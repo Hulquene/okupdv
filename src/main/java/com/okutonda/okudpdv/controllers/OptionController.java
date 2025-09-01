@@ -1,0 +1,61 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.okutonda.okudpdv.controllers;
+
+import com.okutonda.okudpdv.dao.OptionsDao;
+import com.okutonda.okudpdv.models.Options;
+
+/**
+ *
+ * @author kenny
+ */
+public class OptionController {
+
+    OptionsDao dao;
+//    ProductOrderDao prodOrderDao;
+
+    public OptionController() {
+        this.dao = new OptionsDao();
+    }
+
+    public Options getOptions(String name) {
+        Options op = dao.searchFromName(name);
+//        System.out.println("valor: "+op);
+
+        if (op == null) {
+        } else {
+            return op;
+        }
+        return null;
+    }
+
+    public String getValueOptions(String name) {
+        Options op = dao.searchFromName(name);
+        if (op != null) {
+            return op.getValue();
+        }
+        return "";
+    }
+
+    public Boolean add(Options options) {
+        System.out.println("name:" + options.getName());
+        Options opt = getOptions(options.getName());
+        System.out.println("opr:" + opt);
+//        boolean status;
+        if (opt != null) {
+            return dao.edit(options);
+        } else {
+            return dao.add(options);
+        }
+//        return status;
+    }
+
+    public Boolean save(Options options) {
+        return dao.add(options);
+    }
+//    public Boolean deleteId(int id) {
+//        return dao.delete(id);
+//    }
+}

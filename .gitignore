@@ -1,0 +1,7 @@
+/target/
+/nbproject/private/
+/dist/
+/build/
+/out/
+*.log
+*.class
