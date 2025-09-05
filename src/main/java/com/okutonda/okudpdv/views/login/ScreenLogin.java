@@ -12,10 +12,12 @@ import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.CompanySession;
 import com.okutonda.okudpdv.views.suport.JDialogSuport;
 import com.okutonda.okudpdv.views.ScreenMain;
+import com.okutonda.okudpdv.views.install.JDialogInstallInsertUser;
 import com.okutonda.okudpdv.views.pdv.ScreenPdv;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
 import com.okutonda.okudpdv.views.suport.JDialogAbout;
 import java.sql.Connection;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -44,6 +46,25 @@ public class ScreenLogin extends javax.swing.JFrame {
         } else {
             jLabelStatusBdConect.setText("Desconectado");
         }
+
+        List<User> response = userController.get("");
+
+        if (response == null || response.isEmpty()) {
+            JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
+//                    jdInstallUser.setOrder(order);
+            jdInstallUser.setVisible(true);
+        }
+
+//        AdminRoot root = new AdminRoot();
+//        if (!Boolean.parseBoolean(root.getStatusSoftware())) {
+//            JOptionPane.showMessageDialog(
+//                    null,
+//                    "O sistema está inativo",
+//                    "Atenção",
+//                    JOptionPane.ERROR_MESSAGE
+//            );
+//            new JDialogSuport(this, rootPaneCheckingEnabled).setVisible(true);
+//        }
     }
 
     public void loadDataCompany() {
@@ -60,7 +81,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         User response = userController.login(email, password);
         if (response != null) {
-            if (Integer.parseInt(response.getStatus()) == 1) {
+            if (response.getStatus().equals("ativo")) {
                 if (response.getProfile().equals("seller")) {
                     ScreenPdv pdv = new ScreenPdv();
                     this.dispose();
@@ -266,9 +287,9 @@ public class ScreenLogin extends javax.swing.JFrame {
         if (email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Prencha o formulario para continuar...", "Atenção", JOptionPane.ERROR_MESSAGE);
         } else {
-            
+
             this.login(email, password);
-            
+
 //            User response = userController.login(email, password);
 //            if (response != null) {
 //                if (response.getStatus() == 1) {

@@ -18,7 +18,7 @@ public class User {
     private String birthdate;
     private String address;
     private String phone;
-    private Countries country;
+    private String country;
     private String city;
     private String password;
     private String status;
@@ -87,11 +87,11 @@ public class User {
         this.phone = phone;
     }
 
-    public Countries getCountry() {
+    public String getCountry() {
         return country;
     }
 
-    public void setCountry(Countries country) {
+    public void setCountry(String country) {
         this.country = country;
     }
 

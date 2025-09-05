@@ -24,9 +24,9 @@ import javax.swing.JOptionPane;
 public class ConnectDB {
 
 //    private static final String url = "jdbc:sqlite:okudpdv.db";
-    final private String url = "jdbc:mysql://localhost:3306/okudpdv";
-    final private String username = "root";
-    final private String password = "";
+//    final private String url = "jdbc:mysql://localhost:3306/okudpdv";
+//    final private String username = "root";
+//    final private String password = "";
     //CONEXAO REMOTA
 //    final private String url = "jdbc:mysql://172.20.83.71:3306/okudpdv";
 //    final private String username = "kenny";
@@ -47,15 +47,15 @@ public class ConnectDB {
 //        }
 //        return null;
 //    }
-    public Connection connect() {
-        try {
-            return DriverManager.getConnection(url, username, password);
-        } catch (SQLException e) {
-            System.out.println("Error connect database" + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Error connect database: " + e.getMessage());
-        }
-        return null;
-    }
+//    public Connection connect() {
+//        try {
+//            return DriverManager.getConnection(url, username, password);
+//        } catch (SQLException e) {
+//            System.out.println("Error connect database" + e.getMessage());
+//            JOptionPane.showMessageDialog(null, "Error connect database: " + e.getMessage());
+//        }
+//        return null;
+//    }
 
     public Boolean createDatabaseSQLite() {
         String dbResourcePath = "database/seu_database.db";

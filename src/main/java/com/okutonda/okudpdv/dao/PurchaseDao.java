@@ -27,6 +27,7 @@ public class PurchaseDao {
     private final Connection conn;
     PreparedStatement pst = null;
     ResultSet rs = null;
+    private String table = "purchases";
 
     public PurchaseDao() {
         this.conn = ConnectionDatabase.getConnect();
@@ -35,7 +36,7 @@ public class PurchaseDao {
     public boolean add(Purchase obj) {
         try {
             // 1 passo
-            String sql = "INSERT INTO purchase (date,id_product,description,total,purchase_price,sale_price,user_id,supplier_id,qty,status,status_payment)"
+            String sql = "INSERT INTO " + table + " (date,id_product,description,total,purchase_price,sale_price,user_id,supplier_id,qty,status,status_payment)"
                     + "values(?,?,?,?,?,?,?,?,?,?,?)";
             // 2 passo
             PreparedStatement stmt = this.conn.prepareStatement(sql);
@@ -91,7 +92,7 @@ public class PurchaseDao {
     public Boolean delete(int id) {
         try {
             // 1 passo
-            String sql = "DELETE FROM purchase WHERE id =?";
+            String sql = "DELETE FROM " + table + " WHERE id =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
             pst.execute();
@@ -105,7 +106,7 @@ public class PurchaseDao {
     public Purchase getFromProdId(int idProd) {
         try {
             // 1 passo
-            String sql = "SELECT * FROM purchase WHERE id_product =?";
+            String sql = "SELECT * FROM " + table + " WHERE id_product =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, idProd);
             rs = pst.executeQuery();
@@ -125,7 +126,7 @@ public class PurchaseDao {
     public Purchase getId(int id) {
         try {
             // 1 passo
-            String sql = "SELECT * FROM purchase WHERE id =?";
+            String sql = "SELECT * FROM " + table + " WHERE id =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
             rs = pst.executeQuery();
@@ -145,7 +146,7 @@ public class PurchaseDao {
     public Purchase getFromDescription(String description) {
         try {
             // 1 passo
-            String sql = "SELECT * FROM purchase WHERE description =?";
+            String sql = "SELECT * FROM " + table + " WHERE description =?";
             pst = conn.prepareStatement(sql);
             pst.setString(1, description);
             rs = pst.executeQuery();
@@ -164,7 +165,7 @@ public class PurchaseDao {
     public List<Purchase> list(String where) {
         List<Purchase> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM purchase " + where;
+            String sql = "SELECT * FROM " + table + " " + where;
             pst = this.conn.prepareStatement(sql);
             rs = pst.executeQuery();
             Purchase obj;
@@ -210,7 +211,7 @@ public class PurchaseDao {
     public List<Purchase> filter(String txt) {
         List<Purchase> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM purchase WHERE purchase_price LIKE ?  OR description LIKE ? OR date LIKE ?  OR total LIKE ?";
+            String sql = "SELECT * FROM " + table + " WHERE purchase_price LIKE ?  OR description LIKE ? OR date LIKE ?  OR total LIKE ?";
 //            String sql = "SELECT * FROM products WHERE description LIKE ?";
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, "%" + txt + "%");
@@ -260,7 +261,7 @@ public class PurchaseDao {
             Supplier supp;
             User user;
             Product prod;
-            
+
             SupplierDao sDao = new SupplierDao();
             supp = sDao.getFromId(rs.getInt("supplier_id"));
             UserDao uDao = new UserDao();
@@ -325,5 +326,4 @@ public class PurchaseDao {
 //        }
 //        return 0;
 //    }
-
 }

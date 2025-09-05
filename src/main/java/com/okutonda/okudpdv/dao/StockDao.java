@@ -26,6 +26,7 @@ public class StockDao {
     private final Connection conn;
     PreparedStatement pst = null;
     ResultSet rs = null;
+    private String table = "stocks";
 
     public StockDao() {
         this.conn = ConnectionDatabase.getConnect();
@@ -34,7 +35,7 @@ public class StockDao {
     public boolean add(Stock obj) {
         try {
             // 1 passo
-            String sql = "INSERT INTO stock (type,qty,description,purchase_id,user_id)"
+            String sql = "INSERT INTO " + table + " (type,qty,description,purchase_id,user_id)"
                     + "values(?,?,?,?,?)";
             // 2 passo
             PreparedStatement stmt = this.conn.prepareStatement(sql);
@@ -97,7 +98,7 @@ public class StockDao {
     public Boolean delete(int id) {
         try {
             // 1 passo
-            String sql = "DELETE FROM stock WHERE id =?";
+            String sql = "DELETE FROM " + table + " WHERE id =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
             pst.execute();
@@ -131,7 +132,7 @@ public class StockDao {
     public Stock getId(int id) {
         try {
             // 1 passo
-            String sql = "SELECT * FROM stock WHERE id =?";
+            String sql = "SELECT * FROM " + table + " WHERE id =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
             rs = pst.executeQuery();
@@ -170,7 +171,7 @@ public class StockDao {
     public List<Stock> list(String where) {
         List<Stock> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM stock " + where;
+            String sql = "SELECT * FROM " + table + " " + where;
             pst = this.conn.prepareStatement(sql);
             rs = pst.executeQuery();
             Stock obj;
@@ -217,7 +218,7 @@ public class StockDao {
     public List<Stock> filter(String txt) {
         List<Stock> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM stock WHERE description LIKE ?  OR type LIKE ? OR created_at LIKE ?";
+            String sql = "SELECT * FROM " + table + " WHERE description LIKE ?  OR type LIKE ? OR created_at LIKE ?";
 //            String sql = "SELECT * FROM products WHERE description LIKE ?";
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, "%" + txt + "%");

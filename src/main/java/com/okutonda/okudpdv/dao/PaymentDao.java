@@ -4,7 +4,6 @@
  */
 package com.okutonda.okudpdv.dao;
 
-import com.mysql.cj.xdevapi.Client;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Clients;
 import com.okutonda.okudpdv.models.Payment;

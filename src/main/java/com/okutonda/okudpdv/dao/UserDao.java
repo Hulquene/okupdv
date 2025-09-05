@@ -43,7 +43,7 @@ public class UserDao {
             ptmt.setString(4, obj.getEmail());
             ptmt.setString(5, obj.getAddress());
             ptmt.setString(6, obj.getCity());
-            ptmt.setInt(7, obj.getCountry().getId());
+            ptmt.setString(7, obj.getCountry());
             ptmt.setString(8, obj.getProfile());
             ptmt.setString(9, obj.getStatus());
             ptmt.setString(10, obj.getBirthdate());
@@ -71,7 +71,7 @@ public class UserDao {
             ptmt.setString(4, obj.getEmail());
             ptmt.setString(5, obj.getAddress());
             ptmt.setString(6, obj.getCity());
-            ptmt.setInt(7, obj.getCountry().getId());
+            ptmt.setString(7, obj.getCountry());
             ptmt.setString(8, obj.getProfile());
             ptmt.setString(9, obj.getStatus());
             ptmt.setString(10, obj.getBirthdate());
@@ -242,16 +242,16 @@ public class UserDao {
     public User formatObj(ResultSet rs) {
         try {
             User obj = new User();
-            Countries country;
-            CountryDao sDao = new CountryDao();
-            country = sDao.searchFromId(rs.getInt("country"));
+//            CountryDao sDao = new CountryDao();
+//            sDao.searchFromId(rs.getInt("country"));
+            
             obj.setId(rs.getInt("id"));
             obj.setNif(rs.getString("nif"));
             obj.setName(rs.getString("name"));
             obj.setEmail(rs.getString("email"));
             obj.setPhone(rs.getString("phone"));
             obj.setAddress(rs.getString("address"));
-            obj.setCountry(country);
+            obj.setCountry(rs.getString("country"));
             obj.setCity(rs.getString("city"));
             obj.setProfile(rs.getString("profile"));
             obj.setBirthdate(rs.getString("birthdate"));

@@ -7,7 +7,6 @@ package com.okutonda.okudpdv.views.install;
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
-import com.okutonda.okudpdv.models.Countries;
 import com.okutonda.okudpdv.models.Options;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.views.suport.JDialogAbout;
@@ -23,7 +22,7 @@ import javax.swing.JOptionPane;
 public class JDialogInstallInsertUser extends javax.swing.JDialog {
 
     OptionController optionController = new OptionController();
-    CountryController countryController = new CountryController();
+//    CountryController countryController = new CountryController();
     UserController userController = new UserController();
     Boolean status;
 
@@ -39,15 +38,14 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
         return status;
     }
 
-    public void listComboCountries() {
-
-        List<Countries> list = countryController.get("");
-        jComboBoxCountry.removeAllItems();
-        for (Countries item : list) {
-            jComboBoxCountry.addItem(item);
-        }
-    }
-
+//    public void listComboCountries() {
+//
+//        List<Countries> list = countryController.get("");
+//        jComboBoxCountry.removeAllItems();
+//        for (Countries item : list) {
+//            jComboBoxCountry.addItem(item);
+//        }
+//    }
     public Boolean insertUser(User cUser) {
         if (cUser != null) {
             userController.add(cUser, 0);
@@ -58,17 +56,13 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
 
     public void inserDataCompany() {
         List<Options> listOptionCompany = new ArrayList<>();
-
         listOptionCompany.add(new Options("companyName", jTextFieldNameCompany.getText(), "1"));
-
         listOptionCompany.add(new Options("companyNif", jTextFieldNifCompany.getText(), "1"));
-
         listOptionCompany.add(new Options("companyAddress", jTextFieldOptionAddressCompany.getText(), "1"));
         listOptionCompany.add(new Options("companyPhone", jTextFieldPhoneCompany.getText(), "1"));
-
         listOptionCompany.add(new Options("companyEmail", jTextFieldEmailCompany.getText(), "1"));
-        listOptionCompany.add(
-                new Options("companyCountry", jComboBoxCountry.getSelectedItem().toString(), "1"));
+//        listOptionCompany.add(
+//                new Options("companyCountry", jComboBoxCountry.getSelectedItem().toString(), "1"));
         for (Options options : listOptionCompany) {
             optionController.add(options);
         }
@@ -96,14 +90,13 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
             cModel.setAddress(jTextFieldOptionAddressCompany.getText());
             cModel.setPhone(jTextFieldPhoneCompany.getText());
             cModel.setPassword(password);
-
             cModel.setBirthdate("");
-            cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
+            cModel.setCountry("");
+//            cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
 //            cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
             cModel.setCity("");
             cModel.setProfile("admin");
             cModel.setStatus("ativo");
-
 //            if (cModel != null) {
 //                userController.add(cModel, 0);
 //            }
@@ -142,19 +135,17 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
         jButtonContato = new javax.swing.JButton();
         jLabel14 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jComboBoxCountry = new javax.swing.JComboBox();
         jLabel15 = new javax.swing.JLabel();
         jTextFieldOptionAddressCompany = new javax.swing.JTextField();
-        jLabel16 = new javax.swing.JLabel();
         jPasswordFieldPassword = new javax.swing.JPasswordField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(600, 400));
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 255));
 
         jButtonInstall.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonInstall.setText("Instalar");
+        jButtonInstall.setText("Guardar");
         jButtonInstall.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonInstallActionPerformed(evt);
@@ -162,10 +153,10 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
         });
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel3.setText("Usuario Admin");
+        jLabel3.setText("Email do Admin");
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel4.setText("Senha do Usuario Admin");
+        jLabel4.setText("Senha do Admin");
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel6.setText("Nome da empresa");
@@ -220,27 +211,8 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
             }
         });
 
-        jComboBoxCountry.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jComboBoxCountry.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
-                jComboBoxCountryAncestorAdded(evt);
-            }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-        });
-        jComboBoxCountry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBoxCountryActionPerformed(evt);
-            }
-        });
-
         jLabel15.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel15.setText("Endereço");
-
-        jLabel16.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel16.setText("Selecione o Pais");
 
         jPasswordFieldPassword.setText("jPasswordField1");
 
@@ -268,9 +240,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
                                     .addComponent(jLabel8)
                                     .addComponent(jLabel3)
                                     .addComponent(jTextFieldUserEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-                                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jComboBoxCountry, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(29, 29, 29)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -298,7 +268,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
                 .addContainerGap(49, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jComboBoxCountry, jPasswordFieldPassword, jTextFieldEmailCompany, jTextFieldNameCompany, jTextFieldNifCompany, jTextFieldOptionAddressCompany, jTextFieldPhoneCompany, jTextFieldUserEmail});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jPasswordFieldPassword, jTextFieldEmailCompany, jTextFieldNameCompany, jTextFieldNifCompany, jTextFieldOptionAddressCompany, jTextFieldPhoneCompany, jTextFieldUserEmail});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -327,14 +297,11 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
                     .addComponent(jTextFieldEmailCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextFieldPhoneCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jComboBoxCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(45, 45, 45)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
                             .addComponent(jLabel3))
@@ -348,7 +315,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
                             .addComponent(jLabel11))
                         .addGap(34, 34, 34)
                         .addComponent(jButtonInstall, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel13)
                             .addComponent(jButtonSuportInstall)
@@ -360,7 +327,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jComboBoxCountry, jPasswordFieldPassword, jTextFieldEmailCompany, jTextFieldNameCompany, jTextFieldNifCompany, jTextFieldOptionAddressCompany, jTextFieldPhoneCompany, jTextFieldUserEmail});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jPasswordFieldPassword, jTextFieldEmailCompany, jTextFieldNameCompany, jTextFieldNifCompany, jTextFieldOptionAddressCompany, jTextFieldPhoneCompany, jTextFieldUserEmail});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -380,14 +347,12 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
     private void jButtonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonInstallActionPerformed
         // TODO add your handling code here:
         User cModel = validatetUser();
-
         if (cModel != null) {
             insertUser(cModel);
             inserDataCompany();
             status = true;
             JOptionPane.showMessageDialog(null, "Dados Inserido no Banco de Dados com Sucesso!! \n Sera Redirecionado a Tela de login");
             this.dispose();
-
         }
     }//GEN-LAST:event_jButtonInstallActionPerformed
 
@@ -409,15 +374,6 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
 //        this.dispose();
 //        frame.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jComboBoxCountryAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jComboBoxCountryAncestorAdded
-        // TODO add your handling code here:
-        listComboCountries();
-    }//GEN-LAST:event_jComboBoxCountryAncestorAdded
-
-    private void jComboBoxCountryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxCountryActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBoxCountryActionPerformed
 
     /**
      * @param args the command line arguments
@@ -466,14 +422,12 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
     private javax.swing.JButton jButtonContato;
     private javax.swing.JButton jButtonInstall;
     private javax.swing.JButton jButtonSuportInstall;
-    private javax.swing.JComboBox jComboBoxCountry;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
