@@ -4,13 +4,10 @@
  */
 package com.okutonda.okudpdv.views.users;
 
-import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.UserController;
-import com.okutonda.okudpdv.models.Countries;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.Utilities;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
@@ -20,7 +17,7 @@ import javax.swing.JOptionPane;
 public class JDialogFormUser extends javax.swing.JDialog {
 
     UserController userController = new UserController();
-    CountryController countryController = new CountryController();
+//    CountryController countryController = new CountryController();
     Boolean status;
     User user;
 
@@ -39,7 +36,6 @@ public class JDialogFormUser extends javax.swing.JDialog {
 
     public void setFormUser(User user) {
 //        User user = userController.getId(id);
-//        System.out.println("hhh" + user.getCountry());
         if (user != null) {
             jTextFieldID.setText(String.valueOf(user.getId()));
             jTextFieldNif.setText(user.getNif());
@@ -48,8 +44,8 @@ public class JDialogFormUser extends javax.swing.JDialog {
             jTextFieldEmail.setText(user.getEmail());
             jTextFieldPhone.setText(user.getPhone());
             jComboBoxProfile.setSelectedItem(user.getProfile());
-//            jComboBoxCountry.setSelectedItem(user.getCountry().getShort_name());
-//            jTextFieldCity.setText(user.getCity());
+            jTextFieldCountry.setText(user.getCountry());
+            jTextFieldCity.setText(user.getCity());
             jTextFieldAddress.setText(user.getAddress());
             jComboBoxStatus.setSelectedItem(user.getStatus());
         } else {
@@ -72,15 +68,12 @@ public class JDialogFormUser extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo Email invalido!! no minimo 3 caracteres");
         } else if (jTextFieldAddress.getText().isEmpty() || jTextFieldAddress.getText().length() < 3) {
             JOptionPane.showMessageDialog(null, "Campo Endereço invalido!!");
-        } else if (jTextFieldPhone.getText().isEmpty() || jTextFieldPhone.getText().length() > 15) {
-            JOptionPane.showMessageDialog(null, "Campo Phone invalido!! no maximo 15 caracteres");
+//        } else if (jTextFieldPhone.getText().isEmpty() || jTextFieldPhone.getText().length() > 15) {
+//            JOptionPane.showMessageDialog(null, "Campo Phone invalido!! no maximo 15 caracteres");
         } else {
             String repitPassword, password;
             password = new String(jPasswordFieldPassword.getPassword());
             repitPassword = new String(jPasswordFieldRepitPassword.getPassword());
-//            System.out.println("" + password);
-//            System.out.println("" + repitPassword);
-
             Boolean save = false;
             User cModel = new User();
             if (jTextFieldID.getText().isEmpty()) {
@@ -101,12 +94,17 @@ public class JDialogFormUser extends javax.swing.JDialog {
                 cModel.setName(jTextFieldName.getText());
                 cModel.setEmail(jTextFieldEmail.getText());
                 cModel.setAddress(jTextFieldAddress.getText());
+                cModel.setCountry(jTextFieldCountry.getText());
+                cModel.setCity(jTextFieldCity.getText());
                 cModel.setPhone(jTextFieldPhone.getText());
                 cModel.setBirthdate(jFormattedTextFieldBirthdate.getText());
-//                cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
-//                cModel.setCity(jTextFieldCity.getText());
                 cModel.setProfile(jComboBoxProfile.getSelectedItem().toString());
-                cModel.setStatus(jComboBoxStatus.getSelectedItem().toString());
+                String statusUser = (String) jComboBoxStatus.getSelectedItem();
+                if ("ativo".equals(statusUser)) {
+                    cModel.setStatus(1);
+                } else {
+                    cModel.setStatus(0);
+                }
                 cModel.setPassword(password);
                 return cModel;
             }
@@ -122,7 +120,6 @@ public class JDialogFormUser extends javax.swing.JDialog {
 //            jComboBoxCountry.addItem(item);
 //        }
 //    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -161,6 +158,10 @@ public class JDialogFormUser extends javax.swing.JDialog {
         jPasswordFieldRepitPassword = new javax.swing.JPasswordField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jTextFieldCity = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        jTextFieldCountry = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -185,14 +186,19 @@ public class JDialogFormUser extends javax.swing.JDialog {
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("ID:");
 
+        jButtonAdd.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButtonAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonAdd.setText("Salvar");
+        jButtonAdd.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddActionPerformed(evt);
             }
         });
 
+        jButtonClearForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Restart.png"))); // NOI18N
         jButtonClearForm.setText("Limpar");
+        jButtonClearForm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonClearForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonClearFormActionPerformed(evt);
@@ -219,7 +225,7 @@ public class JDialogFormUser extends javax.swing.JDialog {
 
         jLabel11.setText("* Email:");
 
-        jLabel13.setText("* Endereco:");
+        jLabel13.setText("Provincia");
 
         jTextFieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -231,7 +237,7 @@ public class JDialogFormUser extends javax.swing.JDialog {
 
         jLabel19.setText("* Estado");
 
-        jComboBoxProfile.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "user", "admin", "seller", "other" }));
+        jComboBoxProfile.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "seller", "manager", "admin" }));
 
         jLabel20.setText("Grupo");
 
@@ -268,6 +274,22 @@ public class JDialogFormUser extends javax.swing.JDialog {
 
         jLabel4.setText("Repete a senha");
 
+        jTextFieldCity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCityActionPerformed(evt);
+            }
+        });
+
+        jLabel15.setText("* Endereco:");
+
+        jTextFieldCountry.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCountryActionPerformed(evt);
+            }
+        });
+
+        jLabel16.setText("Pais");
+
         javax.swing.GroupLayout jPanelFormUserLayout = new javax.swing.GroupLayout(jPanelFormUser);
         jPanelFormUser.setLayout(jPanelFormUserLayout);
         jPanelFormUserLayout.setHorizontalGroup(
@@ -276,64 +298,75 @@ public class JDialogFormUser extends javax.swing.JDialog {
                 .addGap(14, 14, 14)
                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                                .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(361, 361, 361))
-                            .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel10)
-                                .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                                    .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(jButtonSearchClientForm))
-                                .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jTextFieldAddress)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
                         .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                                .addGap(337, 337, 337)
+                                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(88, 88, 88)
                                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jTextFieldPhone)
-                                    .addComponent(jLabel14))
+                                    .addComponent(jLabel20))
                                 .addGap(34, 34, 34)
                                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jFormattedTextFieldBirthdate)
                                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
                                         .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addComponent(jLabel17))
+                                            .addComponent(jLabel17)
+                                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addGap(0, 0, Short.MAX_VALUE))))
                             .addGroup(jPanelFormUserLayout.createSequentialGroup()
                                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFormUserLayout.createSequentialGroup()
+                                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jTextFieldAddress))
+                                        .addGap(18, 18, 18))
                                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                                        .addGap(6, 6, 6)
-                                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(24, 24, 24)
+                                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jTextFieldCity, javax.swing.GroupLayout.PREFERRED_SIZE, 249, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                                .addGap(6, 6, 6)
+                                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGap(88, 88, 88)))
                                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel20)
                                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
                                         .addGap(6, 6, 6)
-                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(0, 247, Short.MAX_VALUE))
                                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
                                         .addComponent(jComboBoxProfile, 0, 199, Short.MAX_VALUE)
-                                        .addGap(28, 28, 28)
-                                        .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel10)
+                                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                                .addGap(6, 6, 6)
+                                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel14)
+                                            .addComponent(jButtonSearchClientForm))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addContainerGap())
                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
                         .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                                .addGap(325, 325, 325)
-                                .addComponent(jLabel12)))
-                        .addGap(18, 18, 18)
-                        .addComponent(jPasswordFieldRepitPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel12)
+                                .addGap(18, 18, 18)
+                                .addComponent(jPasswordFieldRepitPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 365, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
 
@@ -347,57 +380,71 @@ public class JDialogFormUser extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel17))
+                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonSearchClientForm, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel9)
+                            .addComponent(jButtonSearchClientForm, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(jLabel14)
-                    .addComponent(jLabel17))
-                .addGap(15, 15, 15)
-                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jFormattedTextFieldBirthdate, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel19))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxProfile, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(93, 93, 93)
-                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel14)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(2, 2, 2)
+                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextFieldBirthdate, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel20)
+                            .addComponent(jLabel19))
+                        .addGap(4, 4, 4)
+                        .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jComboBoxProfile, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(146, 146, 146))
+                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                        .addComponent(jTextFieldCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldCity, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel15)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jTextFieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(7, 7, 7)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                        .addGap(8, 8, 8)
+                        .addComponent(jLabel4)
                         .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel12)
-                            .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanelFormUserLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPasswordFieldRepitPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(27, Short.MAX_VALUE))
+                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                .addGap(8, 8, 8)
+                                .addComponent(jLabel12))
+                            .addGroup(jPanelFormUserLayout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanelFormUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jPasswordFieldRepitPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                    .addComponent(jLabel3))
+                .addContainerGap(37, Short.MAX_VALUE))
         );
 
         jPanelFormUserLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jTextFieldAddress, jTextFieldEmail, jTextFieldName, jTextFieldNif});
 
         jPanelFormUserLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jComboBoxProfile, jComboBoxStatus, jFormattedTextFieldBirthdate, jTextFieldPhone});
-
-        jPanelFormUserLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jPasswordFieldPassword, jPasswordFieldRepitPassword});
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -406,17 +453,17 @@ public class JDialogFormUser extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 286, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55, 55, 55)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTextFieldID, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
-                .addComponent(jButtonClearForm, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(70, 70, 70)
+                .addComponent(jButtonClearForm)
                 .addGap(18, 18, 18)
-                .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(40, Short.MAX_VALUE)
                 .addComponent(jPanelFormUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(32, 32, 32))
         );
@@ -427,13 +474,13 @@ public class JDialogFormUser extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextFieldID, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel1)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButtonClearForm, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel2))
-                .addGap(32, 32, 32)
+                .addGap(18, 18, 18)
                 .addComponent(jPanelFormUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(70, 70, 70))
+                .addGap(84, 84, 84))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -468,10 +515,11 @@ public class JDialogFormUser extends javax.swing.JDialog {
                 jTextFieldNif.setText(cModel.getNif());
                 jTextFieldName.setText(cModel.getName());
                 jTextFieldEmail.setText(cModel.getEmail());
+                jTextFieldCity.setText(cModel.getCity());
+                jTextFieldCountry.setText(cModel.getCountry());
                 jTextFieldAddress.setText(cModel.getAddress());
                 jTextFieldPhone.setText(cModel.getPhone());
                 jComboBoxProfile.setSelectedItem(cModel.getProfile());
-//                jComboBoxCountry.setSelectedItem(cModel.getCountry());
                 jComboBoxStatus.setSelectedItem(cModel.getStatus());
             } else {
                 JOptionPane.showMessageDialog(null, "usuario nao encontrado!");
@@ -515,7 +563,7 @@ public class JDialogFormUser extends javax.swing.JDialog {
             if (id > 0) {
                 userController.add(cModel, id);
                 status = true;
-                System.out.println("atuakizar");
+                System.out.println("atualizar");
             } else {
                 userController.add(cModel, 0);
 
@@ -553,6 +601,14 @@ public class JDialogFormUser extends javax.swing.JDialog {
     private void jPasswordFieldPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jPasswordFieldPasswordActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jPasswordFieldPasswordActionPerformed
+
+    private void jTextFieldCityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldCityActionPerformed
+
+    private void jTextFieldCountryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCountryActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldCountryActionPerformed
 
     /**
      * @param args the command line arguments
@@ -609,6 +665,8 @@ public class JDialogFormUser extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
@@ -621,6 +679,8 @@ public class JDialogFormUser extends javax.swing.JDialog {
     private javax.swing.JPasswordField jPasswordFieldPassword;
     private javax.swing.JPasswordField jPasswordFieldRepitPassword;
     private javax.swing.JTextField jTextFieldAddress;
+    private javax.swing.JTextField jTextFieldCity;
+    private javax.swing.JTextField jTextFieldCountry;
     private javax.swing.JTextField jTextFieldEmail;
     private javax.swing.JTextField jTextFieldID;
     private javax.swing.JTextField jTextFieldName;

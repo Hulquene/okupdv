@@ -168,21 +168,33 @@ public final class JPanelSupplier extends javax.swing.JPanel {
             }
         });
 
+        jButtonAlterSeleted.setBackground(new java.awt.Color(255, 255, 153));
+        jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterSeleted.setText("Alterar");
+        jButtonAlterSeleted.setContentAreaFilled(false);
+        jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAlterSeletedActionPerformed(evt);
             }
         });
 
+        jButtonDeleteSelected.setBackground(new java.awt.Color(255, 51, 51));
+        jButtonDeleteSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteSelected.setText("Excluir");
+        jButtonDeleteSelected.setContentAreaFilled(false);
+        jButtonDeleteSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteSelectedActionPerformed(evt);
             }
         });
 
+        jButtonOpenFormSupplier.setBackground(new java.awt.Color(153, 153, 255));
+        jButtonOpenFormSupplier.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonOpenFormSupplier.setText("Adicionar");
+        jButtonOpenFormSupplier.setContentAreaFilled(false);
+        jButtonOpenFormSupplier.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonOpenFormSupplier.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOpenFormSupplierActionPerformed(evt);
@@ -219,7 +231,11 @@ public final class JPanelSupplier extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableSuppliers);
 
+        jButtonViewSupplierSelected.setBackground(new java.awt.Color(153, 255, 153));
+        jButtonViewSupplierSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewSupplierSelected.setText("Ver");
+        jButtonViewSupplierSelected.setContentAreaFilled(false);
+        jButtonViewSupplierSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewSupplierSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonViewSupplierSelectedActionPerformed(evt);
@@ -236,7 +252,7 @@ public final class JPanelSupplier extends javax.swing.JPanel {
                     .addComponent(jScrollPane1)
                     .addGroup(jPanelSearchSupplierLayout.createSequentialGroup()
                         .addComponent(jTextFieldFilterNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 401, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 304, Short.MAX_VALUE)
                         .addComponent(jButtonOpenFormSupplier)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonViewSupplierSelected)
@@ -318,42 +334,44 @@ public final class JPanelSupplier extends javax.swing.JPanel {
 
     private void jButtonDeleteSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteSelectedActionPerformed
         // TODO add your handling code here:
-        int id = Integer.parseInt(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        Supplier client = supplierController.getId(id);
-        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
-        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-        if (sair == JOptionPane.YES_OPTION) {
-            if (supplierController.deleteId(id)) {
-                JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
-                listSuppliers();
+        int id = 0;
+        try {
+            id = (int) jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um Fornecedor na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+                Supplier client = supplierController.getId(id);
+                int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+                if (sair == JOptionPane.YES_OPTION) {
+                    if (supplierController.deleteId(id)) {
+                        JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
+                        listSuppliers();
+                    }
+                }
             }
         }
+
+//        int id = Integer.parseInt(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
+//        Supplier client = supplierController.getId(id);
+//        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
+//        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+//        if (sair == JOptionPane.YES_OPTION) {
+//            if (supplierController.deleteId(id)) {
+//                JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
+//                listSuppliers();
+//            }
+//        }
     }//GEN-LAST:event_jButtonDeleteSelectedActionPerformed
 
     private void jButtonAlterSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterSeletedActionPerformed
         // TODO add your handling code here:
-        //        jTabbedPaneSupplier.setSelectedIndex(1);
-        //        jTextFieldId.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        //        jTextFieldNif.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 1).toString());
-        //        jTextFieldName.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 2).toString());
-        //        jTextFieldEmail.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 3).toString());
-        //        jTextFieldPhone.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 4).toString());
-        //        jComboBoxCountry.setSelectedItem(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 5));
-        //        jTextFieldCity
-        //                .setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 6).toString());
-        //        jTextFieldState.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 7).toString());
-        //        jTextFieldAddress.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 8).toString());
-        //        jTextFieldZipCode.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 9).toString());
-        //        jComboBoxStatus.setSelectedItem(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 10).toString());
-
         int value = 0;
         try {
             value = (int) jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0);
-            System.out.println("jTableSuppliers id:" + value);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Selecione um Fornecedor na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
-            System.out.println("jTableSuppliers id:" + value);
             if (value > 0) {
                 JDialogFormSupplier formUser = new JDialogFormSupplier(null, true);
                 formUser.setSupplier(value);

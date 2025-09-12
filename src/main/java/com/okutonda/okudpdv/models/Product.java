@@ -24,7 +24,7 @@ public class Product {
     private Supplier supplier;
     private int stockTotal;
 //    private int stockMin;
-    private String status;
+    private int status;
 
     public int getId() {
         return id;
@@ -106,7 +106,6 @@ public class Product {
         this.group = group;
     }
 
-
     public String getBarcode() {
         return barcode;
     }
@@ -138,13 +137,12 @@ public class Product {
 //    public void setStockMin(int stockMin) {
 //        this.stockMin = stockMin;
 //    }
-
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
-    
+
 }

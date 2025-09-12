@@ -11,6 +11,7 @@ import com.okutonda.okudpdv.views.Orders.JDialogDetailOrder;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -39,7 +40,7 @@ public final class JPanelSales extends javax.swing.JPanel {
                 c.getId(),
                 UtilSales.FormatedNumberPrefix2(c.getNumber(), c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
-                c.getTotal(),                
+                c.getTotal(),
                 c.getClient().getName(),
                 c.getSeller().getName(),
                 c.getStatus(),}
@@ -83,6 +84,8 @@ public final class JPanelSales extends javax.swing.JPanel {
         jButtonFilterOrder = new javax.swing.JButton();
         jFormattedTextFieldDateFinish = new javax.swing.JFormattedTextField();
         jFormattedTextFieldDateStart = new javax.swing.JFormattedTextField();
+        jButtonGenerateNoteCredit = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
 
         addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
@@ -126,17 +129,33 @@ public final class JPanelSales extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableOrders);
 
+        jButtonDeleteOrder.setBackground(new java.awt.Color(255, 0, 0));
+        jButtonDeleteOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteOrder.setText("Apagar");
+        jButtonDeleteOrder.setContentAreaFilled(false);
+        jButtonDeleteOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteOrder.setEnabled(false);
+        jButtonDeleteOrder.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteOrderActionPerformed(evt);
+            }
+        });
 
+        jButtonViewOrder.setBackground(new java.awt.Color(255, 255, 102));
+        jButtonViewOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewOrder.setText("Ver");
+        jButtonViewOrder.setContentAreaFilled(false);
+        jButtonViewOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonViewOrderActionPerformed(evt);
             }
         });
 
+        jButtonPrintOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/File.png"))); // NOI18N
         jButtonPrintOrder.setText("Imprimir");
+        jButtonPrintOrder.setContentAreaFilled(false);
+        jButtonPrintOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonPrintOrder.setEnabled(false);
         jButtonPrintOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -171,6 +190,17 @@ public final class JPanelSales extends javax.swing.JPanel {
         }
         jFormattedTextFieldDateStart.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
+        jButtonGenerateNoteCredit.setBackground(new java.awt.Color(153, 255, 255));
+        jButtonGenerateNoteCredit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
+        jButtonGenerateNoteCredit.setText("Gerar Nota de Credito");
+        jButtonGenerateNoteCredit.setContentAreaFilled(false);
+        jButtonGenerateNoteCredit.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonGenerateNoteCredit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGenerateNoteCreditActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -190,12 +220,13 @@ public final class JPanelSales extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonFilterOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonDeleteOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jButtonGenerateNoteCredit)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonDeleteOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButtonViewOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButtonPrintOrder)
-                                .addGap(23, 23, 23))
+                                .addComponent(jButtonViewOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(26, 26, 26)
+                                .addComponent(jButtonPrintOrder))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addGap(88, 88, 88)))))
@@ -218,13 +249,29 @@ public final class JPanelSales extends javax.swing.JPanel {
                     .addComponent(jButtonFilterOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonDeleteOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonViewOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPrintOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButtonPrintOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonGenerateNoteCredit, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jTabbedPane1.addTab("Faturas FR", jPanel1);
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 925, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 591, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Nota de Credito", jPanel2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -252,23 +299,79 @@ public final class JPanelSales extends javax.swing.JPanel {
 
     private void jButtonViewOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewOrderActionPerformed
         // TODO add your handling code here:
-        int id = Integer.parseInt(jTableOrders.getValueAt(jTableOrders.getSelectedRow(), 0).toString());
-        System.out.println("ttt:" + id);
+        int id = 0;
+        try {
+            id = (int) jTableOrders.getValueAt(jTableOrders.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um Venda na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
 //        Order order = orderController.getId(id);
-        JDialogDetailOrder jdOrder = new JDialogDetailOrder(null, true);
-        jdOrder.setOrder(id);
+                JDialogDetailOrder jdOrder = new JDialogDetailOrder(null, true);
+                jdOrder.setOrder(id);
 //        jdOrder.setOrder(order);
-        jdOrder.setVisible(true);
+                jdOrder.setVisible(true);
+            }
+        }
     }//GEN-LAST:event_jButtonViewOrderActionPerformed
 
     private void jButtonPrintOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrintOrderActionPerformed
         // TODO add your handling code here:
+        int id = 0;
+        try {
+            id = (int) jTableOrders.getValueAt(jTableOrders.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um Venda na tabela para imprimir!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+////        Order order = orderController.getId(id);
+//                JDialogDetailOrder jdOrder = new JDialogDetailOrder(null, true);
+//                jdOrder.setOrder(id);
+////        jdOrder.setOrder(order);
+//                jdOrder.setVisible(true);
+            }
+        }
     }//GEN-LAST:event_jButtonPrintOrderActionPerformed
+
+    private void jButtonDeleteOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteOrderActionPerformed
+        // TODO add your handling code here:
+        int id = 0;
+        try {
+            id = (int) jTableOrders.getValueAt(jTableOrders.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um Venda na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+////        Order order = orderController.getId(id);
+//                JDialogDetailOrder jdOrder = new JDialogDetailOrder(null, true);
+//                jdOrder.setOrder(id);
+////        jdOrder.setOrder(order);
+//                jdOrder.setVisible(true);
+            }
+        }
+    }//GEN-LAST:event_jButtonDeleteOrderActionPerformed
+
+    private void jButtonGenerateNoteCreditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditActionPerformed
+        // TODO add your handling code here:
+        int id = 0;
+        try {
+            id = (int) jTableOrders.getValueAt(jTableOrders.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um Venda na tabela para gerar uma nota de credito!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+                JDialogGenerateNoteCredit jdNoteCredit = new JDialogGenerateNoteCredit(null, true);
+                jdNoteCredit.setNoteCredit(id);
+                jdNoteCredit.setVisible(true);
+            }
+        }
+    }//GEN-LAST:event_jButtonGenerateNoteCreditActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jButtonDeleteOrder;
     private javax.swing.JButton jButtonFilterOrder;
+    public javax.swing.JButton jButtonGenerateNoteCredit;
     private javax.swing.JButton jButtonPrintOrder;
     private javax.swing.JButton jButtonViewOrder;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateFinish;
@@ -276,6 +379,7 @@ public final class JPanelSales extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTableOrders;

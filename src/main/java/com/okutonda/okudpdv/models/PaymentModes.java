@@ -14,8 +14,8 @@ public class PaymentModes {
     private String name;
     private String description;
     private String code;
-    private String status;
-    private String isDefault;
+    private int status;
+    private int isDefault;
 
     public int getId() {
         return id;
@@ -49,19 +49,19 @@ public class PaymentModes {
         this.code = code;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public String getIsDefault() {
+    public int getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(String isDefault) {
+    public void setIsDefault(int isDefault) {
         this.isDefault = isDefault;
     }
 

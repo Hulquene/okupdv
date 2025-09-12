@@ -36,7 +36,7 @@ public class PurchaseDao {
     public boolean add(Purchase obj) {
         try {
             // 1 passo
-            String sql = "INSERT INTO " + table + " (date,id_product,description,total,purchase_price,sale_price,user_id,supplier_id,qty,status,status_payment)"
+            String sql = "INSERT INTO " + table + " (date,product_id,description,total,price_purchase,price_sale,user_id,supplier_id,qty,status,status_payment)"
                     + "values(?,?,?,?,?,?,?,?,?,?,?)";
             // 2 passo
             PreparedStatement stmt = this.conn.prepareStatement(sql);
@@ -106,7 +106,7 @@ public class PurchaseDao {
     public Purchase getFromProdId(int idProd) {
         try {
             // 1 passo
-            String sql = "SELECT * FROM " + table + " WHERE id_product =?";
+            String sql = "SELECT * FROM " + table + " WHERE product_id =?";
             pst = conn.prepareStatement(sql);
             pst.setInt(1, idProd);
             rs = pst.executeQuery();
@@ -211,7 +211,7 @@ public class PurchaseDao {
     public List<Purchase> filter(String txt) {
         List<Purchase> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM " + table + " WHERE purchase_price LIKE ?  OR description LIKE ? OR date LIKE ?  OR total LIKE ?";
+            String sql = "SELECT * FROM " + table + " WHERE price_purchase LIKE ?  OR description LIKE ? OR date LIKE ?  OR total LIKE ?";
 //            String sql = "SELECT * FROM products WHERE description LIKE ?";
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, "%" + txt + "%");
@@ -267,13 +267,13 @@ public class PurchaseDao {
             UserDao uDao = new UserDao();
             user = uDao.getId(rs.getInt("user_id"));
             ProductDao pDao = new ProductDao();
-            prod = pDao.getId(rs.getInt("id_product"));
+            prod = pDao.getId(rs.getInt("product_id"));
             obj.setId(rs.getInt("id"));
             obj.setDate(rs.getString("date"));
             obj.setDescription(rs.getString("description"));
             obj.setTotal(rs.getDouble("total"));
-            obj.setPricePurchase(rs.getDouble("purchase_price"));
-            obj.setPriceSale(rs.getDouble("sale_price"));
+            obj.setPricePurchase(rs.getDouble("price_purchase"));
+            obj.setPriceSale(rs.getDouble("price_sale"));
             obj.setUser(user);
             obj.setProduct(prod);
             obj.setSupplier(supp);

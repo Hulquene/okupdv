@@ -25,10 +25,6 @@ public class UserController {
     public User login(String email, String password) {
         User user = dao.login(email, password);
         if (user != null) {
-            System.out.println("UserControllher");
-            System.out.println(user.getStatus());
-            System.out.println(user);
-
             session.clearSession();
             session.setUser(user);
         }
@@ -41,8 +37,11 @@ public class UserController {
     }
 
     public User add(User user, int id) {
+        if (session.getUser().getId() == id) {
+            return null;
+        }
+
         boolean status;
-//        System.out.println("use"+user.getName());
         if (id == 0) {
             status = dao.add(user);
         } else {
@@ -55,14 +54,30 @@ public class UserController {
         return null;
     }
 
-//    public User add(User user) {
-//        boolean status = dao.add(user);
-//        if (status == true) {
-//            User responde = dao.searchFromName(user.getName());
-//            return responde;
-//        }
-//        return null;
-//    }
+    public boolean updateCodeManager(String code, int id) {
+        if (session.getUser().getId() == id) {
+            boolean status = dao.updateCodeManager(code, id);
+            return status;
+        }
+        return false;
+    }
+
+    public boolean updatePassword(String newPassword, String oldPassword, int id) {
+        if (session.getUser().getId() == id && (session.getUser().getPassword() == null ? oldPassword == null : session.getUser().getPassword().equals(oldPassword))) {
+            boolean status = dao.updatePassword(newPassword, id);
+            return status;
+        }
+        return false;
+    }
+    //    public User add(User user) {
+    //        boolean status = dao.add(user);
+    //        if (status == true) {
+    //            User responde = dao.searchFromName(user.getName());
+    //            return responde;
+    //        }
+    //        return null;
+    //    }
+
     public User getId(int id) {
         return dao.getId(id);
     }
@@ -73,11 +88,8 @@ public class UserController {
 
     public Boolean validateManager(String code) {
         User user = dao.validateManagerCode(code);
-        System.out.println("hhh:" + user);
-        if (user.getStatus().equals("ativo") == true) {
-            return true;
-        }
-        return false;
+//        System.out.println("hhh:" + user);
+        return user.getStatus() == 1;
     }
 
     public Boolean deleteId(int id) {

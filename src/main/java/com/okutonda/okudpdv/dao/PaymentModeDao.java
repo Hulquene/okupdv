@@ -39,8 +39,8 @@ public class PaymentModeDao {
             stmt.setString(1, obj.getName());
             stmt.setString(2, obj.getDescription());
             stmt.setString(3, obj.getCode());
-            stmt.setString(4, obj.getStatus());
-            stmt.setString(5, obj.getIsDefault());
+            stmt.setInt(4, obj.getStatus());
+            stmt.setInt(5, obj.getIsDefault());
             //3 passo
             stmt.execute();
             // 4 passo
@@ -62,8 +62,8 @@ public class PaymentModeDao {
             pst.setString(1, obj.getName());
             pst.setString(2, obj.getDescription());
             pst.setString(3, obj.getCode());
-            pst.setString(4, obj.getStatus());
-            pst.setString(5, obj.getIsDefault());
+            pst.setInt(4, obj.getStatus());
+            pst.setInt(5, obj.getIsDefault());
             pst.setInt(6, id);
             //3 passo
             //ptmt.executeQuery();
@@ -168,20 +168,6 @@ public class PaymentModeDao {
             if (rs.next()) {
                 obj = formatObj(rs);
             }
-//            if (rs.next()) {
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
-//            }
             return obj;
             // 2 passo
         } catch (SQLException e) {
@@ -216,23 +202,7 @@ public class PaymentModeDao {
             rs = this.pst.executeQuery();
             PaymentModes obj;
             while (rs.next()) {
-
                 obj = formatObj(rs);
-
-//                Clients obj = new Clients();
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setGroupId(rs.getInt("group_id"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
                 list.add(obj);
             }
             return list;
@@ -253,21 +223,7 @@ public class PaymentModeDao {
             rs = this.pst.executeQuery();
             PaymentModes obj;
             while (rs.next()) {
-
                 obj = formatObj(rs);
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setGroupId(rs.getInt("group_id"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
                 list.add(obj);
             }
             return list;
@@ -283,13 +239,12 @@ public class PaymentModeDao {
 //            Countries country;
 //            CountryDao sDao = new CountryDao();
 //            country = sDao.searchFromId(rs.getInt("country"));
-
             obj.setId(rs.getInt("id"));
             obj.setName(rs.getString("name"));
             obj.setDescription(rs.getString("description"));
             obj.setCode(rs.getString("code"));
-            obj.setStatus(rs.getString("status"));
-            obj.setIsDefault(rs.getString("isDefault"));
+            obj.setStatus(rs.getInt("status"));
+            obj.setIsDefault(rs.getInt("isDefault"));
             return obj;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao formatar obj payment_modes: " + e.getMessage());

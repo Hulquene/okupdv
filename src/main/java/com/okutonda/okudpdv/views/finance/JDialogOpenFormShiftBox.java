@@ -13,10 +13,7 @@ import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Util;
 import java.util.List;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
 
 /**
  *
@@ -26,7 +23,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
 
     BoxController boxController = new BoxController();
     ShiftController shiftController = new ShiftController();
-    UserSession session = UserSession.getInstance();
+    //UserSession session = UserSession.getInstance();
     UserController userController = new UserController();
     Boolean status = false;
 
@@ -85,12 +82,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
 
         String codeManager = new String(jPasswordFieldManagerPassword.getPassword());
         String nameManager = (String) jComboBoxSelectedManager.getSelectedItem();
-
-        if (!codeManager.isEmpty() && !nameManager.isEmpty()) {
-
-            return true;
-        }
-        return false;
+        return !codeManager.isEmpty() && !nameManager.isEmpty();
     }
 
     public Shift validateShift() {
@@ -139,7 +131,6 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
             jComboBoxSelectedUser.addItem(item.getName());
             jComboBoxSelectedManager.addItem(item.getName());
         }
-
 //        List<ReasonTaxes> listR = reasonTaxeController.get("");
 //        jComboBoxReasonTaxeId.removeAllItems();
 //        for (ReasonTaxes item : listR) {
@@ -282,7 +273,6 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         // TODO add your handling code here:
         Shift shift = validateShift();
-//        System.out.println("dados:" + value.isEmpty() + "ddd" + Util.isDouble(value));
         if (shift != null) {
 //            shift.setUser(session.getUser());
             Boolean resp = shiftController.add(shift, 0);

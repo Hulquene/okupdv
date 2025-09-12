@@ -42,10 +42,13 @@ public class ScreenLogin extends javax.swing.JFrame {
 //        this.conn = new ConnectDB().connect();
         if (this.conn != null) {
             jLabelStatusBdConect.setText("Conectado");
+            loadDataCompany();
 //            loadDataCompany();
         } else {
             jLabelStatusBdConect.setText("Desconectado");
         }
+        
+        jLabelNameCompany.setText(companySession.getName());
 
         List<User> response = userController.get("");
 
@@ -81,7 +84,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         User response = userController.login(email, password);
         if (response != null) {
-            if (response.getStatus().equals("ativo")) {
+            if (response.getStatus() == 1) {
                 if (response.getProfile().equals("seller")) {
                     ScreenPdv pdv = new ScreenPdv();
                     this.dispose();
@@ -119,7 +122,7 @@ public class ScreenLogin extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jTextFieldEmail = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        jLabelNameCompany = new javax.swing.JLabel();
         jButtonCloseScreen = new javax.swing.JButton();
         jLabelImgFundo = new javax.swing.JLabel();
 
@@ -171,13 +174,16 @@ public class ScreenLogin extends javax.swing.JFrame {
         jLabelStatusBdConect.setText("Desconectado");
         jPanel3.add(jLabelStatusBdConect, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 570, 80, 20));
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setToolTipText("Entrada");
 
-        jButtonLogin.setBackground(new java.awt.Color(0, 0, 51));
+        jButtonLogin.setBackground(new java.awt.Color(0, 0, 102));
         jButtonLogin.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButtonLogin.setForeground(new java.awt.Color(255, 255, 255));
         jButtonLogin.setText("Entrar");
-        jButtonLogin.setToolTipText("");
+        jButtonLogin.setToolTipText("Login");
+        jButtonLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonLoginActionPerformed(evt);
@@ -185,7 +191,12 @@ public class ScreenLogin extends javax.swing.JFrame {
         });
 
         jPasswordFieldPassword.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jPasswordFieldPassword.setForeground(new java.awt.Color(0, 0, 102));
         jPasswordFieldPassword.setText("12345678");
+        jPasswordFieldPassword.setToolTipText("Senha");
+        jPasswordFieldPassword.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPasswordFieldPassword.setCaretColor(new java.awt.Color(0, 0, 102));
+        jPasswordFieldPassword.setFocusable(false);
         jPasswordFieldPassword.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jPasswordFieldPasswordActionPerformed(evt);
@@ -193,10 +204,16 @@ public class ScreenLogin extends javax.swing.JFrame {
         });
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 0, 102));
         jLabel2.setText("Senha:");
 
         jTextFieldEmail.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jTextFieldEmail.setForeground(new java.awt.Color(0, 0, 102));
         jTextFieldEmail.setText("admin@admin.com");
+        jTextFieldEmail.setToolTipText("Email");
+        jTextFieldEmail.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jTextFieldEmail.setCaretColor(new java.awt.Color(0, 0, 102));
+        jTextFieldEmail.setFocusable(false);
         jTextFieldEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextFieldEmailActionPerformed(evt);
@@ -204,10 +221,12 @@ public class ScreenLogin extends javax.swing.JFrame {
         });
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 0, 102));
         jLabel1.setText("Email:");
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel3.setText("ENTRAR");
+        jLabelNameCompany.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabelNameCompany.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelNameCompany.setText("ENTRAR");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -220,12 +239,12 @@ public class ScreenLogin extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(31, 31, 31)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 31, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jPasswordFieldPassword, jTextFieldEmail});
@@ -233,9 +252,9 @@ public class ScreenLogin extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(12, 12, 12)
+                .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -250,9 +269,10 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 140, 380, 300));
 
-        jButtonCloseScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/close_694497.png"))); // NOI18N
+        jButtonCloseScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Close.png"))); // NOI18N
         jButtonCloseScreen.setBorderPainted(false);
         jButtonCloseScreen.setContentAreaFilled(false);
+        jButtonCloseScreen.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonCloseScreen.setFocusable(false);
         jButtonCloseScreen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -396,8 +416,8 @@ public class ScreenLogin extends javax.swing.JFrame {
     private javax.swing.JButton jButtonSuport;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabelImgFundo;
+    private javax.swing.JLabel jLabelNameCompany;
     public javax.swing.JLabel jLabelStatusBdConect;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;

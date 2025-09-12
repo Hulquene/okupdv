@@ -23,6 +23,7 @@ import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.views.finance.JPanelFinance;
 import com.okutonda.okudpdv.views.stock.JPanelStock;
 import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
+import com.okutonda.okudpdv.views.users.JDialogProfile;
 import java.text.DateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
@@ -50,19 +51,19 @@ public final class ScreenMain extends javax.swing.JFrame {
             case "user":
                 this.jToggleButtonUsers.setEnabled(false);
                 this.jToggleButtonUsers.setEnabled(false);
-                this.jButtonSettings.setEnabled(false);
-                this.jButtonSettings.setEnabled(false);
+                this.jToggleButtonSettings.setEnabled(false);
+                this.jToggleButtonSettings.setEnabled(false);
                 break;
             case "seller":
                 this.jToggleButtonUsers.setEnabled(false);
                 this.jToggleButtonSideBarSupplier.setEnabled(false);
-                this.jButtonSettings.setEnabled(false);
+                this.jToggleButtonSettings.setEnabled(false);
                 break;
             case "manager":
                 this.jToggleButtonUsers.setEnabled(false);
                 this.jToggleButtonSideBarSupplier.setEnabled(false);
 //                this.jButtonOpenPDV.setEnabled(false);
-                this.jButtonSettings.setEnabled(false);
+                this.jToggleButtonSettings.setEnabled(false);
                 break;
             default:
                 break;
@@ -78,19 +79,25 @@ public final class ScreenMain extends javax.swing.JFrame {
         session = UserSession.getInstance();
         companySession = CompanySession.getInstance();
 
-        if (session != null || session.getUser().getStatus().equals("ativo") == true) {
+        if (session != null || session.getUser().getStatus() == 1) {
 //            JOptionPane.showMessageDialog(null, "sessio: " + session.getUsername());
             this.setExtendedState(ScreenMain.MAXIMIZED_BOTH);
             roles();
             JPanelDashboard pDashboard = new JPanelDashboard();
             jpload.jPanelLoader(jPanelContent, pDashboard);
-            jLabelUserLogin.setText(session.getUser().getName());
-            jLabelUserLoginProfil.setText(session.getUser().getProfile());
+//            jLabelUserLogin.setText(session.getUser().getName());
+//            jLabelUserLoginProfil.setText(session.getUser().getProfile());
             jLabelNameCompany.setText(companySession.getName());
-        } else {
-//            new ScreenLogin().setVisible(true);
-        }
 
+            int itemCount = jComboBoxOptionsDash.getItemCount();
+            String itemValue = jComboBoxOptionsDash.getItemAt(itemCount - 1);
+            String name = session.getUser().getName();
+            if (itemValue == null ? name != null : !itemValue.equals(name)) {
+                jComboBoxOptionsDash.addItem(name);
+                jComboBoxOptionsDash.setToolTipText(name);
+                jComboBoxOptionsDash.setSelectedItem(name);
+            }
+        }
     }
 
     /**
@@ -112,15 +119,13 @@ public final class ScreenMain extends javax.swing.JFrame {
         jToggleButtonSideBarPayment = new javax.swing.JToggleButton();
         jToggleButtonSideBarSupplier = new javax.swing.JToggleButton();
         jToggleButtonSideBarReport = new javax.swing.JToggleButton();
-        jLabelUserLogin = new javax.swing.JLabel();
-        jLabelUserLoginProfil = new javax.swing.JLabel();
-        jButtonSair = new javax.swing.JButton();
-        jButtonSettings = new javax.swing.JButton();
         jToggleButtonSideBarDashboard1 = new javax.swing.JToggleButton();
         jLabelNameCompany = new javax.swing.JLabel();
-        jLabelDatetime = new javax.swing.JLabel();
         jToggleButtonStock = new javax.swing.JToggleButton();
         jLabelNamePanelOpen = new javax.swing.JLabel();
+        jComboBoxOptionsDash = new javax.swing.JComboBox<>();
+        jLabelDatetime = new javax.swing.JLabel();
+        jToggleButtonSettings = new javax.swing.JToggleButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanelContent = new javax.swing.JPanel();
 
@@ -135,16 +140,19 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
-        jPanel1.setBackground(new java.awt.Color(0, 0, 51));
+        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
         jPanel1.setMinimumSize(new java.awt.Dimension(170, 600));
         jPanel1.setPreferredSize(new java.awt.Dimension(180, 700));
         jPanel1.setRequestFocusEnabled(false);
 
         buttonGroupSideBar.add(jToggleButtonUsers);
         jToggleButtonUsers.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jToggleButtonUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/people_3239045.png"))); // NOI18N
-        jToggleButtonUsers.setText("Usuario");
+        jToggleButtonUsers.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_5.png"))); // NOI18N
+        jToggleButtonUsers.setText("Equipe");
         jToggleButtonUsers.setBorderPainted(false);
+        jToggleButtonUsers.setContentAreaFilled(false);
+        jToggleButtonUsers.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonUsers.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonUsers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -154,10 +162,13 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarDashboard);
         jToggleButtonSideBarDashboard.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarDashboard.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonSideBarDashboard.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/dashboard-interface_5715555.png"))); // NOI18N
         jToggleButtonSideBarDashboard.setSelected(true);
         jToggleButtonSideBarDashboard.setText("Dashboard");
         jToggleButtonSideBarDashboard.setBorderPainted(false);
+        jToggleButtonSideBarDashboard.setContentAreaFilled(false);
+        jToggleButtonSideBarDashboard.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarDashboard.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarDashboard.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -167,9 +178,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarClient);
         jToggleButtonSideBarClient.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/people_3239045.png"))); // NOI18N
+        jToggleButtonSideBarClient.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_2.png"))); // NOI18N
         jToggleButtonSideBarClient.setText("Clientes");
         jToggleButtonSideBarClient.setBorderPainted(false);
+        jToggleButtonSideBarClient.setContentAreaFilled(false);
+        jToggleButtonSideBarClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarClient.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -179,9 +193,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarProduct);
         jToggleButtonSideBarProduct.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jToggleButtonSideBarProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/box-open_9246330.png"))); // NOI18N
+        jToggleButtonSideBarProduct.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonSideBarProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Box.png"))); // NOI18N
         jToggleButtonSideBarProduct.setText("Produtos");
         jToggleButtonSideBarProduct.setBorderPainted(false);
+        jToggleButtonSideBarProduct.setContentAreaFilled(false);
+        jToggleButtonSideBarProduct.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarProduct.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarProduct.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -191,9 +208,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarSales);
         jToggleButtonSideBarSales.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarSales.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonSideBarSales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/shop_6895262.png"))); // NOI18N
         jToggleButtonSideBarSales.setText("Vendas");
         jToggleButtonSideBarSales.setBorderPainted(false);
+        jToggleButtonSideBarSales.setContentAreaFilled(false);
+        jToggleButtonSideBarSales.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarSales.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarSales.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -203,9 +223,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarPayment);
         jToggleButtonSideBarPayment.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarPayment.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonSideBarPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/report_1321938.png"))); // NOI18N
         jToggleButtonSideBarPayment.setText("Financeiro");
         jToggleButtonSideBarPayment.setBorderPainted(false);
+        jToggleButtonSideBarPayment.setContentAreaFilled(false);
+        jToggleButtonSideBarPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarPayment.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarPayment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -215,9 +238,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarSupplier);
         jToggleButtonSideBarSupplier.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarSupplier.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonSideBarSupplier.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/supplier_17241534.png"))); // NOI18N
         jToggleButtonSideBarSupplier.setText("Fornecedores");
         jToggleButtonSideBarSupplier.setBorderPainted(false);
+        jToggleButtonSideBarSupplier.setContentAreaFilled(false);
+        jToggleButtonSideBarSupplier.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarSupplier.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarSupplier.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -227,9 +253,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         buttonGroupSideBar.add(jToggleButtonSideBarReport);
         jToggleButtonSideBarReport.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jToggleButtonSideBarReport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/report_1321938.png"))); // NOI18N
+        jToggleButtonSideBarReport.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonSideBarReport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Opened Folder.png"))); // NOI18N
         jToggleButtonSideBarReport.setText("Relatorio");
         jToggleButtonSideBarReport.setBorderPainted(false);
+        jToggleButtonSideBarReport.setContentAreaFilled(false);
+        jToggleButtonSideBarReport.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarReport.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarReport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -237,39 +266,14 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
-        jLabelUserLogin.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabelUserLogin.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelUserLogin.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelUserLogin.setText("Usuario");
-
-        jLabelUserLoginProfil.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabelUserLoginProfil.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelUserLoginProfil.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelUserLoginProfil.setText("Perfil");
-
-        jButtonSair.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/power-button_12080793.png"))); // NOI18N
-        jButtonSair.setBorderPainted(false);
-        jButtonSair.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSairActionPerformed(evt);
-            }
-        });
-
-        jButtonSettings.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/setting_2626897.png"))); // NOI18N
-        jButtonSettings.setBorderPainted(false);
-        jButtonSettings.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonSettingsActionPerformed(evt);
-            }
-        });
-
         buttonGroupSideBar.add(jToggleButtonSideBarDashboard1);
         jToggleButtonSideBarDashboard1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarDashboard1.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonSideBarDashboard1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/cashier_4429519.png"))); // NOI18N
         jToggleButtonSideBarDashboard1.setText("Faturação");
         jToggleButtonSideBarDashboard1.setBorderPainted(false);
+        jToggleButtonSideBarDashboard1.setContentAreaFilled(false);
+        jToggleButtonSideBarDashboard1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonSideBarDashboard1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonSideBarDashboard1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -278,20 +282,18 @@ public final class ScreenMain extends javax.swing.JFrame {
         });
 
         jLabelNameCompany.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabelNameCompany.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelNameCompany.setForeground(new java.awt.Color(0, 0, 102));
         jLabelNameCompany.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNameCompany.setText("LOGO");
 
-        jLabelDatetime.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabelDatetime.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelDatetime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelDatetime.setText("data atual");
-
         buttonGroupSideBar.add(jToggleButtonStock);
         jToggleButtonStock.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonStock.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonStock.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/shopping-cart_14572403.png"))); // NOI18N
         jToggleButtonStock.setText("Estoque");
         jToggleButtonStock.setBorderPainted(false);
+        jToggleButtonStock.setContentAreaFilled(false);
+        jToggleButtonStock.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jToggleButtonStock.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jToggleButtonStock.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -300,9 +302,41 @@ public final class ScreenMain extends javax.swing.JFrame {
         });
 
         jLabelNamePanelOpen.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
-        jLabelNamePanelOpen.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelNamePanelOpen.setForeground(new java.awt.Color(0, 0, 102));
         jLabelNamePanelOpen.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNamePanelOpen.setText("DASHBOARD");
+
+        jComboBoxOptionsDash.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jComboBoxOptionsDash.setForeground(new java.awt.Color(0, 0, 102));
+        jComboBoxOptionsDash.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Perfil", "Configuração", "Sair" }));
+        jComboBoxOptionsDash.setToolTipText("Usuario");
+        jComboBoxOptionsDash.setAutoscrolls(true);
+        jComboBoxOptionsDash.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jComboBoxOptionsDash.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxOptionsDashActionPerformed(evt);
+            }
+        });
+
+        jLabelDatetime.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabelDatetime.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelDatetime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelDatetime.setText("data atual");
+
+        buttonGroupSideBar.add(jToggleButtonSettings);
+        jToggleButtonSettings.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSettings.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Settings.png"))); // NOI18N
+        jToggleButtonSettings.setText("Configurações");
+        jToggleButtonSettings.setBorderPainted(false);
+        jToggleButtonSettings.setContentAreaFilled(false);
+        jToggleButtonSettings.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jToggleButtonSettings.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jToggleButtonSettings.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonSettingsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -323,20 +357,15 @@ public final class ScreenMain extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelUserLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabelUserLoginProfil, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
-                                    .addComponent(jLabelDatetime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(jLabelNameCompany, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonSair, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabelDatetime, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
+            .addComponent(jComboBoxOptionsDash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -346,11 +375,9 @@ public final class ScreenMain extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelNamePanelOpen)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelUserLogin)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelUserLoginProfil)
-                .addGap(2, 2, 2)
                 .addComponent(jLabelDatetime)
+                .addGap(12, 12, 12)
+                .addComponent(jComboBoxOptionsDash, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonSideBarDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -371,11 +398,9 @@ public final class ScreenMain extends javax.swing.JFrame {
                 .addComponent(jToggleButtonSideBarReport, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonSair, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(119, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(125, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jToggleButtonSideBarClient, jToggleButtonSideBarDashboard, jToggleButtonSideBarPayment, jToggleButtonSideBarProduct, jToggleButtonSideBarReport, jToggleButtonSideBarSales, jToggleButtonSideBarSupplier, jToggleButtonUsers});
@@ -421,7 +446,7 @@ public final class ScreenMain extends javax.swing.JFrame {
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         // TODO add your handling code here:
         //Verificar as sessao do usuario
-        if (session.getUser().getStatus().equals("inativo") == true) {
+        if (session.getUser().getStatus() == 0) {
             new ScreenLogin().setVisible(true);
             this.dispose();
         } else {
@@ -490,28 +515,12 @@ public final class ScreenMain extends javax.swing.JFrame {
         jLabelNamePanelOpen.setText("DASHBOARD");
     }//GEN-LAST:event_jToggleButtonSideBarDashboardActionPerformed
 
-    private void jButtonSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSairActionPerformed
-        // TODO add your handling code here:
-        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja sair?", "Atenção", JOptionPane.YES_NO_OPTION);
-        if (sair == JOptionPane.YES_OPTION) {
-            this.dispose();
-            if (userController.logout()) {
-                new ScreenLogin().setVisible(true);
-            }
-        }
-    }//GEN-LAST:event_jButtonSairActionPerformed
-
     private void jToggleButtonUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonUsersActionPerformed
         // TODO add your handling code here:
         JPanelUser pUser = new JPanelUser();
         jpload.jPanelLoader(jPanelContent, pUser);
         jLabelNamePanelOpen.setText("USUARIO");
     }//GEN-LAST:event_jToggleButtonUsersActionPerformed
-
-    private void jButtonSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSettingsActionPerformed
-        // TODO add your handling code here:
-        new JDialogSetting(this, rootPaneCheckingEnabled).setVisible(true);
-    }//GEN-LAST:event_jButtonSettingsActionPerformed
 
     private void jToggleButtonSideBarDashboard1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarDashboard1ActionPerformed
         // TODO add your handling code here:
@@ -528,6 +537,31 @@ public final class ScreenMain extends javax.swing.JFrame {
         jpload.jPanelLoader(jPanelContent, pStock);
         jLabelNamePanelOpen.setText("ESTOQUE");
     }//GEN-LAST:event_jToggleButtonStockActionPerformed
+
+    private void jComboBoxOptionsDashActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxOptionsDashActionPerformed
+        // TODO add your handling code here:
+        String option = (String) jComboBoxOptionsDash.getSelectedItem();
+
+//        || session.getUser().getName().equals(option)
+        if ("Perfil".equals(option)) {
+            new JDialogProfile(this, rootPaneCheckingEnabled).setVisible(true);
+        } else if ("Configuração".equals(option)) {
+            new JDialogSetting(this, rootPaneCheckingEnabled).setVisible(true);
+        } else if ("Sair".equals(option)) {
+            int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja sair?", "Atenção", JOptionPane.YES_NO_OPTION);
+            if (sair == JOptionPane.YES_OPTION) {
+                this.dispose();
+                if (userController.logout()) {
+                    new ScreenLogin().setVisible(true);
+                }
+            }
+        }
+    }//GEN-LAST:event_jComboBoxOptionsDashActionPerformed
+
+    private void jToggleButtonSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSettingsActionPerformed
+        // TODO add your handling code here:
+        new JDialogSetting(this, rootPaneCheckingEnabled).setVisible(true);
+    }//GEN-LAST:event_jToggleButtonSettingsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -571,16 +605,14 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupSideBar;
-    private javax.swing.JButton jButtonSair;
-    public javax.swing.JButton jButtonSettings;
+    private javax.swing.JComboBox<String> jComboBoxOptionsDash;
     private javax.swing.JLabel jLabelDatetime;
     private javax.swing.JLabel jLabelNameCompany;
     private javax.swing.JLabel jLabelNamePanelOpen;
-    public static javax.swing.JLabel jLabelUserLogin;
-    public static javax.swing.JLabel jLabelUserLoginProfil;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelContent;
     private javax.swing.JScrollPane jScrollPane2;
+    public javax.swing.JToggleButton jToggleButtonSettings;
     public javax.swing.JToggleButton jToggleButtonSideBarClient;
     public javax.swing.JToggleButton jToggleButtonSideBarDashboard;
     public javax.swing.JToggleButton jToggleButtonSideBarDashboard1;

@@ -5,7 +5,6 @@
 package com.okutonda.okudpdv.dao;
 
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.models.Countries;
 import com.okutonda.okudpdv.models.User;
 import java.awt.HeadlessException;
 import java.sql.Connection;
@@ -45,7 +44,7 @@ public class UserDao {
             ptmt.setString(6, obj.getCity());
             ptmt.setString(7, obj.getCountry());
             ptmt.setString(8, obj.getProfile());
-            ptmt.setString(9, obj.getStatus());
+            ptmt.setInt(9, obj.getStatus());
             ptmt.setString(10, obj.getBirthdate());
             ptmt.setString(11, obj.getPassword());
             //3 passo
@@ -73,7 +72,7 @@ public class UserDao {
             ptmt.setString(6, obj.getCity());
             ptmt.setString(7, obj.getCountry());
             ptmt.setString(8, obj.getProfile());
-            ptmt.setString(9, obj.getStatus());
+            ptmt.setInt(9, obj.getStatus());
             ptmt.setString(10, obj.getBirthdate());
             ptmt.setInt(11, id);
             //3 passo
@@ -83,6 +82,44 @@ public class UserDao {
 //            JOptionPane.showMessageDialog(null, "Usuario atualizado com Sucesso!!");
         } catch (HeadlessException | SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao atualizar Usuario: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public Boolean updatePassword(String newPassword, int id) {
+        try {
+            // 1 passo
+            String sql = "UPDATE users SET password=? WHERE id=?";
+            // 2 passo
+            PreparedStatement ptmt = this.conn.prepareStatement(sql);
+            ptmt.setString(1, newPassword);
+            ptmt.setInt(2, id);
+            //3 passo
+            //ptmt.executeQuery();
+            ptmt.execute();
+            return true;
+//            JOptionPane.showMessageDialog(null, "Usuario atualizado com Sucesso!!");
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao atualizar Password Usuario: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public Boolean updateCodeManager(String code, int id) {
+        try {
+            // 1 passo
+            String sql = "UPDATE users SET code=? WHERE id=?";
+            // 2 passo
+            PreparedStatement ptmt = this.conn.prepareStatement(sql);
+            ptmt.setString(1, code);
+            ptmt.setInt(2, id);
+            //3 passo
+            //ptmt.executeQuery();
+            ptmt.execute();
+            return true;
+//            JOptionPane.showMessageDialog(null, "Usuario atualizado com Sucesso!!");
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao atualizar code Usuario: " + e.getMessage());
         }
         return false;
     }
@@ -244,7 +281,7 @@ public class UserDao {
             User obj = new User();
 //            CountryDao sDao = new CountryDao();
 //            sDao.searchFromId(rs.getInt("country"));
-            
+
             obj.setId(rs.getInt("id"));
             obj.setNif(rs.getString("nif"));
             obj.setName(rs.getString("name"));
@@ -255,7 +292,7 @@ public class UserDao {
             obj.setCity(rs.getString("city"));
             obj.setProfile(rs.getString("profile"));
             obj.setBirthdate(rs.getString("birthdate"));
-            obj.setStatus(rs.getString("status"));
+            obj.setStatus(rs.getInt("status"));
 
             return obj;
         } catch (SQLException e) {

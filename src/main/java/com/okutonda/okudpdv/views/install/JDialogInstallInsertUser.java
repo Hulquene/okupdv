@@ -96,7 +96,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
 //            cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
             cModel.setCity("");
             cModel.setProfile("admin");
-            cModel.setStatus("ativo");
+            cModel.setStatus(1);
 //            if (cModel != null) {
 //                userController.add(cModel, 0);
 //            }

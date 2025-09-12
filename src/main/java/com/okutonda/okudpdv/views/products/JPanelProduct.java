@@ -172,21 +172,36 @@ public final class JPanelProduct extends javax.swing.JPanel {
             }
         });
 
+        jButtonAlterSeleted.setBackground(new java.awt.Color(255, 255, 102));
+        jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterSeleted.setText("Editar");
+        jButtonAlterSeleted.setBorderPainted(false);
+        jButtonAlterSeleted.setContentAreaFilled(false);
+        jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAlterSeletedActionPerformed(evt);
             }
         });
 
+        jButtonDeleteSelectedTable.setBackground(new java.awt.Color(255, 0, 0));
+        jButtonDeleteSelectedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteSelectedTable.setText("Excluir");
+        jButtonDeleteSelectedTable.setBorderPainted(false);
+        jButtonDeleteSelectedTable.setContentAreaFilled(false);
+        jButtonDeleteSelectedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteSelectedTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteSelectedTableActionPerformed(evt);
             }
         });
 
+        jButtonOpenFormProduct.setBackground(new java.awt.Color(153, 153, 255));
+        jButtonOpenFormProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonOpenFormProduct.setText("Novo Produto");
+        jButtonOpenFormProduct.setBorderPainted(false);
+        jButtonOpenFormProduct.setContentAreaFilled(false);
+        jButtonOpenFormProduct.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonOpenFormProduct.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOpenFormProductActionPerformed(evt);
@@ -223,7 +238,13 @@ public final class JPanelProduct extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableProducts);
 
-        jButtonViewSeleted.setText("Visualizar");
+        jButtonViewSeleted.setBackground(new java.awt.Color(102, 255, 102));
+        jButtonViewSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
+        jButtonViewSeleted.setText("Ver");
+        jButtonViewSeleted.setToolTipText("Visualizar produto");
+        jButtonViewSeleted.setBorderPainted(false);
+        jButtonViewSeleted.setContentAreaFilled(false);
+        jButtonViewSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonViewSeletedActionPerformed(evt);
@@ -232,7 +253,12 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
         jLabel2.setText("Procurar Produto");
 
+        jButtonGroups.setBackground(new java.awt.Color(153, 153, 255));
+        jButtonGroups.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Puzzle.png"))); // NOI18N
         jButtonGroups.setText("Categoria");
+        jButtonGroups.setBorderPainted(false);
+        jButtonGroups.setContentAreaFilled(false);
+        jButtonGroups.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonGroups.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonGroupsActionPerformed(evt);
@@ -252,7 +278,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanelSearchSupplierLayout.createSequentialGroup()
                         .addComponent(jTextFieldFilterNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 230, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 111, Short.MAX_VALUE)
                         .addComponent(jButtonGroups)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonOpenFormProduct)
@@ -277,9 +303,9 @@ public final class JPanelProduct extends javax.swing.JPanel {
                     .addComponent(jButtonDeleteSelectedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonViewSeleted, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonGroups))
-                .addGap(18, 19, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                .addGap(12, 12, 12))
         );
 
         jPanelSearchSupplierLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonGroups, jTextFieldFilterNameTable});
@@ -645,37 +671,12 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     private void jButtonAlterSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterSeletedActionPerformed
         // TODO add your handling code here:
-        //        jTabbedPaneProduct.setSelectedIndex(1);
-        //        jTextFieldId.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0).toString());
-        //        jComboBoxType.setSelectedItem(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 1));
-        //        jTextFieldCode.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 2).toString());
-        //        jTextFieldBarCode.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 3).toString());
-        //        jTextFieldDescription.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 4).toString());
-        //        jTextFieldPrice.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 5).toString());
-        //        jTextFieldPurchasePrice.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 6).toString());
-        //        jTextFieldStockTotal.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 7).toString());
-        //        jComboBoxTaxeId.setSelectedItem(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 8));
-        //        jComboBoxReasonTaxeId.setSelectedItem(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 9));
-        //        jComboBoxReasonTaxeId.setSelectedItem(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 10));
-        //        jComboBoxSupplier.setSelectedIndex((int) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 11));
-
-        //        JDialogFormProduct formProd = new JDialogFormProduct(null, true);
-        //        Product prod = productController.getId(if);
-        //        formProd.setFormProduct(prod);
-        //        formProd.setVisible(true);
-        //        Boolean resp = formProd.getResponse();
-        //        if (resp == true) {
-        //            JOptionPane.showMessageDialog(null, "Products salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-        //            listProducts();
-        //        }
         int value = 0;
         try {
             value = (int) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0);
-            System.out.println("jTableUsers id:" + value);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
-            //            System.out.println("jTableUsers id:" + value);
             if (value > 0) {
                 JDialogFormProduct formProd = new JDialogFormProduct(null, true);
                 formProd.setProduct(value);

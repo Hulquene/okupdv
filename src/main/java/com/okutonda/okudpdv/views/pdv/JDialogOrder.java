@@ -28,7 +28,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     UserController userController;
     ShiftController shiftController;
     ShiftSession shiftSession;
-    Boolean status;
+    Boolean status = false;
     Boolean statusClose = false;
 
     /**
@@ -68,18 +68,16 @@ public class JDialogOrder extends javax.swing.JDialog {
 //        jLabelTotalOrder.setText(order.getTotal().toString());
     }
 
-    public void closeOrder() {
-
+    public void cancelOrder() {
         JPasswordField passwordFild = new JPasswordField(10);
         JPanel panel = new JPanel();
-        panel.add(new JLabel("Entre com a senha do Supervisor: "));
+        panel.add(new JLabel("Entre com o codigo do Supervisor: "));
         panel.add(passwordFild);
         int option = JOptionPane.showConfirmDialog(null, panel, "Senha", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             char[] password = passwordFild.getPassword();
             String paString = new String(password);
             if (!paString.isEmpty()) {
-
                 statusClose = userController.validateManager(paString);
                 System.out.println("codigo do supervisor:" + statusClose);
                 if (statusClose == true) {
@@ -101,9 +99,9 @@ public class JDialogOrder extends javax.swing.JDialog {
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jButtonClose = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jButtonSaveOrder = new javax.swing.JButton();
+        jButtonClose = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabelSeller = new javax.swing.JLabel();
         jLabelOrder = new javax.swing.JLabel();
@@ -147,15 +145,6 @@ public class JDialogOrder extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel1.setText("FATURA RECIBO");
 
-        jButtonClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/close_694497.png"))); // NOI18N
-        jButtonClose.setBorderPainted(false);
-        jButtonClose.setContentAreaFilled(false);
-        jButtonClose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCloseActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -163,29 +152,38 @@ public class JDialogOrder extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addGap(288, 288, 288)
-                .addComponent(jButtonClose, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(327, 327, 327))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButtonClose, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel1)))
+                .addContainerGap(12, Short.MAX_VALUE)
+                .addComponent(jLabel1)
                 .addContainerGap())
         );
 
         jPanel3.setBackground(new java.awt.Color(153, 153, 255));
 
         jButtonSaveOrder.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonSaveOrder.setText("FINALIZAR FATURA");
+        jButtonSaveOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Done.png"))); // NOI18N
+        jButtonSaveOrder.setText("FINALIZAR");
+        jButtonSaveOrder.setToolTipText("FINALIZAR FATURA");
+        jButtonSaveOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonSaveOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSaveOrderActionPerformed(evt);
+            }
+        });
+
+        jButtonClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Cancel.png"))); // NOI18N
+        jButtonClose.setText("Cancelar");
+        jButtonClose.setToolTipText("Cancelar a Fatura");
+        jButtonClose.setBorderPainted(false);
+        jButtonClose.setContentAreaFilled(false);
+        jButtonClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonClose.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCloseActionPerformed(evt);
             }
         });
 
@@ -195,6 +193,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButtonClose)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButtonSaveOrder)
                 .addContainerGap())
         );
@@ -202,7 +202,9 @@ public class JDialogOrder extends javax.swing.JDialog {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButtonSaveOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonClose, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonSaveOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -285,10 +287,6 @@ public class JDialogOrder extends javax.swing.JDialog {
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel2)
-                        .addGap(38, 38, 38))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -315,7 +313,11 @@ public class JDialogOrder extends javax.swing.JDialog {
                             .addComponent(jLabelTaxOrder, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelSubTotalOrder, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabelTotalOrder, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)))
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addGap(38, 38, 38)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabelOrder)
@@ -360,7 +362,9 @@ public class JDialogOrder extends javax.swing.JDialog {
                             .addComponent(jLabelOrder))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGap(82, 82, 82)
+                                .addComponent(jLabel2))
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 286, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -397,12 +401,10 @@ public class JDialogOrder extends javax.swing.JDialog {
     }//GEN-LAST:event_formWindowActivated
 
     private void jButtonSaveOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveOrderActionPerformed
-//       
+
         Order result = orderController.add(order);
         if (result != null) {
             shiftController.updateIncurredAmount(result.getTotal(), shiftSession.getShift().getId());
-            System.out.println("Id da fatura criada: " + result.getId());
-
 //            JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!! Num: " + result.getId(), "Atenção", JOptionPane.INFORMATION_MESSAGE);
             status = true;
             statusClose = true;
@@ -416,40 +418,20 @@ public class JDialogOrder extends javax.swing.JDialog {
             this.dispose();
         } else {
             status = false;
-//            JOptionPane.showMessageDialog(null, "Venda nao cadastrada!!", "Atenção", JOptionPane.ERROR);
         }
     }//GEN-LAST:event_jButtonSaveOrderActionPerformed
 
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
         // TODO add your handling code here:
-        closeOrder();
-//        JPasswordField passwordFild = new JPasswordField(10);
-//        JPanel panel = new JPanel();
-//        panel.add(new JLabel("Entre com a senha do Supervisor: "));
-//        panel.add(passwordFild);
-//
-//        int option = JOptionPane.showConfirmDialog(null, panel, "Senha", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-//
-////        String value = JOptionPane.showInputDialog(null, "Entre com o valor de abertura: ");
-//        if (option == JOptionPane.OK_OPTION) {
-//            char[] password = passwordFild.getPassword();
-//            String paString = new String(password);
-//            System.out.println("codigo do supervisor:" + paString);
-//            if (userController.validateManager(paString) == true) {
-//                dispose();
-//            }
-//        }
-
+        cancelOrder();
     }//GEN-LAST:event_jButtonCloseActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
-//        closeOrder();
     }//GEN-LAST:event_formWindowClosing
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-//        closeOrder();
         if (statusClose == false) {
             this.setVisible(true);
         }

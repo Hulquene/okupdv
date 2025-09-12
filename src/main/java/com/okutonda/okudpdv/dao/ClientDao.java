@@ -6,7 +6,6 @@ package com.okutonda.okudpdv.dao;
 
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Clients;
-import com.okutonda.okudpdv.models.Countries;
 import java.awt.HeadlessException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,8 +32,8 @@ public class ClientDao {
     public Boolean add(Clients obj) {
         try {
             // 1 passo
-            String sql = "INSERT INTO clients (company,nif,phone,email,address,zip_code,status,isdefault)"
-                    + "values(?,?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO clients (company,nif,phone,email,address,zip_code,status,isdefault,city,state)"
+                    + "values(?,?,?,?,?,?,?,?,?,?)";
             // 2 passo
             PreparedStatement stmt = this.conn.prepareStatement(sql);
             stmt.setString(1, obj.getName());
@@ -42,15 +41,13 @@ public class ClientDao {
             stmt.setString(3, obj.getPhone());
             stmt.setString(4, obj.getEmail());
             stmt.setString(5, obj.getAddress());
-
-//            stmt.setString(6, obj.getCity());
-//            stmt.setString(7, obj.getState());
 //            stmt.setInt(8, obj.getCountry().getId());
             stmt.setString(6, obj.getZipCode());
-
 //            stmt.setInt(10, obj.getGroupId());
-            stmt.setString(7, obj.getStatus());
-            stmt.setString(8, obj.getIsDefault());
+            stmt.setInt(7, obj.getStatus());
+            stmt.setInt(8, obj.getIsDefault());
+            stmt.setString(9, obj.getCity());
+            stmt.setString(10, obj.getState());
             //3 passo
             stmt.execute();
             // 4 passo
@@ -66,7 +63,7 @@ public class ClientDao {
     public Boolean edit(Clients obj, int id) {
         try {
             // 1 passo
-            String sql = "UPDATE clients SET company=?,nif=?,phone=?,email=?,address=?,zip_code=?,status=?,isdefault=? WHERE id=?";
+            String sql = "UPDATE clients SET company=?,nif=?,phone=?,email=?,address=?,city=?,state=?,zip_code=?,status=?,isdefault=? WHERE id=?";
             // 2 passo
             PreparedStatement ptmt = this.conn.prepareStatement(sql);
             ptmt.setString(1, obj.getName());
@@ -74,13 +71,13 @@ public class ClientDao {
             ptmt.setString(3, obj.getPhone());
             ptmt.setString(4, obj.getEmail());
             ptmt.setString(5, obj.getAddress());
-//            ptmt.setString(6, obj.getCity());
-//            ptmt.setString(7, obj.getState());
+            ptmt.setString(6, obj.getCity());
+            ptmt.setString(7, obj.getState());
 //            ptmt.setInt(8, obj.getCountry().getId());
-            ptmt.setString(6, obj.getZipCode());
-            ptmt.setString(7, obj.getStatus());
-            ptmt.setString(8, obj.getIsDefault());
-            ptmt.setInt(9, id);
+            ptmt.setString(8, obj.getZipCode());
+            ptmt.setInt(9, obj.getStatus());
+            ptmt.setInt(10, obj.getIsDefault());
+            ptmt.setInt(11, id);
             //3 passo
             //ptmt.executeQuery();
             ptmt.execute();
@@ -120,20 +117,6 @@ public class ClientDao {
             if (rs.next()) {
                 obj = formatObj(rs);
             }
-//            if (rs.next()) {
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
-//            }
             return obj;
             // 2 passo
         } catch (SQLException e) {
@@ -153,20 +136,6 @@ public class ClientDao {
             if (rs.next()) {
                 obj = formatObj(rs);
             }
-//            if (rs.next()) {
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
-//            }
             return obj;
             // 2 passo
         } catch (SQLException e) {
@@ -186,20 +155,6 @@ public class ClientDao {
             if (rs.next()) {
                 obj = formatObj(rs);
             }
-//            if (rs.next()) {
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
-//            }
             return obj;
             // 2 passo
         } catch (SQLException e) {
@@ -234,23 +189,7 @@ public class ClientDao {
             rs = ptmt.executeQuery();
             Clients obj;
             while (rs.next()) {
-
                 obj = formatObj(rs);
-
-//                Clients obj = new Clients();
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setGroupId(rs.getInt("group_id"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
                 list.add(obj);
             }
             return list;
@@ -271,21 +210,7 @@ public class ClientDao {
             rs = ptmt.executeQuery();
             Clients obj;
             while (rs.next()) {
-
                 obj = formatObj(rs);
-//                obj.setId(rs.getInt("id"));
-//                obj.setNif(rs.getString("nif"));
-//                obj.setName(rs.getString("company"));
-//                obj.setEmail(rs.getString("email"));
-//                obj.setPhone(rs.getString("phone"));
-//                obj.setAddress(rs.getString("address"));
-//                obj.setCountry(rs.getInt("country"));
-//                obj.setCity(rs.getString("city"));
-//                obj.setState(rs.getString("state"));
-//                obj.setZipCode(rs.getString("zip_code"));
-//                obj.setGroupId(rs.getInt("group_id"));
-//                obj.setStatus(rs.getInt("status"));
-//                obj.setIsDefault(rs.getInt("isdefault"));
                 list.add(obj);
             }
             return list;
@@ -309,11 +234,11 @@ public class ClientDao {
             obj.setPhone(rs.getString("phone"));
             obj.setAddress(rs.getString("address"));
 //            obj.setCountry(country);
-//            obj.setCity(rs.getString("city"));
-//            obj.setState(rs.getString("state"));
+            obj.setCity(rs.getString("city"));
+            obj.setState(rs.getString("state"));
             obj.setZipCode(rs.getString("zip_code"));
-            obj.setStatus(rs.getString("status"));
-            obj.setIsDefault(rs.getString("isdefault"));
+            obj.setStatus(rs.getInt("status"));
+            obj.setIsDefault(rs.getInt("isdefault"));
             return obj;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao formatar obj Client: " + e.getMessage());

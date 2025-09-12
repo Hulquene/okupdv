@@ -49,7 +49,7 @@ public class ProductDao {
             stmt.setInt(7, obj.getGroup().getId());
             stmt.setInt(8, obj.getSupplier().getId());
             stmt.setInt(9, obj.getStockTotal());
-            stmt.setString(10, obj.getStatus());
+            stmt.setInt(10, obj.getStatus());
             stmt.setString(11, obj.getBarcode());
             stmt.setDouble(12, obj.getPurchasePrice());
             //3 passo
@@ -77,7 +77,7 @@ public class ProductDao {
             pst.setInt(7, obj.getGroup().getId());
             pst.setInt(8, obj.getSupplier().getId());
             pst.setInt(9, obj.getStockTotal());
-            pst.setString(10, obj.getStatus());
+            pst.setInt(10, obj.getStatus());
             pst.setString(11, obj.getBarcode());
             pst.setDouble(12, obj.getPurchasePrice());
             pst.setInt(13, id);
@@ -310,7 +310,7 @@ public class ProductDao {
             obj.setReasonTaxe(resaonTax);
             obj.setSupplier(supp);
             obj.setStockTotal(rs.getInt("stock_total"));
-            obj.setStatus(rs.getString("status"));
+            obj.setStatus(rs.getInt("status"));
             return obj;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao formatar obj produtos: " + e.getMessage());

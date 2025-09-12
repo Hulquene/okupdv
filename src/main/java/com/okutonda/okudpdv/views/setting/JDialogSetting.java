@@ -11,7 +11,6 @@ import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.PaymentModeController;
 import com.okutonda.okudpdv.controllers.TaxeController;
 import com.okutonda.okudpdv.models.Box;
-import com.okutonda.okudpdv.models.Countries;
 import com.okutonda.okudpdv.models.Options;
 import com.okutonda.okudpdv.models.PaymentModes;
 import com.okutonda.okudpdv.utilities.Utilities;
@@ -117,15 +116,14 @@ public final class JDialogSetting extends javax.swing.JDialog {
         }
     }
 
-    public void listComboCountries() {
-
-        List<Countries> list = countryController.get("");
-        jComboBoxOptionCountryCompany.removeAllItems();
-        for (Countries item : list) {
-            jComboBoxOptionCountryCompany.addItem(item);
-        }
-    }
-
+//    public void listComboCountries() {
+//
+//        List<Countries> list = countryController.get("");
+//        jComboBoxOptionCountryCompany.removeAllItems();
+//        for (Countries item : list) {
+//            jComboBoxOptionCountryCompany.addItem(item);
+//        }
+//    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -152,8 +150,8 @@ public final class JDialogSetting extends javax.swing.JDialog {
         jLabel13 = new javax.swing.JLabel();
         jTextFieldOptionEmailCompany = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
+        jTextFieldOptionCountryCompany = new javax.swing.JTextField();
         jButtonOptionSaveCompany = new javax.swing.JButton();
-        jComboBoxOptionCountryCompany = new javax.swing.JComboBox();
         jPanel8 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTableBox = new javax.swing.JTable();
@@ -260,7 +258,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
         jLabel7.setText("Nome Empresa");
 
-        jLabel8.setText("NIF");
+        jLabel8.setText("Numero de Identificacação Fiscal (NIF)");
 
         jLabel9.setText("Pais");
 
@@ -272,6 +270,9 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
         jLabel12.setText("Telefone");
 
+        jTextFieldOptionCountryCompany.setEnabled(false);
+
+        jButtonOptionSaveCompany.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButtonOptionSaveCompany.setText("Salvar");
         jButtonOptionSaveCompany.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -279,106 +280,103 @@ public final class JDialogSetting extends javax.swing.JDialog {
             }
         });
 
-        jComboBoxOptionCountryCompany.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
-                jComboBoxOptionCountryCompanyAncestorAdded(evt);
-            }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-        });
-
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonOptionSaveCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel11)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jComboBoxOptionCountryCompany, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel11)
-                            .addComponent(jLabel9)
-                            .addComponent(jLabel7)
-                            .addComponent(jTextFieldOptionPhoneCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
-                            .addComponent(jTextFieldOptionAddressCompany)
-                            .addComponent(jTextFieldOptionNameCompany)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jLabel12)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                                .addComponent(jTextFieldOptionAddressCompany)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(jLabel9)
+                                        .addComponent(jLabel7)
+                                        .addComponent(jTextFieldOptionNameCompany)
+                                        .addComponent(jTextFieldOptionCountryCompany))
+                                    .addComponent(jTextFieldOptionCityCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel10))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 152, Short.MAX_VALUE)
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel13)
+                                    .addComponent(jTextFieldOptionEmailCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jTextFieldOptionPhoneCompany, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                                    .addComponent(jLabel12))))
+                        .addGap(38, 38, 38))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel8)
-                            .addComponent(jTextFieldOptionNifCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel10)
-                            .addComponent(jTextFieldOptionCityCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel13)
-                            .addComponent(jTextFieldOptionEmailCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(38, 38, 38))
+                            .addComponent(jTextFieldOptionNifCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))))
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(231, 231, 231)
+                .addComponent(jButtonOptionSaveCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jComboBoxOptionCountryCompany, jTextFieldOptionAddressCompany, jTextFieldOptionCityCompany, jTextFieldOptionEmailCompany, jTextFieldOptionNameCompany, jTextFieldOptionNifCompany, jTextFieldOptionPhoneCompany});
+        jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jTextFieldOptionAddressCompany, jTextFieldOptionCityCompany, jTextFieldOptionEmailCompany, jTextFieldOptionNameCompany, jTextFieldOptionNifCompany, jTextFieldOptionPhoneCompany});
 
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel8))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldOptionNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldOptionNifCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel9)
-                            .addComponent(jLabel10))
-                        .addGap(11, 11, 11)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jComboBoxOptionCountryCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldOptionCityCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(jLabel13))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldOptionAddressCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldOptionEmailCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel12)
-                        .addGap(54, 54, 54))
+                .addGap(39, 39, 39)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel13))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldOptionNifCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldOptionEmailCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel12))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldOptionNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jTextFieldOptionPhoneCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldOptionCountryCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(7, 7, 7)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldOptionCityCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldOptionAddressCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
                 .addComponent(jButtonOptionSaveCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(66, 66, 66))
+                .addGap(22, 22, 22))
         );
 
-        jPanel4Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jComboBoxOptionCountryCompany, jTextFieldOptionAddressCompany, jTextFieldOptionCityCompany, jTextFieldOptionEmailCompany, jTextFieldOptionNameCompany, jTextFieldOptionNifCompany, jTextFieldOptionPhoneCompany});
+        jPanel4Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jTextFieldOptionAddressCompany, jTextFieldOptionCityCompany, jTextFieldOptionEmailCompany, jTextFieldOptionNameCompany, jTextFieldOptionNifCompany, jTextFieldOptionPhoneCompany});
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(90, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32))
+                .addContainerGap(55, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 382, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(291, Short.MAX_VALUE))
+                .addGap(15, 15, 15)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Informacao da Empresa", jPanel2);
@@ -462,7 +460,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                                 .addGroup(jPanelBoxFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jLabel27, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jTextFieldBoxId, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE))))))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addContainerGap(85, Short.MAX_VALUE))
         );
         jPanelBoxFormLayout.setVerticalGroup(
             jPanelBoxFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -515,7 +513,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanelBoxForm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 384, Short.MAX_VALUE))
-                .addContainerGap(230, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         jPanel8Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonDeleteBox, jButtonEditBox, jTextFieldSearchBox});
@@ -596,16 +594,34 @@ public final class JDialogSetting extends javax.swing.JDialog {
         jLabel23.setText("Codigo");
 
         jComboBoxPaymentModesStatus.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jComboBoxPaymentModesStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ative", "inative" }));
+        jComboBoxPaymentModesStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "ativo", "inativo" }));
+        jComboBoxPaymentModesStatus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxPaymentModesStatusActionPerformed(evt);
+            }
+        });
 
         jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel24.setText("Padrao");
 
         jComboBoxPaymentModesDefault.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jComboBoxPaymentModesDefault.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "no", "yes" }));
+        jComboBoxPaymentModesDefault.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "nao", "sim" }));
+        jComboBoxPaymentModesDefault.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxPaymentModesDefaultActionPerformed(evt);
+            }
+        });
 
         jLabel28.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel28.setText("Status");
+
+        jButtonFormPaymentAdd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonFormPaymentAdd.setText("Salvar");
+        jButtonFormPaymentAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonFormPaymentAddActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanelPaymentModesFormLayout = new javax.swing.GroupLayout(jPanelPaymentModesForm);
         jPanelPaymentModesForm.setLayout(jPanelPaymentModesFormLayout);
@@ -615,39 +631,46 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 .addGap(23, 23, 23)
                 .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelPaymentModesFormLayout.createSequentialGroup()
-                        .addComponent(jTextFieldPaymentModesName)
-                        .addGap(30, 30, 30))
-                    .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
-                        .addComponent(jLabel23)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 24, Short.MAX_VALUE)
+                        .addComponent(jComboBoxPaymentModesStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxPaymentModesDefault, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(169, 169, 169))
                     .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
                         .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jTextFieldPaymentModeCode, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
-                            .addComponent(jTextFieldPaymentModeId, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel22, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldPaymentModesDescription, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel19, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelPaymentModesFormLayout.createSequentialGroup()
-                        .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jLabel28))
-                            .addComponent(jComboBoxPaymentModesStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                        .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBoxPaymentModesDefault, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel24))
-                        .addContainerGap(27, Short.MAX_VALUE))))
+                            .addComponent(jButtonFormPaymentAdd, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel20)
+                                .addComponent(jLabel22)
+                                .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
+                                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(103, 103, 103)
+                                    .addComponent(jLabel23))
+                                .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
+                                    .addGap(6, 6, 6)
+                                    .addComponent(jLabel28)
+                                    .addGap(58, 58, 58)
+                                    .addComponent(jLabel24))
+                                .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jTextFieldPaymentModesDescription, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanelPaymentModesFormLayout.createSequentialGroup()
+                                        .addComponent(jTextFieldPaymentModeId, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jTextFieldPaymentModeCode, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jTextFieldPaymentModesName, javax.swing.GroupLayout.Alignment.LEADING))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanelPaymentModesFormLayout.setVerticalGroup(
             jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelPaymentModesFormLayout.createSequentialGroup()
                 .addGap(26, 26, 26)
-                .addComponent(jLabel19)
+                .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(jLabel23))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextFieldPaymentModeId, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldPaymentModeId, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldPaymentModeCode, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(4, 4, 4)
                 .addComponent(jLabel20)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -656,19 +679,17 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 .addComponent(jLabel22)
                 .addGap(4, 4, 4)
                 .addComponent(jTextFieldPaymentModesDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel23)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextFieldPaymentModeCode, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel24)
-                    .addComponent(jLabel28))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel28)
+                    .addComponent(jLabel24))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelPaymentModesFormLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxPaymentModesStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBoxPaymentModesDefault, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addGap(30, 30, 30)
+                .addComponent(jButtonFormPaymentAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(62, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
@@ -678,13 +699,13 @@ public final class JDialogSetting extends javax.swing.JDialog {
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel10Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanelPaymentModesForm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18))
-                    .addGroup(jPanel10Layout.createSequentialGroup()
                         .addGap(43, 43, 43)
                         .addComponent(jLabel18)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanelPaymentModesForm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)))
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
                         .addComponent(jTextFieldFormPaymentSearchTable, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -699,29 +720,22 @@ public final class JDialogSetting extends javax.swing.JDialog {
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel10Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButtonFormPaymentDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButtonFormPAymentEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldFormPaymentSearchTable, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(22, 22, 22)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel10Layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addComponent(jPanelPaymentModesForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(30, 30, 30))
+                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButtonFormPaymentDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonFormPAymentEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(22, 22, 22)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(125, 125, 125))
+                    .addGroup(jPanel10Layout.createSequentialGroup()
+                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldFormPaymentSearchTable, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanelPaymentModesForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(64, 64, 64))))
         );
-
-        jButtonFormPaymentAdd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonFormPaymentAdd.setText("Salvar");
-        jButtonFormPaymentAdd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFormPaymentAddActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -730,18 +744,12 @@ public final class JDialogSetting extends javax.swing.JDialog {
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
-            .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGap(202, 202, 202)
-                .addComponent(jButtonFormPaymentAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 446, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButtonFormPaymentAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 203, Short.MAX_VALUE))
+                .addGap(0, 84, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Forma de Pagamento", jPanel9);
@@ -909,7 +917,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jPanelTaxeForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 104, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                         .addComponent(jTextFieldTaxeSearchTable, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -943,7 +951,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanelTaxeForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(223, Short.MAX_VALUE))
+                .addContainerGap(59, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Imposto", jPanel3);
@@ -975,7 +983,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButtonExportDatabaseInCSV, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonExportDatabaseInExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(625, Short.MAX_VALUE))
+                .addContainerGap(671, Short.MAX_VALUE))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -984,7 +992,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 .addComponent(jButtonExportDatabaseInExcel, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(29, 29, 29)
                 .addComponent(jButtonExportDatabaseInCSV, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(545, Short.MAX_VALUE))
+                .addContainerGap(381, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Backup", jPanel6);
@@ -1066,13 +1074,13 @@ public final class JDialogSetting extends javax.swing.JDialog {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 67, Short.MAX_VALUE))
+                .addGap(0, 113, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 226, Short.MAX_VALUE))
+                .addGap(0, 62, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("About", jPanel7);
@@ -1083,16 +1091,16 @@ public final class JDialogSetting extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 903, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 567, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(848, 718));
+        setSize(new java.awt.Dimension(919, 587));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1184,11 +1192,6 @@ public final class JDialogSetting extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_jButtonTaxeDeleteActionPerformed
 
-    private void jComboBoxOptionCountryCompanyAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jComboBoxOptionCountryCompanyAncestorAdded
-        // TODO add your handling code here:
-
-    }//GEN-LAST:event_jComboBoxOptionCountryCompanyAncestorAdded
-
     private void jButtonOptionSaveCompanyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOptionSaveCompanyActionPerformed
         // TODO add your handling code here:
         List<Options> listOptionCompany = new ArrayList<>();
@@ -1215,7 +1218,10 @@ public final class JDialogSetting extends javax.swing.JDialog {
         }
 
         listOptionCompany.add(
-                new Options("companyCountry", jComboBoxOptionCountryCompany.getSelectedItem().toString(), "1"));
+                new Options("country", jTextFieldOptionCountryCompany.getText(), "1"));
+
+//        listOptionCompany.add(
+//                new Options("companyCountry", jComboBoxOptionCountryCompany.getSelectedItem().toString(), "1"));
         for (Options options : listOptionCompany) {
             optionController.add(options);
         }
@@ -1245,7 +1251,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
         listBox();
         listTaxes();
         listPaymentModes();
-        listComboCountries();
+//        listComboCountries();
 
         jTextFieldOptionNameCompany.setText(optionController.getValueOptions("companyName"));
         jTextFieldOptionNifCompany.setText(optionController.getValueOptions("companyNif"));
@@ -1253,14 +1259,13 @@ public final class JDialogSetting extends javax.swing.JDialog {
         jTextFieldOptionPhoneCompany.setText(optionController.getValueOptions("companyPhone"));
         jTextFieldOptionAddressCompany.setText(optionController.getValueOptions("companyAddress"));
         jTextFieldOptionEmailCompany.setText(optionController.getValueOptions("companyEmail"));
-        System.out.println("hh:" + optionController.getValueOptions("companyCountry"));
-        jComboBoxOptionCountryCompany.setSelectedItem(optionController.getValueOptions("companyCountry"));
+        jTextFieldOptionCountryCompany.setText(optionController.getValueOptions("country"));
+//        jComboBoxOptionCountryCompany.setSelectedItem(optionController.getValueOptions("companyCountry"));
 
         jLabelDateLicence.setText(companySession.getDateKeyLicence());
         jLabelTimeKey.setText(companySession.getTime());
         jLabelKeyLicence.setText(companySession.getKeyLicence());
 //        jLabelDateLicence.setText(companySession.getDateKeyLicence());
-
     }//GEN-LAST:event_formWindowActivated
 
     private void jButtonExportDatabaseInExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExportDatabaseInExcelActionPerformed
@@ -1288,6 +1293,20 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     private void jButtonFormPaymentDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPaymentDeleteActionPerformed
         // TODO add your handling code here:
+//         jTextFieldTaxeId.setText(jTableTaxes.getValueAt(jTableTaxes.getSelectedRow(), 0).toString());
+
+        int id = Integer.parseInt(jTablePaymentModes.getValueAt(jTablePaymentModes.getSelectedRow(), 0).toString());
+//        Taxes tax = taxesController.getId(id);
+        PaymentModes paymentMode = paymentModes.getId(id);
+//        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
+        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + paymentMode.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+        if (sair == JOptionPane.YES_OPTION) {
+            if (paymentModes.deleteId(id)) {
+                JOptionPane.showMessageDialog(null, "payment Mode excluido com Sucesso!!");
+//                listTaxes();
+                listPaymentModes();
+            }
+        }
     }//GEN-LAST:event_jButtonFormPaymentDeleteActionPerformed
 
     private void jButtonFormPAymentEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPAymentEditActionPerformed
@@ -1324,8 +1343,22 @@ public final class JDialogSetting extends javax.swing.JDialog {
             cModel.setName(jTextFieldPaymentModesName.getText());
             cModel.setDescription(jTextFieldPaymentModesDescription.getText());
             cModel.setCode(jTextFieldPaymentModeCode.getText());
-            cModel.setStatus((String) jComboBoxPaymentModesStatus.getSelectedItem());
-            cModel.setIsDefault((String) jComboBoxPaymentModesDefault.getSelectedItem());
+
+//            cModel.setStatus((String) jComboBoxPaymentModesStatus.getSelectedItem());
+//            cModel.setIsDefault((String) jComboBoxPaymentModesDefault.getSelectedItem());
+            String statusPayment = (String) jComboBoxPaymentModesStatus.getSelectedItem();
+            String defaultPayment = (String) jComboBoxPaymentModesDefault.getSelectedItem();
+
+            if ("ativo".equals(statusPayment)) {
+                cModel.setStatus(1);
+            } else {
+                cModel.setStatus(0);
+            }
+            if ("sim".equals(defaultPayment)) {
+                cModel.setIsDefault(1);
+            } else {
+                cModel.setIsDefault(0);
+            }
 
             if (cModel != null) {
                 int id = jTextFieldPaymentModeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldPaymentModeId.getText());
@@ -1398,6 +1431,14 @@ public final class JDialogSetting extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_jButtonEditBoxActionPerformed
 
+    private void jComboBoxPaymentModesStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxPaymentModesStatusActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxPaymentModesStatusActionPerformed
+
+    private void jComboBoxPaymentModesDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxPaymentModesDefaultActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxPaymentModesDefaultActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1464,7 +1505,6 @@ public final class JDialogSetting extends javax.swing.JDialog {
     private javax.swing.JButton jButtonTaxeDelete;
     private javax.swing.JButton jButtonTaxeEdit;
     private javax.swing.JButton jButtonViewLicence;
-    private javax.swing.JComboBox jComboBoxOptionCountryCompany;
     private javax.swing.JComboBox<String> jComboBoxPaymentModesDefault;
     private javax.swing.JComboBox<String> jComboBoxPaymentModesStatus;
     private javax.swing.JComboBox<String> jComboBoxTaxeIsDefault;
@@ -1524,6 +1564,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldFormPaymentSearchTable;
     private javax.swing.JTextField jTextFieldOptionAddressCompany;
     private javax.swing.JTextField jTextFieldOptionCityCompany;
+    private javax.swing.JTextField jTextFieldOptionCountryCompany;
     private javax.swing.JTextField jTextFieldOptionEmailCompany;
     private javax.swing.JTextField jTextFieldOptionNameCompany;
     private javax.swing.JTextField jTextFieldOptionNifCompany;

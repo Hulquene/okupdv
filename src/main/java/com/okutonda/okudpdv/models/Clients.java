@@ -20,8 +20,8 @@ public class Clients {
     private String city;
     private String zipCode;
     private String state;
-    private String status;//ative/inative
-    private String isDefault;//yes/no
+    private int status;//ative/inative
+    private int isDefault;//yes/no
 
     public int getId() {
         return id;
@@ -79,8 +79,6 @@ public class Clients {
         this.country = country;
     }
 
-  
-
     public String getCity() {
         return city;
     }
@@ -105,19 +103,19 @@ public class Clients {
         this.state = state;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public String getIsDefault() {
+    public int getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(String isDefault) {
+    public void setIsDefault(int isDefault) {
         this.isDefault = isDefault;
     }
 

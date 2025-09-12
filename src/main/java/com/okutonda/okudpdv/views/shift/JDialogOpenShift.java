@@ -103,7 +103,6 @@ public class JDialogOpenShift extends javax.swing.JDialog {
     private void jButtonSaveOpenShiftActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveOpenShiftActionPerformed
         // TODO add your handling code here:
         String value = jTextFieldValueOpenShift.getText();
-//        System.out.println("dados:" + value.isEmpty() + "ddd" + Util.isDouble(value));
         if (!value.isEmpty() && Util.isDouble(value)) {
             Shift shift = new Shift();
             shift.setGrantedAmount(Double.valueOf(value));

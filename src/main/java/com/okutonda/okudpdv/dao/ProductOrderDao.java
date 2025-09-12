@@ -4,9 +4,7 @@
  */
 package com.okutonda.okudpdv.dao;
 
-import com.okutonda.okudpdv.jdbc.ConnectDB;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.ProductOrder;
 import java.awt.HeadlessException;

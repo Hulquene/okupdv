@@ -85,17 +85,28 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Categoria de Produtos");
 
+        jTextFieldSearchGroup.setToolTipText("Digite alguma coisa para pesquisar");
         jTextFieldSearchGroup.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 jTextFieldSearchGroupKeyReleased(evt);
             }
         });
 
+        jTextFieldName.setToolTipText("Digite o nome do Grupo");
+
+        jTextFieldCode.setToolTipText("Digite o codigo");
+
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Formulario");
 
+        jButtonSave.setBackground(new java.awt.Color(0, 0, 0));
+        jButtonSave.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonSave.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonSave.setText("Guardar");
+        jButtonSave.setContentAreaFilled(false);
+        jButtonSave.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonSaveActionPerformed(evt);
@@ -131,7 +142,13 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(jTableGroups);
 
+        jButtonEdit.setBackground(new java.awt.Color(0, 0, 0));
+        jButtonEdit.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonEdit.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonEdit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonEdit.setText("Editar");
+        jButtonEdit.setContentAreaFilled(false);
+        jButtonEdit.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonEdit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonEditActionPerformed(evt);
@@ -163,16 +180,14 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(36, 36, 36)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel5)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jButtonSave)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jTextFieldName)
-                                    .addComponent(jLabel3)
-                                    .addComponent(jTextFieldCode)
-                                    .addComponent(jLabel4)
-                                    .addComponent(jTextFieldId, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)))))
+                            .addComponent(jTextFieldName)
+                            .addComponent(jLabel3)
+                            .addComponent(jTextFieldCode)
+                            .addComponent(jLabel4)
+                            .addComponent(jTextFieldId, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
+                            .addComponent(jButtonSave, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(65, 65, 65)
                         .addComponent(jLabel2)))
@@ -186,7 +201,7 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
                 .addGap(33, 33, 33)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButtonEdit, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
+                        .addComponent(jButtonEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel2))
                     .addComponent(jTextFieldSearchGroup))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -208,7 +223,7 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(15, 15, 15)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

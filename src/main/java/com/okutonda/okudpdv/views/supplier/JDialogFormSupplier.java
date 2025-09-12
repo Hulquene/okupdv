@@ -7,10 +7,12 @@ package com.okutonda.okudpdv.views.supplier;
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.dao.SupplierDao;
+import com.okutonda.okudpdv.models.Countries;
 import com.okutonda.okudpdv.models.Supplier;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Utilities;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import javax.swing.JOptionPane;
 
 /**
@@ -20,7 +22,7 @@ import javax.swing.JOptionPane;
 public class JDialogFormSupplier extends javax.swing.JDialog {
 
     SupplierController supplierController = new SupplierController();
-//    CountryController countryController = new CountryController();
+    CountryController countryController = new CountryController();
     UserSession session;
     Boolean status;
     Supplier supplier;
@@ -32,46 +34,37 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         session = UserSession.getInstance();
+        status = false;
     }
 
     public Boolean getResponse() {
         return status;
     }
 
+    public void listComboCountries() {
+
+        List<Countries> list = countryController.get("");
+        jComboBoxCountry.removeAllItems();
+        for (Countries item : list) {
+            jComboBoxCountry.addItem(item.getLong_name());
+        }
+    }
+
     public void setFormSupplier() {
 //        User user = userController.getId(id);
-//        System.out.println("hhh" + user.getCountry());
         if (supplier != null) {
             jTextFieldId.setText(String.valueOf(supplier.getId()));
             jTextFieldNif.setText(supplier.getNif());
             jTextFieldName.setText(supplier.getName());
-//            jFormattedTextFieldBirthdate.setText(supplier.getBirthdate());
             jTextFieldEmail.setText(supplier.getEmail());
             jTextFieldPhone.setText(supplier.getPhone());
-//            jComboBoxProfile.setSelectedItem(supplier.getProfile());
-//            jComboBoxCountry.setSelectedItem(supplier.getCountry());
-//            jTextFieldCity.setText(supplier.getCity());
+            jComboBoxCountry.setSelectedItem(supplier.getCountry());
+            jTextFieldCity.setText(supplier.getCity());
             jTextFieldAddress.setText(supplier.getAddress());
             jComboBoxStatus.setSelectedItem(supplier.getStatus());
-
 //            jTextFieldState.setText(supplier.getState());
             jTextFieldZipCode.setText(supplier.getZipCode());
-
-//             jTextFieldId.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-//        jTextFieldNif.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 1).toString());
-//        jTextFieldName.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 2).toString());
-//        jTextFieldEmail.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 3).toString());
-//        jTextFieldPhone.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 4).toString());
-//        jComboBoxCountry.setSelectedItem(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 5));
-//        jTextFieldCity
-//                .setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 6).toString());
-//            jTextFieldState.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 7).toString());
-//            jTextFieldAddress.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 8).toString());
-//            jTextFieldZipCode.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 9).toString());
-//            jComboBoxStatus.setSelectedItem(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 10).toString());
-        } else {
-//            JOptionPane.showMessageDialog(null, "Usuario nao encotrado!" + id);
-        }
+        } 
     }
 
     public void setSupplier(int id) {
@@ -85,8 +78,8 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo NIF invalido!! no minimo 9 e no maximo 15 caracteres");
         } else if (jTextFieldName.getText().isEmpty() || jTextFieldName.getText().length() < 3) {
             JOptionPane.showMessageDialog(null, "Campo Name invalido!! no minimo 3 caracteres");
-        } else if (jTextFieldEmail.getText().isEmpty() || jTextFieldEmail.getText().length() < 3) {
-            JOptionPane.showMessageDialog(null, "Campo Email invalido!! no minimo 3 caracteres");
+//        } else if (jTextFieldEmail.getText().isEmpty() || jTextFieldEmail.getText().length() < 3) {
+//            JOptionPane.showMessageDialog(null, "Campo Email invalido!! no minimo 3 caracteres");
         } else if (jTextFieldAddress.getText().isEmpty() || jTextFieldAddress.getText().length() < 3) {
             JOptionPane.showMessageDialog(null, "Campo Endereço invalido!!");
         } else if (jTextFieldPhone.getText().isEmpty() || jTextFieldPhone.getText().length() > 15) {
@@ -99,11 +92,26 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             cModel.setAddress(jTextFieldAddress.getText());
             cModel.setPhone(jTextFieldPhone.getText());
 //            cModel.setCountry((Countries) jComboBoxCountry.getSelectedItem());
-//            cModel.setCity(jTextFieldCity.getText());
+            cModel.setCity(jTextFieldCity.getText());
 //            cModel.setState(jTextFieldState.getText());
             cModel.setZipCode(jTextFieldZipCode.getText());
-            cModel.setStatus((String) jComboBoxStatus.getSelectedItem());
-            cModel.setIsDefault("no");
+//            cModel.setStatus((String) jComboBoxStatus.getSelectedItem());
+            cModel.setIsDefault(0);
+
+            String statusSupp = (String) jComboBoxStatus.getSelectedItem();
+//            String defaultSupp = (String) jComboBoxDefaultClient.getSelectedItem();
+
+            if ("ativo".equals(statusSupp)) {
+                cModel.setStatus(1);
+            } else {
+                cModel.setStatus(0);
+            }
+
+//            if ("sim".equals(defaultSupp)) {
+//                cModel.setIsDefault(1);
+//            } else {
+//                cModel.setIsDefault(0);
+//            }
             return cModel;
         }
         return null;
@@ -117,7 +125,6 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 //            jComboBoxCountry.addItem(item);
 //        }
 //    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -144,6 +151,10 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         jTextFieldZipCode = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
         jComboBoxStatus = new javax.swing.JComboBox<>();
+        jLabel15 = new javax.swing.JLabel();
+        jComboBoxCountry = new javax.swing.JComboBox<>();
+        jLabel16 = new javax.swing.JLabel();
+        jTextFieldCity = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jTextFieldId = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
@@ -179,7 +190,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 
         jLabel11.setText("Email:");
 
-        jLabel13.setText("* Endereco:");
+        jLabel13.setText("Provincia");
 
         jTextFieldAddress.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -193,10 +204,26 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 
         jLabel17.setText(" zip_code :");
 
-        jComboBoxStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "inative", "ative" }));
+        jComboBoxStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "inativo", "ativo" }));
         jComboBoxStatus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxStatusActionPerformed(evt);
+            }
+        });
+
+        jLabel15.setText("Pais");
+
+        jComboBoxCountry.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxCountryActionPerformed(evt);
+            }
+        });
+
+        jLabel16.setText("* Endereco:");
+
+        jTextFieldCity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCityActionPerformed(evt);
             }
         });
 
@@ -206,76 +233,79 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                                        .addGap(61, 61, 61)
-                                        .addComponent(jLabel12))
-                                    .addComponent(jLabel13))
-                                .addGap(349, 349, 349))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFormSupplierLayout.createSequentialGroup()
-                                .addComponent(jLabelNifClient, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(329, 329, 329)))
-                        .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                            .addComponent(jTextFieldEmail)
-                            .addGap(73, 73, 73)))
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                        .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel10)
-                            .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel11)
-                            .addComponent(jTextFieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 337, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel14)
+                        .addGap(61, 61, 61)
+                        .addComponent(jLabel12))
+                    .addComponent(jLabel13)
+                    .addComponent(jLabel10)
+                    .addComponent(jLabel15)
+                    .addComponent(jLabel16)
                     .addComponent(jLabel17)
-                    .addComponent(jTextFieldZipCode, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel19)
-                    .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextFieldName, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
+                    .addComponent(jComboBoxCountry, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextFieldCity, javax.swing.GroupLayout.DEFAULT_SIZE, 358, Short.MAX_VALUE)
+                    .addComponent(jTextFieldAddress)
+                    .addComponent(jTextFieldZipCode, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
+                        .addGap(52, 52, 52)
+                        .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel11)
+                            .addComponent(jLabel14)
+                            .addComponent(jLabelNifClient, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 309, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel19))))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         jPanelFormSupplierLayout.setVerticalGroup(
             jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(9, 9, 9)
                 .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelNifClient, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel14))
+                    .addComponent(jLabelNifClient)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldNif, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel17))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldZipCode, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jTextFieldName, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(jLabel19))
+                    .addComponent(jLabel15))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBoxCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel14)
+                    .addComponent(jLabel13))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldCity, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel16)
+                    .addComponent(jLabel19))
+                .addGap(10, 10, 10)
+                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel13)
-                .addGroup(jPanelFormSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                        .addGap(80, 80, 80)
-                        .addComponent(jLabel12))
-                    .addGroup(jPanelFormSupplierLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel17)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextFieldZipCode, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel12)
+                .addContainerGap(28, Short.MAX_VALUE))
         );
 
         jPanelFormSupplierLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jComboBoxStatus, jTextFieldAddress, jTextFieldEmail, jTextFieldName, jTextFieldNif, jTextFieldPhone, jTextFieldZipCode});
@@ -291,7 +321,10 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         jLabel20.setText("ID");
 
         jButtonAdd.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButtonAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonAdd.setText("Salvar");
+        jButtonAdd.setBorderPainted(false);
+        jButtonAdd.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddActionPerformed(evt);
@@ -299,7 +332,10 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         });
 
         jButtonClearForm.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButtonClearForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Restart.png"))); // NOI18N
         jButtonClearForm.setText("Limpar");
+        jButtonClearForm.setBorderPainted(false);
+        jButtonClearForm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonClearForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonClearFormActionPerformed(evt);
@@ -315,14 +351,14 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
-                        .addGap(98, 98, 98)
+                        .addGap(58, 58, 58)
                         .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldId, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonClearForm, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(52, 52, 52)
+                        .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonClearForm, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanelFormSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(17, Short.MAX_VALUE))
         );
@@ -338,7 +374,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
                     .addComponent(jButtonClearForm, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jPanelFormSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(163, Short.MAX_VALUE))
+                .addContainerGap(141, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -349,10 +385,10 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
-        setSize(new java.awt.Dimension(778, 433));
+        setSize(new java.awt.Dimension(778, 501));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -391,57 +427,15 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
         // TODO: Passando os dados da interface para o model
-//        Supplier cModel = validateSupllier();
-//
-//        if (cModel != null) {
-//            int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
-//            if (id > 0) {
-//                //String id = jTextFieldIdClient.getText();
-//                cModel.setId(Integer.parseInt(jTextFieldId.getText()));
-//                //System.out.println("teste:" + id);
-//                cModel = supplierController.add(cModel, id);
-//                System.out.println("Supplier atualizado!");
-//                if (cModel != null) {
-//                    JOptionPane.showMessageDialog(null, "suppliers atualizado com Sucesso!!");
-//                    screanListSupplier();
-//                }
-//            } else {
-//                cModel = supplierController.add(cModel, 0);
-//                if (cModel != null) {
-//                    JOptionPane.showMessageDialog(null, "Supplier Salvo com Sucesso!!");
-//                    screanListSupplier();
-//                }
-//            }
-//
-//            Utilities helpUtil = new Utilities();
-//            helpUtil.clearScreen(jPanelFormSupplier);
-//
-//        }
-        /*
-        if (true) {
-            jTextFieldNifClient.setText("");
-            jTextFieldNameClient.setText("");
-            jTextFieldEmailClient.setText("");
-            jTextFieldAddressClient.setText("");
-            jTextFieldPhoneClient.setText("");
-            jTextFieldZipCodeClient.setText("");
-            jTextFieldStateClient.setText("");
-        }
-         */
-
         Supplier cModel = validateSupllier();
-//        System.out.println("ennnn" + cModel.getName());
         if (cModel != null) {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
             status = false;
             if (id > 0) {
                 supplierController.add(cModel, id);
                 status = true;
-                System.out.println("atualizar");
             } else {
                 supplierController.add(cModel, 0);
-
-                System.out.println("Adicionar");
                 status = true;
             }
             this.dispose();
@@ -468,6 +462,14 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 //        listComboCountries();
         this.setFormSupplier();
     }//GEN-LAST:event_formWindowActivated
+
+    private void jComboBoxCountryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxCountryActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBoxCountryActionPerformed
+
+    private void jTextFieldCityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCityActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldCityActionPerformed
 
     /**
      * @param args the command line arguments
@@ -514,12 +516,15 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonClearForm;
+    private javax.swing.JComboBox<String> jComboBoxCountry;
     private javax.swing.JComboBox<String> jComboBoxStatus;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
@@ -528,6 +533,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanelFormSupplier;
     private javax.swing.JTextField jTextFieldAddress;
+    private javax.swing.JTextField jTextFieldCity;
     private javax.swing.JTextField jTextFieldEmail;
     private javax.swing.JTextField jTextFieldId;
     private javax.swing.JTextField jTextFieldName;

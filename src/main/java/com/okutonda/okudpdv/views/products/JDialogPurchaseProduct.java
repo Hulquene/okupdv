@@ -37,7 +37,6 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
     public JDialogPurchaseProduct(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
         session = UserSession.getInstance();
     }
 
@@ -47,7 +46,6 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
 
     public void setProduct(int id) {
         this.prod = productController.getId(id);
-
     }
 
     public void setFormProduct() {
@@ -106,7 +104,8 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo Fornecedor invalido!! Selecione um");
         } else {
             cModel.setDescription("compra " + jLabelNameProduct.getText());
-            cModel.setDate(jFormattedTextField1.getText());
+//            cModel.setDate(jFormattedTextField1.getText());
+            cModel.setDate("2025-09-10 21:03:52");
             cModel.setQty(Integer.parseInt(jTextFieldQty.getText()));
 
             cModel.setPriceSale(Util.convertToDouble(jTextFieldPriceSale.getText()));
@@ -221,7 +220,7 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
         });
 
         try {
-            jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+            jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##-##-####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -392,7 +391,7 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
             Double per = Double.valueOf(jTextFieldPorcetege.getText());
             this.priceSale = this.pricePurchase + (this.pricePurchase * (per / 100));
             jTextFieldPriceSale.setText(this.priceSale.toString());
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Valor invalido!! insira um numero valido");
         }
     }//GEN-LAST:event_jTextFieldPorcetegeKeyReleased
@@ -406,8 +405,6 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
                 this.dispose();
             }
         }
-
-
     }//GEN-LAST:event_jButtonSaveActionPerformed
 
     private void jComboBoxStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxStatusActionPerformed

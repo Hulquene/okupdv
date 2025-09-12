@@ -9,6 +9,7 @@ import com.okutonda.okudpdv.views.shift.JDialogOpenShift;
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.ShiftController;
+import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.dao.ClientDao;
 import com.okutonda.okudpdv.dao.ProductDao;
 import com.okutonda.okudpdv.utilities.UtilDate;
@@ -21,6 +22,9 @@ import com.okutonda.okudpdv.utilities.ShiftSession;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Util;
 import com.okutonda.okudpdv.views.ScreenMain;
+import com.okutonda.okudpdv.views.login.ScreenLogin;
+import com.okutonda.okudpdv.views.sales.JDialogListOrder;
+import com.okutonda.okudpdv.views.users.JDialogProfile;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +41,12 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     JDialogOrder jdialogOrder;
     UserSession session;
+    UserController userController;
     ShiftSession shiftSession;
     OrderController orderController;
     ProductController productController;
     List<ProductOrder> listProductOrder;
     Clients clientSelected;
-
     ShiftController shiftController = new ShiftController();
     double subTotal, total;
 
@@ -57,8 +61,9 @@ public class ScreenPdv extends javax.swing.JFrame {
         //orderController = new OrderController();
         productController = new ProductController();
         listProductOrder = new ArrayList<>();
-        clientSelected = new Clients();
+        clientSelected = null;//new Clients();
         shiftController.getShiftSession();
+        userController = new UserController();
     }
 
     public String[] splitString(String str) {
@@ -68,9 +73,88 @@ public class ScreenPdv extends javax.swing.JFrame {
         }
         // Usar regex para separar a string em 'X' ou 'x'
         String[] parts = str.split("(?i)x", 2); // (?i) torna a regex case-insensitive
-
         // Retorna o array, que terá a string inteira se o delimitador não for encontrado
         return parts.length == 1 ? new String[]{str} : parts;
+    }
+
+    public String[] validateProduto(String str) {
+        String[] result = splitString(str);
+        if (result == null) {
+            JOptionPane.showMessageDialog(null, "Selecione um produto da lista!!");
+        } else if (result.length == 1) {
+            String[] value = {result[0], jTextFieldQtdProductsSelected.getText()};
+            return value;
+        } else {
+            String[] value = {result[1], result[0]};
+            return value;
+        }
+        return result;
+    }
+
+    public boolean AddProdutoToList(String barcode, int qtd) {
+//        if (barcode.isEmpty() != true) {
+        Product prod = productController.getFromBarCode(barcode);
+//            System.out.println("product encontrado1:" + prod.getDescription());
+        if (prod.getDescription() != null) {
+//                System.out.println("product encontrado2:" + prod.getDescription());
+            if (prod.getStockTotal() >= qtd && qtd > 0) {
+                ProductOrder prodOrder = new ProductOrder();
+                prodOrder.setProduct(prod);
+                prodOrder.setDescription(prod.getDescription());
+
+                if (prod.getTaxe() == null) {
+                    JOptionPane.showMessageDialog(null, "Imposto não definido no Produto", "Atenção", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                } else {
+                    prodOrder.setTaxePercentage(prod.getTaxe().getPercetage());
+                    prodOrder.setTaxeCode(prod.getTaxe().getCode());
+                    prodOrder.setTaxeName(prod.getTaxe().getName());
+
+                    if (prod.getTaxe().getPercetage() == 0) {
+                        if (prod.getReasonTaxe() == null) {
+                            JOptionPane.showMessageDialog(null, "Produto sem Razao de imposto!", "Atenção", JOptionPane.ERROR_MESSAGE);
+                            return false;
+                        } else {
+                            prodOrder.setReasonTax(prod.getReasonTaxe().getReason());
+                            prodOrder.setReasonCode(prod.getReasonTaxe().getCode());
+                        }
+                    } else {
+                        prodOrder.setReasonTax(null);
+                        prodOrder.setReasonCode(null);
+                    }
+                }
+
+                prodOrder.setCode(prod.getCode());
+                prodOrder.setPrice(prod.getPrice());
+                prodOrder.setQty(qtd);
+
+                for (ProductOrder productOrder : listProductOrder) {
+                    if (productOrder.getProduct().getId() == prodOrder.getProduct().getId()) {
+                        prodOrder.setQty(prodOrder.getQty() + productOrder.getQty());
+                        listProductOrder.remove(productOrder);
+                        break;
+                    }
+                }
+//                    System.out.println(prodOrder);
+                listProductOrder.add(prodOrder);
+                listProdutsOrder();
+                calculTotal();
+                new Utilities().clearScreen(jPanelSelectedProduct);
+                jTextFieldQtdProductsSelected.setText("1");
+//                    jTextFieldBarCodeProductSelect.setText("1X");
+                return true;
+
+            } else if (qtd <= 0) {
+                JOptionPane.showMessageDialog(null, "Quantidade invalida!! Verifica a Quantidade de produto!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Estoque insuficiente!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Não foi possivel adicionar Produto ao carrinho. verifica O Codigo de barra!!", "Atenção", JOptionPane.ERROR_MESSAGE);
+        }
+
+//        }
+        return false;
     }
 
     public void listProduts() {
@@ -152,7 +236,6 @@ public class ScreenPdv extends javax.swing.JFrame {
             subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
             total += productOrder.getProduct().getPrice() * productOrder.getQty();
         }
-        
         jTextFieldTotalInvoice.setText(String.valueOf(total));
         jTextFieldPayClient.setText(String.valueOf(total));
     }
@@ -161,6 +244,14 @@ public class ScreenPdv extends javax.swing.JFrame {
         listProductOrder.clear();
         listProdutsOrder();
         calculTotal();
+        clearClient();
+    }
+
+    public void clearClient() {
+        ClientDao clientDao = new ClientDao();
+        clientSelected = clientDao.getClientDefault();
+        jTextFieldNifClient.setText(clientSelected.getNif());
+        jLabelNameClienteSelected.setText(clientSelected.getName());
     }
 
     /**
@@ -178,7 +269,10 @@ public class ScreenPdv extends javax.swing.JFrame {
         jLabelDateTime = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         jButtonPainel = new javax.swing.JButton();
+        jButtonListSales = new javax.swing.JButton();
+        jButtonListClient = new javax.swing.JButton();
         jButtonCloseShift = new javax.swing.JButton();
+        jComboBoxOptions = new javax.swing.JComboBox<>();
         jPanel10 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jTextFieldPayClient = new javax.swing.JTextField();
@@ -214,6 +308,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         jTableProducts = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Ponto de Venda");
         setBackground(new java.awt.Color(255, 255, 255));
         setUndecorated(true);
         setResizable(false);
@@ -223,23 +318,29 @@ public class ScreenPdv extends javax.swing.JFrame {
             }
         });
 
-        jPanel1.setBackground(new java.awt.Color(0, 0, 51));
+        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
 
+        jLabelNameUserSeller.setBackground(new java.awt.Color(255, 255, 255));
         jLabelNameUserSeller.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabelNameUserSeller.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelNameUserSeller.setForeground(new java.awt.Color(0, 0, 102));
         jLabelNameUserSeller.setText("Usuario");
 
+        jLabel14.setBackground(new java.awt.Color(255, 255, 255));
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabel14.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel14.setForeground(new java.awt.Color(0, 0, 102));
         jLabel14.setText("PDV");
 
-        jLabelDateTime.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelDateTime.setBackground(new java.awt.Color(255, 255, 255));
+        jLabelDateTime.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabelDateTime.setForeground(new java.awt.Color(0, 0, 102));
         jLabelDateTime.setText("Data e hora");
 
         jToolBar1.setRollover(true);
         jToolBar1.setMargin(new java.awt.Insets(0, 5, 0, 5));
 
+        jButtonPainel.setBackground(new java.awt.Color(51, 51, 255));
         jButtonPainel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonPainel.setForeground(new java.awt.Color(255, 255, 255));
         jButtonPainel.setText("Painel");
         jButtonPainel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -248,7 +349,37 @@ public class ScreenPdv extends javax.swing.JFrame {
         });
         jToolBar1.add(jButtonPainel);
 
+        jButtonListSales.setBackground(new java.awt.Color(102, 102, 102));
+        jButtonListSales.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonListSales.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonListSales.setText("Lista de venda");
+        jButtonListSales.setFocusable(false);
+        jButtonListSales.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonListSales.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonListSales.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonListSalesActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButtonListSales);
+
+        jButtonListClient.setBackground(new java.awt.Color(51, 153, 0));
+        jButtonListClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonListClient.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonListClient.setText("Clientes");
+        jButtonListClient.setFocusable(false);
+        jButtonListClient.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonListClient.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonListClient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonListClientActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButtonListClient);
+
+        jButtonCloseShift.setBackground(new java.awt.Color(204, 0, 0));
         jButtonCloseShift.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonCloseShift.setForeground(new java.awt.Color(255, 255, 255));
         jButtonCloseShift.setText("Fechar caixa");
         jButtonCloseShift.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -256,6 +387,15 @@ public class ScreenPdv extends javax.swing.JFrame {
             }
         });
         jToolBar1.add(jButtonCloseShift);
+
+        jComboBoxOptions.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Opcões", "Panel", "Sair" }));
+        jComboBoxOptions.setToolTipText("Opcões");
+        jComboBoxOptions.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxOptionsActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jComboBoxOptions);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -265,7 +405,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 .addGap(76, 76, 76)
                 .addComponent(jLabelNameUserSeller)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 391, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabelDateTime, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -333,8 +473,10 @@ public class ScreenPdv extends javax.swing.JFrame {
         jLabel13.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel13.setText("Diferença");
 
+        jButtonFinishInvoice.setBackground(new java.awt.Color(204, 204, 255));
         jButtonFinishInvoice.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jButtonFinishInvoice.setText("Imprimir FR");
+        jButtonFinishInvoice.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Done.png"))); // NOI18N
+        jButtonFinishInvoice.setText("FATURAR");
         jButtonFinishInvoice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonFinishInvoiceActionPerformed(evt);
@@ -370,7 +512,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jTextFieldPayClient, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -383,9 +525,9 @@ public class ScreenPdv extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(jTextFieldTotalChange, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButtonFinishInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jTableProductsInvoice.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -503,7 +645,12 @@ public class ScreenPdv extends javax.swing.JFrame {
 
         jTextFieldNifClient.setAutoscrolls(false);
 
-        jButtonPesquisarCompany.setText("Add");
+        jButtonPesquisarCompany.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonPesquisarCompany.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Plus.png"))); // NOI18N
+        jButtonPesquisarCompany.setToolTipText("Selecionar Cliente");
+        jButtonPesquisarCompany.setBorderPainted(false);
+        jButtonPesquisarCompany.setContentAreaFilled(false);
+        jButtonPesquisarCompany.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonPesquisarCompany.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPesquisarCompanyActionPerformed(evt);
@@ -522,10 +669,14 @@ public class ScreenPdv extends javax.swing.JFrame {
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel11Layout.createSequentialGroup()
                         .addComponent(jTextFieldNifClient, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonPesquisarCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(12, 12, 12)
+                        .addGap(82, 82, 82))
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel11Layout.createSequentialGroup()
+                                .addGap(236, 236, 236)
+                                .addComponent(jButtonPesquisarCompany)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jLabelNameClienteSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 308, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -576,8 +727,11 @@ public class ScreenPdv extends javax.swing.JFrame {
             }
         });
 
+        jButtonAddProductInvoice.setBackground(new java.awt.Color(204, 204, 255));
         jButtonAddProductInvoice.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonAddProductInvoice.setText("ADD");
+        jButtonAddProductInvoice.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Plus.png"))); // NOI18N
+        jButtonAddProductInvoice.setToolTipText("Adicionar Produto");
+        jButtonAddProductInvoice.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAddProductInvoice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAddProductInvoiceActionPerformed(evt);
@@ -611,7 +765,8 @@ public class ScreenPdv extends javax.swing.JFrame {
                                     .addGroup(jPanelSelectedProductLayout.createSequentialGroup()
                                         .addComponent(jTextFieldQtdProductsSelected)
                                         .addGap(18, 18, 18)
-                                        .addComponent(jButtonAddProductInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(jButtonAddProductInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(25, 25, 25))
                                     .addComponent(jLabel10)))
                             .addGroup(jPanelSelectedProductLayout.createSequentialGroup()
                                 .addComponent(jTextFieldSearchProducts)
@@ -674,7 +829,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 623, Short.MAX_VALUE)
+            .addComponent(jScrollPane3)
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -691,17 +846,14 @@ public class ScreenPdv extends javax.swing.JFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel7Layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel7Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(6, 6, 6)
+                        .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+                    .addGroup(jPanel7Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jPanelSelectedProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanelSelectedProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -755,6 +907,15 @@ public class ScreenPdv extends javax.swing.JFrame {
             String date = UtilDate.getDateNow();
             jLabelDateTime.setText(date);
             jLabelNameUserSeller.setText(shiftSession.getSeller().getName());
+
+            int itemCount = jComboBoxOptions.getItemCount();
+            String itemValue = jComboBoxOptions.getItemAt(itemCount - 1);
+
+            if (itemValue != shiftSession.getSeller().getName()) {
+                jComboBoxOptions.addItem(shiftSession.getSeller().getName());
+                jComboBoxOptions.setToolTipText(shiftSession.getSeller().getName());
+                jComboBoxOptions.setSelectedItem(shiftSession.getSeller().getName());
+            }
         }
     }//GEN-LAST:event_formWindowActivated
 
@@ -773,96 +934,34 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonAddProductInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductInvoiceActionPerformed
         // TODO add your handling code here:
-        String str = jTextFieldBarCodeProductSelect.getText();
+//        String str = jTextFieldBarCodeProductSelect.getText();
+        String[] result = validateProduto(jTextFieldBarCodeProductSelect.getText());
 
-//         String str = "12X3333333444"; // Exemplo com delimitador
-        // String str = "123456789"; // Exemplo sem delimitador
-        String[] result = splitString(str);
-
-        System.out.println("Resultado:");
-
-        // Acessando os valores do array por índice
-        String barcode = "";
-        int qtd = 1;
-        if (result == null) {
-            System.out.println("Nenhum valor (string vazia)");
-            JOptionPane.showMessageDialog(null, "Selecione um produto da lista!!");
-        } else {
-            if (result.length == 1) {
-                barcode = result[0];
-                qtd = Integer.parseInt(jTextFieldQtdProductsSelected.getText());
-                System.out.println("Parte 0: " + result[0]); // Apenas a parte inteira
+        if (result != null) {
+            if (AddProdutoToList(result[0], Integer.parseInt(result[1])) == true) {
             } else {
-                qtd = Integer.parseInt(result[0]);
-//                barcode = result[0];
-                barcode = result[1];
-                System.out.println("Parte 0: " + result[0]); // Antes do delimitador
-                System.out.println("Parte 1: " + result[1]); // Depois do delimitador
-
+                JOptionPane.showMessageDialog(null, "Não foi possivel adicionar Produto ao carrinho", "Atenção", JOptionPane.ERROR_MESSAGE);
             }
-//        }
-//
-//        System.out.println("codigo: " + barcode);
-//
-//        if (barcode.isEmpty() != true) {
-            Product prod = productController.getFromBarCode(barcode);
-//            
-//            System.out.println("product encontrado1:" + prod.getDescription());
-            if (prod.getDescription() != null) {
-//                System.out.println("product encontrado2:" + prod.getDescription());
-                if (prod.getStockTotal() >= qtd && qtd > 0) {
-                    ProductOrder prodOrder = new ProductOrder();
-                    prodOrder.setProduct(prod);
-                    prodOrder.setDescription(prod.getDescription());
-                    prodOrder.setTaxePercentage(prod.getTaxe().getPercetage());
-                    prodOrder.setTaxeCode(prod.getTaxe().getCode());
-                    prodOrder.setTaxeName(prod.getTaxe().getName());
-                    prodOrder.setReasonTax(prod.getReasonTaxe().getReason());
-                    prodOrder.setReasonCode(prod.getReasonTaxe().getCode());
-                    prodOrder.setCode(prod.getCode());
-                    prodOrder.setPrice(prod.getPrice());
-                    prodOrder.setQty(qtd);
-
-                    for (ProductOrder productOrder : listProductOrder) {
-                        if (productOrder.getProduct().getId() == prodOrder.getProduct().getId()) {
-                            prodOrder.setQty(prodOrder.getQty() + productOrder.getQty());
-                            listProductOrder.remove(productOrder);
-                            break;
-                        }
-                    }
-//                    System.out.println(prodOrder);
-                    listProductOrder.add(prodOrder);
-                    listProdutsOrder();
-                    calculTotal();
-                    new Utilities().clearScreen(jPanelSelectedProduct);
-                    jTextFieldQtdProductsSelected.setText("1");
-//                    jTextFieldBarCodeProductSelect.setText("1X");
-
-                } else if (qtd <= 0) {
-                    JOptionPane.showMessageDialog(null, "Quantidade invalida!! Verifica a Quantidade de produto!", "Atenção", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Estoque insuficiente!", "Atenção", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Não foi possivel adicionar Produto ao carrinho. verifica O Codigo de barra!!", "Atenção", JOptionPane.ERROR_MESSAGE);
-            }
-
         }
-//        else {
-//            JOptionPane.showMessageDialog(null, "Selecione um produto da lista!!");
-//        }
     }//GEN-LAST:event_jButtonAddProductInvoiceActionPerformed
 
     private void jTextFieldBarCodeProductSelectKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldBarCodeProductSelectKeyPressed
         // TODO add your handling code here:
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            String barCode = jTextFieldBarCodeProductSelect.getText();
-            Product pModel;
-            pModel = productController.getFromBarCode(barCode);
-            if (pModel.getDescription() == null) {
-                JOptionPane.showMessageDialog(null, "Produto nao encontrado!");
+            String[] result = validateProduto(jTextFieldBarCodeProductSelect.getText());
+            if (result != null) {
+                if (AddProdutoToList(result[0], Integer.parseInt(result[1])) == true) {
+                } else {
+                    JOptionPane.showMessageDialog(null, "Não foi possivel adicionar Produto ao carrinho", "Atenção", JOptionPane.ERROR_MESSAGE);
+                }
             }
-            System.out.println("clicado!!");
+//            String barCode = jTextFieldBarCodeProductSelect.getText();
+//            Product pModel;
+//            pModel = productController.getFromBarCode(barCode);
+//            if (pModel.getDescription() == null) {
+//                JOptionPane.showMessageDialog(null, "Produto nao encontrado!");
+//            }
+//            System.out.println("clicado!!");
         }
 
     }//GEN-LAST:event_jTextFieldBarCodeProductSelectKeyPressed
@@ -887,13 +986,12 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonFinishInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishInvoiceActionPerformed
         // TODO add your handling code here:
-
         if (!listProductOrder.isEmpty()) {
             Double totalPay = Double.valueOf(jTextFieldPayClient.getText());
             Double changeInvoice = Double.valueOf(jTextFieldTotalChange.getText());
             if (total > 0 && total >= changeInvoice && changeInvoice >= 0) {
                 try {
-                    if (clientSelected != null) {
+                    if (clientSelected == null) {
                         ClientDao clientDao = new ClientDao();
                         clientSelected = clientDao.getClientDefault();
                     }
@@ -929,16 +1027,15 @@ public class ScreenPdv extends javax.swing.JFrame {
 
                     if (respo == true) {
                         JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-
                         clearOrder();
                         listProduts();
 //                        helpUtil.clearScreen(jPanel3);
 //                        helpUtil.clearScreen(jPanel3);
 //                        order = null;
-
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Venda nao cadastrada!!", "Atenção", JOptionPane.ERROR);
                     }
+//                    else {
+//                        JOptionPane.showMessageDialog(null, "Venda nao cadastrada!!", "Atenção", JOptionPane.ERROR);
+//                    }
 //                Order result = orderController.add(order);
 //                if (result != null) {
 //                    total = 0.0;
@@ -1026,6 +1123,38 @@ public class ScreenPdv extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextFieldTotalInvoiceActionPerformed
 
+    private void jButtonListSalesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonListSalesActionPerformed
+        // TODO add your handling code here:
+        JDialogListOrder jdListorder = new JDialogListOrder(null, true);
+        jdListorder.setVisible(true);
+    }//GEN-LAST:event_jButtonListSalesActionPerformed
+
+    private void jButtonListClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonListClientActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonListClientActionPerformed
+
+    private void jComboBoxOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxOptionsActionPerformed
+        // TODO add your handling code here:
+        String option = (String) jComboBoxOptions.getSelectedItem();
+
+        if ("Panel".equals(option)) {
+            int yes = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja ir ao Dashboard??", "Atenção", JOptionPane.YES_NO_OPTION);
+            if (yes == JOptionPane.YES_OPTION) {
+                backDashboard();
+            }
+        } else if ("Usuario".equals(option)) {
+            new JDialogProfile(this, rootPaneCheckingEnabled).setVisible(true);
+        } else if ("Sair".equals(option)) {
+            int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja sair?", "Atenção", JOptionPane.YES_NO_OPTION);
+            if (sair == JOptionPane.YES_OPTION) {
+                this.dispose();
+                if (userController.logout()) {
+                    new ScreenLogin().setVisible(true);
+                }
+            }
+        }
+    }//GEN-LAST:event_jComboBoxOptionsActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1073,11 +1202,14 @@ public class ScreenPdv extends javax.swing.JFrame {
     private javax.swing.JButton jButtonAddProductInvoice;
     private javax.swing.JButton jButtonCloseShift;
     private javax.swing.JButton jButtonFinishInvoice;
+    private javax.swing.JButton jButtonListClient;
+    private javax.swing.JButton jButtonListSales;
     private javax.swing.JButton jButtonPainel;
     private javax.swing.JButton jButtonPesquisarCompany;
     private javax.swing.JButton jButtonRemoveAllProd;
     private javax.swing.JButton jButtonRemoveProd;
     private javax.swing.JButton jButtonSearchProduct;
+    private javax.swing.JComboBox<String> jComboBoxOptions;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

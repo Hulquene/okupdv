@@ -34,9 +34,9 @@ public final class JPanelClient extends javax.swing.JPanel {
                 c.getName(),
                 c.getEmail(),
                 c.getPhone(),
-//                c.getCountry(),
-//                c.getCity(),
-//                c.getState(),
+                //                c.getCountry(),
+                //                c.getCity(),
+                //                c.getState(),
                 c.getAddress(),
                 c.getZipCode(),
                 c.getStatus(),
@@ -57,9 +57,9 @@ public final class JPanelClient extends javax.swing.JPanel {
                 c.getName(),
                 c.getEmail(),
                 c.getPhone(),
-//                c.getCountry(),
-//                c.getCity(),
-//                c.getState(),
+                //                c.getCountry(),
+                //                c.getCity(),
+                //                c.getState(),
                 c.getAddress(),
                 c.getZipCode(),
                 c.getStatus(),
@@ -95,7 +95,6 @@ public final class JPanelClient extends javax.swing.JPanel {
 //
 //        return null;
 //    }
-
     public void screanListClient() {
         jTabbedPaneClient.setSelectedIndex(0);
         listClients();
@@ -109,7 +108,6 @@ public final class JPanelClient extends javax.swing.JPanel {
 //            jComboBoxCountryClient.addItem(item);
 //        }
 //    }
-
     /**
      * Creates new form JPanelClient
      */
@@ -146,7 +144,10 @@ public final class JPanelClient extends javax.swing.JPanel {
         jPanelSearchClient.setBackground(new java.awt.Color(204, 204, 255));
         jPanelSearchClient.setPreferredSize(new java.awt.Dimension(900, 600));
 
+        jButtonFilterClientNameTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
         jButtonFilterClientNameTable.setText("Pesquisar");
+        jButtonFilterClientNameTable.setContentAreaFilled(false);
+        jButtonFilterClientNameTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonFilterClientNameTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonFilterClientNameTableActionPerformed(evt);
@@ -159,22 +160,39 @@ public final class JPanelClient extends javax.swing.JPanel {
             }
         });
 
-        jButtonAlterClientSeletedTable.setText("Alterar");
+        jButtonAlterClientSeletedTable.setBackground(new java.awt.Color(255, 255, 102));
+        jButtonAlterClientSeletedTable.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonAlterClientSeletedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
+        jButtonAlterClientSeletedTable.setText("Editar");
+        jButtonAlterClientSeletedTable.setContentAreaFilled(false);
+        jButtonAlterClientSeletedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterClientSeletedTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonAlterClientSeletedTableActionPerformed(evt);
             }
         });
 
+        jButtonDeleteClientSelectedTable.setBackground(new java.awt.Color(255, 51, 51));
+        jButtonDeleteClientSelectedTable.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonDeleteClientSelectedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteClientSelectedTable.setText("Excluir");
-        jButtonDeleteClientSelectedTable.setEnabled(false);
+        jButtonDeleteClientSelectedTable.setToolTipText("Apagar Cliente");
+        jButtonDeleteClientSelectedTable.setContentAreaFilled(false);
+        jButtonDeleteClientSelectedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonDeleteClientSelectedTable.setSelected(true);
         jButtonDeleteClientSelectedTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDeleteClientSelectedTableActionPerformed(evt);
             }
         });
 
+        jButtonCreateNewClient.setBackground(new java.awt.Color(153, 153, 255));
+        jButtonCreateNewClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonCreateNewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonCreateNewClient.setText("Adicionar");
+        jButtonCreateNewClient.setToolTipText("Cadastrar Cliente");
+        jButtonCreateNewClient.setContentAreaFilled(false);
+        jButtonCreateNewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonCreateNewClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonCreateNewClientActionPerformed(evt);
@@ -211,7 +229,12 @@ public final class JPanelClient extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableClients);
 
+        jButtonCreateViewClient.setBackground(new java.awt.Color(102, 255, 102));
+        jButtonCreateViewClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonCreateViewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonCreateViewClient.setText("Ver");
+        jButtonCreateViewClient.setContentAreaFilled(false);
+        jButtonCreateViewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonCreateViewClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonCreateViewClientActionPerformed(evt);
@@ -230,14 +253,14 @@ public final class JPanelClient extends javax.swing.JPanel {
                         .addContainerGap())
                     .addGroup(jPanelSearchClientLayout.createSequentialGroup()
                         .addComponent(jTextFieldFilterClientNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButtonFilterClientNameTable)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
-                        .addComponent(jButtonCreateNewClient, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30)
-                        .addComponent(jButtonCreateViewClient)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonAlterClientSeletedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonFilterClientNameTable)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                        .addComponent(jButtonCreateNewClient)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonCreateViewClient)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButtonAlterClientSeletedTable)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonDeleteClientSelectedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(8, 8, 8))))
@@ -276,9 +299,20 @@ public final class JPanelClient extends javax.swing.JPanel {
 
     private void jButtonCreateViewClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateViewClientActionPerformed
         // TODO add your handling code here:
-        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-        Clients client = clientController.getId(id);
-        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
+        int id = 0;
+        try {
+            id = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+                Clients client = clientController.getId(id);
+                JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
+            }
+        }
+//        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
+//        Clients client = clientController.getId(id);
+//        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
     }//GEN-LAST:event_jButtonCreateViewClientActionPerformed
 
     private void jTableClientsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableClientsMouseClicked
@@ -312,16 +346,35 @@ public final class JPanelClient extends javax.swing.JPanel {
 
     private void jButtonDeleteClientSelectedTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteClientSelectedTableActionPerformed
         // TODO add your handling code here:
-        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-        Clients client = clientController.getId(id);
-        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
-        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-        if (sair == JOptionPane.YES_OPTION) {
-            if (clientController.deleteId(id)) {
-                JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
-                listClients();
+        System.out.println("teste");
+        int id = 0;
+        try {
+            id = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (id > 0) {
+                Clients client = clientController.getId(id);
+                int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+                if (sair == JOptionPane.YES_OPTION) {
+                    if (clientController.deleteId(id)) {
+                        JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
+                        listClients();
+                    }
+                }
             }
         }
+
+//        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
+//        Clients client = clientController.getId(id);
+//        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
+//        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+//        if (sair == JOptionPane.YES_OPTION) {
+//            if (clientController.deleteId(id)) {
+//                JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
+//                listClients();
+//            }
+//        }
     }//GEN-LAST:event_jButtonDeleteClientSelectedTableActionPerformed
 
     private void jButtonAlterClientSeletedTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterClientSeletedTableActionPerformed
@@ -343,11 +396,9 @@ public final class JPanelClient extends javax.swing.JPanel {
         int value = 0;
         try {
             value = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
-            System.out.println("1jTableClients id:" + value);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
-            System.out.println("2jTableClients id:" + value);
             if (value > 0) {
                 JDialogFormClient formClient = new JDialogFormClient(null, true);
                 formClient.setClient(value);

@@ -219,7 +219,6 @@ public class OrderDao {
 
     public List<Order> list(String where) {
         List<Order> list = new ArrayList<>();
-//        System.out.println("ddd:" + where);
         try {
             String sql = "SELECT * FROM orders " + where;
             pst = this.conn.prepareStatement(sql);

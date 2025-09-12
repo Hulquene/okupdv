@@ -107,7 +107,6 @@ public final class JPanelStock extends javax.swing.JPanel {
                 c.getSupplier().getName(),
                 c.getType()
             });
-            System.out.println("ddd: " + c.getDescription());
         }
     }
 

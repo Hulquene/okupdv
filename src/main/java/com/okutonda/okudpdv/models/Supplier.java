@@ -20,9 +20,9 @@ public class Supplier {
     private String city;
     private String zipCode;
     private String state;
-    private String status;
+    private int status;
     private int groupId;
-    private String isDefault;
+    private int isDefault;
 
     public int getId() {
         return id;
@@ -112,19 +112,19 @@ public class Supplier {
         this.groupId = groupId;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public String getIsDefault() {
+    public int getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(String isDefault) {
+    public void setIsDefault(int isDefault) {
         this.isDefault = isDefault;
     }
 

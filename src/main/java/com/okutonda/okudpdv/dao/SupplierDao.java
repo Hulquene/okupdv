@@ -33,8 +33,8 @@ public class SupplierDao {
     public Boolean add(Supplier obj) {
         try {
             // 1 passo
-            String sql = "INSERT INTO suppliers (company,nif,phone,email,address,zip_code,group_id,status,isdefault)"
-                    + "values(?,?,?,?,?,?,?,?,?)";
+            String sql = "INSERT INTO suppliers (company,nif,phone,email,address,city,zip_code,group_id,status,isdefault)"
+                    + "values(?,?,?,?,?,?,?,?,?,?)";
             // 2 passo
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
@@ -42,15 +42,13 @@ public class SupplierDao {
             pst.setString(3, obj.getPhone());
             pst.setString(4, obj.getEmail());
             pst.setString(5, obj.getAddress());
-
-//            pst.setString(6, obj.getCity());
+            pst.setString(6, obj.getCity());
 //            pst.setString(7, obj.getState());
 //            pst.setInt(8, obj.getCountry().getId());
-            pst.setString(6, obj.getZipCode());
-
-            pst.setInt(7, obj.getGroupId());
-            pst.setString(8, obj.getStatus());
-            pst.setString(9, obj.getIsDefault());
+            pst.setString(7, obj.getZipCode());
+            pst.setInt(8, obj.getGroupId());
+            pst.setInt(9, obj.getStatus());
+            pst.setInt(10, obj.getIsDefault());
             //3 passo
             pst.execute();
             // 4 passo
@@ -65,7 +63,7 @@ public class SupplierDao {
     public Boolean edit(Supplier obj, int id) {
         try {
             // 1 passo
-            String sql = "UPDATE suppliers SET company=?,nif=?,phone=?,email=?,address=?,zip_code=?,group_id=?,status=?,isdefault=? WHERE id=?";
+            String sql = "UPDATE suppliers SET company=?,nif=?,phone=?,email=?,address=?,city=?,zip_code=?,group_id=?,status=?,isdefault=? WHERE id=?";
             // 2 passo
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
@@ -73,14 +71,14 @@ public class SupplierDao {
             pst.setString(3, obj.getPhone());
             pst.setString(4, obj.getEmail());
             pst.setString(5, obj.getAddress());
-//            pst.setString(6, obj.getCity());
+            pst.setString(6, obj.getCity());
 //            pst.setString(7, obj.getState());
 //            pst.setInt(8, obj.getCountry().getId());
-            pst.setString(6, obj.getZipCode());
-            pst.setInt(7, obj.getGroupId());
-            pst.setString(8, obj.getStatus());
-            pst.setString(9, obj.getIsDefault());
-            pst.setInt(10, id);
+            pst.setString(7, obj.getZipCode());
+            pst.setInt(8, obj.getGroupId());
+            pst.setInt(9, obj.getStatus());
+            pst.setInt(10, obj.getIsDefault());
+            pst.setInt(11, id);
 
             pst.execute();
             // 4 passo
@@ -221,12 +219,12 @@ public class SupplierDao {
             obj.setPhone(rs.getString("phone"));
             obj.setAddress(rs.getString("address"));
 //            obj.setCountry(country);
-//            obj.setCity(rs.getString("city"));
+            obj.setCity(rs.getString("city"));
 //            obj.setState(rs.getString("state"));
             obj.setZipCode(rs.getString("zip_code"));
             obj.setGroupId(rs.getInt("group_id"));
-            obj.setStatus(rs.getString("status"));
-            obj.setIsDefault(rs.getString("isdefault"));
+            obj.setStatus(rs.getInt("status"));
+            obj.setIsDefault(rs.getInt("isdefault"));
             return obj;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Erro ao formatar obj Supplier: " + e.getMessage());

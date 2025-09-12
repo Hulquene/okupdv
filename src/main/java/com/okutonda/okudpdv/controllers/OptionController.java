@@ -23,7 +23,6 @@ public class OptionController {
     public Options getOptions(String name) {
         Options op = dao.searchFromName(name);
 //        System.out.println("valor: "+op);
-
         if (op == null) {
         } else {
             return op;
@@ -40,16 +39,12 @@ public class OptionController {
     }
 
     public Boolean add(Options options) {
-        System.out.println("name:" + options.getName());
         Options opt = getOptions(options.getName());
-        System.out.println("opr:" + opt);
-//        boolean status;
         if (opt != null) {
             return dao.edit(options);
         } else {
             return dao.add(options);
         }
-//        return status;
     }
 
     public Boolean save(Options options) {

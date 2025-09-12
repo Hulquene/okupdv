@@ -67,3 +67,17 @@ git commit -m "first commit"
 git branch -M main
 git remote add origin https://github.com/Hulquene/okupdv.git
 git push -u origin main
+
+
+
+Em desevolvimento
+
+Cliente: concluido
+Usuario:concluido
+Roles usuario -> profile
+Fornecedor:concluido
+Produto:concluido
+Produto categoria:concluido
+Caixa ou pdv
+    pontos: codigo do supervisor para cancelar a fatura
+            so esta a fazer fatura com consumidor final
