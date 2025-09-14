@@ -30,6 +30,10 @@ public class ProductOrderDao {
         this.conn = ConnectionDatabase.getConnect();
     }
 
+    public ProductOrderDao(Connection externalConn) { // para transação
+        this.conn = externalConn;
+    }
+
     public boolean add(ProductOrder obj, int orderId) {
         try {
             // 1 passo

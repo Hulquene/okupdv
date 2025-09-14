@@ -4,6 +4,8 @@
  */
 package com.okutonda.okudpdv.models;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author kenny
@@ -11,19 +13,22 @@ package com.okutonda.okudpdv.models;
 public class Payment {
 
     private int id;
-    private String status;
-    private String description;
-    private Double Total;
-    private String date;
-    private String dateFinish;
-    private Clients client;
-    private int invoiceId;
-    private String invoiceType;
-    private String prefix;
-    private int number;
-    private PaymentModes paymentMode;
-    private User user;
+    private PaymentStatus status;     // SUCCESS ou FAILED
+    private String description;       // Observações / detalhe do pagamento
+    private BigDecimal total;         // valor pago
+    private String date;              // data criação
+    private String dateFinish;        // data liquidação/finalização
+    private Clients client;           // cliente associado
+    private int invoiceId;            // id da fatura
+    private String invoiceType;       // tipo da fatura (FT, FR, NC…)
+    private String prefix;            // prefixo da fatura
+    private int number;               // número da fatura
+    private PaymentMode paymentMode;  // NUMERARIO, MULTICAIXA, TRANSFERENCIA, OUTROS
+    private User user;                // operador/caixa que registrou
+    private String reference;         // referência NSU/IBAN/comprovativo (quando aplicável)
+    private String currency = "AOA";  // moeda (default Kwanza)
 
+    // getters/setters
     public int getId() {
         return id;
     }
@@ -32,11 +37,11 @@ public class Payment {
         this.id = id;
     }
 
-    public String getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(PaymentStatus status) {
         this.status = status;
     }
 
@@ -48,12 +53,12 @@ public class Payment {
         this.description = description;
     }
 
-    public Double getTotal() {
-        return Total;
+    public BigDecimal getTotal() {
+        return total;
     }
 
-    public void setTotal(Double Total) {
-        this.Total = Total;
+    public void setTotal(BigDecimal total) {
+        this.total = total;
     }
 
     public String getDate() {
@@ -112,11 +117,11 @@ public class Payment {
         this.number = number;
     }
 
-    public PaymentModes getPaymentMode() {
+    public PaymentMode getPaymentMode() {
         return paymentMode;
     }
 
-    public void setPaymentMode(PaymentModes paymentMode) {
+    public void setPaymentMode(PaymentMode paymentMode) {
         this.paymentMode = paymentMode;
     }
 
@@ -128,9 +133,40 @@ public class Payment {
         this.user = user;
     }
 
-    @Override
-    public String toString() {
-        return "Payment{" + "id=" + id + ", status=" + status + ", description=" + description + ", Total=" + Total + ", date=" + date + ", dateFinish=" + dateFinish + ", client=" + client + ", invoiceId=" + invoiceId + ", invoiceType=" + invoiceType + ", prefix=" + prefix + ", number=" + number + ", paymentMode=" + paymentMode + ", user=" + user + '}';
+    public String getReference() {
+        return reference;
     }
 
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{"
+                + "id=" + id
+                + ", status=" + status
+                + ", description='" + description + '\''
+                + ", total=" + total
+                + ", date='" + date + '\''
+                + ", dateFinish='" + dateFinish + '\''
+                + ", client=" + client
+                + ", invoiceId=" + invoiceId
+                + ", invoiceType='" + invoiceType + '\''
+                + ", prefix='" + prefix + '\''
+                + ", number=" + number
+                + ", paymentMode=" + paymentMode
+                + ", user=" + user
+                + ", reference='" + reference + '\''
+                + ", currency='" + currency + '\''
+                + '}';
+    }
 }

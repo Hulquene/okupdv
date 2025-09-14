@@ -5,14 +5,22 @@
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.dao.OrderDao;
+import com.okutonda.okudpdv.dao.PaymentDao;
 import com.okutonda.okudpdv.dao.ProductDao;
 import com.okutonda.okudpdv.dao.ProductOrderDao;
+import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Order;
+import com.okutonda.okudpdv.models.Payment;
+import com.okutonda.okudpdv.models.PaymentStatus;
 import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.UtilDate;
 import com.okutonda.okudpdv.utilities.UtilSaft;
 import com.okutonda.okudpdv.utilities.UtilSales;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -173,4 +181,160 @@ public class OrderController {
     public Double CalculateTotalValueTaxeOrder(Order order) {
         return null;
     }
+
+    public Order criarEFinalizarComPagamentos(Order order, List<Payment> pagamentos) throws Exception {
+        // 0) validações básicas
+        if (order == null || order.getProducts() == null || order.getProducts().isEmpty()) {
+            throw new IllegalArgumentException("Pedido sem itens.");
+        }
+        if (pagamentos == null || pagamentos.isEmpty()) {
+            throw new IllegalArgumentException("Sem pagamentos.");
+        }
+
+        // 1) Recalcular totais no servidor (preço COM IVA embutido)
+        Totais t = calcularTotaisComIvaEmbutido(order.getProducts());
+        order.setSubTotal(t.subTotal.doubleValue());
+        order.setTotalTaxe(t.tax.doubleValue());
+        order.setTotal(t.total.doubleValue());
+
+        // 2) Numeracao/Hash/Meta
+        String prefix = UtilSales.getPrefix("order");
+        int number = this.getNextNumber();
+        String date = UtilDate.getFormatDataNow();
+        int year = UtilDate.getYear();
+        String numberOrder = UtilSales.FormatedNumberPrefix2(number, year, prefix);
+
+        // Usa total (com IVA) no hash
+        String hash = UtilSaft.appGenerateHashInvoice(date, date, numberOrder, String.valueOf(order.getTotal()), "");
+        order.setPrefix(prefix);
+        order.setNumber(number);
+        order.setDatecreate(date);
+        order.setHash(hash);
+        order.setYear(year);
+        order.setStatus(2); // exemplo: 2 = emitido/pago
+
+        // (se tiveres chave única fiscal)
+        // order.setKey(saftService.gerarChave(numberOrder, date));  // se existir
+        // 3) Transação única (usar MESMA connection para todos os DAOs)
+        Connection conn = null;
+        try {
+            conn = ConnectionDatabase.getConnect();
+            conn.setAutoCommit(false);
+
+            OrderDao orderDaoTx = new OrderDao(conn);
+            ProductOrderDao itemDaoTx = new ProductOrderDao(conn);
+            PaymentDao paymentDaoTx = new PaymentDao(conn);
+            ProductDao productDaoTx = new ProductDao(conn); // se fores baixar stock
+
+            // 3.1) Inserir cabeçalho
+            boolean ok = orderDaoTx.add(order);
+            if (!ok) {
+                throw new RuntimeException("Falha ao gravar Order.");
+            }
+
+            // 3.2) Obter o ID gravado (podes usar getGeneratedKeys; aqui uso o teu getFromNumber)
+            Order salvo = orderDaoTx.getFromNumber(order.getNumber());
+            if (salvo == null || salvo.getId() <= 0) {
+                throw new RuntimeException("Falha ao recuperar Order gravado.");
+            }
+
+            // 3.3) Inserir itens + baixa de stock
+            for (ProductOrder po : order.getProducts()) {
+                itemDaoTx.add(po, salvo.getId());
+                // baixa de stock (se aplicável)
+                int novoStock = po.getProduct().getStockTotal() - po.getQty();
+                productDaoTx.updateStock(po.getProduct().getId(), Math.max(novoStock, 0));
+            }
+
+            // 3.4) Inserir pagamentos
+            for (Payment p : pagamentos) {
+                p.setInvoiceId(salvo.getId());
+                p.setInvoiceType(salvo.getPrefix());
+                p.setPrefix(salvo.getPrefix());
+                p.setNumber(salvo.getNumber());
+                p.setClient(salvo.getClient());
+                p.setUser(salvo.getSeller());
+                if (p.getDate() == null) {
+                    p.setDate(date);
+                }
+                if (p.getCurrency() == null) {
+                    p.setCurrency("AOA");
+                }
+                if (p.getStatus() == null) {
+                    p.setStatus(PaymentStatus.SUCCESS);
+                }
+
+                paymentDaoTx.add(p, salvo.getId());
+            }
+
+            conn.commit();
+            return orderDaoTx.getId(salvo.getId());
+        } catch (Exception e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException ignore) {
+                }
+//                conn.setAutoCommit(true);
+//                conn.close();
+            }
+        }
+    }
+
+    /**
+     * Totais com PREÇO COM IVA embutido
+     */
+    private static class Totais {
+
+        final BigDecimal subTotal; // líquido
+        final BigDecimal tax;      // IVA
+        final BigDecimal total;    // bruto
+
+        Totais(BigDecimal s, BigDecimal i, BigDecimal t) {
+            this.subTotal = s;
+            this.tax = i;
+            this.total = t;
+        }
+    }
+
+    private Totais calcularTotaisComIvaEmbutido(List<ProductOrder> itens) {
+        BigDecimal sub = BigDecimal.ZERO, iva = BigDecimal.ZERO, tot = BigDecimal.ZERO;
+        for (ProductOrder po : itens) {
+            if (po == null || po.getProduct() == null) {
+                continue;
+            }
+            BigDecimal qty = bd(po.getQty());
+            BigDecimal price = bd(po.getPrice()); // preço unitário COM IVA
+            BigDecimal gross = price.multiply(qty);
+
+            BigDecimal perc = po.getTaxePercentage() == null ? BigDecimal.ZERO : new BigDecimal(po.getTaxePercentage().toString());
+            BigDecimal lineTax, lineNet;
+            if (perc.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal base = new BigDecimal("100").add(perc);
+                lineTax = gross.multiply(perc).divide(base, 2, RoundingMode.HALF_UP);
+                lineNet = gross.subtract(lineTax);
+            } else {
+                lineTax = BigDecimal.ZERO;
+                lineNet = gross;
+            }
+            sub = sub.add(lineNet);
+            iva = iva.add(lineTax);
+            tot = tot.add(gross);
+        }
+        return new Totais(
+                sub.setScale(2, RoundingMode.HALF_UP),
+                iva.setScale(2, RoundingMode.HALF_UP),
+                tot.setScale(2, RoundingMode.HALF_UP)
+        );
+    }
+
+    private static BigDecimal bd(Number n) {
+        return (n == null) ? BigDecimal.ZERO : new BigDecimal(n.toString());
+    }
+
 }

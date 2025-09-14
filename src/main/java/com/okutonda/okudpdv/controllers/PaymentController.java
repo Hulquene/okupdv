@@ -66,7 +66,8 @@ public class PaymentController {
     public List<Payment> get(String where) {
         return dao.list(where);
     }
-     public List<Payment> filter(String txt) {
+
+    public List<Payment> filter(String txt) {
         return dao.filter(txt);
     }
 }

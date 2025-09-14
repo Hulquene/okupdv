@@ -342,6 +342,7 @@ CREATE TABLE `orders` (
   `seller_id` int NOT NULL,
   `total` double DEFAULT NULL,
   `sub_total` double DEFAULT '0',
+  `total_taxe` double DEFAULT '0',
   `pay_total` double NOT NULL DEFAULT '0',
   `amount_returned` decimal(15,2) NOT NULL DEFAULT '0.00',
   `hash` text,
@@ -350,7 +351,6 @@ CREATE TABLE `orders` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   `note` text,
   `key` varchar(255) DEFAULT NULL,
-  `totalTaxe` double DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -887,50 +887,40 @@ INSERT INTO `payment_modes` (`name`,`description`,`code`,`status`,`isDefault`) V
 ('Crédito Documentário','Pagamento via crédito documentário','CI','1',0),
 ('Outros','Outros meios de pagamento','OU','1',0);
 
+CREATE TABLE IF NOT EXISTS payments (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  description    VARCHAR(255)           NOT NULL DEFAULT '',
+  total          DECIMAL(15,2)          NOT NULL DEFAULT 0.00,
+  prefix         VARCHAR(11)            NOT NULL,
+  number         INT                    NOT NULL,
 
-CREATE TABLE IF NOT EXISTS `payment` (
-  `id`              INT NOT NULL AUTO_INCREMENT,
-  `description`     VARCHAR(255)       NOT NULL,
-  `total`           DECIMAL(15,2)      NOT NULL DEFAULT 0.00,
-  `prefix`          VARCHAR(11)        NOT NULL,
-  `number`          INT                NOT NULL,
-  `date`            DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `dateFinish`      DATETIME           NULL,
-  `status`          ENUM('pending','paid','partial','canceled') NOT NULL DEFAULT 'pending',
-  `clientId`        INT                NOT NULL,
-  `userId`          INT                NOT NULL,
-  `invoiceId`       INT                NOT NULL,
-  `invoiceType`     ENUM('ORDER','INVOICE','CREDIT_NOTE') NOT NULL DEFAULT 'ORDER',
-  `paymentModeId`   INT                NOT NULL,
-  `created_at`      TIMESTAMP          NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`      TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  `date`         DATETIME               NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  dateFinish     DATETIME               NULL,
 
-  -- Índices para performance
-  KEY `idx_payment_clientId` (`clientId`),
-  KEY `idx_payment_userId` (`userId`),
-  KEY `idx_payment_invoice` (`invoiceId`, `invoiceType`),
-  KEY `idx_payment_mode` (`paymentModeId`),
+  -- enums alinhados ao teu código Java
+  status         ENUM('SUCCESS','FAILED')     NOT NULL DEFAULT 'SUCCESS',
+  mode           ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
 
-  -- FKs (ajusta ON DELETE conforme tua regra de negócio)
-  CONSTRAINT `fk_payment_client`
-    FOREIGN KEY (`clientId`) REFERENCES `clients`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
+  reference      VARCHAR(100)           NULL,
+  currency       VARCHAR(10)            NOT NULL DEFAULT 'AOA',
 
-  CONSTRAINT `fk_payment_user`
-    FOREIGN KEY (`userId`)   REFERENCES `users`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE
+  clientId       INT                    NOT NULL,
+  userId         INT                    NOT NULL,
+  order_id       INT                    NOT NULL,
+  order_type     ENUM('ORDER','INVOICE','CREDIT_NOTE') NOT NULL DEFAULT 'ORDER',
 
-  -- Se tiveres a tabela `payment_modes`, podes ativar esta FK:
-  -- ,CONSTRAINT `fk_payment_mode`
-  --   FOREIGN KEY (`paymentModeId`) REFERENCES `payment_modes`(`id`)
-  --   ON DELETE RESTRICT ON UPDATE CASCADE
+  created_at     TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  -- Se `invoiceId` for sempre `orders.id`, podes ativar:
-  -- ,CONSTRAINT `fk_payment_order`
-  --   FOREIGN KEY (`invoiceId`) REFERENCES `orders`(`id`)
-  --   ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  -- índices úteis
+  KEY idx_payments_date (`date`),
+  KEY idx_payments_order (order_id, order_type),
+  KEY idx_payments_prefix_number (prefix, number),
+  KEY idx_payments_client (clientId),
+  KEY idx_payments_user (userId),
+  KEY idx_payments_mode (mode),
+  KEY idx_payments_status (status)
+);
 
 CREATE TABLE IF NOT EXISTS `box` (
   `id` INT NOT NULL AUTO_INCREMENT,

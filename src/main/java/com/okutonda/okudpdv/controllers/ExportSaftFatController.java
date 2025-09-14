@@ -40,7 +40,7 @@ public class ExportSaftFatController {
     private final ProductDao productDao = new ProductDao();
     private final ClientDao clientDao = new ClientDao();
     private final PaymentDao paymentDao = new PaymentDao();
-    private final PaymentModeDao paymentModeDao = new PaymentModeDao();
+//    private final PaymentModeDao paymentModeDao = new PaymentModeDao();
     // Working Documents (model/dao mínimos que partilhei contigo)
 //    private final WorkDocumentDao workDocDao = new WorkDocumentDao();
 //    private final WorkDocumentLineDao workDocLineDao = new WorkDocumentLineDao();
@@ -555,7 +555,7 @@ public class ExportSaftFatController {
             writeTag(w, "Description", "Liquidação");
             w.writeEndElement(); // </SourceDocumentID>
 
-            BigDecimal amt = BigDecimal.valueOf(p.getTotal() != null ? p.getTotal() : 0.0);
+            BigDecimal amt = p.getTotal();
             writeTag(w, "CreditAmount", amt.toString());
 
             w.writeStartElement("Tax"); // pagamentos não têm IVA

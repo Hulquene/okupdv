@@ -11,14 +11,19 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
+import com.okutonda.okudpdv.models.PaymentMode;
+import com.okutonda.okudpdv.models.PaymentStatus;
 import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.utilities.ShiftSession;
+import com.okutonda.okudpdv.utilities.UtilDate;
 import com.okutonda.okudpdv.utilities.UtilSales;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,7 +43,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     UserController userController;
     ShiftController shiftController;
     ShiftSession shiftSession;
-    Boolean status = false;
+    Boolean response = false;
     Boolean statusClose = false;
     List<Payment> listPayment;
 
@@ -79,7 +84,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     }
 
     public Boolean getResponse() {
-        return status;
+        return response;
     }
 
     public void setOrder(Order order) {
@@ -99,7 +104,7 @@ public class JDialogOrder extends javax.swing.JDialog {
         jLabelClientName.setText(order.getClient().getName());
         jLabelClientNif.setText(order.getClient().getNif());
         jTextPaneNote.setText(order.getNote());
-        System.out.println("foi chamado...");
+//        System.out.println("foi chamado...");
         // inicia a gestão dinâmica de pagamento
         setupPagamentoUI();
     }
@@ -123,9 +128,57 @@ public class JDialogOrder extends javax.swing.JDialog {
         }
     }
 
-    private void updatePaymentToList(Payment payment, String type) {
+    private void rebuildPaymentsFromUI() {
+        List<Payment> nova = new ArrayList<>();
 
-        listPayment.add(payment);
+        if (jCheckBoxNumerario.isSelected()) {
+            BigDecimal v = parse(jTextFieldPayNumerario.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (v.signum() > 0) {
+                Payment p = new Payment();
+                p.setPaymentMode(PaymentMode.NUMERARIO);
+                p.setStatus(PaymentStatus.SUCCESS);
+                p.setTotal(v);
+                p.setCurrency("AOA");
+                nova.add(p);
+            }
+        }
+        if (jCheckBoxMulticaixa.isSelected()) {
+            BigDecimal v = parse(jTextFieldPayMulticaixa.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (v.signum() > 0) {
+                Payment p = new Payment();
+                p.setPaymentMode(PaymentMode.MULTICAIXA);
+                p.setStatus(PaymentStatus.SUCCESS);
+                p.setTotal(v);
+                p.setCurrency("AOA");
+                // p.setReference(jTextFieldNSU.getText()); // se tiver
+                nova.add(p);
+            }
+        }
+        if (jCheckBoxTransferencia.isSelected()) {
+            BigDecimal v = parse(jTextFieldPayTransferencia.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (v.signum() > 0) {
+                Payment p = new Payment();
+                p.setPaymentMode(PaymentMode.TRANSFERENCIA);
+                p.setStatus(PaymentStatus.SUCCESS);
+                p.setTotal(v);
+                p.setCurrency("AOA");
+                // p.setReference(jTextFieldRefBancaria.getText());
+                nova.add(p);
+            }
+        }
+        if (jCheckBoxOutros.isSelected()) {
+            BigDecimal v = parse(jTextFieldPayOutros.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (v.signum() > 0) {
+                Payment p = new Payment();
+                p.setPaymentMode(PaymentMode.OUTROS);
+                p.setStatus(PaymentStatus.SUCCESS);
+                p.setTotal(v);
+                p.setCurrency("AOA");
+                nova.add(p);
+            }
+        }
+
+        this.listPayment = nova; // substitui a lista inteira conforme estado atual da UI
     }
 
     // Chama isto no setOrder(order) depois de setar jTextFieldTotalOrder:
@@ -155,7 +208,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     }
 
     private void addSelectionListeners() {
-        System.out.println("addSelectionListeners");
+//        System.out.println("addSelectionListeners");
         java.awt.event.ItemListener il = e -> {
             syncEnabledFromSelection();
             // quando ativar um método vazio, sugerir restante
@@ -169,7 +222,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     }
 
     private void addAmountListeners() {
-        System.out.println("addAmountListeners");
+//        System.out.println("addAmountListeners");
         javax.swing.event.DocumentListener doc = new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
@@ -194,7 +247,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     }
 
     private void syncEnabledFromSelection() {
-        System.out.println("syncEnabledFromSelection 1");
+//        System.out.println("syncEnabledFromSelection 1");
         jTextFieldPayNumerario.setEnabled(jCheckBoxNumerario.isSelected());
         jTextFieldPayMulticaixa.setEnabled(jCheckBoxMulticaixa.isSelected());
         jTextFieldPayTransferencia.setEnabled(jCheckBoxTransferencia.isSelected());
@@ -239,42 +292,42 @@ public class JDialogOrder extends javax.swing.JDialog {
     }
 
     private void recalcPagamento() {
-        System.out.println("recalcPagamento");
+//        System.out.println("recalcPagamento");
         BigDecimal soma = BigDecimal.ZERO;
 //
 //        listPayment = null;
-        listPayment = new ArrayList<>();
-        Payment pay;
+//        listPayment = new ArrayList<>();
+//        Payment pay;
 //        System.out.println("jTextFieldPayNumerario " + jTextFieldPayNumerario.getText());
 
         if (jCheckBoxNumerario.isSelected()) {
             soma = soma.add(parse(jTextFieldPayNumerario.getText()));
-            pay = new Payment();
-//            pay.setPaymentMode(paymentMode);
-//            String value = jTextFieldPayNumerario.getText();
-            pay.setTotal(parseDouble(jTextFieldPayNumerario.getText()));
-            updatePaymentToList(pay, "numerario");
+//            pay = new Payment();
+////            pay.setPaymentMode(paymentMode);
+////            String value = jTextFieldPayNumerario.getText();
+//            pay.setTotal(parseDouble(jTextFieldPayNumerario.getText()));
+//            updatePaymentToList(pay, "numerario");
         }
         if (jCheckBoxMulticaixa.isSelected()) {
             soma = soma.add(parse(jTextFieldPayMulticaixa.getText()));
-            pay = new Payment();
-//            pay.setPaymentMode(paymentMode);
-            pay.setTotal(parseDouble(jTextFieldPayMulticaixa.getText()));
-            updatePaymentToList(pay, "Multicaixa");
+//            pay = new Payment();
+////            pay.setPaymentMode(paymentMode);
+//            pay.setTotal(parseDouble(jTextFieldPayMulticaixa.getText()));
+//            updatePaymentToList(pay, "Multicaixa");
         }
         if (jCheckBoxTransferencia.isSelected()) {
             soma = soma.add(parse(jTextFieldPayTransferencia.getText()));
-            pay = new Payment();
-//            pay.setPaymentMode(paymentMode);
-            pay.setTotal(parseDouble(jTextFieldPayTransferencia.getText()));
-            updatePaymentToList(pay, "Transferencia");
+//            pay = new Payment();
+////            pay.setPaymentMode(paymentMode);
+//            pay.setTotal(parseDouble(jTextFieldPayTransferencia.getText()));
+//            updatePaymentToList(pay, "Transferencia");
         }
         if (jCheckBoxOutros.isSelected()) {
             soma = soma.add(parse(jTextFieldPayOutros.getText()));
-            pay = new Payment();
-//            pay.setPaymentMode(paymentMode);
-            pay.setTotal(parseDouble(jTextFieldPayOutros.getText()));
-            updatePaymentToList(pay, "Outros");
+//            pay = new Payment();
+////            pay.setPaymentMode(paymentMode);
+//            pay.setTotal(parseDouble(jTextFieldPayOutros.getText()));
+//            updatePaymentToList(pay, "Outros");
         }
 
         BigDecimal troco = soma.subtract(totalPedido);
@@ -291,6 +344,7 @@ public class JDialogOrder extends javax.swing.JDialog {
 //        System.out.println("restante" + restante);
         jTextFieldTroco.setText(format(troco));
         jTextFieldValorRestante.setText(format(restante));
+        rebuildPaymentsFromUI();
     }
 
     private BigDecimal calcRestante() {
@@ -388,34 +442,6 @@ public class JDialogOrder extends javax.swing.JDialog {
         } catch (Exception e) {
             System.err.println("Falha ao parsear valor: " + s);
             return BigDecimal.ZERO;
-        }
-    }
-
-    private Double parseDouble(String s) {
-//        if (s == null) {
-//            return BigDecimal.ZERO;
-//        }
-//        s = s.trim();
-//        if (s.isEmpty()) {
-//            return BigDecimal.ZERO;
-//        }
-
-        // 🔑 remove caracteres “estranhos” (espaços, U+FFFD, etc.)
-        s = s.replaceAll("[^0-9,.-]", "");
-
-        // normaliza decimal
-        if (s.contains(",") && s.contains(".")) {
-            // caso "10.000,50"
-            s = s.replace(".", "").replace(",", ".");
-        } else if (s.contains(",")) {
-            s = s.replace(",", ".");
-        }
-
-        try {
-            return Double.valueOf(s);
-        } catch (Exception e) {
-            System.err.println("Falha ao parsear valor: " + s);
-            return 0.00;
         }
     }
 
@@ -937,39 +963,112 @@ public class JDialogOrder extends javax.swing.JDialog {
 
     private void jButtonSaveOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveOrderActionPerformed
 
-        BigDecimal valorRestante = BigDecimal.ZERO;
-        valorRestante = valorRestante.add(parse(jTextFieldValorRestante.getText()));
-//        return (restante.compareTo(BigDecimal.ZERO) < 0) ? BigDecimal.ZERO : restante;
-        if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
-            JOptionPane.showMessageDialog(null, "VALORES RESTANTE EM FALTA: " + valorRestante, "Atenção", JOptionPane.WARNING_MESSAGE);
-            return;
+        // evita duplo clique
+        jButtonSaveOrder.setEnabled(false);
+
+        try {
+            // 1) Garantir que recalculamos a lista de pagamentos a partir da UI
+            rebuildPaymentsFromUI();
+
+            // 2) Validar restante
+            BigDecimal valorRestante = parse(jTextFieldValorRestante.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
+                JOptionPane.showMessageDialog(this, "VALOR EM FALTA: " + format(valorRestante), "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 3) Validar que tem ao menos um pagamento > 0
+            if (listPayment == null || listPayment.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Selecione pelo menos um método de pagamento.", "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 4) Soma pagamentos e calcular troco
+            BigDecimal totalPedido = parse(jTextFieldTotalOrder.getText()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal somaPag = listPayment.stream()
+                    .map(Payment::getTotal)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal troco = somaPag.subtract(totalPedido);
+            if (troco.compareTo(BigDecimal.ZERO) < 0) {
+                troco = BigDecimal.ZERO;
+            }
+
+            // 5) Preencher order com valores de pagamento
+            order.setPayTotal(somaPag.doubleValue());
+            order.setAmountReturned(troco.doubleValue());
+            order.setNote(jTextPaneNote.getText()); // se tiver observação
+
+            // 6) Completar metadados opcionais dos pagamentos (cliente, operador, datas)
+            String nowIso = UtilDate.getFormatDataNow();
+            for (Payment p : listPayment) {
+                p.setClient(order.getClient());
+                p.setUser(order.getSeller());
+                p.setDate(nowIso);
+                p.setDescription(p.getPaymentMode().name()); // opcional
+            }
+
+            // 7) Persistir: order + itens + pagamentos (numeração/hash no controller)
+            Order salvo = orderController.criarEFinalizarComPagamentos(order, listPayment);
+            if (salvo != null && salvo.getId() > 0) {
+                JOptionPane.showMessageDialog(this, "Venda gravada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                this.response = true;  // se o diálogo usa getResponse()
+                this.statusClose = true;
+                UtilSales.print(order);
+//             try {
+//            // TODO add your handling code here:
+//                UtilSales.PrintOrderTicket(order);
+//            } catch (PrinterException ex) {
+//                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+
+                dispose();             // fecha o diálogo
+            } else {
+                JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao gravar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            jButtonSaveOrder.setEnabled(true);
         }
 
-        System.out.println("Fatura:" + this.order);
-        System.out.println("Total Payment:" + this.listPayment.size());
-        System.out.println("List Payment:" + this.listPayment);
-
-//         jTextFieldPayNumerario, 
-//         jTextFieldPayMulticaixa, 
-//         jTextFieldPayTransferencia, 
-//         jTextFieldPayOutros
-//        Order result = orderController.add(order);
-//        if (result != null) {
-//            shiftController.updateIncurredAmount(result.getTotal(), shiftSession.getShift().getId());
-////            JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!! Num: " + result.getId(), "Atenção", JOptionPane.INFORMATION_MESSAGE);
-//            status = true;
-//            statusClose = true;
-//            UtilSales.print(order);
-////             try {
-////            // TODO add your handling code here:
-////                UtilSales.PrintOrderTicket(order);
-////            } catch (PrinterException ex) {
-////                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
-////            }
-//            this.dispose();
-//        } else {
-//            status = false;
+//        BigDecimal valorRestante = BigDecimal.ZERO;
+//        valorRestante = valorRestante.add(parse(jTextFieldValorRestante.getText()));
+////        return (restante.compareTo(BigDecimal.ZERO) < 0) ? BigDecimal.ZERO : restante;
+//        if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
+//            JOptionPane.showMessageDialog(null, "VALORES RESTANTE EM FALTA: " + valorRestante, "Atenção", JOptionPane.WARNING_MESSAGE);
+//            return;
 //        }
+//
+//        System.out.println("Fatura:" + this.order);
+//        System.out.println("Total Payment:" + this.listPayment.size());
+//        System.out.println("List Payment:" + this.listPayment);
+//
+////         jTextFieldPayNumerario, 
+////         jTextFieldPayMulticaixa, 
+////         jTextFieldPayTransferencia, 
+////         jTextFieldPayOutros
+////        Order result = orderController.add(order);
+////        if (result != null) {
+////            shiftController.updateIncurredAmount(result.getTotal(), shiftSession.getShift().getId());
+//////            JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!! Num: " + result.getId(), "Atenção", JOptionPane.INFORMATION_MESSAGE);
+////            status = true;
+////            statusClose = true;
+////            UtilSales.print(order);
+//////             try {
+//////            // TODO add your handling code here:
+//////                UtilSales.PrintOrderTicket(order);
+//////            } catch (PrinterException ex) {
+//////                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
+//////            }
+////            this.dispose();
+////        } else {
+////            status = false;
+////        }
     }//GEN-LAST:event_jButtonSaveOrderActionPerformed
 
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed
