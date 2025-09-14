@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -34,33 +35,58 @@ public class PaymentDao {
 
     public Boolean add(Payment obj, int invoiceId) {
         try {
-            // 1 passo
-            String sql = "INSERT INTO payment (description,total,prefix,number,date,dateFinish,status,clientId,userId,invoiceId,invoiceType,paymentModeId)"
-                    + "values(?,?,?,?,?,?,?,?,?,?,?)";
-            // 2 passo
+            String sql = "INSERT INTO payment (description,total,prefix,number,date,dateFinish,status,clientId,userId,invoiceId,invoiceType,paymentModeId) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
             this.pst = this.conn.prepareStatement(sql);
-            this.pst.setString(1, obj.getDescription());
-            this.pst.setDouble(2, obj.getTotal());
-            this.pst.setString(3, obj.getPrefix());
-            this.pst.setInt(4, obj.getNumber());
-            this.pst.setString(5, obj.getDate());
-            this.pst.setString(6, obj.getDateFinish());
-            this.pst.setString(7, obj.getStatus());
-            this.pst.setInt(8, obj.getClient().getId());
-            this.pst.setInt(9, obj.getUser().getId());
-            this.pst.setInt(8, obj.getInvoiceId());
-            this.pst.setString(10, obj.getInvoiceType());
-            this.pst.setInt(11, obj.getPaymentMode().getId());
-            //3 passo
+            int i = 1;
+            this.pst.setString(i++, obj.getDescription());
+            this.pst.setDouble(i++, obj.getTotal());
+            this.pst.setString(i++, obj.getPrefix());
+            this.pst.setInt(i++, obj.getNumber());
+            this.pst.setString(i++, obj.getDate());
+            this.pst.setString(i++, obj.getDateFinish());
+            this.pst.setString(i++, obj.getStatus());
+            this.pst.setInt(i++, obj.getClient().getId());
+            this.pst.setInt(i++, obj.getUser().getId());
+            this.pst.setInt(i++, invoiceId); // <-- aqui é invoiceId
+            this.pst.setString(i++, obj.getInvoiceType());
+            this.pst.setInt(i++, obj.getPaymentMode().getId());
             this.pst.execute();
             return true;
         } catch (HeadlessException | SQLException e) {
-            System.out.println("Erro ao salvar Payment" + e.getMessage());
-//            JOptionPane.showMessageDialog(null, "Erro ao salvar client: " + e.getMessage());
+            System.out.println("Erro ao salvar Payment: " + e.getMessage());
         }
         return false;
     }
 
+//    public Boolean add(Payment obj, int invoiceId) {
+//        try {
+//            // 1 passo
+//            String sql = "INSERT INTO payment (description,total,prefix,number,date,dateFinish,status,clientId,userId,invoiceId,invoiceType,paymentModeId)"
+//                    + "values(?,?,?,?,?,?,?,?,?,?,?)";
+//            // 2 passo
+//            this.pst = this.conn.prepareStatement(sql);
+//            this.pst.setString(1, obj.getDescription());
+//            this.pst.setDouble(2, obj.getTotal());
+//            this.pst.setString(3, obj.getPrefix());
+//            this.pst.setInt(4, obj.getNumber());
+//            this.pst.setString(5, obj.getDate());
+//            this.pst.setString(6, obj.getDateFinish());
+//            this.pst.setString(7, obj.getStatus());
+//            this.pst.setInt(8, obj.getClient().getId());
+//            this.pst.setInt(9, obj.getUser().getId());
+//            this.pst.setInt(8, obj.getInvoiceId());
+//            this.pst.setString(10, obj.getInvoiceType());
+//            this.pst.setInt(11, obj.getPaymentMode().getId());
+//            //3 passo
+//            this.pst.execute();
+//            return true;
+//        } catch (HeadlessException | SQLException e) {
+//            System.out.println("Erro ao salvar Payment" + e.getMessage());
+////            JOptionPane.showMessageDialog(null, "Erro ao salvar client: " + e.getMessage());
+//        }
+//        return false;
+//    }
 //    public Boolean edit(Payment obj, int id) {
 //        try {
 //            // 1 passo
@@ -121,6 +147,31 @@ public class PaymentDao {
             JOptionPane.showMessageDialog(null, "Erro ao excluir payment: " + e.getMessage());
         }
         return false;
+    }
+
+    public List<Payment> filterDate(LocalDate from, LocalDate to) {
+        List<Payment> list = new ArrayList<>();
+        String sql = """
+        SELECT *
+        FROM payment
+        WHERE DATE(`date`) BETWEEN ? AND ?
+        ORDER BY `date` ASC, id ASC
+    """;
+        try (PreparedStatement ptmt = this.conn.prepareStatement(sql)) {
+            ptmt.setDate(1, java.sql.Date.valueOf(from));
+            ptmt.setDate(2, java.sql.Date.valueOf(to));
+            try (ResultSet rs = ptmt.executeQuery()) {
+                while (rs.next()) {
+                    Payment obj = formatObj(rs);
+                    if (obj != null) {
+                        list.add(obj);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao filtrar payment por data: " + e.getMessage());
+        }
+        return list;
     }
 
     public Payment searchFromName(String name) {

@@ -17,8 +17,8 @@ public class Utilities {
     public void clearScreen(JPanel container) {
         Component components[] = container.getComponents();
         for (Component component : components) {
-            if (component instanceof JTextField) {
-                ((JTextField) component).setText(null);
+            if (component instanceof JTextField jTextField) {
+                jTextField.setText("");
             }
         }
     }

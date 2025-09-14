@@ -65,4 +65,9 @@ public class PaymentModes {
         this.isDefault = isDefault;
     }
 
+    @Override
+    public String toString() {
+        return "PaymentModes{" + "id=" + id + ", name=" + name + ", description=" + description + ", code=" + code + ", status=" + status + ", isDefault=" + isDefault + '}';
+    }
+
 }

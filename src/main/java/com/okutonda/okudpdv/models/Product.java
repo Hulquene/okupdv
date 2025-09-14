@@ -145,4 +145,9 @@ public class Product {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "Product{" + "id=" + id + ", type=" + type + ", code=" + code + ", description=" + description + ", longDescription=" + longDescription + ", price=" + price + ", purchasePrice=" + purchasePrice + ", taxe=" + taxe + ", reasonTaxe=" + reasonTaxe + ", group=" + group + ", barcode=" + barcode + ", supplier=" + supplier + ", stockTotal=" + stockTotal + ", status=" + status + '}';
+    }
+
 }

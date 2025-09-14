@@ -36,7 +36,7 @@ public class JDialogProductSearch extends javax.swing.JDialog {
 
     public void filterListProducts(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.filter(txt);
+        List<Product> list = productController.filter(txt,"");
         loadListProducts(list);
     }
 

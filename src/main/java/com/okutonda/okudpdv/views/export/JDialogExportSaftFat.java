@@ -4,6 +4,11 @@
  */
 package com.okutonda.okudpdv.views.export;
 
+import com.okutonda.okudpdv.controllers.ExportSaftFatController;
+import com.okutonda.okudpdv.models.ExportSaftFat;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -11,12 +16,57 @@ package com.okutonda.okudpdv.views.export;
  */
 public class JDialogExportSaftFat extends javax.swing.JDialog {
 
+    ExportSaftFatController exportSaftFat = new ExportSaftFatController();
+
     /**
      * Creates new form JDialogExportSaftFat
      */
     public JDialogExportSaftFat(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        listExpotSaftFat();
+    }
+
+    public void listExpotSaftFat() {
+        List<ExportSaftFat> list = exportSaftFat.get();
+        loadListExpotSaftFat(list);
+    }
+
+    public void filterListExpotSaftFat(String txt) {
+        List<ExportSaftFat> list = exportSaftFat.filter(txt);
+        loadListExpotSaftFat(list);
+    }
+
+    public void loadListExpotSaftFat(List<ExportSaftFat> list) {
+//        DefaultTableModel data = (DefaultTableModel) jTableExporSaftFat.getModel();
+// prepara o modelo com as novas colunas (ou garante que a tua JTable tem estas colunas)
+        DefaultTableModel data = new DefaultTableModel(
+                new String[]{"ID", "Período", "Ficheiro", "Exportado por", "Criado em", "Estado", "Notas"}, 0);
+        jTableExporSaftFat.setModel(data);
+// limpa linhas antigas
+        data.setRowCount(0);
+
+// formato para createdAt
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        for (ExportSaftFat c : list) {
+            String period = c.getPeriodLabel(); // "YYYY-MM-DD a YYYY-MM-DD"
+            String file = c.getFileName();    // só o nome, sem path
+            String user = c.getUser() != null ? c.getUser().getName() : "";
+            String created = c.getCreatedAt() != null ? c.getCreatedAt().format(dtf) : "";
+            String status = c.getStatus() != null ? c.getStatus() : "";
+            String notes = c.getNotes() != null ? c.getNotes() : "";
+
+            data.addRow(new Object[]{
+                c.getId(),
+                period,
+                file,
+                user,
+                created,
+                status,
+                notes
+            });
+
+        }
     }
 
     /**
@@ -31,45 +81,64 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTableExporSaftFat = new javax.swing.JTable();
         jFormattedTextFieldDateStart = new javax.swing.JFormattedTextField();
         jFormattedTextFieldDateEnd = new javax.swing.JFormattedTextField();
         jButtonGerarFile = new javax.swing.JButton();
         jTextField1 = new javax.swing.JTextField();
         jButtonApagarFile = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTableExporSaftFat.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "Data de inicio", "data de fim", "Status", "Data de Criação"
             }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
 
-        jFormattedTextFieldDateStart.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
-        jFormattedTextFieldDateStart.setText("dd/mm/ano");
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(jTableExporSaftFat);
+
+        try {
+            jFormattedTextFieldDateStart.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
         jFormattedTextFieldDateStart.setToolTipText("Data de inicio do ficheiro");
-        jFormattedTextFieldDateStart.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jFormattedTextFieldDateStart.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jFormattedTextFieldDateStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jFormattedTextFieldDateStartActionPerformed(evt);
             }
         });
 
-        jFormattedTextFieldDateEnd.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
-        jFormattedTextFieldDateEnd.setText("dd/mm/ano");
+        try {
+            jFormattedTextFieldDateEnd.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
         jFormattedTextFieldDateEnd.setToolTipText("Data de fim do ficheiro");
-        jFormattedTextFieldDateEnd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jFormattedTextFieldDateEnd.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
         jButtonGerarFile.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButtonGerarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Document.png"))); // NOI18N
@@ -85,12 +154,27 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
         jButtonApagarFile.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButtonApagarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Trash Can.png"))); // NOI18N
         jButtonApagarFile.setText("Apagar");
+        jButtonApagarFile.setBorderPainted(false);
         jButtonApagarFile.setContentAreaFilled(false);
+        jButtonApagarFile.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonApagarFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonApagarFileActionPerformed(evt);
             }
         });
+
+        jLabel1.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel1.setText("As datas devem estar nesse formato dd/MM/yyyy");
+
+        jLabel2.setText("Data Inicial");
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        jLabel3.setText("Gerar Novo arquivo Fiscal");
+
+        jLabel4.setText("Data Final");
+
+        jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel5.setText("Pesquisar");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -99,36 +183,57 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jTextField1)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(154, 154, 154)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(18, 18, 18)
-                                .addComponent(jFormattedTextFieldDateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButtonGerarFile)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 276, Short.MAX_VALUE)
-                        .addComponent(jButtonApagarFile, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jFormattedTextFieldDateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jButtonGerarFile))))
+                            .addComponent(jLabel3)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(123, 123, 123)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 287, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jButtonApagarFile, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 634, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(36, 36, 36)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButtonGerarFile, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jFormattedTextFieldDateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButtonApagarFile, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
-                    .addComponent(jTextField1))
+                .addContainerGap(18, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(58, 58, 58))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFormattedTextFieldDateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonGerarFile, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonApagarFile, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20))
         );
 
         jTabbedPane1.addTab("SAF-T Faturação", jPanel1);
@@ -137,70 +242,70 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 762, Short.MAX_VALUE)
+            .addGap(0, 646, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 390, Short.MAX_VALUE)
+            .addGap(0, 445, Short.MAX_VALUE)
         );
 
-        jTabbedPane1.addTab("tab2", jPanel2);
+        jTabbedPane1.addTab("Preferencias", jPanel2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addComponent(jTabbedPane1)
-                .addGap(22, 22, 22))
+                .addContainerGap()
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 646, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 425, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
+                .addContainerGap()
+                .addComponent(jTabbedPane1)
+                .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(820, 480));
+        setSize(new java.awt.Dimension(674, 500));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonGerarFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGerarFileActionPerformed
         // TODO add your handling code here:
-//        try {
-//            var fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//            var start = java.time.LocalDate.parse(jFormattedTextFieldDateStart.getText().trim(), fmt);
-//            var end = java.time.LocalDate.parse(jFormattedTextFieldDateEnd.getText().trim(), fmt);
-//            if (end.isBefore(start)) {
-//                javax.swing.JOptionPane.showMessageDialog(this, "Data final não pode ser anterior à inicial.");
-//                return;
-//            }
-//
-//            String defaultName = String.format("SAFT_AO_%s_%s.xml",
-//                    start.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE),
-//                    end.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
-//
-//            javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
-//            fc.setSelectedFile(new java.io.File(defaultName));
-//            int result = fc.showSaveDialog(this);
-//            if (result != javax.swing.JFileChooser.APPROVE_OPTION) {
-//                return;
-//            }
-//
-//            java.nio.file.Path output = fc.getSelectedFile().toPath();
-//
-//            // chama o controller
-//            long exportId = new com.okutonda.okudpdv.controllers.ExportSaftFat().export(start, end, output);
-//
-//            javax.swing.JOptionPane.showMessageDialog(this,
-//                    "SAF-T gerado com sucesso!\nID export: " + exportId + "\nFicheiro: " + output);
-//
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            javax.swing.JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
-//        }
+        try {
+            var fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            var start = java.time.LocalDate.parse(jFormattedTextFieldDateStart.getText().trim(), fmt);
+            var end = java.time.LocalDate.parse(jFormattedTextFieldDateEnd.getText().trim(), fmt);
+            if (end.isBefore(start)) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Data final não pode ser anterior à inicial.");
+                return;
+            }
+
+            String defaultName = String.format("SAFT_AO_%s_%s.xml",
+                    start.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE),
+                    end.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
+
+            javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+            fc.setSelectedFile(new java.io.File(defaultName));
+            int result = fc.showSaveDialog(this);
+            if (result != javax.swing.JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            java.nio.file.Path output = fc.getSelectedFile().toPath();
+
+            // chama o controller
+            long exportId = new ExportSaftFatController().export(start, end, output);
+
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "SAF-T gerado com sucesso!\nID export: " + exportId + "\nFicheiro: " + output);
+            listExpotSaftFat();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            javax.swing.JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
+        }
     }//GEN-LAST:event_jButtonGerarFileActionPerformed
 
     private void jFormattedTextFieldDateStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextFieldDateStartActionPerformed
@@ -258,11 +363,16 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
     private javax.swing.JButton jButtonGerarFile;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateEnd;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateStart;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTableExporSaftFat;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }

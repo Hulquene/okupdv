@@ -82,7 +82,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     public void filterListProduct(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.filter(txt);
+        List<Product> list = productController.filter(txt, "");
         loadListProducts(list);
     }
 

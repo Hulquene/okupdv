@@ -119,7 +119,7 @@ public final class JPanelReport extends javax.swing.JPanel {
     }
 
     public void filterListProduct(String txt, String type) {
-        List<Product> list = productController.filter(txt);
+        List<Product> list = productController.filter(txt,"");
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
         for (Product c : list) {

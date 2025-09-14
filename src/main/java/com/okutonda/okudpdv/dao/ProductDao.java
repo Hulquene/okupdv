@@ -230,10 +230,10 @@ public class ProductDao {
         return null;
     }
 
-    public List<Product> filter(String txt) {
+    public List<Product> filter(String txt,String and) {
         List<Product> list = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM products WHERE description LIKE ?  OR type LIKE ? OR barcode LIKE ?  OR price LIKE ?";
+            String sql = "SELECT * FROM products WHERE description LIKE ?  OR type LIKE ? OR barcode LIKE ?  OR price LIKE ? "  + and;
 //            String sql = "SELECT * FROM products WHERE description LIKE ?";
             pst = this.conn.prepareStatement(sql);
             pst.setString(1, "%" + txt + "%");

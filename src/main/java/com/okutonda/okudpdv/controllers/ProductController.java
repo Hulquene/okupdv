@@ -61,8 +61,9 @@ public class ProductController {
         return dao.filterProduct(txt);
     }
 
-    public List<Product> filter(String txt) {
-        return dao.filter(txt);
+    public List<Product> filter(String txt, String and) {
+        and = and.isEmpty() ? "" : and;
+        return dao.filter(txt,and);
     }
 
     public Boolean add(Product prod, int id) {

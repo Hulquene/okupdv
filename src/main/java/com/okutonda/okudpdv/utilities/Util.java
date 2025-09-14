@@ -4,6 +4,7 @@
  */
 package com.okutonda.okudpdv.utilities;
 
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -14,6 +15,8 @@ import java.util.Base64;
  * @author kenny
  */
 public class Util {
+
+    public static final java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0.00");
 
     public static String checkNumberType(String input) {
         if (isInteger(input)) {
@@ -26,14 +29,14 @@ public class Util {
             return "Not a number";
         }
     }
-    
+
     public static Boolean checkIsNumber(String input) {
         if (isInteger(input)) {
             return true;
         } else if (isDouble(input)) {
-             return true;
+            return true;
         } else if (isFloat(input)) {
-             return true;
+            return true;
         } else {
             return false;
         }
@@ -192,6 +195,41 @@ public class Util {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static BigDecimal parse(String s) {
+        if (s == null) {
+            return BigDecimal.ZERO;
+        }
+        s = s.trim();
+        if (s.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        // 🔑 remove caracteres “estranhos” (espaços, U+FFFD, etc.)
+        s = s.replaceAll("[^0-9,.-]", "");
+
+        // normaliza decimal
+        if (s.contains(",") && s.contains(".")) {
+            // caso "10.000,50"
+            s = s.replace(".", "").replace(",", ".");
+        } else if (s.contains(",")) {
+            s = s.replace(",", ".");
+        }
+
+        try {
+            return new BigDecimal(s);
+        } catch (Exception e) {
+            System.err.println("Falha ao parsear valor: " + s);
+            return BigDecimal.ZERO;
+        }
+    }
+
+    public static String format(BigDecimal v) {
+        if (v == null) {
+            return "0,00";
+        }
+        return df.format(v);
     }
 
 }

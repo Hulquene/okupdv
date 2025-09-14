@@ -128,4 +128,9 @@ public class Payment {
         this.user = user;
     }
 
+    @Override
+    public String toString() {
+        return "Payment{" + "id=" + id + ", status=" + status + ", description=" + description + ", Total=" + Total + ", date=" + date + ", dateFinish=" + dateFinish + ", client=" + client + ", invoiceId=" + invoiceId + ", invoiceType=" + invoiceType + ", prefix=" + prefix + ", number=" + number + ", paymentMode=" + paymentMode + ", user=" + user + '}';
+    }
+
 }

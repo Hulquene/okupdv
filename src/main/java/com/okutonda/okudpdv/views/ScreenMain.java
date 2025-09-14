@@ -25,8 +25,10 @@ import com.okutonda.okudpdv.views.stock.JPanelStock;
 import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -100,6 +102,15 @@ public final class ScreenMain extends javax.swing.JFrame {
         }
     }
 
+    private void iniciarRelogio() {
+        Timer timer = new Timer(1000, e -> {
+            // Atualiza a cada 1 segundo (1000 ms)
+            String horaAtual = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date());
+            jLabelDateTime.setText(horaAtual);
+        });
+        timer.start();
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -124,7 +135,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         jToggleButtonStock = new javax.swing.JToggleButton();
         jLabelNamePanelOpen = new javax.swing.JLabel();
         jComboBoxOptionsDash = new javax.swing.JComboBox<>();
-        jLabelDatetime = new javax.swing.JLabel();
+        jLabelDateTime = new javax.swing.JLabel();
         jToggleButtonSettings = new javax.swing.JToggleButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanelContent = new javax.swing.JPanel();
@@ -149,7 +160,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         jToggleButtonUsers.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonUsers.setForeground(new java.awt.Color(0, 0, 102));
         jToggleButtonUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_5.png"))); // NOI18N
-        jToggleButtonUsers.setText("Equipe");
+        jToggleButtonUsers.setText("Staff");
         jToggleButtonUsers.setBorderPainted(false);
         jToggleButtonUsers.setContentAreaFilled(false);
         jToggleButtonUsers.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -301,7 +312,7 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
-        jLabelNamePanelOpen.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
+        jLabelNamePanelOpen.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabelNamePanelOpen.setForeground(new java.awt.Color(0, 0, 102));
         jLabelNamePanelOpen.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNamePanelOpen.setText("DASHBOARD");
@@ -318,10 +329,10 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
-        jLabelDatetime.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabelDatetime.setForeground(new java.awt.Color(0, 0, 102));
-        jLabelDatetime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelDatetime.setText("data atual");
+        jLabelDateTime.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabelDateTime.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelDateTime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelDateTime.setText("Data e hora");
 
         buttonGroupSideBar.add(jToggleButtonSettings);
         jToggleButtonSettings.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -358,10 +369,11 @@ public final class ScreenMain extends javax.swing.JFrame {
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabelNameCompany, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
-                                .addComponent(jLabelDatetime, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -373,10 +385,10 @@ public final class ScreenMain extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabelNameCompany)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelNamePanelOpen)
+                .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelDatetime)
-                .addGap(12, 12, 12)
+                .addComponent(jLabelDateTime)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jComboBoxOptionsDash, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonSideBarDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -400,7 +412,7 @@ public final class ScreenMain extends javax.swing.JFrame {
                 .addComponent(jToggleButtonUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(125, Short.MAX_VALUE))
+                .addContainerGap(119, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jToggleButtonSideBarClient, jToggleButtonSideBarDashboard, jToggleButtonSideBarPayment, jToggleButtonSideBarProduct, jToggleButtonSideBarReport, jToggleButtonSideBarSales, jToggleButtonSideBarSupplier, jToggleButtonUsers});
@@ -454,9 +466,10 @@ public final class ScreenMain extends javax.swing.JFrame {
                 JDialogValidateLicence dialogLicence = new JDialogValidateLicence(this, rootPaneCheckingEnabled);
                 dialogLicence.setVisible(true);
             } else {
-                Date date = new Date();
-                DateFormat dateF = DateFormat.getDateInstance(DateFormat.SHORT);
-                jLabelDatetime.setText(dateF.format(date));
+//                Date date = new Date();
+//                DateFormat dateF = DateFormat.getDateInstance(DateFormat.SHORT);
+//                jLabelDateTime.setText(dateF.format(date));
+                iniciarRelogio();
             }
 
         }
@@ -606,7 +619,7 @@ public final class ScreenMain extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupSideBar;
     private javax.swing.JComboBox<String> jComboBoxOptionsDash;
-    private javax.swing.JLabel jLabelDatetime;
+    private javax.swing.JLabel jLabelDateTime;
     private javax.swing.JLabel jLabelNameCompany;
     private javax.swing.JLabel jLabelNamePanelOpen;
     private javax.swing.JPanel jPanel1;

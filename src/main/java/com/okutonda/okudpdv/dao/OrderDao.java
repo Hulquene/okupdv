@@ -412,34 +412,5 @@ public class OrderDao {
         }
         return null;
     }
-//    public Order formatObj(ResultSet rs) {
-//        try {
-//            Order obj = new Order();
-//            Clients client;// = new Clients();
-//            ClientDao clientDao = new ClientDao();
-//            client = clientDao.searchFromNif(rs.getString("clients.nif"));
-//            User seller = new User();
-////            UserDao sellerDao = new UserDao();
-////            seller = sellerDao.searchFromId(rs.getInt("cl.nif"));
-//            Payment payment = new Payment();
-//            obj.setId(rs.getInt("ord.id"));
-//            obj.setStatus(rs.getInt("ord.status"));
-//            obj.setDatecreate(rs.getString("ord.datecreate"));
-//            obj.setNumber(rs.getInt("ord.number"));
-//            obj.setPrefix(rs.getString("ord.prefix"));
-//            obj.setClient(client);
-//            obj.setSeller(seller);
-//            obj.setTotal(rs.getDouble("ord.total"));
-//            obj.setSub_total(rs.getDouble("ord.sub_total"));
-//            obj.setAmount_returned(rs.getDouble("ord.amount_returned"));
-//            obj.setPay_total(rs.getDouble("ord.pay_total"));
-//            obj.setPayment(payment);
-//            obj.setHash(rs.getString("ord.hash"));
-//            return obj;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao formatar obj Order: " + e.getMessage());
-//        }
-//        return null;
-//    }
 
 }

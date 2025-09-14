@@ -1014,7 +1014,8 @@ CREATE TABLE IF NOT EXISTS saft_exports (
   notes        TEXT NULL,
   created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
+ALTER TABLE saft_exports
+  ADD COLUMN exported_by INT NULL;
 
 COMMIT;
 

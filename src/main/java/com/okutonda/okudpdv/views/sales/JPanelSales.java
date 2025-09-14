@@ -152,11 +152,10 @@ public final class JPanelSales extends javax.swing.JPanel {
             }
         });
 
-        jButtonPrintOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/File.png"))); // NOI18N
+        jButtonPrintOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/printer_8139457.png"))); // NOI18N
         jButtonPrintOrder.setText("Imprimir");
         jButtonPrintOrder.setContentAreaFilled(false);
         jButtonPrintOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonPrintOrder.setEnabled(false);
         jButtonPrintOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPrintOrderActionPerformed(evt);
@@ -169,7 +168,12 @@ public final class JPanelSales extends javax.swing.JPanel {
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel2.setText("Data Fim:");
 
+        jButtonFilterOrder.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonFilterOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
         jButtonFilterOrder.setText("Filtrar");
+        jButtonFilterOrder.setBorderPainted(false);
+        jButtonFilterOrder.setContentAreaFilled(false);
+        jButtonFilterOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonFilterOrder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonFilterOrderActionPerformed(evt);
@@ -218,14 +222,14 @@ public final class JPanelSales extends javax.swing.JPanel {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jFormattedTextFieldDateFinish, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButtonFilterOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jButtonFilterOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButtonGenerateNoteCredit)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(18, 18, 18)
                                 .addComponent(jButtonDeleteOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButtonViewOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(26, 26, 26)
+                                .addComponent(jButtonViewOrder)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonPrintOrder))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel2)

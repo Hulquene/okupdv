@@ -139,5 +139,10 @@ public class ProductOrder {
     public void setReasonCode(String reasonCode) {
         this.reasonCode = reasonCode;
     }
+
+    @Override
+    public String toString() {
+        return "ProductOrder{" + "id=" + id + ", orderId=" + orderId + ", product=" + product + ", date=" + date + ", description=" + description + ", qty=" + qty + ", price=" + price + ", unit=" + unit + ", code=" + code + ", taxeCode=" + taxeCode + ", taxeName=" + taxeName + ", taxePercentage=" + taxePercentage + ", reasonTax=" + reasonTax + ", reasonCode=" + reasonCode + '}';
+    }
     
 }
