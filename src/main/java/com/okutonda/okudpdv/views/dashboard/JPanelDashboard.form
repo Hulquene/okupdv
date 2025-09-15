@@ -173,7 +173,7 @@
               <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icon/Male User_5.png"/>
+              <Image iconType="3" name="/icons/Male User_5.png"/>
             </Property>
           </Properties>
         </Component>
@@ -354,7 +354,7 @@
         <Component class="javax.swing.JLabel" name="jLabel7">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icon/Male User_4.png"/>
+              <Image iconType="3" name="/icons/Male User_5.png"/>
             </Property>
           </Properties>
         </Component>
@@ -673,7 +673,7 @@
         <Component class="javax.swing.JLabel" name="jLabel3">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icon/Idea.png"/>
+              <Image iconType="3" name="/icons/Idea.png"/>
             </Property>
           </Properties>
         </Component>
@@ -859,7 +859,7 @@
         <Component class="javax.swing.JLabel" name="jLabel15">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icon/Idea.png"/>
+              <Image iconType="3" name="/icons/Idea.png"/>
             </Property>
           </Properties>
         </Component>

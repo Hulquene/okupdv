@@ -669,7 +669,7 @@
                       <Font name="Segoe UI" size="12" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/icon/Plus.png"/>
+                      <Image iconType="3" name="/icons/Plus.png"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" value="Selecionar Cliente"/>
                     <Property name="borderPainted" type="boolean" value="false"/>
@@ -835,7 +835,7 @@
                       <Font name="Segoe UI" size="14" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/icon/Plus.png"/>
+                      <Image iconType="3" name="/icons/Plus.png"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" value="Adicionar Produto"/>
                     <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">

@@ -115,7 +115,7 @@ public class JPanelDashboard extends javax.swing.JPanel {
         jPanel7.setPreferredSize(new java.awt.Dimension(140, 100));
 
         jLabel1.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_5.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Male User_5.png"))); // NOI18N
 
         jLabel10.setBackground(new java.awt.Color(255, 255, 255));
         jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
@@ -207,7 +207,7 @@ public class JPanelDashboard extends javax.swing.JPanel {
         jPanel8.setBackground(new java.awt.Color(255, 153, 51));
         jPanel8.setPreferredSize(new java.awt.Dimension(140, 100));
 
-        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_4.png"))); // NOI18N
+        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Male User_5.png"))); // NOI18N
 
         jLabelNameUser.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabelNameUser.setForeground(new java.awt.Color(255, 255, 255));
@@ -368,7 +368,7 @@ public class JPanelDashboard extends javax.swing.JPanel {
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
         jPanel2.setPreferredSize(new java.awt.Dimension(140, 100));
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Idea.png"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Idea.png"))); // NOI18N
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
@@ -464,7 +464,7 @@ public class JPanelDashboard extends javax.swing.JPanel {
         jPanel5.setBackground(new java.awt.Color(255, 51, 51));
         jPanel5.setPreferredSize(new java.awt.Dimension(140, 100));
 
-        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Idea.png"))); // NOI18N
+        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Idea.png"))); // NOI18N
 
         jLabel17.setBackground(new java.awt.Color(0, 153, 255));
         jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N

@@ -269,7 +269,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         jPanel3.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 140, 380, 300));
 
-        jButtonCloseScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Close.png"))); // NOI18N
+        jButtonCloseScreen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Close.png"))); // NOI18N
         jButtonCloseScreen.setBorderPainted(false);
         jButtonCloseScreen.setContentAreaFilled(false);
         jButtonCloseScreen.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));

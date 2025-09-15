@@ -159,7 +159,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonUsers);
         jToggleButtonUsers.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonUsers.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_5.png"))); // NOI18N
+        jToggleButtonUsers.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Male User_5.png"))); // NOI18N
         jToggleButtonUsers.setText("Staff");
         jToggleButtonUsers.setBorderPainted(false);
         jToggleButtonUsers.setContentAreaFilled(false);
@@ -190,7 +190,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarClient);
         jToggleButtonSideBarClient.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarClient.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Male User_2.png"))); // NOI18N
+        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Male User_2.png"))); // NOI18N
         jToggleButtonSideBarClient.setText("Clientes");
         jToggleButtonSideBarClient.setBorderPainted(false);
         jToggleButtonSideBarClient.setContentAreaFilled(false);
@@ -265,7 +265,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarReport);
         jToggleButtonSideBarReport.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarReport.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarReport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Opened Folder.png"))); // NOI18N
+        jToggleButtonSideBarReport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
         jToggleButtonSideBarReport.setText("Relatorio");
         jToggleButtonSideBarReport.setBorderPainted(false);
         jToggleButtonSideBarReport.setContentAreaFilled(false);
@@ -337,7 +337,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSettings);
         jToggleButtonSettings.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSettings.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Settings.png"))); // NOI18N
+        jToggleButtonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Settings.png"))); // NOI18N
         jToggleButtonSettings.setText("Configurações");
         jToggleButtonSettings.setBorderPainted(false);
         jToggleButtonSettings.setContentAreaFilled(false);

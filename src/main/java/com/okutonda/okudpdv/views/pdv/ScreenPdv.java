@@ -858,7 +858,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         jTextFieldNifClient.setAutoscrolls(false);
 
         jButtonPesquisarCompany.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonPesquisarCompany.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Plus.png"))); // NOI18N
+        jButtonPesquisarCompany.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonPesquisarCompany.setToolTipText("Selecionar Cliente");
         jButtonPesquisarCompany.setBorderPainted(false);
         jButtonPesquisarCompany.setContentAreaFilled(false);
@@ -929,7 +929,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
         jButtonAddProductInvoice.setBackground(new java.awt.Color(204, 204, 255));
         jButtonAddProductInvoice.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonAddProductInvoice.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Plus.png"))); // NOI18N
+        jButtonAddProductInvoice.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonAddProductInvoice.setToolTipText("Adicionar Produto");
         jButtonAddProductInvoice.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAddProductInvoice.addActionListener(new java.awt.event.ActionListener() {
