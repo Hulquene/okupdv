@@ -306,8 +306,12 @@ public final class JPanelClient extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (id > 0) {
-                Clients client = clientController.getId(id);
-                JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
+                JDialogViewClient viewClient = new JDialogViewClient(null, true);
+                viewClient.setClient(id);
+                viewClient.setVisible(true);
+//                Boolean resp = viewClient.getResponse();                
+//                Clients client = clientController.getId(id);
+//                JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
             }
         }
 //        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
@@ -379,20 +383,6 @@ public final class JPanelClient extends javax.swing.JPanel {
 
     private void jButtonAlterClientSeletedTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterClientSeletedTableActionPerformed
         // TODO add your handling code here:
-//        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-//        jTabbedPaneClient.setSelectedIndex(1);
-//        jTextFieldIdClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-//        jTextFieldNifClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 1).toString());
-//        jTextFieldNameClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 2).toString());
-//        jTextFieldEmailClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 3).toString());
-//        jTextFieldPhoneClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 4).toString());
-//        jComboBoxCountryClient.setSelectedItem(jTableClients.getValueAt(jTableClients.getSelectedRow(), 5));
-//        jTextFieldCityClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 6).toString());
-//        jTextFieldStateClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 7).toString());
-//        jTextFieldAddressClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 8).toString());
-//        jTextFieldZipCodeClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 9).toString());
-//        jComboBoxStatusClient.setSelectedIndex(1);
-
         int value = 0;
         try {
             value = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
