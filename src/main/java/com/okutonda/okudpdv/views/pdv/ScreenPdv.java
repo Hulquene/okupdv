@@ -26,6 +26,7 @@ import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,7 +36,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
@@ -72,12 +78,165 @@ public class ScreenPdv extends javax.swing.JFrame {
         clientSelected = null;//new Clients();
         shiftController.getShiftSession();
         userController = new UserController();
+
+        // Atalhos globais
+        InputMap im = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = getRootPane().getActionMap();
+
+        // F2 → Ajuda
+        im.put(KeyStroke.getKeyStroke("F1"), "ajuda");
+        am.put("ajuda", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ajuda();
+            }
+        });
+        // F2 → Novo Cliente
+        im.put(KeyStroke.getKeyStroke("F2"), "novoCliente");
+        am.put("novoCliente", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                novoCliente();
+            }
+        });
+
+        // F3 → Procurar Produto
+        im.put(KeyStroke.getKeyStroke("F3"), "procurarProduto");
+        am.put("procurarProduto", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                procurarProduto();
+            }
+        });
+
+        // F12 → Finalizar Venda
+        im.put(KeyStroke.getKeyStroke("F12"), "finalizarVenda");
+        am.put("finalizarVenda", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                finalizarVenda();
+            }
+        });
+
+        // ESC → Cancelar
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancelarVenda");
+        am.put("cancelarVenda", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelarVenda();
+            }
+        });
+    }
+
+    // ================== FUNÇÕES DO PDV ==================
+    private void ajuda() {
+        JDialogHelpers jdHelp = new JDialogHelpers(this, true);
+        jdHelp.setVisible(true);
+    }
+
+    private void novoCliente() {
+        JOptionPane.showMessageDialog(this, "Função: Novo Cliente");
+    }
+
+    private void procurarProduto() {
+        JDialogProductSearch jdP = new JDialogProductSearch(this, true);
+        jdP.setVisible(true);
+    }
+
+    private void finalizarVenda() {
+        // Evita finalizar sem itens
+        if (listProductOrder == null || listProductOrder.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Adicione produto para fazer a venda", "Atenção", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+//       System.out.println(listProductOrder.toString());
+        // Evita duplo clique
+        jButtonFinishInvoice.setEnabled(false);
+
+        try {
+            // 1) Cliente padrão (se não selecionado)
+            if (clientSelected == null) {
+                ClientDao clientDao = new ClientDao();
+                clientSelected = clientDao.getClientDefault();
+                if (clientSelected == null) {
+                    JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
+            // 2) Sessão/Operador
+            if (shiftSession == null || shiftSession.getSeller() == null) {
+                JOptionPane.showMessageDialog(this, "Abra um turno (operador não encontrado).", "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 3) Monta o Order “mínimo” (sem numeração/hash/valores pagos)
+            Order order = new Order();
+            order.setClient(clientSelected);
+            order.setSeller(shiftSession.getSeller());
+            order.setProducts(listProductOrder);
+            // NÃO setar prefix/number/hash aqui; isso é do controller/service.
+            // NÃO usar total/subTotal aqui; isso é recalculado no servidor.
+
+            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO NO DIÁLOGO (UI)
+// (o controller recalcula novamente ao salvar)
+            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO (preço COM IVA embutido)
+            Totais t = calcularTotaisLocalComIVA(listProductOrder);
+            order.setSubTotal(t.subtotal.doubleValue()); // líquido
+            order.setTotalTaxe(t.tax.doubleValue());     // IVA
+            order.setTotal(t.total.doubleValue());       // bruto
+
+//            System.out.println(order);
+            // 4) Abre diálogo de pagamento (o diálogo calcula payTotal, troco, métodos, observações, etc.)
+            JDialogOrder jdOrder = new JDialogOrder(this, true);
+            jdOrder.setOrder(order);          // passa itens/cliente/seller para o preview no diálogo
+            jdOrder.setVisible(true);
+
+            // 5) Verifica se o utilizador confirmou o pagamento
+            Boolean confirmado = jdOrder.getResponse();
+            if (Boolean.TRUE.equals(confirmado)) {
+                // O diálogo deve ter preenchido:
+                //   order.setPayTotal(...);
+                //   order.setAmountReturned(...);
+                //   order.setNote(...);           // se aplicares
+                //   // não mexer no prefix/number/hash – isso será feito no controller
+
+                // 6) Finaliza no controller (ele calcula totais, reserva número, gera hash e persiste tudo)
+//                Order result = orderController.criarEFinalizar(order);
+//                if (result != null && result.getId() > 0) {
+//                    JOptionPane.showMessageDialog(this, "Venda efetuada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                clearOrder();   // limpa carrinho/campos
+//                    listProduts();  // recarrega grelha de produtos/stock
+//                    // opcional: imprimir/mostrar resumo result
+//                } else {
+//                    JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
+//                }
+            } else {
+                // utilizador cancelou; nada a fazer
+                // JOptionPane.showMessageDialog(this, "Pagamento cancelado.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Ocorreu um erro ao finalizar a venda:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            jButtonFinishInvoice.setEnabled(true);
+        }
+
+    }
+
+    private void cancelarVenda() {
+        listProductOrder.clear();
+        listProdutsOrder();
+        calculTotal();
     }
 
     private static class Totais {
+
         BigDecimal subtotal; // líquido (sem IVA)
         BigDecimal tax;      // IVA
         BigDecimal total;    // bruto (com IVA)
+
         Totais(BigDecimal s, BigDecimal i, BigDecimal t) {
             this.subtotal = s;
             this.tax = i;
@@ -412,8 +571,8 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     public void filterListProducts(String txt) {
         ProductDao cDao = new ProductDao();
-        List<Product> list = cDao.filter(txt,"and stock_total>0 and status='1'");
-        
+        List<Product> list = cDao.filter(txt, "and stock_total>0 and status='1'");
+
         listProduts(list);
 //        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
 //        data.setNumRows(0);
@@ -504,6 +663,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         jButtonPainelListProducts = new javax.swing.JButton();
         jButtonListClient = new javax.swing.JButton();
         jButtonCloseShift = new javax.swing.JButton();
+        jButtonHelp = new javax.swing.JButton();
         jComboBoxOptions = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
@@ -634,6 +794,20 @@ public class ScreenPdv extends javax.swing.JFrame {
         });
         jToolBar1.add(jButtonCloseShift);
 
+        jButtonHelp.setBackground(new java.awt.Color(204, 204, 0));
+        jButtonHelp.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonHelp.setForeground(new java.awt.Color(255, 255, 255));
+        jButtonHelp.setText("Ajuda");
+        jButtonHelp.setFocusable(false);
+        jButtonHelp.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonHelp.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonHelpActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButtonHelp);
+
         jComboBoxOptions.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Opcões", "Panel", "Sair" }));
         jComboBoxOptions.setToolTipText("Opcões");
         jComboBoxOptions.addActionListener(new java.awt.event.ActionListener() {
@@ -652,20 +826,16 @@ public class ScreenPdv extends javax.swing.JFrame {
                 .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabelNameUserSeller, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(167, 167, 167)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabelDateTime, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 464, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 551, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(67, 67, 67))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(2, 2, 2))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGap(3, 3, 3)
                         .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -674,7 +844,8 @@ public class ScreenPdv extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabelNameCompany)
-                            .addComponent(jLabelNameUserSeller))))
+                            .addComponent(jLabelNameUserSeller)
+                            .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -1151,153 +1322,83 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonFinishInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishInvoiceActionPerformed
         // TODO add your handling code here:
-
+        finalizarVenda();
         // Evita finalizar sem itens
-        if (listProductOrder == null || listProductOrder.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Adicione produto para fazer a venda", "Atenção", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-//       System.out.println(listProductOrder.toString());
-        // Evita duplo clique
-        jButtonFinishInvoice.setEnabled(false);
-
-        try {
-            // 1) Cliente padrão (se não selecionado)
-            if (clientSelected == null) {
-                ClientDao clientDao = new ClientDao();
-                clientSelected = clientDao.getClientDefault();
-                if (clientSelected == null) {
-                    JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-            }
-
-            // 2) Sessão/Operador
-            if (shiftSession == null || shiftSession.getSeller() == null) {
-                JOptionPane.showMessageDialog(this, "Abra um turno (operador não encontrado).", "Atenção", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // 3) Monta o Order “mínimo” (sem numeração/hash/valores pagos)
-            Order order = new Order();
-            order.setClient(clientSelected);
-            order.setSeller(shiftSession.getSeller());
-            order.setProducts(listProductOrder);
-            // NÃO setar prefix/number/hash aqui; isso é do controller/service.
-            // NÃO usar total/subTotal aqui; isso é recalculado no servidor.
-
-            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO NO DIÁLOGO (UI)
-// (o controller recalcula novamente ao salvar)
-            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO (preço COM IVA embutido)
-            Totais t = calcularTotaisLocalComIVA(listProductOrder);
-            order.setSubTotal(t.subtotal.doubleValue()); // líquido
-            order.setTotalTaxe(t.tax.doubleValue());     // IVA
-            order.setTotal(t.total.doubleValue());       // bruto
-
-//            System.out.println(order);
-            // 4) Abre diálogo de pagamento (o diálogo calcula payTotal, troco, métodos, observações, etc.)
-            JDialogOrder jdOrder = new JDialogOrder(this, true);
-            jdOrder.setOrder(order);          // passa itens/cliente/seller para o preview no diálogo
-            jdOrder.setVisible(true);
-
-            // 5) Verifica se o utilizador confirmou o pagamento
-            Boolean confirmado = jdOrder.getResponse();
-            if (Boolean.TRUE.equals(confirmado)) {
-                // O diálogo deve ter preenchido:
-                //   order.setPayTotal(...);
-                //   order.setAmountReturned(...);
-                //   order.setNote(...);           // se aplicares
-                //   // não mexer no prefix/number/hash – isso será feito no controller
-
-                // 6) Finaliza no controller (ele calcula totais, reserva número, gera hash e persiste tudo)
-//                Order result = orderController.criarEFinalizar(order);
-//                if (result != null && result.getId() > 0) {
-//                    JOptionPane.showMessageDialog(this, "Venda efetuada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    clearOrder();   // limpa carrinho/campos
-//                    listProduts();  // recarrega grelha de produtos/stock
-//                    // opcional: imprimir/mostrar resumo result
-//                } else {
-//                    JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
-//                }
-            } else {
-                // utilizador cancelou; nada a fazer
-                // JOptionPane.showMessageDialog(this, "Pagamento cancelado.", "Info", JOptionPane.INFORMATION_MESSAGE);
-            }
-
-        } catch (Exception ex) {
-            Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "Ocorreu um erro ao finalizar a venda:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            jButtonFinishInvoice.setEnabled(true);
-        }
-
+//        if (listProductOrder == null || listProductOrder.isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Adicione produto para fazer a venda", "Atenção", JOptionPane.WARNING_MESSAGE);
+//            return;
+//        }
+//        // Evita duplo clique
+//        jButtonFinishInvoice.setEnabled(false);
 //
-//        if (!listProductOrder.isEmpty()) {
-////            Double totalPay = Double.valueOf(jTextFieldPayClient.getText());
-////            Double changeInvoice = Double.valueOf(jTextFieldTotalChange.getText());
-////            if (total > 0 && total >= changeInvoice && changeInvoice >= 0) {
-//            try {
+//        try {
+//            // 1) Cliente padrão (se não selecionado)
+//            if (clientSelected == null) {
+//                ClientDao clientDao = new ClientDao();
+//                clientSelected = clientDao.getClientDefault();
 //                if (clientSelected == null) {
-//                    ClientDao clientDao = new ClientDao();
-//                    clientSelected = clientDao.getClientDefault();
+//                    JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
+//                    return;
 //                }
-//                Order order = new Order();
-////                    String prefix = UtilSales.getPrefix("order");
-////                    int number = orderController.getNextNumber();
-////                    String numberOrder = prefix + number;
-////                    String date = UtilDate.getFormatDataNow();
-////                    String hash = UtilSaft.appGenerateHashInvoice(date, date, numberOrder, String.valueOf(total), "");
-//
-////                    order.setStatus(1);
-////                    order.setYear(UtilDate.getYear());
-////                    order.setDatecreate(date);
-//                order.setTotal(total);
-//                order.setSubTotal(subTotal);
-//                order.setTotalTaxe(subTotal);
-////                    order.setPayTotal(totalPay);
-////                    order.setAmountReturned(changeInvoice);
-////                    order.setNumber(number);
-////                    order.setPrefix(UtilSales.getPrefix("order"));
-////                order.setHash(UtilSaft.appGenerateHashInvoice(date, date, numberOrder, String.valueOf(total), ""));
-////                    order.setHash(hash);
-//
-//                order.setClient(clientSelected);
-//                order.setSeller(shiftSession.getSeller());
-//                order.setProducts(listProductOrder);
-//
-//                JDialogOrder jdOrder = new JDialogOrder(this, true);
-//                jdOrder.setOrder(order);
-//                jdOrder.setVisible(true);
-//
-//                Boolean respo = jdOrder.getResponse();
-//
-//                if (respo == true) {
-//                    JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-//                    clearOrder();
-//                    listProduts();
-////                        helpUtil.clearScreen(jPanel3);
-////                        helpUtil.clearScreen(jPanel3);
-////                        order = null;
-//                }
-////                    else {
-////                        JOptionPane.showMessageDialog(null, "Venda nao cadastrada!!", "Atenção", JOptionPane.ERROR);
-////                    }
-////                Order result = orderController.add(order);
-////                if (result != null) {
-////                    total = 0.0;
-////                    subTotal = 0.0;
-////                    JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!! Num: " + result.getId(), "Atenção", JOptionPane.INFORMATION_MESSAGE);
-////                } else {
-////                    JOptionPane.showMessageDialog(null, "Venda nao cadastrada!!", "Atenção", JOptionPane.ERROR);
-////                }
-//            } catch (Exception ex) {
-//                Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-////            } else {
-////                JOptionPane.showMessageDialog(null, "Valor Pago insuficiente!", "Atenção", JOptionPane.WARNING_MESSAGE);
-////            }
-//        } else {
-//            JOptionPane.showMessageDialog(null, "Adicione producto para fazer uma venda", "Atenção", JOptionPane.WARNING_MESSAGE);
+//
+//            // 2) Sessão/Operador
+//            if (shiftSession == null || shiftSession.getSeller() == null) {
+//                JOptionPane.showMessageDialog(this, "Abra um turno (operador não encontrado).", "Atenção", JOptionPane.WARNING_MESSAGE);
+//                return;
+//            }
+//
+//            // 3) Monta o Order “mínimo” (sem numeração/hash/valores pagos)
+//            Order order = new Order();
+//            order.setClient(clientSelected);
+//            order.setSeller(shiftSession.getSeller());
+//            order.setProducts(listProductOrder);
+//            // NÃO setar prefix/number/hash aqui; isso é do controller/service.
+//            // NÃO usar total/subTotal aqui; isso é recalculado no servidor.
+//
+//            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO NO DIÁLOGO (UI)
+//// (o controller recalcula novamente ao salvar)
+//            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO (preço COM IVA embutido)
+//            Totais t = calcularTotaisLocalComIVA(listProductOrder);
+//            order.setSubTotal(t.subtotal.doubleValue()); // líquido
+//            order.setTotalTaxe(t.tax.doubleValue());     // IVA
+//            order.setTotal(t.total.doubleValue());       // bruto
+//
+////            System.out.println(order);
+//            // 4) Abre diálogo de pagamento (o diálogo calcula payTotal, troco, métodos, observações, etc.)
+//            JDialogOrder jdOrder = new JDialogOrder(this, true);
+//            jdOrder.setOrder(order);          // passa itens/cliente/seller para o preview no diálogo
+//            jdOrder.setVisible(true);
+//
+//            // 5) Verifica se o utilizador confirmou o pagamento
+//            Boolean confirmado = jdOrder.getResponse();
+//            if (Boolean.TRUE.equals(confirmado)) {
+//                // O diálogo deve ter preenchido:
+//                //   order.setPayTotal(...);
+//                //   order.setAmountReturned(...);
+//                //   order.setNote(...);           // se aplicares
+//                //   // não mexer no prefix/number/hash – isso será feito no controller
+//
+//                // 6) Finaliza no controller (ele calcula totais, reserva número, gera hash e persiste tudo)
+////                Order result = orderController.criarEFinalizar(order);
+////                if (result != null && result.getId() > 0) {
+////                    JOptionPane.showMessageDialog(this, "Venda efetuada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+//                clearOrder();   // limpa carrinho/campos
+////                    listProduts();  // recarrega grelha de produtos/stock
+////                    // opcional: imprimir/mostrar resumo result
+////                } else {
+////                    JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
+////                }
+//            } else {
+//                // utilizador cancelou; nada a fazer
+//                // JOptionPane.showMessageDialog(this, "Pagamento cancelado.", "Info", JOptionPane.INFORMATION_MESSAGE);
+//            }
+//
+//        } catch (Exception ex) {
+//            Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
+//            JOptionPane.showMessageDialog(this, "Ocorreu um erro ao finalizar a venda:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+//        } finally {
+//            jButtonFinishInvoice.setEnabled(true);
 //        }
     }//GEN-LAST:event_jButtonFinishInvoiceActionPerformed
 
@@ -1326,9 +1427,10 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonRemoveAllProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveAllProdActionPerformed
         // TODO add your handling code here:
-        listProductOrder.clear();
-        listProdutsOrder();
-        calculTotal();
+        cancelarVenda();
+//        listProductOrder.clear();
+//        listProdutsOrder();
+//        calculTotal();
     }//GEN-LAST:event_jButtonRemoveAllProdActionPerformed
 
     private void jButtonPainelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPainelActionPerformed
@@ -1356,6 +1458,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonListClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonListClientActionPerformed
         // TODO add your handling code here:
+        novoCliente();
     }//GEN-LAST:event_jButtonListClientActionPerformed
 
     private void jComboBoxOptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxOptionsActionPerformed
@@ -1382,8 +1485,9 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jButtonPainelListProductsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPainelListProductsActionPerformed
         // TODO add your handling code here:
-        JDialogProductSearch jdP = new JDialogProductSearch(this, true);
-        jdP.setVisible(true);
+//        JDialogProductSearch jdP = new JDialogProductSearch(this, true);
+//        jdP.setVisible(true);
+        procurarProduto();
     }//GEN-LAST:event_jButtonPainelListProductsActionPerformed
 
     private void jTableProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableProductsMouseClicked
@@ -1457,6 +1561,11 @@ public class ScreenPdv extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButtonPesquisarCompanyActionPerformed
 
+    private void jButtonHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonHelpActionPerformed
+        // TODO add your handling code here:
+        ajuda();
+    }//GEN-LAST:event_jButtonHelpActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1504,6 +1613,7 @@ public class ScreenPdv extends javax.swing.JFrame {
     private javax.swing.JButton jButtonAddProductInvoice;
     private javax.swing.JButton jButtonCloseShift;
     private javax.swing.JButton jButtonFinishInvoice;
+    private javax.swing.JButton jButtonHelp;
     private javax.swing.JButton jButtonListClient;
     private javax.swing.JButton jButtonListSales;
     private javax.swing.JButton jButtonPainel;

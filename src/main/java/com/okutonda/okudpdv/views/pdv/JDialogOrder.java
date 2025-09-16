@@ -17,17 +17,21 @@ import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.utilities.ShiftSession;
 import com.okutonda.okudpdv.utilities.UtilDate;
 import com.okutonda.okudpdv.utilities.UtilSales;
+import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -64,6 +68,94 @@ public class JDialogOrder extends javax.swing.JDialog {
         userController = new UserController();
         shiftController = new ShiftController();
         shiftSession = ShiftSession.getInstance();
+
+        // Atalhos globais
+        InputMap im = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = getRootPane().getActionMap();
+
+        // F12 → Finalizar Venda
+        im.put(KeyStroke.getKeyStroke("F12"), "finalizarVenda");
+        am.put("finalizarVenda", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                finalizarVenda();
+            }
+        });
+    }
+
+    private void finalizarVenda() {
+        // evita duplo clique
+        jButtonSaveOrder.setEnabled(false);
+
+        try {
+            // 1) Garantir que recalculamos a lista de pagamentos a partir da UI
+            rebuildPaymentsFromUI();
+
+            // 2) Validar restante
+            BigDecimal valorRestante = parse(jTextFieldValorRestante.getText()).setScale(2, RoundingMode.HALF_UP);
+            if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
+                JOptionPane.showMessageDialog(this, "VALOR EM FALTA: " + format(valorRestante), "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 3) Validar que tem ao menos um pagamento > 0
+            if (listPayment == null || listPayment.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Selecione pelo menos um método de pagamento.", "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // 4) Soma pagamentos e calcular troco
+            BigDecimal totalPedido = parse(jTextFieldTotalOrder.getText()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal somaPag = listPayment.stream()
+                    .map(Payment::getTotal)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal troco = somaPag.subtract(totalPedido);
+            if (troco.compareTo(BigDecimal.ZERO) < 0) {
+                troco = BigDecimal.ZERO;
+            }
+
+            // 5) Preencher order com valores de pagamento
+            order.setPayTotal(somaPag.doubleValue());
+            order.setAmountReturned(troco.doubleValue());
+            order.setNote(jTextPaneNote.getText()); // se tiver observação
+
+            // 6) Completar metadados opcionais dos pagamentos (cliente, operador, datas)
+            String nowIso = UtilDate.getFormatDataNow();
+            for (Payment p : listPayment) {
+                p.setClient(order.getClient());
+                p.setUser(order.getSeller());
+                p.setDate(nowIso);
+                p.setDescription(p.getPaymentMode().name()); // opcional
+            }
+
+            // 7) Persistir: order + itens + pagamentos (numeração/hash no controller)
+            Order salvo = orderController.criarEFinalizarComPagamentos(order, listPayment);
+            if (salvo != null && salvo.getId() > 0) {
+                JOptionPane.showMessageDialog(this, "Venda gravada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                this.response = true;  // se o diálogo usa getResponse()
+                this.statusClose = true;
+                UtilSales.print(order);
+//             try {
+//            // TODO add your handling code here:
+//                UtilSales.PrintOrderTicket(order);
+//            } catch (PrinterException ex) {
+//                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+
+                dispose();             // fecha o diálogo
+            } else {
+                JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao gravar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            jButtonSaveOrder.setEnabled(true);
+        }
     }
 
     public void listProdutsOrder() {
@@ -602,7 +694,7 @@ public class JDialogOrder extends javax.swing.JDialog {
         });
 
         jButtonClose.setForeground(new java.awt.Color(255, 0, 0));
-        jButtonClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Cancel.png"))); // NOI18N
+        jButtonClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Cancel.png"))); // NOI18N
         jButtonClose.setText("Cancelar");
         jButtonClose.setToolTipText("Cancelar a Fatura");
         jButtonClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -963,112 +1055,7 @@ public class JDialogOrder extends javax.swing.JDialog {
 
     private void jButtonSaveOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveOrderActionPerformed
 
-        // evita duplo clique
-        jButtonSaveOrder.setEnabled(false);
-
-        try {
-            // 1) Garantir que recalculamos a lista de pagamentos a partir da UI
-            rebuildPaymentsFromUI();
-
-            // 2) Validar restante
-            BigDecimal valorRestante = parse(jTextFieldValorRestante.getText()).setScale(2, RoundingMode.HALF_UP);
-            if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
-                JOptionPane.showMessageDialog(this, "VALOR EM FALTA: " + format(valorRestante), "Atenção", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // 3) Validar que tem ao menos um pagamento > 0
-            if (listPayment == null || listPayment.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Selecione pelo menos um método de pagamento.", "Atenção", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            // 4) Soma pagamentos e calcular troco
-            BigDecimal totalPedido = parse(jTextFieldTotalOrder.getText()).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal somaPag = listPayment.stream()
-                    .map(Payment::getTotal)
-                    .filter(Objects::nonNull)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .setScale(2, RoundingMode.HALF_UP);
-
-            BigDecimal troco = somaPag.subtract(totalPedido);
-            if (troco.compareTo(BigDecimal.ZERO) < 0) {
-                troco = BigDecimal.ZERO;
-            }
-
-            // 5) Preencher order com valores de pagamento
-            order.setPayTotal(somaPag.doubleValue());
-            order.setAmountReturned(troco.doubleValue());
-            order.setNote(jTextPaneNote.getText()); // se tiver observação
-
-            // 6) Completar metadados opcionais dos pagamentos (cliente, operador, datas)
-            String nowIso = UtilDate.getFormatDataNow();
-            for (Payment p : listPayment) {
-                p.setClient(order.getClient());
-                p.setUser(order.getSeller());
-                p.setDate(nowIso);
-                p.setDescription(p.getPaymentMode().name()); // opcional
-            }
-
-            // 7) Persistir: order + itens + pagamentos (numeração/hash no controller)
-            Order salvo = orderController.criarEFinalizarComPagamentos(order, listPayment);
-            if (salvo != null && salvo.getId() > 0) {
-                JOptionPane.showMessageDialog(this, "Venda gravada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                this.response = true;  // se o diálogo usa getResponse()
-                this.statusClose = true;
-                UtilSales.print(order);
-//             try {
-//            // TODO add your handling code here:
-//                UtilSales.PrintOrderTicket(order);
-//            } catch (PrinterException ex) {
-//                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-
-                dispose();             // fecha o diálogo
-            } else {
-                JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Erro ao gravar: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            jButtonSaveOrder.setEnabled(true);
-        }
-
-//        BigDecimal valorRestante = BigDecimal.ZERO;
-//        valorRestante = valorRestante.add(parse(jTextFieldValorRestante.getText()));
-////        return (restante.compareTo(BigDecimal.ZERO) < 0) ? BigDecimal.ZERO : restante;
-//        if (valorRestante.compareTo(BigDecimal.ZERO) > 0) {
-//            JOptionPane.showMessageDialog(null, "VALORES RESTANTE EM FALTA: " + valorRestante, "Atenção", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
-//
-//        System.out.println("Fatura:" + this.order);
-//        System.out.println("Total Payment:" + this.listPayment.size());
-//        System.out.println("List Payment:" + this.listPayment);
-//
-////         jTextFieldPayNumerario, 
-////         jTextFieldPayMulticaixa, 
-////         jTextFieldPayTransferencia, 
-////         jTextFieldPayOutros
-////        Order result = orderController.add(order);
-////        if (result != null) {
-////            shiftController.updateIncurredAmount(result.getTotal(), shiftSession.getShift().getId());
-//////            JOptionPane.showMessageDialog(null, "Venda efetuada com sucesso!! Num: " + result.getId(), "Atenção", JOptionPane.INFORMATION_MESSAGE);
-////            status = true;
-////            statusClose = true;
-////            UtilSales.print(order);
-//////             try {
-//////            // TODO add your handling code here:
-//////                UtilSales.PrintOrderTicket(order);
-//////            } catch (PrinterException ex) {
-//////                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
-//////            }
-////            this.dispose();
-////        } else {
-////            status = false;
-////        }
+        finalizarVenda();
     }//GEN-LAST:event_jButtonSaveOrderActionPerformed
 
     private void jButtonCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCloseActionPerformed

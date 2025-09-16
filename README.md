@@ -81,3 +81,246 @@ Produto categoria:concluido
 Caixa ou pdv
     pontos: codigo do supervisor para cancelar a fatura
             so esta a fazer fatura com consumidor final
+
+
+
+
+
+🔑 Atalhos de Teclado Recomendados para PDV
+
+(alguns são praticamente “padrão de mercado”)
+
+Operações Principais
+
+F1 → Ajuda / Informações rápidas
+
+F2 → Novo cliente / Selecionar cliente
+
+F3 → Procurar produto
+
+F4 → Adicionar item manual
+
+F5 → Aplicar desconto
+
+F6 → Ver subtotal
+
+F7 → Suspender venda
+
+F8 → Retomar venda suspensa
+
+F9 → Cancelar item selecionado
+
+F10 → Cancelar venda
+
+F11 → Mudar utilizador (logout rápido)
+
+F12 → Finalizar venda / Pagamento
+
+Teclas Especiais
+
+ESC → Cancelar operação atual / Fechar janela
+
+ENTER → Confirmar (ex.: adicionar item pesquisado)
+
+TAB → Avançar entre campos
+
+CTRL + P → Imprimir
+
+CTRL + D → Abrir gaveta de dinheiro
+
+
+
+
+
+
+Em sistemas de faturação/ERP desktop (como o teu em Swing), a escolha das cores deve seguir três princípios:
+
+Profissionalismo (não pode parecer infantil).
+
+Legibilidade (bom contraste).
+
+Usabilidade (cores consistentes para botões, alertas, fundo, etc.).
+
+🎨 Paleta de Cores Sugerida (estilo moderno/profissional)
+
+Primária (Ação principal): Azul médio → #1976D2
+
+Secundária (Apoio/menus): Cinza escuro → #424242
+
+Sucesso (operações OK): Verde → #388E3C
+
+Aviso (atenção): Laranja → #F57C00
+
+Erro (crítico/cancelar): Vermelho → #D32F2F
+
+Fundo principal: Cinza muito claro → #F5F5F5
+
+Texto padrão: Preto/Cinza escuro → #212121
+
+Texto secundário: Cinza médio → #616161
+
+Realce de campos ativos: Azul claro → #64B5F6
+
+📌 Onde aplicar cada cor no teu sistema
+1. JFrame / JDialog / JPanel
+
+Fundo da janela: cinza claro #F5F5F5
+
+Cabeçalho/título (se usares um painel superior): azul primário #1976D2
+
+Bordas: cinza médio #E0E0E0
+
+2. Botões
+
+Ação principal (Finalizar Venda / Gravar) → Azul #1976D2 com texto branco.
+
+Ações secundárias (Novo Cliente, Procurar Produto) → Cinza #424242 com texto branco.
+
+Cancelar/Excluir → Vermelho #D32F2F.
+
+Confirmar (OK, Sucesso) → Verde #388E3C.
+
+3. Tabelas (JTable)
+
+Fundo: branco #FFFFFF.
+
+Cabeçalho: cinza médio #EEEEEE com texto preto.
+
+Linhas alternadas: branco / cinza muito claro #FAFAFA.
+
+Seleção: azul claro #64B5F6 com texto preto.
+
+4. Campos de Texto (JTextField, JComboBox)
+
+Fundo normal: branco.
+
+Fundo quando desabilitado: cinza claro #EEEEEE.
+
+Borda ativa (quando focado): azul claro #64B5F6.
+
+5. Mensagens (JOptionPane ou JDialog customizado)
+
+Info → Azul.
+
+Sucesso → Verde.
+
+Aviso → Laranja.
+
+Erro → Vermelho.
+
+
+Vou-te dar a paleta completa em:
+
+Hexadecimal (#RRGGBB) → padrão web.
+
+Decimal RGB (new Color(r, g, b)).
+
+Float RGB (new Color(r/255f, g/255f, b/255f) → útil para gráficos).
+
+HSL (caso precises para design/UI consistency).
+
+🎨 Paleta de Cores — Vários Formatos
+🔵 Primária (Ação principal) → Azul médio
+
+Hex: #1976D2
+
+RGB: new Color(25, 118, 210)
+
+RGB float: new Color(0.098f, 0.463f, 0.824f)
+
+HSL: 207°, 79%, 46%
+
+⚫ Secundária (Menus) → Cinza escuro
+
+Hex: #424242
+
+RGB: new Color(66, 66, 66)
+
+RGB float: new Color(0.259f, 0.259f, 0.259f)
+
+HSL: 0°, 0%, 26%
+
+✅ Sucesso → Verde
+
+Hex: #388E3C
+
+RGB: new Color(56, 142, 60)
+
+RGB float: new Color(0.220f, 0.557f, 0.235f)
+
+HSL: 123°, 43%, 39%
+
+⚠️ Aviso → Laranja
+
+Hex: #F57C00
+
+RGB: new Color(245, 124, 0)
+
+RGB float: new Color(0.961f, 0.486f, 0.0f)
+
+HSL: 32°, 100%, 48%
+
+❌ Erro → Vermelho
+
+Hex: #D32F2F
+
+RGB: new Color(211, 47, 47)
+
+RGB float: new Color(0.827f, 0.184f, 0.184f)
+
+HSL: 0°, 64%, 51%
+
+🪟 Fundo Principal → Cinza muito claro
+
+Hex: #F5F5F5
+
+RGB: new Color(245, 245, 245)
+
+RGB float: new Color(0.961f, 0.961f, 0.961f)
+
+HSL: 0°, 0%, 96%
+
+📝 Texto padrão → Preto/Cinza escuro
+
+Hex: #212121
+
+RGB: new Color(33, 33, 33)
+
+RGB float: new Color(0.129f, 0.129f, 0.129f)
+
+HSL: 0°, 0%, 13%
+
+📝 Texto secundário → Cinza médio
+
+Hex: #616161
+
+RGB: new Color(97, 97, 97)
+
+RGB float: new Color(0.380f, 0.380f, 0.380f)
+
+HSL: 0°, 0%, 38%
+
+🔵 Realce de campos ativos → Azul claro
+
+Hex: #64B5F6
+
+RGB: new Color(100, 181, 246)
+
+RGB float: new Color(0.392f, 0.710f, 0.965f)
+
+HSL: 207°, 89%, 68%
+
+
+// Definição centralizada das cores
+public class TemaCores {
+
+    public static final Color PRIMARY = new Color(25, 118, 210);   // Azul
+    public static final Color SECONDARY = new Color(66, 66, 66);   // Cinza escuro
+    public static final Color SUCCESS = new Color(56, 142, 60);    // Verde
+    public static final Color WARNING = new Color(245, 124, 0);    // Laranja
+    public static final Color ERROR = new Color(211, 47, 47);      // Vermelho
+    public static final Color BG_LIGHT = new Color(245, 245, 245); // Cinza claro
+    public static final Color TEXT_DARK = new Color(33, 33, 33);   // Texto principal
+    public static final Color TEXT_GRAY = new Color(97, 97, 97);   // Texto secundário
+    public static final Color HIGHLIGHT = new Color(100, 181, 246);// Realce ativo
+}
