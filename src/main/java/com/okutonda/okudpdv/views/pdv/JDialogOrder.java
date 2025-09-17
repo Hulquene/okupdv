@@ -684,7 +684,7 @@ public class JDialogOrder extends javax.swing.JDialog {
 
         jButtonSaveOrder.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButtonSaveOrder.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/printer_8139457.png"))); // NOI18N
-        jButtonSaveOrder.setText("FINALIZAR");
+        jButtonSaveOrder.setText("FINALIZAR F12");
         jButtonSaveOrder.setToolTipText("FINALIZAR FATURA");
         jButtonSaveOrder.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonSaveOrder.addActionListener(new java.awt.event.ActionListener() {

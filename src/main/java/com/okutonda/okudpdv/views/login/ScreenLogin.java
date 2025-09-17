@@ -9,6 +9,9 @@ import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.User;
+import com.okutonda.okudpdv.ui.TemaCleaner;
+import com.okutonda.okudpdv.ui.TemaCores;
+import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.utilities.CompanySession;
 import com.okutonda.okudpdv.views.suport.JDialogSuport;
 import com.okutonda.okudpdv.views.ScreenMain;
@@ -37,24 +40,20 @@ public class ScreenLogin extends javax.swing.JFrame {
      */
     public ScreenLogin() {
         initComponents();
-//        this.setExtendedState(ScreenLogin.MAXIMIZED_BOTH);
+//         1) aplica tema (depois do init)
+        applyTheme();
+
         this.conn = ConnectionDatabase.getConnect();
-//        this.conn = new ConnectDB().connect();
         if (this.conn != null) {
             jLabelStatusBdConect.setText("Conectado");
             loadDataCompany();
-//            loadDataCompany();
         } else {
             jLabelStatusBdConect.setText("Desconectado");
         }
-        
         jLabelNameCompany.setText(companySession.getName());
-
         List<User> response = userController.get("");
-
         if (response == null || response.isEmpty()) {
             JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
-//                    jdInstallUser.setOrder(order);
             jdInstallUser.setVisible(true);
         }
 
@@ -68,6 +67,49 @@ public class ScreenLogin extends javax.swing.JFrame {
 //            );
 //            new JDialogSuport(this, rootPaneCheckingEnabled).setVisible(true);
 //        }
+    }
+
+    /**
+     * Aplica o tema centralizado nesta tela. Chamar após initComponents().
+     */
+    private void applyTheme() {
+
+        TemaCleaner.clearBuilderOverrides(getContentPane());
+        // Painel de fundo da janela
+//        jPanel3.setBackground(TemaCores.BG_LIGHT);
+
+        // Card do login
+//        TemaUI.aplicarPainelDefault(jPanel1);
+        // Título
+        TemaUI.aplicarTitulo(jLabelNameCompany);
+        jLabelNameCompany.setForeground(TemaCores.PRIMARY);
+
+        // Labels
+//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
+//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
+        // Campos
+//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
+//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
+        // Botões
+//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
+//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonInstall.setForeground(TemaCores.PRIMARY);
+//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
+        // Status de BD (cor dinâmica) — chama depois de testar a conexão
+        updateDbStatusLabel(this.conn != null);
+
+        // Borda superior/rodapé (opcional)
+        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
+        // Se o GUI Builder deixou cores hardcoded em initComponents,
+        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
+    }
+
+    /**
+     * Atualiza a cor do label de status da BD conforme conectado/desconectado.
+     */
+    private void updateDbStatusLabel(boolean connected) {
+        jLabelStatusBdConect.setForeground(connected ? TemaCores.SUCCESS : TemaCores.ERROR);
     }
 
     public void loadDataCompany() {
@@ -175,7 +217,6 @@ public class ScreenLogin extends javax.swing.JFrame {
         jPanel3.add(jLabelStatusBdConect, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 570, 80, 20));
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 255));
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPanel1.setToolTipText("Entrada");
 
         jButtonLogin.setBackground(new java.awt.Color(0, 0, 102));
@@ -194,9 +235,7 @@ public class ScreenLogin extends javax.swing.JFrame {
         jPasswordFieldPassword.setForeground(new java.awt.Color(0, 0, 102));
         jPasswordFieldPassword.setText("12345678");
         jPasswordFieldPassword.setToolTipText("Senha");
-        jPasswordFieldPassword.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPasswordFieldPassword.setCaretColor(new java.awt.Color(0, 0, 102));
-        jPasswordFieldPassword.setFocusable(false);
         jPasswordFieldPassword.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jPasswordFieldPasswordActionPerformed(evt);
@@ -211,9 +250,8 @@ public class ScreenLogin extends javax.swing.JFrame {
         jTextFieldEmail.setForeground(new java.awt.Color(0, 0, 102));
         jTextFieldEmail.setText("admin@admin.com");
         jTextFieldEmail.setToolTipText("Email");
-        jTextFieldEmail.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jTextFieldEmail.setCaretColor(new java.awt.Color(0, 0, 102));
-        jTextFieldEmail.setFocusable(false);
+        jTextFieldEmail.setFocusTraversalPolicyProvider(true);
         jTextFieldEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextFieldEmailActionPerformed(evt);
@@ -244,7 +282,7 @@ public class ScreenLogin extends javax.swing.JFrame {
                     .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPasswordFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 31, Short.MAX_VALUE))
+                .addGap(0, 35, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jPasswordFieldPassword, jTextFieldEmail});
