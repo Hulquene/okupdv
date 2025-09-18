@@ -335,6 +335,7 @@ CREATE TABLE `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
   `status` TINYINT(1) NOT NULL DEFAULT '1',
   `datecreate` varchar(255) NOT NULL,
+  `duedate` varchar(255) NOT NULL,
   `year` int NOT NULL,
   `number` int NOT NULL,
   `prefix` varchar(11) NOT NULL,

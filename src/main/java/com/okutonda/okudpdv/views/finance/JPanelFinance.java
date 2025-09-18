@@ -5,6 +5,7 @@
 package com.okutonda.okudpdv.views.finance;
 
 import com.okutonda.okudpdv.controllers.ClientController;
+import com.okutonda.okudpdv.controllers.FinanceController;
 import com.okutonda.okudpdv.controllers.PaymentController;
 import com.okutonda.okudpdv.controllers.PaymentModeController;
 import com.okutonda.okudpdv.controllers.ProductOrderController;
@@ -14,12 +15,15 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.models.Clients;
+import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
 import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.Shift;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.UtilSales;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -30,6 +34,8 @@ import javax.swing.table.DefaultTableModel;
  * @author kenny
  */
 public final class JPanelFinance extends javax.swing.JPanel {
+
+    FinanceController financeController = new FinanceController();
 
     ReportController reportController = new ReportController();
     ShiftController shiftController = new ShiftController();
@@ -48,10 +54,238 @@ public final class JPanelFinance extends javax.swing.JPanel {
      */
     public JPanelFinance() {
         initComponents();
-        listShifts();
-        listPurchase();
-        listSalesProducts();
-        listPayments();
+
+        jTableFinanceReceive.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Cliente", "Nº Fatura", "Emissão", "Vencimento",
+                    "Valor Total", "Pago", "Em Aberto", "Status", "Dias Atraso"
+                }
+        ) {
+            Class[] types = new Class[]{
+                String.class, String.class, String.class, String.class,
+                Double.class, Double.class, Double.class, String.class, Integer.class
+            };
+            boolean[] canEdit = new boolean[]{false, false, false, false, false, false, false, false, false};
+
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        jTableFinancePay.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Fornecedor", "Nº Documento", "Emissão", "Vencimento",
+                    "Valor Total", "Pago", "Em Aberto", "Status", "Dias Atraso"
+                }
+        ) {
+            Class[] types = new Class[]{
+                String.class, String.class, String.class, String.class,
+                Double.class, Double.class, Double.class, String.class, Integer.class
+            };
+            boolean[] canEdit = new boolean[]{false, false, false, false, false, false, false, false, false};
+
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        jTableFinanceSales.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Cliente", "Nº Fatura", "Emissão", "Valor Total", "Pago", "Status"
+                }
+        ) {
+            Class[] types = new Class[]{
+                String.class, String.class, String.class, Double.class, Double.class, String.class
+            };
+            boolean[] canEdit = new boolean[]{false, false, false, false, false, false};
+
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        jTableFinanceCashFlow.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Data", "Forma Pagamento", "Valor"
+                }
+        ) {
+            Class[] types = new Class[]{
+                String.class, String.class, Double.class
+            };
+            boolean[] canEdit = new boolean[]{false, false, false};
+
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+//        listShifts();
+//        listPurchase();
+//        listSalesProducts();
+//        listPayments();
+        listContasReceber();
+        listContasPagar();
+        listVendas();
+        listFluxoCaixa(TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY);
+    }
+
+    public void listContasReceber() {
+        List<Order> list = financeController.getContasAReceber();
+        loadListReceber(list);
+    }
+
+    public void loadListReceber(List<Order> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceReceive.getModel();
+        data.setNumRows(0);
+
+        LocalDate hoje = LocalDate.now();
+
+        for (Order o : list) {
+            double total = o.getTotal() != null ? o.getTotal() : 0d;
+            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
+            double emAberto = total - pago;
+
+            LocalDate emissao = LocalDate.parse(o.getDatecreate().substring(0, 10));
+            LocalDate vencimento = emissao.plusDays(30); // simulação
+            int diasAtraso = hoje.isAfter(vencimento)
+                    ? (int) ChronoUnit.DAYS.between(vencimento, hoje)
+                    : 0;
+
+            String status;
+            if (emAberto <= 0) {
+                status = "Pago";
+            } else if (pago > 0 && emAberto > 0) {
+                status = "Parcialmente paga";
+            } else if (diasAtraso > 0) {
+                status = "Vencida";
+            } else {
+                status = "Em aberto";
+            }
+
+            data.addRow(new Object[]{
+                (o.getClient() != null ? o.getClient().getName() : ""),
+                o.getPrefix() + "-" + o.getNumber(),
+                emissao.toString(),
+                vencimento.toString(),
+                total,
+                pago,
+                emAberto,
+                status,
+                diasAtraso
+            });
+        }
+    }
+
+    public void listContasPagar() {
+        List<Order> list = financeController.getContasAReceber(); // 🚨 provisório
+        loadListPagar(list);
+    }
+
+    public void loadListPagar(List<Order> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinancePay.getModel();
+        data.setNumRows(0);
+
+        LocalDate hoje = LocalDate.now();
+
+        for (Order o : list) {
+            double total = o.getTotal() != null ? o.getTotal() : 0d;
+            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
+            double emAberto = total - pago;
+
+            LocalDate emissao = LocalDate.parse(o.getDatecreate().substring(0, 10));
+            LocalDate vencimento = emissao.plusDays(30);
+            int diasAtraso = hoje.isAfter(vencimento)
+                    ? (int) ChronoUnit.DAYS.between(vencimento, hoje)
+                    : 0;
+
+            String status;
+            if (emAberto <= 0) {
+                status = "Pago";
+            } else if (pago > 0 && emAberto > 0) {
+                status = "Parcialmente pago";
+            } else if (diasAtraso > 0) {
+                status = "Vencido";
+            } else {
+                status = "Em aberto";
+            }
+
+            data.addRow(new Object[]{
+                //                (o.getSupplier() != null ? o.getSupplier().getName() : "Fornecedor X"), // placeholder
+                "Fornecedor X",
+                o.getPrefix() + "-" + o.getNumber(),
+                emissao.toString(),
+                vencimento.toString(),
+                total,
+                pago,
+                emAberto,
+                status,
+                diasAtraso
+            });
+        }
+    }
+
+    public void listVendas() {
+        List<Order> list = financeController.getHistoricoVendas();
+        loadListVendas(list);
+    }
+
+    public void loadListVendas(List<Order> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceSales.getModel();
+        data.setNumRows(0);
+
+        for (Order o : list) {
+            double total = o.getTotal() != null ? o.getTotal() : 0d;
+            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
+
+            String status = (pago >= total) ? "Liquidada" : "Em aberto";
+
+            data.addRow(new Object[]{
+                (o.getClient() != null ? o.getClient().getName() : ""),
+                o.getPrefix() + "-" + o.getNumber(),
+                o.getDatecreate().substring(0, 10),
+                total,
+                pago,
+                status
+            });
+        }
+    }
+
+    public void listFluxoCaixa(String dateFrom, String dateTo) {
+        List<Payment> list = financeController.getFluxoCaixa(dateFrom, dateTo);
+        loadFluxoCaixa(list);
+    }
+
+    public void loadFluxoCaixa(List<Payment> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceCashFlow.getModel();
+        data.setNumRows(0);
+
+        for (Payment p : list) {
+            data.addRow(new Object[]{
+                p.getDate(),
+                (p.getPaymentMode() != null ? p.getPaymentMode().name() : ""),
+                p.getTotal()
+            });
+        }
     }
 
     public void listPayments() {
@@ -65,7 +299,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void loadListPayments(List<Payment> list) {
-        DefaultTableModel data = (DefaultTableModel) jTableFinancePayments.getModel();
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceReceive.getModel();
         data.setNumRows(0);
         for (Payment c : list) {
             data.addRow(new Object[]{
@@ -90,7 +324,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void loadListShifts(List<Shift> list) {
-        DefaultTableModel data = (DefaultTableModel) jTableHistoryShift.getModel();
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceCashFlow.getModel();
         data.setNumRows(0);
         for (Shift c : list) {
             data.addRow(new Object[]{
@@ -115,7 +349,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
     public void loadListSalesProducts(List<ProductOrder> list) {
 //        List<ProductOrder> list = productOrderController.get("");
-        DefaultTableModel data = (DefaultTableModel) jTableFinanceProductsOrderSales.getModel();
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceSales.getModel();
         data.setNumRows(0);
         for (ProductOrder c : list) {
             data.addRow(new Object[]{
@@ -133,7 +367,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
     public void listPurchase() {
         List<Purchase> list = purchaseController.get("");
-        DefaultTableModel data = (DefaultTableModel) jTableFinancePurchase.getModel();
+        DefaultTableModel data = (DefaultTableModel) jTableFinancePay.getModel();
         data.setNumRows(0);
         for (Purchase c : list) {
             data.addRow(new Object[]{
@@ -192,7 +426,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
-        jTableFinancePayments = new javax.swing.JTable();
+        jTableFinanceReceive = new javax.swing.JTable();
         jFormattedTextField5 = new javax.swing.JFormattedTextField();
         jFormattedTextField6 = new javax.swing.JFormattedTextField();
         jComboBox3 = new javax.swing.JComboBox<>();
@@ -203,7 +437,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jLabel28 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTableFinancePurchase = new javax.swing.JTable();
+        jTableFinancePay = new javax.swing.JTable();
         jFormattedTextField3 = new javax.swing.JFormattedTextField();
         jFormattedTextField4 = new javax.swing.JFormattedTextField();
         jComboBox2 = new javax.swing.JComboBox<>();
@@ -214,7 +448,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jLabel30 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTableFinanceProductsOrderSales = new javax.swing.JTable();
+        jTableFinanceSales = new javax.swing.JTable();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
         jComboBox1 = new javax.swing.JComboBox<>();
@@ -228,7 +462,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jComboBoxSalesFromSeller = new javax.swing.JComboBox();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jTableHistoryShift = new javax.swing.JTable();
+        jTableFinanceCashFlow = new javax.swing.JTable();
         jButtonExportHistoryShiftExcell = new javax.swing.JButton();
         jLabel17 = new javax.swing.JLabel();
         jComboBoxFlowShiftFilter = new javax.swing.JComboBox<>();
@@ -247,7 +481,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 255));
 
-        jTableFinancePayments.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinanceReceive.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -273,7 +507,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane4.setViewportView(jTableFinancePayments);
+        jScrollPane4.setViewportView(jTableFinanceReceive);
 
         try {
             jFormattedTextField5.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
@@ -351,7 +585,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jPanel2.setBackground(new java.awt.Color(204, 204, 255));
 
-        jTableFinancePurchase.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinancePay.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null, null, null, null},
@@ -377,7 +611,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(jTableFinancePurchase);
+        jScrollPane3.setViewportView(jTableFinancePay);
 
         try {
             jFormattedTextField3.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
@@ -460,7 +694,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 255));
 
-        jTableFinanceProductsOrderSales.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinanceSales.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null},
@@ -486,7 +720,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTableFinanceProductsOrderSales);
+        jScrollPane1.setViewportView(jTableFinanceSales);
 
         try {
             jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
@@ -580,7 +814,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jPanel4.setBackground(new java.awt.Color(204, 204, 255));
 
-        jTableHistoryShift.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinanceCashFlow.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null, null, null},
@@ -606,7 +840,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane5.setViewportView(jTableHistoryShift);
+        jScrollPane5.setViewportView(jTableFinanceCashFlow);
 
         jButtonExportHistoryShiftExcell.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonExportHistoryShiftExcell.setText("Excel");
@@ -740,9 +974,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1089, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1089, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -766,17 +998,17 @@ public final class JPanelFinance extends javax.swing.JPanel {
         // TODO add your handling code here:
         List<List<String>> data = new ArrayList<>();
         data.add(List.of("ID", "Codigo", "Vendedor", "Valor Abertura", "Valor Vendido", "Total de Fecho", "Data Abertura", "Data Fecho", "Estado do caixa"));
-        for (int i = 0; i < jTableHistoryShift.getRowCount(); i++) {
+        for (int i = 0; i < jTableFinanceCashFlow.getRowCount(); i++) {
             data.add(List.of(
-                jTableHistoryShift.getValueAt(i, 0).toString(),
-                jTableHistoryShift.getValueAt(i, 1).toString(),
-                jTableHistoryShift.getValueAt(i, 2).toString(),
-                jTableHistoryShift.getValueAt(i, 3).toString(),
-                jTableHistoryShift.getValueAt(i, 4).toString(),
-                jTableHistoryShift.getValueAt(i, 5).toString(),
-                jTableHistoryShift.getValueAt(i, 6).toString(),
-                jTableHistoryShift.getValueAt(i, 7).toString(),
-                jTableHistoryShift.getValueAt(i, 8).toString()
+                    jTableFinanceCashFlow.getValueAt(i, 0).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 1).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 2).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 3).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 4).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 5).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 6).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 7).toString(),
+                    jTableFinanceCashFlow.getValueAt(i, 8).toString()
             ));
         }
         reportController.historyShiftArrayListToExcell(data);
@@ -834,9 +1066,9 @@ public final class JPanelFinance extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTableFinancePayments;
-    private javax.swing.JTable jTableFinanceProductsOrderSales;
-    private javax.swing.JTable jTableFinancePurchase;
-    private javax.swing.JTable jTableHistoryShift;
+    private javax.swing.JTable jTableFinanceCashFlow;
+    private javax.swing.JTable jTableFinancePay;
+    private javax.swing.JTable jTableFinanceReceive;
+    private javax.swing.JTable jTableFinanceSales;
     // End of variables declaration//GEN-END:variables
 }

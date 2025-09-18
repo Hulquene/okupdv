@@ -206,6 +206,7 @@ public class OrderController {
 
         // Usa total (com IVA) no hash
         String hash = UtilSaft.appGenerateHashInvoice(date, date, numberOrder, String.valueOf(order.getTotal()), "");
+        
         order.setPrefix(prefix);
         order.setNumber(number);
         order.setDatecreate(date);

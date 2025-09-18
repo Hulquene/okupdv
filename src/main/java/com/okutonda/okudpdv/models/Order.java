@@ -24,6 +24,7 @@ public class Order {
     private Double payTotal;
     private Double amountReturned;
     private String datecreate;
+    private String duedate;  
     private int year;
     private String hash;
     private String note;
@@ -164,6 +165,14 @@ public class Order {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getDuedate() {
+        return duedate;
+    }
+
+    public void setDuedate(String duedate) {
+        this.duedate = duedate;
     }
 
     @Override

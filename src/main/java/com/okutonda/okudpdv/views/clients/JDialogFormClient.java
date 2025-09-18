@@ -342,7 +342,7 @@ public class JDialogFormClient extends javax.swing.JDialog {
         jLabel2.setText("Formulario de Cliente");
 
         jButtonAddClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonAddClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Plus.png"))); // NOI18N
+        jButtonAddClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonAddClient.setText("Salvar");
         jButtonAddClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -351,7 +351,7 @@ public class JDialogFormClient extends javax.swing.JDialog {
         });
 
         jButtonClearFormClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonClearFormClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Restart.png"))); // NOI18N
+        jButtonClearFormClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Restart.png"))); // NOI18N
         jButtonClearFormClient.setText("Limpar");
         jButtonClearFormClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
