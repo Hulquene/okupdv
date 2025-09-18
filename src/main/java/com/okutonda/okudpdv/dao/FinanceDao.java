@@ -31,7 +31,8 @@ public class FinanceDao {
 
     /**
      * Lista todas as faturas que ainda têm saldo em aberto (Contas a Receber).
-     * @return 
+     *
+     * @return
      */
     public List<Order> listContasAReceber() {
         List<Order> list = new ArrayList<>();
@@ -103,7 +104,8 @@ public class FinanceDao {
     /**
      * Lista histórico de vendas (todas as faturas pagas no ato ou já
      * liquidadas).
-     * @return 
+     *
+     * @return
      */
     public List<Order> listHistoricoVendas() {
         List<Order> list = new ArrayList<>();
@@ -172,9 +174,10 @@ public class FinanceDao {
 
     /**
      * Fluxo de caixa consolidado por dia e forma de pagamento.
+     *
      * @param dateFrom
      * @param dateTo
-     * @return 
+     * @return
      */
     public List<Payment> listFluxoCaixa(String dateFrom, String dateTo) {
         List<Payment> list = new ArrayList<>();
@@ -208,11 +211,68 @@ public class FinanceDao {
         return list;
     }
 
+    public List<Payment> listReceitas(String dateFrom, String dateTo) {
+        List<Payment> list = new ArrayList<>();
+        String sql = """
+        SELECT p.id,
+               p.description,
+               p.total,
+               p.date,
+               p.mode,
+               p.reference,
+               c.id   AS client_id,
+               c.company AS client_name,
+               u.id   AS user_id,
+               u.name AS user_name
+        FROM payments p
+        LEFT JOIN clients c ON p.clientId = c.id
+        LEFT JOIN users u   ON p.userId = u.id
+        WHERE p.status='SUCCESS'
+          AND DATE(p.date) BETWEEN ? AND ?
+        ORDER BY p.date ASC
+    """;
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, dateFrom);
+            pst.setString(2, dateTo);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Payment obj = new Payment();
+                    obj.setId(rs.getInt("id"));
+                    obj.setDescription(rs.getString("description"));
+                    obj.setTotal(rs.getBigDecimal("total"));
+                    obj.setDate(rs.getString("date"));
+                    obj.setPaymentMode(com.okutonda.okudpdv.models.PaymentMode.valueOf(rs.getString("mode")));
+                    obj.setReference(rs.getString("reference"));
+
+                    // Cliente
+                    com.okutonda.okudpdv.models.Clients c = new com.okutonda.okudpdv.models.Clients();
+                    c.setId(rs.getInt("client_id"));
+                    c.setName(rs.getString("client_name"));
+                    obj.setClient(c);
+
+                    // Usuário
+                    com.okutonda.okudpdv.models.User u = new com.okutonda.okudpdv.models.User();
+                    u.setId(rs.getInt("user_id"));
+                    u.setName(rs.getString("user_name"));
+                    obj.setUser(u);
+
+                    list.add(obj);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar receitas: " + e.getMessage());
+        }
+        return list;
+    }
+
     /**
      * Total de receitas no período (somatório de todos os pagamentos).
+     *
      * @param dateFrom
      * @param dateTo
-     * @return 
+     * @return
      */
     public double getTotalReceitas(String dateFrom, String dateTo) {
         String sql = """

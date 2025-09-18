@@ -10,11 +10,13 @@ import com.okutonda.okudpdv.models.Payment;
 import com.okutonda.okudpdv.utilities.UserSession;
 
 import java.util.List;
+
 /**
  *
  * @author rog
  */
 public class FinanceController {
+
     private final FinanceDao dao;
     private final UserSession session = UserSession.getInstance();
 
@@ -44,5 +46,9 @@ public class FinanceController {
     // Total de receitas no período
     public double getTotalReceitas(String dateFrom, String dateTo) {
         return dao.getTotalReceitas(dateFrom, dateTo);
+    }
+
+    public List<Payment> getReceitas(String dateFrom, String dateTo) {
+        return dao.listReceitas(dateFrom, dateTo);
     }
 }
