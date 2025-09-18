@@ -39,7 +39,7 @@ public class OrderDao {
 
     public boolean add(Order obj) {
         try {
-            String sql = "INSERT INTO orders (status,datecreate,number,prefix,total,sub_total,total_taxe,pay_total,amount_returned,hash,client_id,seller_id,year,`key`,note) "
+            String sql = "INSERT INTO orders (status,datecreate,number,prefix,total,sub_total,total_taxe,pay_total,amount_returned,hash,client_id,user_id,year,`key`,note) "
                     + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             pst = this.conn.prepareStatement(sql);
             pst.setInt(1, obj.getStatus());
@@ -67,7 +67,7 @@ public class OrderDao {
 
     public boolean edit(Order obj) {
         try {
-            String sql = "UPDATE orders SET status=?,datecreate=?,number=?,prefix=?,total=?,sub_total=?,total_taxe=?,pay_total=?,amount_returned=?,hash=?,client_id=?,seller_id=?,year=?,`key`=?,note=? WHERE id=?";
+            String sql = "UPDATE orders SET status=?,datecreate=?,number=?,prefix=?,total=?,sub_total=?,total_taxe=?,pay_total=?,amount_returned=?,hash=?,client_id=?,user_id=?,year=?,`key`=?,note=? WHERE id=?";
             pst = this.conn.prepareStatement(sql);
             pst.setInt(1, obj.getStatus());
             pst.setString(2, obj.getDatecreate());
@@ -270,7 +270,7 @@ public class OrderDao {
             client = clientDao.getId(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
-            seller = sellerDao.getId(rs.getInt("seller_id"));
+            seller = sellerDao.getId(rs.getInt("user_id"));
 
             List<ProductOrder> products;
             ProductOrderDao pDao = new ProductOrderDao();
@@ -309,7 +309,7 @@ public class OrderDao {
             client = clientDao.getId(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
-            seller = sellerDao.getId(rs.getInt("seller_id"));
+            seller = sellerDao.getId(rs.getInt("user_id"));
 
 //            List<ProductOrder> products;
 //            ProductOrderDao pDao = new ProductOrderDao();

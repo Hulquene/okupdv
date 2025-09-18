@@ -31,6 +31,7 @@ public class FinanceDao {
 
     /**
      * Lista todas as faturas que ainda têm saldo em aberto (Contas a Receber).
+     * @return 
      */
     public List<Order> listContasAReceber() {
         List<Order> list = new ArrayList<>();
@@ -43,7 +44,7 @@ public class FinanceDao {
                    o.duedate,
                    o.note,
                    o.client_id,
-                   c.name AS client_name,
+                   c.company AS client_name,
                    c.nif AS client_nif,
                    u.id AS user_id,
                    u.name AS user_name,
@@ -56,7 +57,7 @@ public class FinanceDao {
               ON o.client_id = c.id
             LEFT JOIN users u
               ON o.user_id = u.id
-            GROUP BY o.id, c.name, c.nif, u.id, u.name
+            GROUP BY o.id, c.company, c.nif, u.id, u.name
             HAVING saldo_em_aberto > 0
             ORDER BY o.datecreate ASC
         """;
@@ -102,6 +103,7 @@ public class FinanceDao {
     /**
      * Lista histórico de vendas (todas as faturas pagas no ato ou já
      * liquidadas).
+     * @return 
      */
     public List<Order> listHistoricoVendas() {
         List<Order> list = new ArrayList<>();
@@ -114,7 +116,7 @@ public class FinanceDao {
                    o.duedate,
                    o.note,
                    o.client_id,
-                   c.name AS client_name,
+                   c.company AS client_name,
                    c.nif AS client_nif,
                    u.id AS user_id,
                    u.name AS user_name,
@@ -126,7 +128,7 @@ public class FinanceDao {
               ON o.client_id = c.id
             LEFT JOIN users u
               ON o.user_id = u.id
-            GROUP BY o.id, c.name, c.nif, u.id, u.name
+            GROUP BY o.id, c.company, c.nif, u.id, u.name
             ORDER BY o.datecreate DESC
         """;
 
@@ -170,6 +172,9 @@ public class FinanceDao {
 
     /**
      * Fluxo de caixa consolidado por dia e forma de pagamento.
+     * @param dateFrom
+     * @param dateTo
+     * @return 
      */
     public List<Payment> listFluxoCaixa(String dateFrom, String dateTo) {
         List<Payment> list = new ArrayList<>();
@@ -205,6 +210,9 @@ public class FinanceDao {
 
     /**
      * Total de receitas no período (somatório de todos os pagamentos).
+     * @param dateFrom
+     * @param dateTo
+     * @return 
      */
     public double getTotalReceitas(String dateFrom, String dateTo) {
         String sql = """

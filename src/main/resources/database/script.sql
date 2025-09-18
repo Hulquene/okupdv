@@ -340,7 +340,7 @@ CREATE TABLE `orders` (
   `number` int NOT NULL,
   `prefix` varchar(11) NOT NULL,
   `client_id` int NOT NULL,
-  `seller_id` int NOT NULL,
+  `user_id` int NOT NULL,
   `total` double DEFAULT NULL,
   `sub_total` double DEFAULT '0',
   `total_taxe` double DEFAULT '0',

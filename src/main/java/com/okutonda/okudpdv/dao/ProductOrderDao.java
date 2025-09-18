@@ -66,7 +66,7 @@ public class ProductOrderDao {
     public boolean edit(ProductOrder obj) {
         try {
             // 1 passo
-            String sql = "UPDATE products_order SET status=?,datecreate=?,number=?,prefix=?,total=?,sub_total=?,pay_total=?,amount_returned=?,hash=?,client_id=?,seller_id=? WHERE id=?";
+            String sql = "UPDATE products_order SET status=?,datecreate=?,number=?,prefix=?,total=?,sub_total=?,pay_total=?,amount_returned=?,hash=?,client_id=?,user_id=? WHERE id=?";
             // 2 passo
             pst = this.conn.prepareStatement(sql);
             pst.setInt(1, obj.getOrderId());
