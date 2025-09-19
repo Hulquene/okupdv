@@ -5,8 +5,10 @@
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.dao.FinanceDao;
+import com.okutonda.okudpdv.models.Expense;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
+import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.utilities.UserSession;
 
 import java.util.List;
@@ -32,6 +34,16 @@ public class FinanceController {
         // no futuro podes adaptar para filtrar só as faturas do vendedor logado
         return dao.listContasAReceber();
     }
+    // Contas a pagar
+// Contas a pagar
+
+    public List<Purchase> getContasAPagar() {
+        if (session.getUser().getProfile().equals("admin") || session.getUser().getProfile().equals("manager")) {
+            return dao.listContasAPagar();
+        }
+        // no futuro: filtrar compras por usuário responsável
+        return dao.listContasAPagar();
+    }
 
     // Histórico de vendas
     public List<Order> getHistoricoVendas() {
@@ -51,4 +63,9 @@ public class FinanceController {
     public List<Payment> getReceitas(String dateFrom, String dateTo) {
         return dao.listReceitas(dateFrom, dateTo);
     }
+
+    public List<Expense> getDespesas(String dateFrom, String dateTo) {
+        return dao.listDespesas(dateFrom, dateTo);
+    }
+
 }

@@ -14,70 +14,83 @@ import java.util.List;
  */
 public class PurchaseController {
 
-    PurchaseDao dao;
+    private final PurchaseDao dao;
 
     public PurchaseController() {
         this.dao = new PurchaseDao();
     }
 
-    public Purchase getId(int id) {
-        return dao.getId(id);
+    public boolean add(Purchase p) {
+        return dao.add(p);
     }
 
-//    public Purchase getFromBarCode(String barcode) {
-//        return dao.searchFromBarCode(barcode);
+    public List<Purchase> get() {
+        return dao.list();
+    }
+//    PurchaseDao dao;
+//
+//    public PurchaseController() {
+//        this.dao = new PurchaseDao();
 //    }
-    public Purchase getName(String description) {
-        return dao.getFromDescription(description);
-    }
-
-    public List<Purchase> get(String where) {
-        return dao.list(where);
-    }
-
-    public List<Purchase> getPurchase() {
-        return dao.list("");
-    }
-
-//    public List<Purchase> getProductsStock() {
-//        return dao.listHistoryStock(" WHERE type ='product'");
+//
+//    public Purchase getId(int id) {
+//        return dao.getId(id);
 //    }
-////    public List<Purchase> filterProductStock(String txt) {
+//
+////    public Purchase getFromBarCode(String barcode) {
+////        return dao.searchFromBarCode(barcode);
+////    }
+//    public Purchase getName(String description) {
+//        return dao.getFromDescription(description);
+//    }
+//
+//    public List<Purchase> get(String where) {
+//        return dao.list(where);
+//    }
+//
+//    public List<Purchase> getPurchase() {
+//        return dao.list("");
+//    }
+//
+////    public List<Purchase> getProductsStock() {
+////        return dao.listHistoryStock(" WHERE type ='product'");
+////    }
+//////    public List<Purchase> filterProductStock(String txt) {
+//////        return dao.filterProduct(txt);
+//////    }
+////    public List<Purchase> filterProduct(String txt) {
 ////        return dao.filterProduct(txt);
 ////    }
-//    public List<Purchase> filterProduct(String txt) {
-//        return dao.filterProduct(txt);
-//    }
-//    public List<Purchase> getServices() {
-//        return dao.list(" WHERE type ='service'");
-//    }
-//    public List<Product> filterService(String txt) {
-//        return dao.filterProduct(txt);
-//    }
-    public List<Purchase> filter(String txt) {
-        return dao.filter(txt);
-    }
-
-    public Boolean add(Purchase pur) {
-        return dao.add(pur);
-    }
-
-//    public boolean updateStock(int prodId, int stock) {
-//        return dao.updateStock(prodId, stock);
-//    }
-    public Boolean deleteId(int id) {
-        return dao.delete(id);
-    }
-
-//    public Double CalculateTotalProduct(Purchase prod, int qtd) {
-//        return prod.getPrice() * qtd;
+////    public List<Purchase> getServices() {
+////        return dao.list(" WHERE type ='service'");
+////    }
+////    public List<Product> filterService(String txt) {
+////        return dao.filterProduct(txt);
+////    }
+//    public List<Purchase> filter(String txt) {
+//        return dao.filter(txt);
 //    }
 //
-//    public Double CalculateTotalChangeProduct(Purchase prod) {
-//        return null;
+//    public Boolean add(Purchase pur) {
+//        return dao.add(pur);
 //    }
 //
-//    public Double CalculateTotalValueTaxeProduct(Purchase prod) {
-//        return null;
+////    public boolean updateStock(int prodId, int stock) {
+////        return dao.updateStock(prodId, stock);
+////    }
+//    public Boolean deleteId(int id) {
+//        return dao.delete(id);
 //    }
+//
+////    public Double CalculateTotalProduct(Purchase prod, int qtd) {
+////        return prod.getPrice() * qtd;
+////    }
+////
+////    public Double CalculateTotalChangeProduct(Purchase prod) {
+////        return null;
+////    }
+////
+////    public Double CalculateTotalValueTaxeProduct(Purchase prod) {
+////        return null;
+////    }
 }

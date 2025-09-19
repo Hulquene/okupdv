@@ -164,14 +164,33 @@ public class OrderController {
         return null;
     }
 
-    public Double CalculateTotalOrder(List<ProductOrder> listProductOrder) {
-        total = subTotal = 0;
+//    public Double CalculateTotalOrder(List<ProductOrder> listProductOrder) {
+//        total = subTotal = 0;
+//        for (ProductOrder productOrder : listProductOrder) {
+//            subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
+//            total += productOrder.getProduct().getPrice() * productOrder.getQty();
+//        }
+//
+//        return null;
+//    }
+    public BigDecimal calculateTotalOrder(List<ProductOrder> listProductOrder) {
+        BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+
         for (ProductOrder productOrder : listProductOrder) {
-            subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
-            total += productOrder.getProduct().getPrice() * productOrder.getQty();
+            if (productOrder.getProduct() != null && productOrder.getProduct().getPrice() != null) {
+                BigDecimal price = productOrder.getProduct().getPrice();
+                BigDecimal qty = BigDecimal.valueOf(productOrder.getQty());
+
+                BigDecimal lineTotal = price.multiply(qty);
+
+                subTotal = subTotal.add(lineTotal);
+                total = total.add(lineTotal); // se fores aplicar IVA ou descontos, mete aqui
+            }
         }
 
-        return null;
+        // podes guardar subTotal/total como atributos do objeto se precisares
+        return total;
     }
 
     public Double CalculateTotalChangeOrder(Order order) {
@@ -206,7 +225,7 @@ public class OrderController {
 
         // Usa total (com IVA) no hash
         String hash = UtilSaft.appGenerateHashInvoice(date, date, numberOrder, String.valueOf(order.getTotal()), "");
-        
+
         order.setPrefix(prefix);
         order.setNumber(number);
         order.setDatecreate(date);

@@ -130,7 +130,8 @@ public final class JPanelStock extends javax.swing.JPanel {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getQty(),
-                c.getPurchase().getDescription(),
+//                c.getPurchase().getDescription(),
+                "",
                 c.getDescription(),
                 c.getUser().getName(),
                 c.getType()

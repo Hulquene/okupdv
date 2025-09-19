@@ -6,6 +6,7 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.dao.ProductDao;
 import com.okutonda.okudpdv.models.Product;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -45,6 +46,7 @@ public class ProductController {
     public List<Product> getProductsStock() {
         return dao.listHistoryStock(" WHERE type ='product'");
     }
+
     public List<Product> filterProductStock(String txt) {
         return dao.filterProduct(txt);
     }
@@ -63,7 +65,7 @@ public class ProductController {
 
     public List<Product> filter(String txt, String and) {
         and = and.isEmpty() ? "" : and;
-        return dao.filter(txt,and);
+        return dao.filter(txt, and);
     }
 
     public Boolean add(Product prod, int id) {
@@ -84,8 +86,14 @@ public class ProductController {
         return dao.delete(id);
     }
 
-    public Double CalculateTotalProduct(Product prod, int qtd) {
-        return prod.getPrice() * qtd;
+//    public BigDecimal CalculateTotalProduct(Product prod, int qtd) {
+//        return prod.getPrice() * qtd;
+//    }
+    public BigDecimal calculateTotalProduct(Product prod, int qtd) {
+        if (prod == null || prod.getPrice() == null) {
+            return BigDecimal.ZERO;
+        }
+        return prod.getPrice().multiply(BigDecimal.valueOf(qtd));
     }
 
     public Double CalculateTotalChangeProduct(Product prod) {

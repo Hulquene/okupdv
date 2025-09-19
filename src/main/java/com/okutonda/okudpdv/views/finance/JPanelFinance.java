@@ -15,6 +15,7 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.models.Clients;
+import com.okutonda.okudpdv.models.Expense;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
 import com.okutonda.okudpdv.models.ProductOrder;
@@ -77,10 +78,10 @@ public final class JPanelFinance extends javax.swing.JPanel {
             }
         });
 
-        jTableFinancePay.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinancePayable.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
                 new String[]{
-                    "Fornecedor", "Nº Documento", "Emissão", "Vencimento",
+                    "Fornecedor", "Nº Documento", "Data Compra", "Vencimento",
                     "Valor Total", "Pago", "Em Aberto", "Status", "Dias Atraso"
                 }
         ) {
@@ -139,10 +140,31 @@ public final class JPanelFinance extends javax.swing.JPanel {
             }
         });
 
-//        listShifts();
-//        listPurchase();
-//        listSalesProducts();
-//        listPayments();
+        jTableFinanceCashFlowDespesas.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "Data", "Nº Doc", "Descrição", "Fornecedor", "Categoria", "Conta", "Valor", "Forma Pagamento", "Usuário", "Notas"
+                }
+        ) {
+            Class[] types = new Class[]{
+                String.class, String.class, String.class, String.class, String.class,
+                String.class, Double.class, String.class, String.class, String.class
+            };
+            boolean[] canEdit = new boolean[]{
+                false, false, false, false, false, false, false, false, false, false
+            };
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
         listContasReceber();
         listContasPagar();
         listVendas();
@@ -198,45 +220,46 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listContasPagar() {
-        List<Order> list = financeController.getContasAReceber(); // 🚨 provisório
+        List<Purchase> list = financeController.getContasAPagar();
         loadListPagar(list);
     }
 
-    public void loadListPagar(List<Order> list) {
-        DefaultTableModel data = (DefaultTableModel) jTableFinancePay.getModel();
+    public void loadListPagar(List<Purchase> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinancePayable.getModel();
         data.setNumRows(0);
 
         LocalDate hoje = LocalDate.now();
 
-        for (Order o : list) {
-            double total = o.getTotal() != null ? o.getTotal() : 0d;
-            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
-            double emAberto = total - pago;
+        for (Purchase p : list) {
+            double pago = p.getPayTotal() != null ? p.getPayTotal().doubleValue() : 0d;
+            double emAberto = p.getTotal() != null ? p.getTotal().doubleValue() - pago : 0d;
 
-            LocalDate emissao = LocalDate.parse(o.getDatecreate().substring(0, 10));
-            LocalDate vencimento = emissao.plusDays(30);
-            int diasAtraso = hoje.isAfter(vencimento)
-                    ? (int) ChronoUnit.DAYS.between(vencimento, hoje)
-                    : 0;
-
+            // status
             String status;
             if (emAberto <= 0) {
                 status = "Pago";
             } else if (pago > 0 && emAberto > 0) {
-                status = "Parcialmente pago";
-            } else if (diasAtraso > 0) {
-                status = "Vencido";
+                status = "Parcial";
             } else {
                 status = "Em aberto";
             }
 
+            // vencimento
+            LocalDate vencimento = p.getDataVencimento().toInstant()
+                    .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            int diasAtraso = hoje.isAfter(vencimento)
+                    ? (int) java.time.temporal.ChronoUnit.DAYS.between(vencimento, hoje)
+                    : 0;
+            if (diasAtraso > 0) {
+                status = "Vencida";
+            }
+
             data.addRow(new Object[]{
-                //                (o.getSupplier() != null ? o.getSupplier().getName() : "Fornecedor X"), // placeholder
-                "Fornecedor X",
-                o.getPrefix() + "-" + o.getNumber(),
-                emissao.toString(),
-                vencimento.toString(),
-                total,
+                (p.getSupplier() != null ? p.getSupplier().getName() : ""),
+                p.getInvoiceNumber(),
+                p.getDataCompra(),
+                p.getDataVencimento(),
+                p.getTotal(),
                 pago,
                 emAberto,
                 status,
@@ -306,6 +329,31 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 "Receita",
                 p.getTotal(),
                 p.getPaymentMode() != null ? p.getPaymentMode().name() : ""
+            });
+        }
+    }
+
+    public void listDespesas() {
+        List<Expense> despesas = financeController.getDespesas("2025-09-01", "2025-09-30");
+        loadListDespesas(despesas);
+    }
+
+    public void loadListDespesas(List<Expense> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableFinanceCashFlowDespesas.getModel();
+        data.setNumRows(0);
+
+        for (Expense e : list) {
+            data.addRow(new Object[]{
+                e.getDate(),
+                (e.getId() != null ? "DP-" + e.getId() : ""), // Nº Doc
+                e.getDescription(),
+                (e.getSupplier() != null ? e.getSupplier().getName() : ""),
+                (e.getCategory() != null ? e.getCategory().getName() : ""),
+                "Caixa Loja", // podes mapear para contas reais no futuro
+                e.getTotal(),
+                e.getMode(),
+                (e.getUser() != null ? e.getUser().getName() : ""),
+                e.getNotes()
             });
         }
     }
@@ -387,27 +435,26 @@ public final class JPanelFinance extends javax.swing.JPanel {
         }
     }
 
-    public void listPurchase() {
-        List<Purchase> list = purchaseController.get("");
-        DefaultTableModel data = (DefaultTableModel) jTableFinancePay.getModel();
-        data.setNumRows(0);
-        for (Purchase c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getDescription(),
-                c.getProduct().getDescription(),
-                c.getQty(),
-                c.getTotal(),
-                c.getDate(),
-                c.getUser().getName(),
-                c.getSupplier().getName(),
-                c.getStatusPayment(),
-                "",
-                ""
-            });
-        }
-    }
-
+//    public void listPurchase() {
+//        List<Purchase> list = purchaseController.get("");
+//        DefaultTableModel data = (DefaultTableModel) jTableFinancePay.getModel();
+//        data.setNumRows(0);
+//        for (Purchase c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getDescription(),
+//                c.getProduct().getDescription(),
+//                c.getQty(),
+//                c.getTotal(),
+//                c.getDate(),
+//                c.getUser().getName(),
+//                c.getSupplier().getName(),
+//                c.getStatusPayment(),
+//                "",
+//                ""
+//            });
+//        }
+//    }
     public void loadCombobox() {
 
         List<Clients> listC = clientController.get("");
@@ -459,7 +506,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jLabel28 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTableFinancePay = new javax.swing.JTable();
+        jTableFinancePayable = new javax.swing.JTable();
         jFormattedTextField3 = new javax.swing.JFormattedTextField();
         jFormattedTextField4 = new javax.swing.JFormattedTextField();
         jComboBox2 = new javax.swing.JComboBox<>();
@@ -502,6 +549,22 @@ public final class JPanelFinance extends javax.swing.JPanel {
         jComboBoxFlowShifitManager = new javax.swing.JComboBox();
         jLabel26 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
+        jPanel9 = new javax.swing.JPanel();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        jTableFinanceCashFlowDespesas = new javax.swing.JTable();
+        jButtonExportHistoryShiftExcell2 = new javax.swing.JButton();
+        jLabel31 = new javax.swing.JLabel();
+        jComboBoxFlowShiftFilter2 = new javax.swing.JComboBox<>();
+        jFormattedTextField11 = new javax.swing.JFormattedTextField();
+        jFormattedTextField12 = new javax.swing.JFormattedTextField();
+        jButton3 = new javax.swing.JButton();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jComboBoxFlowShiftFromSeller1 = new javax.swing.JComboBox();
+        jLabel34 = new javax.swing.JLabel();
+        jComboBoxFlowShifitManager1 = new javax.swing.JComboBox();
+        jLabel35 = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(976, 622));
 
@@ -611,7 +674,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jPanel2.setBackground(new java.awt.Color(204, 204, 255));
 
-        jTableFinancePay.setModel(new javax.swing.table.DefaultTableModel(
+        jTableFinancePayable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null, null, null, null, null, null},
                 {null, null, null, null, null, null, null, null, null, null, null},
@@ -637,7 +700,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(jTableFinancePay);
+        jScrollPane3.setViewportView(jTableFinancePayable);
 
         try {
             jFormattedTextField3.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
@@ -1010,15 +1073,174 @@ public final class JPanelFinance extends javax.swing.JPanel {
 
         jTabbedPane2.addTab("Entradas (Receitas)", jPanel6);
 
+        jPanel9.setBackground(new java.awt.Color(204, 204, 255));
+
+        jTableFinanceCashFlowDespesas.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID", "Codigo", "Vendedor", "Valor de Abertura", "Valor de fecho", "Total vendido", "Data de Abertura", "Data de Fecho", "Estado", "Caixa"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane7.setViewportView(jTableFinanceCashFlowDespesas);
+
+        jButtonExportHistoryShiftExcell2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonExportHistoryShiftExcell2.setText("Excel");
+        jButtonExportHistoryShiftExcell2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonExportHistoryShiftExcell2ActionPerformed(evt);
+            }
+        });
+
+        jLabel31.setText("Exportar por:");
+
+        jComboBoxFlowShiftFilter2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Todas", "Hoje", "Semana", "Mes", "Vencidas" }));
+
+        try {
+            jFormattedTextField11.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            jFormattedTextField12.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+
+        jButton3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButton3.setText("Abrir Caixa");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jLabel17.setText("Da data");
+
+        jLabel32.setText("Ate a data");
+
+        jLabel33.setText("Filtar por");
+
+        jLabel34.setText("Por Funcionario");
+
+        jLabel35.setText("Por Gestor");
+
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jFormattedTextField11, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel32, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addComponent(jLabel33, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(jComboBoxFlowShiftFilter2, javax.swing.GroupLayout.PREFERRED_SIZE, 152, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addGap(114, 114, 114)
+                                .addComponent(jLabel34, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
+                                .addComponent(jComboBoxFlowShiftFromSeller1, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(39, 39, 39)))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel35, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxFlowShifitManager1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
+                                .addGap(120, 120, 120)
+                                .addComponent(jLabel31))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel9Layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                                .addComponent(jButtonExportHistoryShiftExcell2, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addComponent(jScrollPane7))
+                .addContainerGap())
+        );
+        jPanel9Layout.setVerticalGroup(
+            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel9Layout.createSequentialGroup()
+                .addGap(2, 2, 2)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel34, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel35, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel31, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jComboBoxFlowShiftFromSeller1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxFlowShifitManager1, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButtonExportHistoryShiftExcell2)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel33, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel32, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jFormattedTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextField11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxFlowShiftFilter2, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(82, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 1027, Short.MAX_VALUE)
+            .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel7Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 513, Short.MAX_VALUE)
+            .addGap(0, 590, Short.MAX_VALUE)
+            .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel7Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
 
         jTabbedPane2.addTab("Saídas (Despesas)", jPanel7);
@@ -1066,22 +1288,37 @@ public final class JPanelFinance extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButtonExportHistoryShiftExcell1ActionPerformed
 
+    private void jButtonExportHistoryShiftExcell2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExportHistoryShiftExcell2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonExportHistoryShiftExcell2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButtonExportHistoryShiftExcell1;
+    private javax.swing.JButton jButtonExportHistoryShiftExcell2;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
     private javax.swing.JComboBox jComboBoxFlowShifitManager;
+    private javax.swing.JComboBox jComboBoxFlowShifitManager1;
     private javax.swing.JComboBox<String> jComboBoxFlowShiftFilter1;
+    private javax.swing.JComboBox<String> jComboBoxFlowShiftFilter2;
     private javax.swing.JComboBox jComboBoxFlowShiftFromSeller;
+    private javax.swing.JComboBox jComboBoxFlowShiftFromSeller1;
     private javax.swing.JComboBox jComboBoxPaymentFromClient;
     private javax.swing.JComboBox jComboBoxPaymentFromClient1;
     private javax.swing.JComboBox jComboBoxSalesFromClient;
     private javax.swing.JComboBox jComboBoxSalesFromSeller;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JFormattedTextField jFormattedTextField10;
+    private javax.swing.JFormattedTextField jFormattedTextField11;
+    private javax.swing.JFormattedTextField jFormattedTextField12;
     private javax.swing.JFormattedTextField jFormattedTextField2;
     private javax.swing.JFormattedTextField jFormattedTextField3;
     private javax.swing.JFormattedTextField jFormattedTextField4;
@@ -1093,6 +1330,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel22;
@@ -1104,6 +1342,11 @@ public final class JPanelFinance extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
@@ -1115,15 +1358,18 @@ public final class JPanelFinance extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPane2;
+    private javax.swing.JTable jTableFinanceCashFlowDespesas;
     private javax.swing.JTable jTableFinanceCashFlowReceitas;
-    private javax.swing.JTable jTableFinancePay;
+    private javax.swing.JTable jTableFinancePayable;
     private javax.swing.JTable jTableFinanceReceive;
     private javax.swing.JTable jTableFinanceSales;
     // End of variables declaration//GEN-END:variables

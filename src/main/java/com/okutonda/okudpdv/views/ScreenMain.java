@@ -24,6 +24,7 @@ import com.okutonda.okudpdv.utilities.CompanySession;
 import com.okutonda.okudpdv.utilities.JpanelLoader;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.views.finance.JPanelFinance;
+import com.okutonda.okudpdv.views.purchases.JPanelPurchases;
 import com.okutonda.okudpdv.views.stock.JPanelStock;
 import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
@@ -167,6 +168,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         jComboBoxOptionsDash = new javax.swing.JComboBox<>();
         jLabelDateTime = new javax.swing.JLabel();
         jToggleButtonSettings = new javax.swing.JToggleButton();
+        jToggleButtonSideBarPurchases = new javax.swing.JToggleButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanelContent = new javax.swing.JPanel();
 
@@ -379,6 +381,21 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
+        buttonGroupSideBar.add(jToggleButtonSideBarPurchases);
+        jToggleButtonSideBarPurchases.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jToggleButtonSideBarPurchases.setForeground(new java.awt.Color(0, 0, 102));
+        jToggleButtonSideBarPurchases.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/shop_6895262.png"))); // NOI18N
+        jToggleButtonSideBarPurchases.setText("Compras");
+        jToggleButtonSideBarPurchases.setBorderPainted(false);
+        jToggleButtonSideBarPurchases.setContentAreaFilled(false);
+        jToggleButtonSideBarPurchases.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jToggleButtonSideBarPurchases.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jToggleButtonSideBarPurchases.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jToggleButtonSideBarPurchasesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelSidebarLayout = new javax.swing.GroupLayout(jPanelSidebar);
         jPanelSidebar.setLayout(jPanelSidebarLayout);
         jPanelSidebarLayout.setHorizontalGroup(
@@ -405,7 +422,8 @@ public final class ScreenMain extends javax.swing.JFrame {
                                     .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE))
                                 .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToggleButtonSideBarPurchases, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addComponent(jComboBoxOptionsDash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -433,16 +451,18 @@ public final class ScreenMain extends javax.swing.JFrame {
                 .addGap(3, 3, 3)
                 .addComponent(jToggleButtonSideBarSales, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jToggleButtonSideBarPurchases, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonSideBarPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonSideBarSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jToggleButtonSideBarReport, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToggleButtonUsers, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jToggleButtonSettings, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(119, Short.MAX_VALUE))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         jPanelSidebarLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jToggleButtonSideBarClient, jToggleButtonSideBarDashboard, jToggleButtonSideBarPayment, jToggleButtonSideBarProduct, jToggleButtonSideBarReport, jToggleButtonSideBarSales, jToggleButtonSideBarSupplier, jToggleButtonUsers});
@@ -606,6 +626,13 @@ public final class ScreenMain extends javax.swing.JFrame {
         new JDialogSetting(this, rootPaneCheckingEnabled).setVisible(true);
     }//GEN-LAST:event_jToggleButtonSettingsActionPerformed
 
+    private void jToggleButtonSideBarPurchasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarPurchasesActionPerformed
+        // TODO add your handling code here:
+        JPanelPurchases pPurchases = new JPanelPurchases();
+        jpload.jPanelLoader(jPanelContent, pPurchases);
+        jLabelNamePanelOpen.setText("COMPRAS");
+    }//GEN-LAST:event_jToggleButtonSideBarPurchasesActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -661,6 +688,7 @@ public final class ScreenMain extends javax.swing.JFrame {
     public javax.swing.JToggleButton jToggleButtonSideBarDashboard1;
     public javax.swing.JToggleButton jToggleButtonSideBarPayment;
     public javax.swing.JToggleButton jToggleButtonSideBarProduct;
+    public javax.swing.JToggleButton jToggleButtonSideBarPurchases;
     public javax.swing.JToggleButton jToggleButtonSideBarReport;
     public javax.swing.JToggleButton jToggleButtonSideBarSales;
     public javax.swing.JToggleButton jToggleButtonSideBarSupplier;

@@ -562,7 +562,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 c.getDescription(),
                 c.getPrice(),
                 c.getQty(),
-                productController.CalculateTotalProduct(c.getProduct(), c.getQty())
+                productController.calculateTotalProduct(c.getProduct(), c.getQty())
 //                c.getQty() * c.getPrice()
             }
             );
@@ -611,14 +611,33 @@ public class ScreenPdv extends javax.swing.JFrame {
         this.dispose();
     }
 
+//    public void calculTotal() {
+//        total = subTotal = 0;
+//        for (ProductOrder productOrder : listProductOrder) {
+//            subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
+//            total += productOrder.getProduct().getPrice() * productOrder.getQty();
+//        }
+//        jTextFieldTotalInvoice.setText(String.valueOf(total));
+////        jTextFieldPayClient.setText(String.valueOf(total));
+//    }
     public void calculTotal() {
-        total = subTotal = 0;
+        BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+
         for (ProductOrder productOrder : listProductOrder) {
-            subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
-            total += productOrder.getProduct().getPrice() * productOrder.getQty();
+            if (productOrder.getProduct() != null && productOrder.getProduct().getPrice() != null) {
+                BigDecimal price = productOrder.getProduct().getPrice();
+                BigDecimal qty = BigDecimal.valueOf(productOrder.getQty());
+
+                BigDecimal lineTotal = price.multiply(qty);
+
+                subTotal = subTotal.add(lineTotal);
+                total = total.add(lineTotal);
+            }
         }
-        jTextFieldTotalInvoice.setText(String.valueOf(total));
-//        jTextFieldPayClient.setText(String.valueOf(total));
+
+        jTextFieldTotalInvoice.setText(total.toPlainString());
+        // jTextFieldPayClient.setText(total.toPlainString());
     }
 
     public void clearOrder() {

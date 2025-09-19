@@ -324,3 +324,45 @@ public class TemaCores {
     public static final Color TEXT_GRAY = new Color(97, 97, 97);   // Texto secundário
     public static final Color HIGHLIGHT = new Color(100, 181, 246);// Realce ativo
 }
+
+
+
+
+
+📥 Contas a Pagar
+
+São todas as obrigações financeiras da empresa, ou seja, aquilo que tens de pagar.
+
+Exemplo:
+
+Compras de mercadorias feitas a fornecedores (a crédito).
+
+Aluguel, água, luz, internet.
+
+Salários, impostos, taxas.
+
+💡 No sistema: normalmente vêm do módulo de compras → cada compra registada vira uma conta a pagar.
+
+📤 Contas a Receber
+
+São todos os direitos financeiros da empresa, ou seja, aquilo que os clientes te devem.
+
+Exemplo:
+
+Vendas a prazo (quando vendes e o cliente paga depois).
+
+Faturas emitidas e ainda não pagas.
+
+💡 No sistema: normalmente vêm do módulo de vendas/faturação → cada fatura a crédito vira uma conta a receber.
+
+⚖️ Diferença essencial
+
+Contas a pagar = dinheiro que vai sair do caixa.
+
+Contas a receber = dinheiro que vai entrar no caixa.
+
+📊 No teu sistema (exemplo PDV/ERP)
+
+Contas a receber → podes usar a tabela orders ou invoices (faturas FR/FT).
+
+Contas a pagar → podes usar a tabela purchases (compras, entrada de estoque, despesas).

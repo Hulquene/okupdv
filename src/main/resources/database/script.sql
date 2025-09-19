@@ -324,6 +324,49 @@ LOCK TABLES `inventory_stock` WRITE;
 /*!40000 ALTER TABLE `inventory_stock` ENABLE KEYS */;
 UNLOCK TABLES;
 
+CREATE TABLE IF NOT EXISTS expense_categories (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    description VARCHAR(255) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE IF NOT EXISTS expenses (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    description  VARCHAR(255)        NOT NULL DEFAULT '',
+    total        DECIMAL(15,2)       NOT NULL DEFAULT 0.00,
+    prefix       VARCHAR(11)         NOT NULL,
+    number       INT                 NOT NULL,
+
+    `date`       DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateFinish   DATETIME            NULL,
+
+    status       ENUM('SUCCESS','FAILED') NOT NULL DEFAULT 'SUCCESS',
+    mode         ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
+
+    reference    VARCHAR(100)        NULL,
+    notes        TEXT                NULL,          -- 👈 anotações adicionais
+    currency     VARCHAR(10)         NOT NULL DEFAULT 'AOA',
+
+    supplier_id   INT                 NOT NULL,
+    user_id       INT                 NOT NULL,
+    category_id   INT                 NULL,
+
+    created_at   TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- Índices úteis
+    KEY idx_expenses_date (`date`),
+    KEY idx_expenses_supplier (supplier_id),
+    KEY idx_expenses_user (user_id),
+    KEY idx_expenses_mode (mode),
+    KEY idx_expenses_status (status),
+
+    CONSTRAINT fk_expenses_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+    CONSTRAINT fk_expenses_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_expenses_category FOREIGN KEY (category_id) REFERENCES expense_categories(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 --
 -- Table structure for table `orders`
 --
@@ -803,6 +846,7 @@ UNLOCK TABLES;
 -- =========================
 -- TABELA: purchases (Purchase)
 -- =========================
+/*
 CREATE TABLE IF NOT EXISTS `purchases` (
   `id`              INT AUTO_INCREMENT PRIMARY KEY,
   `description`     VARCHAR(255)                NOT NULL,
@@ -835,6 +879,51 @@ CREATE TABLE IF NOT EXISTS `purchases` (
   CHECK (`qty` >= 0),
   CHECK (`stock_total` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+*/;
+
+CREATE TABLE purchases (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    supplier_id INT NOT NULL,                    -- fornecedor (NIF deve estar registado)
+    invoice_number VARCHAR(50) NOT NULL,         -- nº da fatura ou documento de compra
+    invoice_type ENUM('FT','FR','NC','ND') DEFAULT 'FT', -- tipo de documento (fatura, recibo, nota crédito, etc.)
+    descricao VARCHAR(255) NULL,
+    total DECIMAL(15,2) NOT NULL,                -- valor total da compra
+    iva_total DECIMAL(15,2) DEFAULT 0.00,        -- imposto (IVA) discriminado
+    total_pago DECIMAL(15,2) DEFAULT 0.00,
+    saldo_em_aberto DECIMAL(15,2) DEFAULT 0.00,
+    data_compra DATE NOT NULL,                   -- data da compra (igual à fatura do fornecedor)
+    data_vencimento DATE NOT NULL,               -- prazo de pagamento
+    status ENUM('aberto','parcial','pago','atrasado') DEFAULT 'aberto',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE purchase_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_id INT NOT NULL,                    -- ligação à compra
+    valor_pago DECIMAL(15,2) NOT NULL,           -- valor pago
+    data_pagamento DATE NOT NULL,                -- data do pagamento efetivo
+    metodo ENUM('dinheiro','transferencia','cartao','cheque','outro') DEFAULT 'dinheiro',
+    referencia VARCHAR(100) NULL,                -- nº comprovativo / referência bancária
+    observacao TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_purchase_payment FOREIGN KEY (purchase_id) REFERENCES purchases(id)
+);
+CREATE TABLE purchase_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_id INT NOT NULL,                    -- ligação à compra
+    product_id INT NOT NULL,                     -- ligação ao produto registado
+    quantidade INT NOT NULL,
+    preco_custo DECIMAL(15,2) NOT NULL,          -- preço unitário de compra
+    iva DECIMAL(15,2) DEFAULT 0.00,              -- IVA aplicado ao produto
+    subtotal DECIMAL(15,2) NOT NULL,             -- quantidade * preco_custo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_purchase_item_purchase FOREIGN KEY (purchase_id) REFERENCES purchases(id),
+    CONSTRAINT fk_purchase_item_product FOREIGN KEY (product_id) REFERENCES products(id)
+);
 
 -- =====================
 -- TABELA: stocks (Stock)

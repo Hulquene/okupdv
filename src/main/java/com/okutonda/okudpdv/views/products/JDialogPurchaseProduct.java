@@ -88,36 +88,36 @@ public class JDialogPurchaseProduct extends javax.swing.JDialog {
     }
 
     public Purchase validatePurchase() {
-        Purchase cModel = new Purchase();
-
-        if (jTextFieldQty.getText().isEmpty() || Util.isInteger(jTextFieldQty.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Quatidade invalido!! Insira um numero inteiro");
-        } else if (Util.isValidDouble(jTextFieldTotalPurchase.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Total invalido!! Insira um valor valido");
-        } else if (Util.isValidDouble(jTextFieldPriceUnit.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Preço de Compra invalido!! Insira um valor compra");
-        } else if (Util.isValidDouble(jTextFieldPriceSale.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Preço de venda invalido!! Insira um preço");
-//        } else if (Util.isValidDouble(jTextFieldPorcetege.getText()) == false) {
-//            JOptionPane.showMessageDialog(null, "Campo Percentagem invalido!! Insira um numero compra");
-        } else if (jComboBoxSupplier.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo Fornecedor invalido!! Selecione um");
-        } else {
-            cModel.setDescription("compra " + jLabelNameProduct.getText());
-//            cModel.setDate(jFormattedTextField1.getText());
-            cModel.setDate("2025-09-10 21:03:52");
-            cModel.setQty(Integer.parseInt(jTextFieldQty.getText()));
-
-            cModel.setPriceSale(Util.convertToDouble(jTextFieldPriceSale.getText()));
-            cModel.setPricePurchase(Util.convertToDouble(jTextFieldPriceUnit.getText()));
-            cModel.setTotal(Util.convertToDouble(jTextFieldTotalPurchase.getText()));
-            cModel.setStatus(Integer.toString(jComboBoxStatus.getSelectedIndex()));
-            cModel.setStatusPayment(Integer.toString(jComboBoxStatus.getSelectedIndex()));
-            cModel.setUser((User) session.getUser());
-            cModel.setProduct(this.prod);
-            cModel.setSupplier((Supplier) jComboBoxSupplier.getSelectedItem());
-            return cModel;
-        }
+//        Purchase cModel = new Purchase();
+//
+//        if (jTextFieldQty.getText().isEmpty() || Util.isInteger(jTextFieldQty.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Campo Quatidade invalido!! Insira um numero inteiro");
+//        } else if (Util.isValidDouble(jTextFieldTotalPurchase.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Campo Total invalido!! Insira um valor valido");
+//        } else if (Util.isValidDouble(jTextFieldPriceUnit.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Campo Preço de Compra invalido!! Insira um valor compra");
+//        } else if (Util.isValidDouble(jTextFieldPriceSale.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Campo Preço de venda invalido!! Insira um preço");
+////        } else if (Util.isValidDouble(jTextFieldPorcetege.getText()) == false) {
+////            JOptionPane.showMessageDialog(null, "Campo Percentagem invalido!! Insira um numero compra");
+//        } else if (jComboBoxSupplier.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(null, "Campo Fornecedor invalido!! Selecione um");
+//        } else {
+//            cModel.setDescription("compra " + jLabelNameProduct.getText());
+////            cModel.setDate(jFormattedTextField1.getText());
+//            cModel.setDate("2025-09-10 21:03:52");
+//            cModel.setQty(Integer.parseInt(jTextFieldQty.getText()));
+//
+//            cModel.setPriceSale(Util.convertToDouble(jTextFieldPriceSale.getText()));
+//            cModel.setPricePurchase(Util.convertToDouble(jTextFieldPriceUnit.getText()));
+//            cModel.setTotal(Util.convertToDouble(jTextFieldTotalPurchase.getText()));
+//            cModel.setStatus(Integer.toString(jComboBoxStatus.getSelectedIndex()));
+//            cModel.setStatusPayment(Integer.toString(jComboBoxStatus.getSelectedIndex()));
+//            cModel.setUser((User) session.getUser());
+//            cModel.setProduct(this.prod);
+//            cModel.setSupplier((Supplier) jComboBoxSupplier.getSelectedItem());
+//            return cModel;
+//        }
 
         return null;
     }

@@ -47,7 +47,7 @@ public class ProductDao {
             stmt.setString(1, obj.getType());
             stmt.setString(2, obj.getCode());
             stmt.setString(3, obj.getDescription());
-            stmt.setDouble(4, obj.getPrice());
+            stmt.setBigDecimal(4, obj.getPrice());
             stmt.setInt(5, obj.getTaxe().getId());
             stmt.setInt(6, obj.getReasonTaxe().getId());
             stmt.setInt(7, obj.getGroup().getId());
@@ -55,7 +55,7 @@ public class ProductDao {
             stmt.setInt(9, obj.getStockTotal());
             stmt.setInt(10, obj.getStatus());
             stmt.setString(11, obj.getBarcode());
-            stmt.setDouble(12, obj.getPurchasePrice());
+            stmt.setBigDecimal(12, obj.getPurchasePrice());
             //3 passo
             stmt.execute();
             // 4 passo
@@ -75,7 +75,7 @@ public class ProductDao {
             pst.setString(1, obj.getType());
             pst.setString(2, obj.getCode());
             pst.setString(3, obj.getDescription());
-            pst.setDouble(4, obj.getPrice());
+            pst.setBigDecimal(4, obj.getPrice());
             pst.setInt(5, obj.getTaxe().getId());
             pst.setInt(6, obj.getReasonTaxe().getId());
             pst.setInt(7, obj.getGroup().getId());
@@ -83,7 +83,7 @@ public class ProductDao {
             pst.setInt(9, obj.getStockTotal());
             pst.setInt(10, obj.getStatus());
             pst.setString(11, obj.getBarcode());
-            pst.setDouble(12, obj.getPurchasePrice());
+            pst.setBigDecimal(12, obj.getPurchasePrice());
             pst.setInt(13, id);
             //3 passo
             //ptmt.executeQuery();
@@ -307,8 +307,8 @@ public class ProductDao {
             obj.setCode(rs.getString("code"));
             obj.setBarcode(rs.getString("barcode"));
             obj.setDescription(rs.getString("description"));
-            obj.setPrice(rs.getDouble("price"));
-            obj.setPurchasePrice(rs.getDouble("purchase_price"));
+            obj.setPrice(rs.getBigDecimal("price"));
+            obj.setPurchasePrice(rs.getBigDecimal("purchase_price"));
             obj.setGroup(groups);
             obj.setTaxe(tax);
             obj.setReasonTaxe(resaonTax);

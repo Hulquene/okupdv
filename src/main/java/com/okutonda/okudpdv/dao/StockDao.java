@@ -266,7 +266,7 @@ public class StockDao {
             Stock obj = new Stock();
             Purchase pur;
             PurchaseDao pDao = new PurchaseDao();
-            pur = pDao.getId(rs.getInt("purchase_id"));
+            pur = null;//pDao.getId(rs.getInt("purchase_id"));
             
             User user;
             UserDao uDao = new UserDao();

@@ -18,6 +18,7 @@ import com.okutonda.okudpdv.models.Taxes;
 import com.okutonda.okudpdv.models.Warehouse;
 import com.okutonda.okudpdv.utilities.Util;
 import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -127,8 +128,11 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             cModel.setBarcode(jTextFieldBarCode.getText());
             cModel.setTaxe((Taxes) jComboBoxTaxeId.getSelectedItem());
             cModel.setReasonTaxe((ReasonTaxes) jComboBoxReasonTaxeId.getSelectedItem());
-            cModel.setPrice(Util.convertToDouble(jTextFieldPrice.getText()));
-            cModel.setPurchasePrice(Util.convertToDouble(jTextFieldPurchasePrice.getText()));
+//            cModel.setPrice(Util.convertToDouble(jTextFieldPrice.getText()));
+//            cModel.setPurchasePrice(Util.convertToDouble(jTextFieldPurchasePrice.getText()));
+            cModel.setPrice(new BigDecimal(jTextFieldPrice.getText().replace(",", ".")));
+            cModel.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
+
             cModel.setGroup((GroupsProduct) jComboBoxGroup.getSelectedItem());
             cModel.setSupplier((Supplier) jComboBoxSupplier.getSelectedItem());
             cModel.setStockTotal(Util.convertToInteger(jTextFieldStockTotal.getText()));

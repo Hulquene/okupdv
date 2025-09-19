@@ -6,8 +6,12 @@ package com.okutonda.okudpdv.dao;
 
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Clients;
+import com.okutonda.okudpdv.models.Expense;
+import com.okutonda.okudpdv.models.ExpenseCategory;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
+import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.models.Supplier;
 import com.okutonda.okudpdv.models.User;
 
 import java.sql.Connection;
@@ -27,6 +31,65 @@ public class FinanceDao {
 
     public FinanceDao() {
         this.conn = ConnectionDatabase.getConnect();
+    }
+
+    public List<Purchase> listContasAPagar() {
+        List<Purchase> list = new ArrayList<>();
+        String sql = """
+        SELECT p.id,
+               p.invoice_number,
+               p.invoice_type,
+               p.descricao,
+               p.total,
+               p.iva_total,
+               p.data_compra,
+               p.data_vencimento,
+               p.status,
+               s.id   AS supplier_id,
+               s.name AS supplier_name,
+               (p.total - IFNULL(SUM(pp.valor_pago), 0)) AS saldo_em_aberto,
+               IFNULL(SUM(pp.valor_pago), 0) AS total_pago
+        FROM purchases p
+        LEFT JOIN purchase_payments pp ON p.id = pp.purchase_id
+        LEFT JOIN suppliers s ON p.supplier_id = s.id
+        GROUP BY p.id, p.invoice_number, p.invoice_type, p.descricao, p.total, p.iva_total,
+                 p.data_compra, p.data_vencimento, p.status, s.id, s.name
+        HAVING saldo_em_aberto > 0
+        ORDER BY p.data_vencimento ASC
+    """;
+
+        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                Purchase obj = new Purchase();
+                obj.setId(rs.getInt("id"));
+                obj.setInvoiceNumber(rs.getString("invoice_number"));
+                obj.setInvoiceType(rs.getString("invoice_type"));
+                obj.setDescricao(rs.getString("descricao"));
+                obj.setTotal(rs.getBigDecimal("total"));
+                obj.setIvaTotal(rs.getBigDecimal("iva_total"));
+
+                // Datas (converte de SQL Date → java.util.Date)
+                obj.setDataCompra(rs.getDate("data_compra"));
+                obj.setDataVencimento(rs.getDate("data_vencimento"));
+
+                obj.setStatus(rs.getString("status"));
+                obj.setPayTotal(rs.getBigDecimal("total_pago"));
+                obj.setNote("Saldo em aberto: " + rs.getBigDecimal("saldo_em_aberto"));
+
+                // fornecedor
+                if (rs.getInt("supplier_id") > 0) {
+                    Supplier s = new Supplier();
+                    s.setId(rs.getInt("supplier_id"));
+                    s.setName(rs.getString("supplier_name"));
+                    obj.setSupplier(s);
+                }
+
+                list.add(obj);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar contas a pagar: " + e.getMessage());
+        }
+        return list;
     }
 
     /**
@@ -296,4 +359,81 @@ public class FinanceDao {
         }
         return 0d;
     }
+
+    public List<Expense> listDespesas(String dateFrom, String dateTo) {
+        List<Expense> list = new ArrayList<>();
+        String sql = """
+        SELECT e.id,
+               e.description,
+               e.total,
+               e.date,
+               e.dateFinish,
+               e.mode,
+               e.reference,
+               e.currency,
+               e.notes,
+               s.id   AS supplier_id,
+               s.name AS supplier_name,
+               u.id   AS user_id,
+               u.name AS user_name,
+               c.id   AS category_id,
+               c.name AS category_name
+        FROM expenses e
+        LEFT JOIN suppliers s ON e.supplier_id = s.id
+        LEFT JOIN users u     ON e.user_id = u.id
+        LEFT JOIN expense_categories c ON e.category_id = c.id
+        WHERE DATE(e.date) BETWEEN ? AND ?
+        ORDER BY e.date ASC
+    """;
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, dateFrom);
+            pst.setString(2, dateTo);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Expense obj = new Expense();
+                    obj.setId(rs.getInt("id"));
+                    obj.setDescription(rs.getString("description"));
+                    obj.setTotal(rs.getBigDecimal("total"));
+                    obj.setDate(rs.getString("date"));
+                    obj.setDateFinish(rs.getString("dateFinish"));
+                    obj.setMode(rs.getString("mode"));
+                    obj.setReference(rs.getString("reference"));
+                    obj.setCurrency(rs.getString("currency"));
+                    obj.setNotes(rs.getString("notes"));
+
+                    // fornecedor
+                    if (rs.getInt("supplier_id") > 0) {
+                        Supplier supplier = new Supplier();
+                        supplier.setId(rs.getInt("supplier_id"));
+                        supplier.setName(rs.getString("supplier_name"));
+                        obj.setSupplier(supplier);
+                    }
+
+                    // usuário
+                    if (rs.getInt("user_id") > 0) {
+                        User u = new User();
+                        u.setId(rs.getInt("user_id"));
+                        u.setName(rs.getString("user_name"));
+                        obj.setUser(u);
+                    }
+
+                    // categoria
+                    if (rs.getInt("category_id") > 0) {
+                        ExpenseCategory c = new ExpenseCategory();
+                        c.setId(rs.getInt("category_id"));
+                        c.setName(rs.getString("category_name"));
+                        obj.setCategory(c);
+                    }
+
+                    list.add(obj);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar despesas: " + e.getMessage());
+        }
+        return list;
+    }
+
 }

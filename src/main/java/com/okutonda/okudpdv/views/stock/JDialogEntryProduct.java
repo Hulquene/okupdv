@@ -34,23 +34,28 @@ public class JDialogEntryProduct extends javax.swing.JDialog {
         for (Purchase c : list) {
             data.addRow(new Object[]{
                 c.getId(),
-                c.getDescription(),
-                c.getProduct().getDescription(),
-                c.getQty(),
-                c.getDate(),
-                c.getPricePurchase(),
+                "",
+                "",
+                "",
+                "",
+                "",
+//                c.getDescription(),
+//                c.getProduct().getDescription(),
+//                c.getQty(),
+//                c.getDate(),
+//                c.getPricePurchase(),
                 "",});
         }
     }
 
     public void listPurchase() {
-        List<Purchase> list = purchaseController.get("");
-        loadListPurchase(list);
+//        List<Purchase> list = purchaseController.get("");
+//        loadListPurchase(list);
     }
 
     public void filterListPurchase(String txt) {
-        List<Purchase> list = purchaseController.filter(txt);
-        loadListPurchase(list);
+//        List<Purchase> list = purchaseController.filter(txt);
+//        loadListPurchase(list);
     }
 
     /**

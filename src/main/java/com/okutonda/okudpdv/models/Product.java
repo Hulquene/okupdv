@@ -4,6 +4,8 @@
  */
 package com.okutonda.okudpdv.models;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author kenny
@@ -15,8 +17,8 @@ public class Product {
     private String code;
     private String description;
     private String longDescription;
-    private Double price;
-    private Double purchasePrice;
+    private BigDecimal price;
+    private BigDecimal purchasePrice;
     private Taxes taxe;
     private ReasonTaxes reasonTaxe;
     private GroupsProduct group;
@@ -66,19 +68,19 @@ public class Product {
         this.longDescription = longDescription;
     }
 
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public Double getPurchasePrice() {
+    public BigDecimal getPurchasePrice() {
         return purchasePrice;
     }
 
-    public void setPurchasePrice(Double purchasePrice) {
+    public void setPurchasePrice(BigDecimal purchasePrice) {
         this.purchasePrice = purchasePrice;
     }
 
