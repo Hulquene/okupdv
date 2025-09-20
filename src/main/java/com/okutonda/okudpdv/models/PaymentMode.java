@@ -8,6 +8,12 @@ package com.okutonda.okudpdv.models;
  *
  * @author hr
  */
+//public enum PaymentMode {
+//    NUMERARIO, MULTICAIXA, TRANSFERENCIA, OUTROS
+//}
 public enum PaymentMode {
-    NUMERARIO, MULTICAIXA, TRANSFERENCIA, OUTROS
+    NUMERARIO,     // pagamento em dinheiro
+    MULTICAIXA,    // TPA / cartão
+    TRANSFERENCIA, // transferência bancária
+    OUTROS         // cheque, crédito, etc.
 }

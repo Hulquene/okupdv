@@ -5,9 +5,13 @@
 package com.okutonda.okudpdv.dao;
 
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
+import com.okutonda.okudpdv.models.InvoiceType;
 import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.PurchaseItem;
+import com.okutonda.okudpdv.models.StockMovement;
 import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.models.User;
+import com.okutonda.okudpdv.models.Warehouse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,47 +32,61 @@ public class PurchaseDao {
         this.conn = ConnectionDatabase.getConnect();
     }
 
+    public int getNextNumber() throws SQLException {
+        String sql = "SELECT IFNULL(MAX(CAST(invoice_number AS UNSIGNED)), 0) + 1 AS next_num FROM purchases";
+        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("next_num");
+            }
+        }
+        return 1; // fallback
+    }
+
     public boolean add(Purchase purchase) {
         String sqlPurchase = """
-            INSERT INTO purchases
-            (supplier_id, invoice_number, invoice_type, descricao, total, iva_total, data_compra, data_vencimento, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO purchases
+        (supplier_id, invoice_number, invoice_type, descricao, total, iva_total, data_compra, data_vencimento, status, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sqlPurchase, Statement.RETURN_GENERATED_KEYS)) {
-            // Inserir dados da compra
-            pst.setInt(1, purchase.getSupplier().getId());
-            pst.setString(2, purchase.getInvoiceNumber());
-            pst.setString(3, purchase.getInvoiceType());
-            pst.setString(4, purchase.getDescricao());
-            pst.setBigDecimal(5, purchase.getTotal());
-            pst.setBigDecimal(6, purchase.getIvaTotal());
-            pst.setDate(7, new java.sql.Date(purchase.getDataCompra().getTime()));
-            pst.setDate(8, new java.sql.Date(purchase.getDataVencimento().getTime()));
-            pst.setString(9, purchase.getStatus());
+        try {
+            conn.setAutoCommit(false); // 🚀 Início da transação
 
-            int affected = pst.executeUpdate();
-            if (affected == 0) {
-                throw new SQLException("Erro ao inserir compra.");
-            }
-
-            // Pegar o ID da compra
+            // 1) Inserir dados da compra
             int purchaseId;
-            try (ResultSet rs = pst.getGeneratedKeys()) {
-                if (rs.next()) {
-                    purchaseId = rs.getInt(1);
-                } else {
-                    throw new SQLException("Erro ao obter ID da compra.");
+            try (PreparedStatement pst = conn.prepareStatement(sqlPurchase, Statement.RETURN_GENERATED_KEYS)) {
+                pst.setInt(1, purchase.getSupplier().getId());
+                pst.setString(2, purchase.getInvoiceNumber());
+                pst.setString(3, purchase.getInvoiceType().name());
+                pst.setString(4, purchase.getDescricao());
+                pst.setBigDecimal(5, purchase.getTotal());
+                pst.setBigDecimal(6, purchase.getIvaTotal());
+                pst.setDate(7, new java.sql.Date(purchase.getDataCompra().getTime()));
+                pst.setDate(8, new java.sql.Date(purchase.getDataVencimento().getTime()));
+                pst.setString(9, purchase.getStatus());
+                pst.setInt(10, purchase.getUser().getId());
+
+                int affected = pst.executeUpdate();
+                if (affected == 0) {
+                    throw new SQLException("Erro ao inserir compra.");
+                }
+
+                try (ResultSet rs = pst.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        purchaseId = rs.getInt(1);
+                    } else {
+                        throw new SQLException("Erro ao obter ID da compra.");
+                    }
                 }
             }
 
-            // Inserir itens
+            // 2) Inserir itens da compra
             if (purchase.getItems() != null) {
                 String sqlItem = """
-                    INSERT INTO purchase_items
-                    (purchase_id, product_id, quantidade, preco_custo, iva, subtotal)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """;
+                INSERT INTO purchase_items
+                (purchase_id, product_id, quantidade, preco_custo, iva, subtotal)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """;
 
                 try (PreparedStatement pstItem = conn.prepareStatement(sqlItem)) {
                     for (PurchaseItem item : purchase.getItems()) {
@@ -80,17 +98,41 @@ public class PurchaseDao {
                         pstItem.setBigDecimal(6, item.getSubtotal());
                         pstItem.addBatch();
 
-                        // Atualizar stock do produto
-                        atualizarStock(item.getProduct().getId(), item.getQuantidade());
+                        // 3) Criar movimento de stock
+                        StockMovement movimento = new StockMovement();
+                        movimento.setProduct(item.getProduct());
+                        movimento.setQuantity(item.getQuantidade()); // positivo = entrada
+                        movimento.setType("ENTRADA");
+                        movimento.setOrigin("COMPRA");
+                        movimento.setReason("COMPRA Nº " + purchase.getInvoiceNumber());
+                        movimento.setUser(purchase.getUser());
+                        movimento.setWarehouse(new Warehouse());
+                        movimento.getWarehouse().setId(1); // Armazém por defeito
+
+                        StockMovementDao stockDao = new StockMovementDao(conn); // usa mesma transação
+                        stockDao.add(movimento);
                     }
                     pstItem.executeBatch();
                 }
             }
 
+            conn.commit(); // ✅ Tudo certo → confirma transação
             return true;
-        } catch (SQLException e) {
-            System.out.println("Erro ao salvar compra: " + e.getMessage());
+
+        } catch (Exception e) {
+            try {
+                conn.rollback(); // ❌ Erro → desfaz tudo
+                System.out.println("Rollback realizado devido a erro: " + e.getMessage());
+            } catch (SQLException ex) {
+                System.out.println("Erro ao realizar rollback: " + ex.getMessage());
+            }
             return false;
+        } finally {
+            try {
+                conn.setAutoCommit(true); // volta ao normal
+            } catch (SQLException e) {
+                System.out.println("Erro ao resetar autoCommit: " + e.getMessage());
+            }
         }
     }
 
@@ -105,13 +147,26 @@ public class PurchaseDao {
 
     public List<Purchase> list() {
         List<Purchase> list = new ArrayList<>();
-        String sql = "SELECT p.*, s.company AS supplier_name FROM purchases p INNER JOIN suppliers s ON p.supplier_id = s.id ORDER BY p.data_compra DESC";
+
+        String sql = """
+        SELECT p.*,
+               s.company AS supplier_name,
+               u.id AS user_id,
+               u.name AS user_name
+        FROM purchases p
+        INNER JOIN suppliers s ON p.supplier_id = s.id
+        LEFT JOIN users u ON p.user_id = u.id
+        ORDER BY p.data_compra DESC
+    """;
+
         try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+
             while (rs.next()) {
                 Purchase obj = new Purchase();
+
+                // Campos principais
                 obj.setId(rs.getInt("id"));
                 obj.setInvoiceNumber(rs.getString("invoice_number"));
-                obj.setInvoiceType(rs.getString("invoice_type"));
                 obj.setDescricao(rs.getString("descricao"));
                 obj.setTotal(rs.getBigDecimal("total"));
                 obj.setIvaTotal(rs.getBigDecimal("iva_total"));
@@ -119,18 +174,38 @@ public class PurchaseDao {
                 obj.setDataVencimento(rs.getDate("data_vencimento"));
                 obj.setStatus(rs.getString("status"));
 
+                // InvoiceType com segurança
+                String invoiceTypeStr = rs.getString("invoice_type");
+                if (invoiceTypeStr != null) {
+                    try {
+                        obj.setInvoiceType(InvoiceType.valueOf(invoiceTypeStr));
+                    } catch (IllegalArgumentException ex) {
+                        System.out.println("⚠ Tipo de documento inválido no banco: " + invoiceTypeStr);
+                        obj.setInvoiceType(null); // ou podes definir um default
+                    }
+                }
+
+                // Fornecedor
                 Supplier supplier = new Supplier();
                 supplier.setId(rs.getInt("supplier_id"));
                 supplier.setName(rs.getString("supplier_name"));
                 obj.setSupplier(supplier);
+
+                // Usuário
+                User user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setName(rs.getString("user_name"));
+                obj.setUser(user);
 
                 list.add(obj);
             }
         } catch (SQLException e) {
             System.out.println("Erro ao listar compras: " + e.getMessage());
         }
+
         return list;
     }
+
 //    private final Connection conn;
 //    PreparedStatement pst = null;
 //    ResultSet rs = null;

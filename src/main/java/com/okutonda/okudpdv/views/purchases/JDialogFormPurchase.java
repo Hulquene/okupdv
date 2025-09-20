@@ -4,7 +4,9 @@
  */
 package com.okutonda.okudpdv.views.purchases;
 
+import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
+import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.PurchaseItem;
@@ -12,10 +14,17 @@ import com.okutonda.okudpdv.models.Supplier;
 import com.okutonda.okudpdv.ui.TemaCores;
 import com.okutonda.okudpdv.ui.TemaUI;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.DateFormatter;
+import javax.swing.text.DefaultFormatterFactory;
 
 /**
  *
@@ -25,6 +34,9 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
     private List<PurchaseItem> itensCompra = new ArrayList<>();
 
+    ProductController productController = new ProductController();
+    SupplierController supplierController = new SupplierController();
+
     /**
      * Creates new form JDialogFormPurchase
      */
@@ -33,7 +45,29 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         initComponents();
         applyTheme();
 
-        loadItemsTable();
+        loadComboBoxSuppliers();
+        loadComboBoxProdutosCompra();
+
+        // mesmo formatter/behavior nos dois campos
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        jFormattedTextFieldDataCompra.setFormatterFactory(
+                new DefaultFormatterFactory(new DateFormatter(sdf)));
+        jFormattedTextFieldDataCompra.setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
+
+        jFormattedTextFieldDataVencimento.setFormatterFactory(
+                new DefaultFormatterFactory(new DateFormatter(sdf)));
+        jFormattedTextFieldDataVencimento.setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
+
+// 1) data de compra = hoje
+        Date hoje = new Date();
+        jFormattedTextFieldDataCompra.setValue(hoje);
+
+// 2) vencimento = compra + 1 mês (usando java.time)
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDate base = hoje.toInstant().atZone(zone).toLocalDate();
+        Date venc = Date.from(base.plusMonths(1).atStartOfDay(zone).toInstant());
+        jFormattedTextFieldDataVencimento.setValue(venc);
+
     }
 
     private void applyTheme() {
@@ -71,6 +105,24 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
         // Se o GUI Builder deixou cores hardcoded em initComponents,
         // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
+    }
+
+    private void loadComboBoxSuppliers() {
+
+        List<Supplier> fornecedores = supplierController.get("");
+
+        for (Supplier s : fornecedores) {
+            jComboBoxListFornecedor.addItem(s);
+        }
+    }
+
+    private void loadComboBoxProdutosCompra() {
+        jComboBoxListProduto.removeAllItems(); // limpa primeiro
+
+        List<Product> produtos = productController.getProducts();
+        for (Product p : produtos) {
+            jComboBoxListProduto.addItem(p);
+        }
     }
 
     private void loadItemsTable() {
@@ -112,8 +164,8 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jComboBoxListProduto = new javax.swing.JComboBox<>();
-        jComboBoxListFornecedor = new javax.swing.JComboBox<>();
+        jComboBoxListProduto = new javax.swing.JComboBox();
+        jComboBoxListFornecedor = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -135,9 +187,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jComboBoxListProduto.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        jComboBoxListFornecedor.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBoxListProduto.setToolTipText("");
 
         jLabel1.setText("Fornecedor");
 
@@ -176,11 +226,22 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
         jLabelTitle.setText("Formulario de Compra");
 
+        try {
+            jFormattedTextFieldDataCompra.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
         jFormattedTextFieldDataCompra.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jFormattedTextFieldDataCompraActionPerformed(evt);
             }
         });
+
+        try {
+            jFormattedTextFieldDataVencimento.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
 
         jTextAreaNote.setColumns(20);
         jTextAreaNote.setRows(5);
@@ -311,12 +372,27 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         PurchaseItem item = new PurchaseItem();
         item.setProduct(prod);
         item.setQuantidade(qtd);
-        item.setPrecoCusto(prod.getPrice()); // assumindo que já tens preço no produto
+        item.setPrecoCusto(prod.getPrice());
         item.setSubtotal(prod.getPrice().multiply(BigDecimal.valueOf(qtd)));
 
-        itensCompra.add(item);
+// 🔹 Verificar se já existe esse produto na lista
+        boolean jaExiste = false;
+        for (PurchaseItem it : itensCompra) {
+            if (it.getProduct().getId() == prod.getId()) {
+                // já existe → soma quantidade e recalcula subtotal
+                it.setQuantidade(it.getQuantidade() + qtd);
+                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(it.getQuantidade())));
+                jaExiste = true;
+                break;
+            }
+        }
 
-        // atualizar tabela
+// 🔹 Se não existir, adiciona normalmente
+        if (!jaExiste) {
+            itensCompra.add(item);
+        }
+
+// atualizar tabela
         loadItemsTable();
         atualizarTotais();
     }//GEN-LAST:event_jButtonAddProductActionPerformed
@@ -410,8 +486,8 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAddProduct;
     private javax.swing.JButton jButtonFinishPurchase;
-    private javax.swing.JComboBox<String> jComboBoxListFornecedor;
-    private javax.swing.JComboBox<String> jComboBoxListProduto;
+    private javax.swing.JComboBox jComboBoxListFornecedor;
+    private javax.swing.JComboBox jComboBoxListProduto;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataCompra;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataVencimento;
     private javax.swing.JLabel jLabel1;

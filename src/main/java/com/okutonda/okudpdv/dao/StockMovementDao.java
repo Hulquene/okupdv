@@ -35,15 +35,25 @@ public class StockMovementDao {
     public boolean add(StockMovement movimento) {
         try {
             String sql = """
-                INSERT INTO stock_movements (product_id, quantity, type, reason, user_id)
-                VALUES (?,?,?,?,?)
-            """;
+            INSERT INTO stock_movements
+            (product_id, warehouse_id, user_id, quantity, type, origin, reference_id, notes, reason)
+            VALUES (?,?,?,?,?,?,?,?,?)
+        """;
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setInt(1, movimento.getProduct().getId());
-            pst.setInt(2, movimento.getQuantity()); // positivo = entrada, negativo = saída
-            pst.setString(3, movimento.getType());  // IN / OUT / AJUSTE
-            pst.setString(4, movimento.getReason());
-            pst.setInt(5, movimento.getUser().getId());
+            pst.setInt(2, movimento.getWarehouse() != null ? movimento.getWarehouse().getId() : 1); // default 1
+            pst.setInt(3, movimento.getUser().getId());
+            pst.setInt(4, movimento.getQuantity());
+            pst.setString(5, movimento.getType());
+            pst.setString(6, movimento.getOrigin() != null ? movimento.getOrigin() : "MANUAL");
+            if (movimento.getReferenceId() != null) {
+                pst.setInt(7, movimento.getReferenceId());
+            } else {
+                pst.setNull(7, java.sql.Types.INTEGER);
+            }
+            pst.setString(8, movimento.getNotes() != null ? movimento.getNotes() : "");
+            pst.setString(9, movimento.getReason() != null ? movimento.getReason() : "");
+
             pst.execute();
             return true;
         } catch (SQLException e) {

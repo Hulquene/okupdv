@@ -17,13 +17,14 @@ public class Purchase {
     private Integer id;
     private Supplier supplier;
     private String invoiceNumber;
-    private String invoiceType; // FT, FR, NC, ND
+    private InvoiceType invoiceType; // FT, FR, NC, ND
     private String descricao;
     private BigDecimal total;
     private BigDecimal ivaTotal;
     private Date dataCompra;
     private Date dataVencimento;
     private String status; // aberto, parcial, pago, atrasado
+    private User user;
 
     private List<PurchaseItem> items;
     private List<PurchasePayment> payments;
@@ -56,11 +57,11 @@ public class Purchase {
         this.invoiceNumber = invoiceNumber;
     }
 
-    public String getInvoiceType() {
+    public InvoiceType getInvoiceType() {
         return invoiceType;
     }
 
-    public void setInvoiceType(String invoiceType) {
+    public void setInvoiceType(InvoiceType invoiceType) {
         this.invoiceType = invoiceType;
     }
 
@@ -143,123 +144,26 @@ public class Purchase {
     public void setPayments(List<PurchasePayment> payments) {
         this.payments = payments;
     }
-//    private int id;
-//    private String description;
-//    private Product product;
-//    private Double Total;
-//    private Double priceSale;
-//    private Double pricePurchase;
-//    private int qty;
-//    private String status;
-//    private String statusPayment;
-//    private String date;
-//    private User user;
-//    private Supplier supplier;
-//    private int stockTotal;
-//
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public void setId(int id) {
-//        this.id = id;
-//    }
-//
-//    public String getDescription() {
-//        return description;
-//    }
-//
-//    public void setDescription(String description) {
-//        this.description = description;
-//    }
-//
-//    public Product getProduct() {
-//        return product;
-//    }
-//
-//    public void setProduct(Product product) {
-//        this.product = product;
-//    }
-//
-//    public Double getTotal() {
-//        return Total;
-//    }
-//
-//    public void setTotal(Double Total) {
-//        this.Total = Total;
-//    }
-//
-//    public Double getPriceSale() {
-//        return priceSale;
-//    }
-//
-//    public void setPriceSale(Double priceSale) {
-//        this.priceSale = priceSale;
-//    }
-//
-//    public Double getPricePurchase() {
-//        return pricePurchase;
-//    }
-//
-//    public void setPricePurchase(Double pricePurchase) {
-//        this.pricePurchase = pricePurchase;
-//    }
-//
-//    public int getQty() {
-//        return qty;
-//    }
-//
-//    public void setQty(int qty) {
-//        this.qty = qty;
-//    }
-//
-//    public String getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(String status) {
-//        this.status = status;
-//    }
-//
-//    public String getStatusPayment() {
-//        return statusPayment;
-//    }
-//
-//    public void setStatusPayment(String statusPayment) {
-//        this.statusPayment = statusPayment;
-//    }
-//
-//    public String getDate() {
-//        return date;
-//    }
-//
-//    public void setDate(String date) {
-//        this.date = date;
-//    }
-//
-//    public User getUser() {
-//        return user;
-//    }
-//
-//    public void setUser(User user) {
-//        this.user = user;
-//    }
-//
-//    public Supplier getSupplier() {
-//        return supplier;
-//    }
-//
-//    public void setSupplier(Supplier supplier) {
-//        this.supplier = supplier;
-//    }
-//
-//    public int getStockTotal() {
-//        return stockTotal;
-//    }
-//
-//    public void setStockTotal(int stockTotal) {
-//        this.stockTotal = stockTotal;
-//    }
-//    
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public BigDecimal getTotal_pago() {
+        return total_pago;
+    }
+
+    public void setTotal_pago(BigDecimal total_pago) {
+        this.total_pago = total_pago;
+    }
+
+    @Override
+    public String toString() {
+        return "Purchase{" + "id=" + id + ", supplier=" + supplier + ", invoiceNumber=" + invoiceNumber + ", invoiceType=" + invoiceType + ", descricao=" + descricao + ", total=" + total + ", ivaTotal=" + ivaTotal + ", dataCompra=" + dataCompra + ", dataVencimento=" + dataVencimento + ", status=" + status + ", user=" + user + ", items=" + items + ", payments=" + payments + ", total_pago=" + total_pago + ", note=" + note + '}';
+    }
 
 }

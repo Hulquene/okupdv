@@ -153,16 +153,20 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{"
-                + "id=" + id
-                + ", type=" + type
-                + ", code=" + code
-                + ", description=" + description
-                + ", price=" + price
-                + ", purchasePrice=" + purchasePrice
-                + ", currentStock=" + currentStock
-                + ", minStock=" + minStock
-                + ", status=" + status + '}';
+        return code + " - " + description;
     }
 
+//    @Override
+//    public String toString() {
+//        return "Product{"
+//                + "id=" + id
+//                + ", type=" + type
+//                + ", code=" + code
+//                + ", description=" + description
+//                + ", price=" + price
+//                + ", purchasePrice=" + purchasePrice
+//                + ", currentStock=" + currentStock
+//                + ", minStock=" + minStock
+//                + ", status=" + status + '}';
+//    }
 }

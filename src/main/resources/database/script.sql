@@ -646,6 +646,7 @@ DROP TABLE IF EXISTS `purchases`;
 CREATE TABLE `purchases` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `supplier_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
   `invoice_number` VARCHAR(50) NOT NULL,
   `invoice_type` ENUM('FT','FR','NC','ND') DEFAULT 'FT',
   `descricao` VARCHAR(255) NULL,
@@ -722,13 +723,14 @@ DROP TABLE IF EXISTS `stock_movements`;
 CREATE TABLE `stock_movements` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `product_id` INT NOT NULL,
-  `warehouse_id` INT NOT NULL,
+  `warehouse_id` INT NOT NULL DEFAULT '0',
   `user_id` INT NOT NULL,
   `quantity` INT NOT NULL,
   `type` ENUM('ENTRADA','SAIDA','AJUSTE','TRANSFERENCIA') NOT NULL,
   `origin` ENUM('COMPRA','VENDA','DEVOLUCAO','MANUAL','AJUSTE','TRANSFERENCIA') NOT NULL,
   `reference_id` INT NULL,
   `notes` VARCHAR(255) NULL,
+  `reason` VARCHAR(255) NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

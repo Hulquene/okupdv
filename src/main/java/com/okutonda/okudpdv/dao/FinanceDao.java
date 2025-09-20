@@ -8,6 +8,7 @@ import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Clients;
 import com.okutonda.okudpdv.models.Expense;
 import com.okutonda.okudpdv.models.ExpenseCategory;
+import com.okutonda.okudpdv.models.InvoiceType;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
 import com.okutonda.okudpdv.models.Purchase;
@@ -61,9 +62,12 @@ public class FinanceDao {
         try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Purchase obj = new Purchase();
+                // ENUMs
+                String invoice_typeStr = rs.getString("invoice_type");
+                
                 obj.setId(rs.getInt("id"));
                 obj.setInvoiceNumber(rs.getString("invoice_number"));
-                obj.setInvoiceType(rs.getString("invoice_type"));
+//                obj.setInvoiceType(rs.getString("invoice_type"));
                 obj.setDescricao(rs.getString("descricao"));
                 obj.setTotal(rs.getBigDecimal("total"));
                 obj.setIvaTotal(rs.getBigDecimal("iva_total"));
@@ -76,6 +80,9 @@ public class FinanceDao {
                 obj.setPayTotal(rs.getBigDecimal("total_pago"));
                 obj.setNote("Saldo em aberto: " + rs.getBigDecimal("saldo_em_aberto"));
 
+                if (invoice_typeStr != null) {
+                    obj.setInvoiceType(InvoiceType.valueOf(invoice_typeStr));
+                }
                 // fornecedor
                 if (rs.getInt("supplier_id") > 0) {
                     Supplier s = new Supplier();

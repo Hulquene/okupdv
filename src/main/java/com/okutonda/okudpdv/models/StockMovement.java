@@ -11,46 +11,132 @@ import java.util.Date;
  * @author hr
  */
 public class StockMovement {
+
     private int id;
     private Product product;
-    private int quantity; // positivo = entrada, negativo = saída
-    private String type;  // IN, OUT, AJUSTE, TRANSFERENCIA
-    private String reason; // motivo (VENDA, COMPRA, DEVOLUCAO, AJUSTE MANUAL, etc.)
+    private Warehouse warehouse;  // novo campo
     private User user;
+    private int quantity;
+    private String type;       // ENTRADA, SAIDA, AJUSTE, TRANSFERENCIA
+    private String origin;     // COMPRA, VENDA, DEVOLUCAO, MANUAL...
+    private Integer referenceId;
+    private String notes;
+    private String reason;
     private Date createdAt;
+    private Date updatedAt;
 
     // Getters e Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public Product getProduct() {
+        return product;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
+    public Warehouse getWarehouse() {
+        return warehouse;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setWarehouse(Warehouse warehouse) {
+        this.warehouse = warehouse;
+    }
 
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public Integer getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(Integer referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     @Override
     public String toString() {
-        return "StockMovement{" +
-                "id=" + id +
-                ", product=" + (product != null ? product.getDescription() : "null") +
-                ", quantity=" + quantity +
-                ", type='" + type + '\'' +
-                ", reason='" + reason + '\'' +
-                ", user=" + (user != null ? user.getName() : "null") +
-                ", createdAt=" + createdAt +
-                '}';
+        return "StockMovement{"
+                + "id=" + id
+                + ", product=" + (product != null ? product.getDescription() : "null")
+                + ", warehouse=" + (warehouse != null ? warehouse.getName() : "null")
+                + ", quantity=" + quantity
+                + ", type='" + type + '\''
+                + ", origin='" + origin + '\''
+                + ", reason='" + reason + '\''
+                + ", notes='" + notes + '\''
+                + ", referenceId=" + referenceId
+                + ", user=" + (user != null ? user.getName() : "null")
+                + ", createdAt=" + createdAt
+                + ", updatedAt=" + updatedAt
+                + '}';
     }
 }
