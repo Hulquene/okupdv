@@ -243,7 +243,7 @@ public final class ScreenInstall extends javax.swing.JFrame {
             if (status == 1) {
 //                    insertUser(cModel);
 //                    inserDataCompany();
-                JOptionPane.showMessageDialog(null, "Banco de Dados instalado com Sucesso!!");
+                JOptionPane.showMessageDialog(null, "Instalacao do banco de Dados...");
 
                 JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
 //                    jdInstallUser.setOrder(order);
@@ -255,9 +255,9 @@ public final class ScreenInstall extends javax.swing.JFrame {
                 this.dispose();
                 frame.setVisible(true);
             } else if (status == 0) {
-                JOptionPane.showMessageDialog(null, "Erro ao instalar Banco de Dados!!", "Atenºão", JOptionPane.ERROR);
+                JOptionPane.showMessageDialog(null, "Erro ao instalar Banco de Dados!!", "Atenºão", JOptionPane.ERROR_MESSAGE);
             } else if (status == 2) {
-                JOptionPane.showMessageDialog(null, "Erro na cricao das tabelas  Banco de Dados!!", "Atenºão", JOptionPane.ERROR);
+                JOptionPane.showMessageDialog(null, "Erro na cricao das tabelas  Banco de Dados!!", "Atenção", JOptionPane.ERROR_MESSAGE);
             }
 //                if (MySQLServiceManager.createDatabaseMySQL()) {
 //                    Connection conn = ConnectionDatabase.getConnect();

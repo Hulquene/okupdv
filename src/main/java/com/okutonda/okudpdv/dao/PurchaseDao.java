@@ -105,7 +105,7 @@ public class PurchaseDao {
 
     public List<Purchase> list() {
         List<Purchase> list = new ArrayList<>();
-        String sql = "SELECT p.*, s.name AS supplier_name FROM purchases p INNER JOIN suppliers s ON p.supplier_id = s.id ORDER BY p.data_compra DESC";
+        String sql = "SELECT p.*, s.company AS supplier_name FROM purchases p INNER JOIN suppliers s ON p.supplier_id = s.id ORDER BY p.data_compra DESC";
         try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 Purchase obj = new Purchase();

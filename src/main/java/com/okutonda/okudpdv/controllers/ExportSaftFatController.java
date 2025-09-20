@@ -608,8 +608,14 @@ public class ExportSaftFatController {
         return (s == null || s.isEmpty()) ? def : s;
     }
 
-    private static double nzD(Double d) {
-        return d == null ? 0.0 : d;
+    // Mantém em BigDecimal para operações financeiras
+    private static BigDecimal nzBD(BigDecimal d) {
+        return d == null ? BigDecimal.ZERO : d;
+    }
+
+// Só usa double para exibir ou cálculos não críticos
+    private static double nzD(BigDecimal d) {
+        return d == null ? 0.0 : d.doubleValue();
     }
 
     private static BigDecimal bd(Object o) {
@@ -700,8 +706,8 @@ public class ExportSaftFatController {
     }
 
     // Mapeamento simples do TaxCode para Angola
-    private static String mapTaxCode(String code, Double perc, String name) {
-        double p = perc == null ? 0.0 : perc;
+    private static String mapTaxCode(String code, BigDecimal perc, String name) {
+        BigDecimal p = perc == null ? BigDecimal.ZERO : perc;
         if (approx(p, 14)) {
             return "NOR";
         }
@@ -743,7 +749,14 @@ public class ExportSaftFatController {
         return "OUT";
     }
 
-    private static boolean approx(double a, double b) {
-        return Math.abs(a - b) < 0.001;
+    private static boolean approx(BigDecimal a, double b) {
+        if (a == null) {
+            a = BigDecimal.ZERO;
+        }
+        BigDecimal bdB = BigDecimal.valueOf(b);
+
+        BigDecimal diff = a.subtract(bdB).abs();
+        return diff.compareTo(new BigDecimal("0.001")) < 0;
     }
+
 }

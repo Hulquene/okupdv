@@ -169,7 +169,8 @@ public class JDialogOrder extends javax.swing.JDialog {
                 c.getPrice(),
                 c.getTaxePercentage(),
                 c.getQty(),
-                c.getQty() * c.getPrice()
+                //                c.getQty() * c.getPrice()
+                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
             }
             );
         }

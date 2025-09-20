@@ -5,6 +5,7 @@
 package com.okutonda.okudpdv.utilities;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -86,6 +87,19 @@ public class Util {
             return Double.valueOf(input);
         } else {
             throw new NumberFormatException("Input is not a valid number.");
+        }
+    }
+
+    public static BigDecimal convertToBigDecimal(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            // Substitui vírgula por ponto para garantir compatibilidade
+            text = text.replace(",", ".");
+            return new BigDecimal(text).setScale(2, RoundingMode.HALF_UP);
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
         }
     }
 

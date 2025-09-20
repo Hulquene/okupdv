@@ -38,15 +38,15 @@ public class JDialogFormStock extends javax.swing.JDialog {
                 c.getId(),
                 c.getCode(),
                 c.getDescription(),
-                c.getStockTotal(),
+                c.getCurrentStock(),
                 0
             });
         }
     }
 
     public void filterListProduct(String txt) {
-//        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.filterProduct(txt);
+        
+        List<Product> list = productController.get(txt);
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -54,7 +54,7 @@ public class JDialogFormStock extends javax.swing.JDialog {
                 c.getId(),
                 c.getCode(),
                 c.getDescription(),
-                c.getStockTotal(),
+                c.getCurrentStock(),
                 0
             });
         }
@@ -212,32 +212,32 @@ public class JDialogFormStock extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        List<Product> listProd = new ArrayList<>();
-        for (int i = 0; i < jTableProducts.getRowCount(); i++) {
-
-            int qtdOld, qtdNew;
-
-            qtdOld = (int) jTableProducts.getValueAt(i, 3);
-            qtdNew = (int) jTableProducts.getValueAt(i, 4);
-            if (qtdNew > 0) {
-                Product prod = new Product();
-                prod.setId((int) jTableProducts.getValueAt(i, 0));
-//                System.out.println("producto qtd : " + qtdNew);
-                prod.setStockTotal(qtdOld + qtdNew);
-                listProd.add(prod);
-            }
-
-        }
-        int count = 0;
-        for (Product product : listProd) {
-            Boolean statusResult = productController.updateStock(product.getId(), product.getStockTotal());
-            if (statusResult == true) {
-                count++;
-            }
-            //System.out.println("producto: " + product.getId() +"-" + product.getStockTotal());
-        }
-        JOptionPane.showMessageDialog(null, "Total de Produtos Atualizado:" + count);
-        this.dispose();
+//        List<Product> listProd = new ArrayList<>();
+//        for (int i = 0; i < jTableProducts.getRowCount(); i++) {
+//
+//            int qtdOld, qtdNew;
+//
+//            qtdOld = (int) jTableProducts.getValueAt(i, 3);
+//            qtdNew = (int) jTableProducts.getValueAt(i, 4);
+//            if (qtdNew > 0) {
+//                Product prod = new Product();
+//                prod.setId((int) jTableProducts.getValueAt(i, 0));
+////                System.out.println("producto qtd : " + qtdNew);
+//                prod.setStockTotal(qtdOld + qtdNew);
+//                listProd.add(prod);
+//            }
+//
+//        }
+//        int count = 0;
+//        for (Product product : listProd) {
+//            Boolean statusResult = productController.updateStock(product.getId(), product.getCurrentStock());
+//            if (statusResult == true) {
+//                count++;
+//            }
+//            //System.out.println("producto: " + product.getId() +"-" + product.getStockTotal());
+//        }
+//        JOptionPane.showMessageDialog(null, "Total de Produtos Atualizado:" + count);
+//        this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jTextFieldSeachTxtKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldSeachTxtKeyReleased

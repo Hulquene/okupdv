@@ -55,7 +55,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             jTextFieldDescription.setText(prod.getDescription());
             jTextFieldPrice.setText(String.valueOf(prod.getPrice()));
             jTextFieldPurchasePrice.setText(String.valueOf(prod.getPurchasePrice()));
-            jTextFieldStockTotal.setText(String.valueOf(prod.getStockTotal()));
+//            jTextFieldStockTotal.setText(String.valueOf(prod.getStockTotal()));
 //            jComboBoxTaxeId.setSelectedItem(prod.getTaxe().toString());
 //            jComboBoxReasonTaxeId.setSelectedItem(prod.getReasonTaxe().toString());
 //            jComboBoxReasonTaxeId.setSelectedItem(prod.getReasonTaxe().toString());
@@ -96,7 +96,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 //        jComboBoxSubGroupId.setSelectedIndex(cModel.getSubGroupId());
         jComboBoxSupplier.setSelectedItem(cModel.getSupplier());
         jComboBoxStatus.setSelectedItem(cModel.getStatus());
-        jTextFieldStockTotal.setText(Double.toString(cModel.getStockTotal()));
+//        jTextFieldStockTotal.setText(Double.toString(cModel.getStockTotal()));
     }
 
     public Product validateProduct() {
@@ -112,8 +112,8 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo Preço invalido!! Insira um numero preço");
         } else if (Util.isValidDouble(jTextFieldPurchasePrice.getText()) == false) {
             JOptionPane.showMessageDialog(null, "Campo Preço de Compra invalido!! Insira um numero compra");
-        } else if (jTextFieldStockTotal.getText().isEmpty() || Util.isInteger(jTextFieldStockTotal.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Total de Estoque invalido!! Insira um numero");
+//        } else if (jTextFieldStockTotal.getText().isEmpty() || Util.isInteger(jTextFieldStockTotal.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Campo Total de Estoque invalido!! Insira um numero");
         } else if (jComboBoxReasonTaxeId.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Campo Reason Taxe invalido!! Selecione");
         } else if (jComboBoxTaxeId.getSelectedItem() == null) {
@@ -135,7 +135,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 
             cModel.setGroup((GroupsProduct) jComboBoxGroup.getSelectedItem());
             cModel.setSupplier((Supplier) jComboBoxSupplier.getSelectedItem());
-            cModel.setStockTotal(Util.convertToInteger(jTextFieldStockTotal.getText()));
+//            cModel.setStockTotal(Util.convertToInteger(jTextFieldStockTotal.getText()));
 //            cModel.setStatus(jComboBoxStatus.getSelectedItem().toString());
 
             String statusProd = (String) jComboBoxStatus.getSelectedItem();

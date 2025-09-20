@@ -15,6 +15,7 @@ import java.awt.print.Printable;
 import static java.awt.print.Printable.NO_SUCH_PAGE;
 import static java.awt.print.Printable.PAGE_EXISTS;
 import java.awt.print.PrinterException;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -163,16 +164,25 @@ public class FaturaTicket implements Printable {
         g2d.drawLine(10, y, (int) width - 10, y);
         y += 10;
 
-        double subtotal = 0.0;
-        double totalImposto = 0.0;
+        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal totalImposto = BigDecimal.ZERO;
 
         // Itens da Fatura
         for (ProductOrder item : order.getProducts()) {
-            double precoTotal = item.getQty() * item.getPrice();
-            double imposto = precoTotal * 7 / 100;
+
+//            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(line.getQty()));
+            BigDecimal precoTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQty()));
+//            BigDecimal precoTotal = item.getQty() * item.getPrice();
+
+//            BigDecimal imposto = precoTotal * 7 / 100;
+            BigDecimal imposto = precoTotal
+                    .multiply(BigDecimal.valueOf(7)) // multiplica por 7
+                    .divide(BigDecimal.valueOf(100));   // divide por 100
 //            double imposto = precoTotal * item.getTaxaImposto() / 100;
-            subtotal += precoTotal;
-            totalImposto += imposto;
+//            subtotal += precoTotal;
+//            totalImposto += imposto;
+            subtotal = subtotal.add(precoTotal);
+            totalImposto = totalImposto.add(imposto);
 
             g2d.drawString(item.getDescription(), 10, y);
             g2d.drawString(String.valueOf(item.getQty()), 60, y);
@@ -202,8 +212,10 @@ public class FaturaTicket implements Printable {
         y += 15;
 
         // Total
+        BigDecimal totalGeral = subtotal.add(totalImposto);
         g2d.setFont(new Font("Serif", Font.BOLD, 12));
-        g2d.drawString("Total: R$ " + String.format("%.2f", subtotal + totalImposto), 10, y);
+        g2d.drawString("Total: R$ " + String.format("%.2f", totalGeral.doubleValue()), 10, y);
+//        g2d.drawString("Total: R$ " + String.format("%.2f", subtotal + totalImposto), 10, y);
         y += 20;
 
         // Linha horizontal
@@ -227,7 +239,7 @@ public class FaturaTicket implements Printable {
 
         // Razões de Isenção
         for (ProductOrder item : order.getProducts()) {
-            if (item.getTaxePercentage() == 0) {
+            if (item.getTaxePercentage() == BigDecimal.ZERO) {
                 g2d.drawString(item.getDescription(), 10, y);
                 g2d.drawString(item.getReasonTax(), 60, y);
                 y += 15;

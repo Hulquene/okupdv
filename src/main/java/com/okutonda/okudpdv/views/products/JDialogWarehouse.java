@@ -36,7 +36,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getName(),
-                c.getAddress(),});
+                c.getLocation(),});
         }
     }
 
@@ -48,7 +48,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getName(),
-                c.getAddress(),});
+                c.getLocation(),});
         }
     }
 
@@ -302,7 +302,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo Localizacao invalida!!");
         } else {
             cModel.setName(jTextFieldName.getText());
-            cModel.setAddress(jTextFieldAddress.getText());
+            cModel.setLocation(jTextFieldAddress.getText());
         }
         if (cModel != null) {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());

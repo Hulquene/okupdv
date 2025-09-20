@@ -46,12 +46,12 @@ public class ProductOrderDao {
 //            ptmt.setString(3, obj.getDate());
             pst.setString(3, obj.getDescription());
             pst.setInt(4, obj.getQty());
-            pst.setDouble(5, obj.getPrice());
+            pst.setBigDecimal(5, obj.getPrice());
             pst.setString(6, obj.getUnit());
             pst.setString(7, obj.getCode());
             pst.setString(8, obj.getTaxeCode());
             pst.setString(9, obj.getTaxeName());
-            pst.setDouble(10, obj.getTaxePercentage());
+            pst.setBigDecimal(10, obj.getTaxePercentage());
             pst.setString(11, obj.getReasonTax());
             pst.setString(12, obj.getReasonCode());
             //3 passo
@@ -74,12 +74,12 @@ public class ProductOrderDao {
             pst.setString(3, obj.getDate());
             pst.setString(4, obj.getDescription());
             pst.setInt(5, obj.getQty());
-            pst.setDouble(6, obj.getPrice());
+            pst.setBigDecimal(6, obj.getPrice());
             pst.setString(7, obj.getUnit());
             pst.setString(8, obj.getCode());
             pst.setString(9, obj.getTaxeCode());
             pst.setString(10, obj.getTaxeName());
-            pst.setDouble(11, obj.getTaxePercentage());
+            pst.setBigDecimal(11, obj.getTaxePercentage());
             pst.setString(12, obj.getReasonTax());
             pst.setString(13, obj.getReasonCode());
             //3 passo
@@ -217,11 +217,11 @@ public class ProductOrderDao {
             obj.setDate(rs.getString("date"));
             obj.setDescription(rs.getString("description"));
             obj.setQty(rs.getInt("qty"));
-            obj.setPrice(rs.getDouble("price"));
+            obj.setPrice(rs.getBigDecimal("price"));
             obj.setUnit(rs.getString("unit"));
             obj.setCode(rs.getString("prod_code"));
             obj.setTaxeName(rs.getString("taxe_name"));
-            obj.setTaxePercentage(rs.getDouble("taxe_percentage"));
+            obj.setTaxePercentage(rs.getBigDecimal("taxe_percentage"));
             obj.setTaxeCode(rs.getString("taxe_code"));
             return obj;
         } catch (SQLException e) {

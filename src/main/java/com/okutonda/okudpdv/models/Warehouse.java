@@ -4,6 +4,8 @@
  */
 package com.okutonda.okudpdv.models;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author kenny
@@ -12,9 +14,13 @@ public class Warehouse {
 
     private int id;
     private String name;
-    private String address;
-//    private String status;
+    private String location;
+    private String description;
+    private int status;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -31,16 +37,56 @@ public class Warehouse {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
+    public String getLocation() {
+        return location;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override
     public String toString() {
-        return this.getName();
+        return "Warehouse{"
+                + "id=" + id
+                + ", name='" + name + '\''
+                + ", location='" + location + '\''
+                + ", description='" + description + '\''
+                + ", status=" + status
+                + ", createdAt=" + createdAt
+                + ", updatedAt=" + updatedAt
+                + '}';
     }
 }

@@ -366,3 +366,49 @@ Contas a receber = dinheiro que vai entrar no caixa.
 Contas a receber → podes usar a tabela orders ou invoices (faturas FR/FT).
 
 Contas a pagar → podes usar a tabela purchases (compras, entrada de estoque, despesas).
+
+
+
+
+
+
+
+Quando registar movimentos de stock:
+
+Venda (PDV / Order)
+
+Cada item vendido gera um movimento OUT (saída).
+
+Exemplo: -2 unidades do Produto A, razão = "VENDA FT/123".
+
+Compra / Entrada em armazém
+
+Quando registamos uma compra (Purchase), cada item comprado gera um movimento IN (entrada).
+
+Exemplo: +50 unidades do Produto A, razão = "COMPRA PC/456".
+
+Ajuste manual (Inventário físico)
+
+Quando o gestor faz uma contagem física e precisa corrigir o stock.
+
+Exemplo: +3 unidades, razão = "AJUSTE MANUAL inventário 2025".
+
+Devoluções
+
+Cliente devolve → entrada (IN).
+
+Devolução ao fornecedor → saída (OUT).
+
+Transferência entre armazéns
+
+Sai do armazém A (OUT, razão = "TRANSFERÊNCIA para Armazém B")
+
+Entra no armazém B (IN, razão = "TRANSFERÊNCIA de Armazém A").
+
+📌 Ou seja:
+
+Venda = apenas um dos casos que geram movimentos.
+
+A lógica certa é: qualquer entrada ou saída de stock → criar um registo em stock_movements.
+
+Assim, stock atual = soma de todos os movimentos.

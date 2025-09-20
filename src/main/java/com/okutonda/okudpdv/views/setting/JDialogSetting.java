@@ -1142,7 +1142,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
         } else {
             cModel.setName(jTextFieldTaxeName.getText());
             cModel.setCode(jTextFieldTaxeCode.getText());
-            cModel.setPercetage(Util.convertToDouble(jTextFieldTaxePerc.getText()));
+            cModel.setPercetage(Util.convertToBigDecimal(jTextFieldTaxePerc.getText()));
             cModel.setIsDefault(jComboBoxTaxeIsDefault.getSelectedIndex());
         }
         if (cModel != null) {

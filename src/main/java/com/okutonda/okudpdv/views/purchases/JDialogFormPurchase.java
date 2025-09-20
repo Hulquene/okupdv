@@ -9,6 +9,8 @@ import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.PurchaseItem;
 import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.ui.TemaCores;
+import com.okutonda.okudpdv.ui.TemaUI;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,46 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     public JDialogFormPurchase(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        applyTheme();
+
+        loadItemsTable();
+    }
+
+    private void applyTheme() {
+//        TemaCleaner.clearBuilderOverrides(getContentPane());
+        // Painel de fundo da janela
+//        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
+
+//        TemaUI.aplicarTitulo(jLabelJpanelSelected);
+//        jPanelSidebar.setBackground(TemaCores.PRIMARY);
+        // Card do login
+//        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
+        // Título
+//        TemaUI.aplicarTitulo(jLabelNameCompany);
+        jLabelTitle.setForeground(TemaCores.PRIMARY);
+        // Labels
+//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
+//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
+        // Campos
+//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
+//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
+        // Botões
+//        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
+//        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
+//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
+//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonInstall.setForeground(TemaCores.PRIMARY);
+//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
+        // Status de BD (cor dinâmica) — chama depois de testar a conexão
+//        updateDbStatusLabel(this.conn != null);
+        // Borda superior/rodapé (opcional)
+        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
+        // Se o GUI Builder deixou cores hardcoded em initComponents,
+        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
     }
 
     private void loadItemsTable() {
@@ -81,7 +123,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         jButtonFinishPurchase = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jTextFieldQtdProduct = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
+        jLabelTitle = new javax.swing.JLabel();
         jFormattedTextFieldDataCompra = new javax.swing.JFormattedTextField();
         jFormattedTextFieldDataVencimento = new javax.swing.JFormattedTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -132,7 +174,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
         jTextFieldQtdProduct.setText("1");
 
-        jLabel4.setText("Formulario de Compra");
+        jLabelTitle.setText("Formulario de Compra");
 
         jFormattedTextFieldDataCompra.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -168,7 +210,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 618, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jLabel4)
+                        .addComponent(jLabelTitle)
                         .addComponent(jComboBoxListFornecedor, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -205,7 +247,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                         .addGap(26, 26, 26))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(15, 15, 15)
-                        .addComponent(jLabel4)
+                        .addComponent(jLabelTitle)
                         .addGap(72, 72, 72)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
@@ -375,10 +417,10 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabelTitle;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTablePurchaseItems;

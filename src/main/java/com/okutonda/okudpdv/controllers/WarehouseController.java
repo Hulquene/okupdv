@@ -14,36 +14,47 @@ import java.util.List;
  */
 public class WarehouseController {
 
-    WarehouseDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final WarehouseDao dao;
 
     public WarehouseController() {
         this.dao = new WarehouseDao();
-//        this.prodOrderDao = new ProductOrderDao();
     }
 
+    /**
+     * Adicionar ou editar
+     */
     public Boolean add(Warehouse warehouse, int id) {
-        boolean status;
         if (id == 0) {
-            status = dao.add(warehouse);
+            return dao.add(warehouse);
         } else {
-            status = dao.edit(warehouse, id);
+            return dao.edit(warehouse, id);
         }
-        return status;
     }
 
+    /**
+     * Buscar por ID
+     */
     public Warehouse getId(int id) {
         return dao.searchFromId(id);
     }
 
+    /**
+     * Listar com filtro LIKE
+     */
     public List<Warehouse> filter(String txt) {
         return dao.filter(txt);
     }
 
+    /**
+     * Excluir
+     */
     public Boolean deleteId(int id) {
         return dao.delete(id);
     }
 
+    /**
+     * Listar todos (com ou sem WHERE)
+     */
     public List<Warehouse> get(String where) {
         return dao.list(where);
     }

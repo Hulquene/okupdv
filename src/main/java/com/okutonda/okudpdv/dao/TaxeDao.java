@@ -38,7 +38,7 @@ public class TaxeDao {
              pst = this.conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
             pst.setString(2, obj.getCode());
-            pst.setDouble(3, obj.getPercetage());
+            pst.setBigDecimal(3, obj.getPercetage());
             pst.setInt(4, obj.getIsDefault());
             //3 passo
             pst.execute();
@@ -58,7 +58,7 @@ public class TaxeDao {
              pst = this.conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
             pst.setString(2, obj.getCode());
-            pst.setDouble(3, obj.getPercetage());
+            pst.setBigDecimal(3, obj.getPercetage());
             pst.setInt(4, obj.getIsDefault());
             pst.setInt(5, id);
             //3 passo
@@ -169,7 +169,7 @@ public class TaxeDao {
             obj.setId(rs.getInt("id"));
             obj.setCode(rs.getString("code"));
             obj.setName(rs.getString("name"));
-            obj.setPercetage(rs.getDouble("percentage"));
+            obj.setPercetage(rs.getBigDecimal("percentage"));
             obj.setIsDefault(rs.getInt("isdefault"));
             return obj;
         } catch (SQLException e) {

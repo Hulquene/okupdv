@@ -8,6 +8,7 @@ import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.utilities.UtilSales;
+import java.math.BigDecimal;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -38,7 +39,8 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
                 c.getDescription(),
                 c.getPrice(),
                 c.getQty(),
-                c.getQty() * c.getPrice()
+                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
+//                c.getQty() * c.getPrice()
             }
             );
         }

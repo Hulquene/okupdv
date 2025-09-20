@@ -24,9 +24,28 @@ public class Product {
     private GroupsProduct group;
     private String barcode;
     private Supplier supplier;
-    private int stockTotal;
-//    private int stockMin;
+    private int minStock;   // novo: mínimo em vez de stock_total
     private int status;
+
+    // 🔹 campo somente leitura, calculado em runtime (não persistido)
+    private int currentStock;
+
+    // getters/setters...
+    public int getMinStock() {
+        return minStock;
+    }
+
+    public void setMinStock(int minStock) {
+        this.minStock = minStock;
+    }
+
+    public int getCurrentStock() {
+        return currentStock;
+    }
+
+    public void setCurrentStock(int currentStock) {
+        this.currentStock = currentStock;
+    }
 
     public int getId() {
         return id;
@@ -124,21 +143,6 @@ public class Product {
         this.supplier = supplier;
     }
 
-    public int getStockTotal() {
-        return stockTotal;
-    }
-
-    public void setStockTotal(int stockTotal) {
-        this.stockTotal = stockTotal;
-    }
-
-//    public int getStockMin() {
-//        return stockMin;
-//    }
-//
-//    public void setStockMin(int stockMin) {
-//        this.stockMin = stockMin;
-//    }
     public int getStatus() {
         return status;
     }
@@ -149,7 +153,16 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" + "id=" + id + ", type=" + type + ", code=" + code + ", description=" + description + ", longDescription=" + longDescription + ", price=" + price + ", purchasePrice=" + purchasePrice + ", taxe=" + taxe + ", reasonTaxe=" + reasonTaxe + ", group=" + group + ", barcode=" + barcode + ", supplier=" + supplier + ", stockTotal=" + stockTotal + ", status=" + status + '}';
+        return "Product{"
+                + "id=" + id
+                + ", type=" + type
+                + ", code=" + code
+                + ", description=" + description
+                + ", price=" + price
+                + ", purchasePrice=" + purchasePrice
+                + ", currentStock=" + currentStock
+                + ", minStock=" + minStock
+                + ", status=" + status + '}';
     }
 
 }

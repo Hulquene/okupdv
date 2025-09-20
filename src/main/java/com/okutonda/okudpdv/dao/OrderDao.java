@@ -9,7 +9,6 @@ import com.okutonda.okudpdv.models.Clients;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.ProductOrder;
 import com.okutonda.okudpdv.models.User;
-import java.awt.HeadlessException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

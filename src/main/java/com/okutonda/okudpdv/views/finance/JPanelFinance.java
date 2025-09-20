@@ -23,6 +23,7 @@ import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.Shift;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.UtilSales;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -430,7 +431,8 @@ public final class JPanelFinance extends javax.swing.JPanel {
                 c.getQty(),
                 c.getPrice(),
                 c.getTaxePercentage(),
-                (c.getQty() * c.getPrice())
+                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
+//                (c.getQty() * c.getPrice())
             });
         }
     }

@@ -22,8 +22,6 @@ import javax.swing.JOptionPane;
 public class WarehouseDao {
 
     private final Connection conn;
-    PreparedStatement pst = null;
-    ResultSet rs = null;
 
     public WarehouseDao() {
         this.conn = ConnectionDatabase.getConnect();
@@ -31,37 +29,32 @@ public class WarehouseDao {
 
     public boolean add(Warehouse obj) {
         try {
-            // 1 passo
-            String sql = "INSERT INTO warehouse (name,address)"
-                    + "values(?,?)";
-            // 2 passo
-            pst = this.conn.prepareStatement(sql);
+            String sql = "INSERT INTO warehouses (name, location, description, status) VALUES (?,?,?,?)";
+            PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
-            pst.setString(2, obj.getAddress());
+            pst.setString(2, obj.getLocation());
+            pst.setString(3, obj.getDescription());
+            pst.setInt(4, obj.getStatus());
             pst.execute();
-            // 4 passo
             return true;
-        } catch (HeadlessException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Erro ao salvar Warehouse: " + e.getMessage());
         }
         return false;
     }
-    
-    
+
     public boolean edit(Warehouse obj, int id) {
         try {
-            // 1 passo
-            String sql = "UPDATE warehouse SET name=?,address=? WHERE id=?";
-            // 2 passo
-            pst = this.conn.prepareStatement(sql);
+            String sql = "UPDATE warehouses SET name=?, location=?, description=?, status=? WHERE id=?";
+            PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, obj.getName());
-            pst.setString(2, obj.getAddress());
-            pst.setInt(3, id);
-            //3 passo
-            //ptmt.executeQuery();
+            pst.setString(2, obj.getLocation());
+            pst.setString(3, obj.getDescription());
+            pst.setInt(4, obj.getStatus());
+            pst.setInt(5, id);
             pst.execute();
             return true;
-        } catch (HeadlessException | SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Erro ao atualizar Warehouse: " + e.getMessage());
         }
         return false;
@@ -69,64 +62,54 @@ public class WarehouseDao {
 
     public List<Warehouse> list(String where) {
         List<Warehouse> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM warehouse";
-            pst = this.conn.prepareStatement(sql);
-            rs = pst.executeQuery();
-            Warehouse obj;
+        String sql = "SELECT * FROM warehouses " + (where == null ? "" : where);
+        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
+                list.add(formatObj(rs));
             }
-            return list;
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de Warehouse: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao listar Warehouses: " + e.getMessage());
         }
-        return null;
+        return list;
     }
-    
+
     public Warehouse searchFromId(int id) {
         try {
-            // 1 passo
-            String sql = "SELECT * FROM warehouse WHERE id =?";
-            pst = conn.prepareStatement(sql);
+            String sql = "SELECT * FROM warehouses WHERE id=?";
+            PreparedStatement pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
-            rs = pst.executeQuery();
-            Warehouse obj = null;
+            ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                obj = formatObj(rs);
+                return formatObj(rs);
             }
-            return obj;
-            // 2 passo
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer consulta do Warehouse: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao buscar Warehouse: " + e.getMessage());
         }
         return null;
     }
-     public List<Warehouse> filter(String txt) {
+
+    public List<Warehouse> filter(String txt) {
         List<Warehouse> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM warehouse WHERE name LIKE ?  OR address LIKE ?";
-            pst = this.conn.prepareStatement(sql);
-            pst.setString(1, "%" + txt + "%");
-            pst.setString(2, "%" + txt + "%");
-            rs = pst.executeQuery();
-            Warehouse obj;// = new Product();
+        String sql = "SELECT * FROM warehouses WHERE name LIKE ? OR location LIKE ? OR description LIKE ?";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            String like = "%" + txt + "%";
+            pst.setString(1, like);
+            pst.setString(2, like);
+            pst.setString(3, like);
+            ResultSet rs = pst.executeQuery();
             while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
+                list.add(formatObj(rs));
             }
-            return list;
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de warehouse: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao filtrar Warehouses: " + e.getMessage());
         }
-        return null;
+        return list;
     }
+
     public Boolean delete(int id) {
         try {
-            // 1 passo
-            String sql = "DELETE FROM warehouse WHERE id =?";
-            pst = conn.prepareStatement(sql);
+            String sql = "DELETE FROM warehouses WHERE id=?";
+            PreparedStatement pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
             pst.execute();
             return true;
@@ -135,18 +118,16 @@ public class WarehouseDao {
         }
         return false;
     }
-    
-    
-    public Warehouse formatObj(ResultSet rs) {
-        try {
-            Warehouse obj = new Warehouse();
-            obj.setId(rs.getInt("id"));
-            obj.setName(rs.getString("name"));
-            obj.setAddress(rs.getString("address"));
-            return obj;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao formatar obj Warehouse: " + e.getMessage());
-        }
-        return null;
+
+    private Warehouse formatObj(ResultSet rs) throws SQLException {
+        Warehouse obj = new Warehouse();
+        obj.setId(rs.getInt("id"));
+        obj.setName(rs.getString("name"));
+        obj.setLocation(rs.getString("location"));
+        obj.setDescription(rs.getString("description"));
+        obj.setStatus(rs.getInt("status"));
+        obj.setCreatedAt(rs.getTimestamp("created_at"));
+        obj.setUpdatedAt(rs.getTimestamp("updated_at"));
+        return obj;
     }
 }

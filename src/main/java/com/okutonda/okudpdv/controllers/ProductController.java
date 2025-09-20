@@ -15,80 +15,97 @@ import java.util.List;
  */
 public class ProductController {
 
-    ProductDao dao;
-//    ProductOrderDao pOrderDao;
+    private final ProductDao dao;
 
     public ProductController() {
         this.dao = new ProductDao();
-//        this.pOrderDao = new ProductOrderDao();
     }
 
+    /**
+     * Buscar por ID
+     */
     public Product getId(int id) {
         return dao.getId(id);
     }
 
+    /**
+     * Buscar por código de barras
+     */
     public Product getFromBarCode(String barcode) {
         return dao.searchFromBarCode(barcode);
     }
 
+    /**
+     * Buscar por nome
+     */
     public Product getName(String description) {
         return dao.searchFromName(description);
     }
 
+    /**
+     * Lista genérica (com ou sem WHERE)
+     */
     public List<Product> get(String where) {
-        return dao.list(where);
+        return dao.listWithStock(where == null ? "" : where);
     }
 
+    /**
+     * Apenas produtos (sem serviços)
+     */
     public List<Product> getProducts() {
-        return dao.list(" WHERE type ='product'");
+        return dao.listWithStock(" WHERE p.type ='product'");
     }
 
-    public List<Product> getProductsStock() {
-        return dao.listHistoryStock(" WHERE type ='product'");
-    }
-
-    public List<Product> filterProductStock(String txt) {
-        return dao.filterProduct(txt);
-    }
-
-    public List<Product> filterProduct(String txt) {
-        return dao.filterProduct(txt);
-    }
-
+    /**
+     * Apenas serviços
+     */
     public List<Product> getServices() {
-        return dao.list(" WHERE type ='service'");
+        return dao.listWithStock(" WHERE p.type ='service'");
     }
 
-    public List<Product> filterService(String txt) {
-        return dao.filterProduct(txt);
+    /**
+     * Inventário (para o menu de stock)
+     */
+    public List<Product> getForInventory() {
+        return dao.listForInventory();
     }
 
-    public List<Product> filter(String txt, String and) {
-        and = and.isEmpty() ? "" : and;
-        return dao.filter(txt, and);
+    /**
+     * Produtos para PDV (somente ativos, com stock disponível)
+     */
+    public List<Product> getForPDV(String filtro) {
+        return dao.listForPDV(filtro);
     }
 
+    /**
+     * Filtro geral
+     */
+//    public List<Product> filter(String txt, String and) {
+//        and = (and == null || and.isEmpty()) ? "" : and;
+//        return dao.filter(txt, and);
+//    }
+
+    /**
+     * Adicionar ou editar
+     */
     public Boolean add(Product prod, int id) {
-        boolean status;
         if (id == 0) {
-            status = dao.add(prod);
+            return dao.add(prod);
         } else {
-            status = dao.edit(prod, id);
+            return dao.edit(prod, id);
         }
-        return status;
     }
 
-    public boolean updateStock(int prodId, int stock) {
-        return dao.updateStock(prodId, stock);
-    }
-
+    /**
+     * Apagar
+     */
     public Boolean deleteId(int id) {
         return dao.delete(id);
     }
 
-//    public BigDecimal CalculateTotalProduct(Product prod, int qtd) {
-//        return prod.getPrice() * qtd;
-//    }
+    /**
+     * Calcular total de um produto × quantidade
+     */
     public BigDecimal calculateTotalProduct(Product prod, int qtd) {
         if (prod == null || prod.getPrice() == null) {
             return BigDecimal.ZERO;
@@ -96,6 +113,7 @@ public class ProductController {
         return prod.getPrice().multiply(BigDecimal.valueOf(qtd));
     }
 
+    // Futuro: podes implementar descontos, impostos ou trocos
     public Double CalculateTotalChangeProduct(Product prod) {
         return null;
     }

@@ -11,8 +11,7 @@ import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.dao.ClientDao;
-import com.okutonda.okudpdv.dao.ProductDao;
-import com.okutonda.okudpdv.utilities.UtilDate;
+import com.okutonda.okudpdv.dao.StockMovementDao;
 import com.okutonda.okudpdv.utilities.Utilities;
 import com.okutonda.okudpdv.models.Clients;
 import com.okutonda.okudpdv.models.Order;
@@ -380,15 +379,15 @@ public class ScreenPdv extends javax.swing.JFrame {
             return false;
         }
 
-        Double perc = prod.getTaxe().getPercetage();
+        BigDecimal perc = prod.getTaxe().getPercetage();
         if (perc == null) {
-            perc = 0.0;
+            perc = BigDecimal.ZERO;
         }
 
         String reasonTax = null;
         String reasonCode = null;
 
-        if (perc == 0.0) {
+        if (perc == BigDecimal.ZERO) {
             if (prod.getReasonTaxe() == null) {
                 JOptionPane.showMessageDialog(this, "Produto isento/0% sem Razão de Imposto (Mxx).", "Atenção", JOptionPane.ERROR_MESSAGE);
                 return false;
@@ -414,14 +413,25 @@ public class ScreenPdv extends javax.swing.JFrame {
         int qtyAtual = (existing != null) ? existing.getQty() : 0;
         int qtyFinal = qtyAtual + qtd;
 
-        if (prod.getStockTotal() < qtyFinal) {
-            int disponivel = Math.max(prod.getStockTotal() - qtyAtual, 0);
+        StockMovementDao stockDao = new StockMovementDao();
+        int stockAtual = stockDao.getStockAtual(prod.getId());  // consulta somatório IN - OUT
+        prod.setCurrentStock(stockAtual); // opcional: atualiza no objeto
+
+        if (stockAtual < qtyFinal) {
             JOptionPane.showMessageDialog(this,
-                    "ESTOQUE INSUFICIENTE!\nDISPONIVEL ATUAL: " + disponivel,
+                    "ESTOQUE INSUFICIENTE!\nDISPONÍVEL ATUAL: " + stockAtual,
                     "Atenção", JOptionPane.ERROR_MESSAGE);
             return false;
         }
 
+//        if (prod.getCurrentStock() < qtyFinal) {
+////        if (prod.getStockTotal() < qtyFinal) {
+//            int disponivel = Math.max(prod.getStockTotal() - qtyAtual, 0);
+//            JOptionPane.showMessageDialog(this,
+//                    "ESTOQUE INSUFICIENTE!\nDISPONIVEL ATUAL: " + disponivel,
+//                    "Atenção", JOptionPane.ERROR_MESSAGE);
+//            return false;
+//        }
         // 5) Criar/Atualizar ProductOrder
         if (existing == null) {
             ProductOrder po = new ProductOrder();
@@ -535,7 +545,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     public void listProduts(List<Product> list) {
         if (list == null) {
-            list = productController.get("WHERE stock_total>0 and status='1'");
+            list = productController.getForPDV(null);
         }
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
@@ -546,7 +556,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 c.getDescription(),
                 c.getPrice(),
                 c.getTaxe().getPercetage(),
-                c.getStockTotal()
+                c.getCurrentStock()
             }
             );
         }
@@ -570,21 +580,7 @@ public class ScreenPdv extends javax.swing.JFrame {
     }
 
     public void filterListProducts(String txt) {
-        ProductDao cDao = new ProductDao();
-        List<Product> list = cDao.filter(txt, "and stock_total>0 and status='1'");
-
-        listProduts(list);
-//        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
-//        data.setNumRows(0);
-//        for (Product c : list) {
-//            data.addRow(new Object[]{
-//                c.getId(),
-//                c.getBarcode(),
-//                c.getDescription(),
-//                c.getPrice(),
-//                c.getStockTotal(),
-//                c.getSupplier().getName(),});
-//        }
+        listProduts(productController.getForPDV(txt));
     }
 
 //    public void listClients() {
@@ -734,16 +730,19 @@ public class ScreenPdv extends javax.swing.JFrame {
         jLabelNameUserSeller.setBackground(new java.awt.Color(255, 255, 255));
         jLabelNameUserSeller.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabelNameUserSeller.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelNameUserSeller.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNameUserSeller.setText("Usuario");
 
         jLabelNameCompany.setBackground(new java.awt.Color(255, 255, 255));
         jLabelNameCompany.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabelNameCompany.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelNameCompany.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNameCompany.setText("PDV");
 
         jLabelDateTime.setBackground(new java.awt.Color(255, 255, 255));
         jLabelDateTime.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelDateTime.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelDateTime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelDateTime.setText("Data e hora");
 
         jToolBar1.setRollover(true);
@@ -842,12 +841,12 @@ public class ScreenPdv extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabelNameUserSeller, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabelDateTime, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabelNameUserSeller, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabelDateTime, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 551, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(67, 67, 67))
         );
@@ -855,14 +854,18 @@ public class ScreenPdv extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabelNameCompany)
+                            .addComponent(jLabelNameUserSeller)))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGap(3, 3, 3)
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabelNameCompany)
-                        .addComponent(jLabelNameUserSeller)
-                        .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabelDateTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
 
@@ -1274,9 +1277,9 @@ public class ScreenPdv extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(81, 81, 81)
+                .addContainerGap()
                 .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(63, 63, 63))
         );
@@ -1305,7 +1308,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(1200, 578));
+        setSize(new java.awt.Dimension(1137, 578));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 

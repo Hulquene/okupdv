@@ -82,12 +82,14 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     public void filterListProduct(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.filter(txt, "");
+        List<Product> list = productController.get(txt);
         loadListProducts(list);
     }
 
     public void loadListProductsInventory(List<Product> list) {
-//        List<Product> list = productController.getProducts();
+        if (list == null) {
+            list = productController.getForPDV(null);
+        }
         DefaultTableModel data = (DefaultTableModel) jTableInventory.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -96,7 +98,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
                 c.getCode(),
                 c.getBarcode(),
                 c.getDescription(),
-                c.getStockTotal(),
+                c.getCurrentStock(),
                 c.getPrice(),
                 c.getPurchasePrice(),
                 c.getSupplier().getName(),
@@ -107,13 +109,13 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     public void listProductsInventory() {
 //        List<Product> list = productController.getProducts();
-        List<Product> list = productController.getProductsStock();
+        List<Product> list = productController.get(null);
         loadListProductsInventory(list);
     }
 
     public void filterListProductInventory(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.filterProductStock(txt);
+        List<Product> list = productController.get(txt);
         loadListProductsInventory(list);
     }
 
@@ -152,8 +154,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
         jLabel5 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
 
         jTabbedPaneProduct.setBackground(new java.awt.Color(255, 255, 255));
         jTabbedPaneProduct.setEnabled(false);
@@ -479,36 +479,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
         jTabbedPaneProduct.addTab("Mercadoria", jPanel2);
 
-        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 974, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 585, Short.MAX_VALUE)
-        );
-
-        jTabbedPaneProduct.addTab("Entrada", jPanel1);
-
-        jPanel3.setBackground(new java.awt.Color(204, 204, 255));
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 974, Short.MAX_VALUE)
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 585, Short.MAX_VALUE)
-        );
-
-        jTabbedPaneProduct.addTab("Saida", jPanel3);
-
         jScrollPane4.setViewportView(jTabbedPaneProduct);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -755,9 +725,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanelSearchSupplier;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

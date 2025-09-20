@@ -4,6 +4,8 @@
  */
 package com.okutonda.okudpdv.models;
 
+import java.math.BigDecimal;
+
 /**
  *
  * @author kenny
@@ -12,7 +14,7 @@ public class Taxes {
 
     private int id;
     private String name;
-    private Double percetage;
+    private BigDecimal percetage;
     private String code;
     private int isDefault;
 
@@ -32,11 +34,11 @@ public class Taxes {
         this.name = name;
     }
 
-    public Double getPercetage() {
+    public BigDecimal getPercetage() {
         return percetage;
     }
 
-    public void setPercetage(Double percetage) {
+    public void setPercetage(BigDecimal percetage) {
         this.percetage = percetage;
     }
 

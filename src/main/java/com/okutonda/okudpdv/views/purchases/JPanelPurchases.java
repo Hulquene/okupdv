@@ -140,7 +140,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        jTabbedPane1.addTab("Purchase", jPanel1);
+        jTabbedPane1.addTab("Compras", jPanel1);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -153,7 +153,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
             .addGap(0, 591, Short.MAX_VALUE)
         );
 
-        jTabbedPane1.addTab("tab2", jPanel2);
+        jTabbedPane1.addTab("Pagamentos de compras", jPanel2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

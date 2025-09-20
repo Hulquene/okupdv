@@ -8,15 +8,14 @@ import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.ProductOrderController;
 import com.okutonda.okudpdv.controllers.ReportController;
-import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.ProductOrder;
-import com.okutonda.okudpdv.models.Shift;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.utilities.UtilSales;
 import com.okutonda.okudpdv.views.export.JDialogExportSaftFat;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -78,7 +77,8 @@ public final class JPanelReport extends javax.swing.JPanel {
                 c.getQty(),
                 c.getPrice(),
                 c.getTaxePercentage(),
-                (c.getQty() * c.getPrice())
+                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
+//                (c.getQty() * c.getPrice())
             });
         }
     }
@@ -113,13 +113,14 @@ public final class JPanelReport extends javax.swing.JPanel {
                 c.getQty(),
                 c.getPrice(),
                 c.getTaxePercentage(),
-                (c.getQty() * c.getPrice())
+                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
+//                (c.getQty() * c.getPrice())
             });
         }
     }
 
     public void filterListProduct(String txt, String type) {
-        List<Product> list = productController.filter(txt,"");
+        List<Product> list = productController.get(txt);
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -129,7 +130,7 @@ public final class JPanelReport extends javax.swing.JPanel {
                 c.getDescription(),
                 c.getPrice(),
                 c.getPurchasePrice(),
-                c.getStockTotal(),
+                c.getCurrentStock(),
                 c.getTaxe().getPercetage(),
                 c.getSupplier().getName()
             });

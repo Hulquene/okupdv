@@ -8,11 +8,13 @@ import com.okutonda.okudpdv.dao.OrderDao;
 import com.okutonda.okudpdv.dao.PaymentDao;
 import com.okutonda.okudpdv.dao.ProductDao;
 import com.okutonda.okudpdv.dao.ProductOrderDao;
+import com.okutonda.okudpdv.dao.StockMovementDao;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.Order;
 import com.okutonda.okudpdv.models.Payment;
 import com.okutonda.okudpdv.models.PaymentStatus;
 import com.okutonda.okudpdv.models.ProductOrder;
+import com.okutonda.okudpdv.models.StockMovement;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.UtilDate;
 import com.okutonda.okudpdv.utilities.UtilSaft;
@@ -258,12 +260,28 @@ public class OrderController {
                 throw new RuntimeException("Falha ao recuperar Order gravado.");
             }
 
-            // 3.3) Inserir itens + baixa de stock
+//            // 3.3) Inserir itens + baixa de stock
+//            for (ProductOrder po : order.getProducts()) {
+//                itemDaoTx.add(po, salvo.getId());
+//                // baixa de stock (se aplicável)
+//                int novoStock = po.getProduct().getStockTotal() - po.getQty();
+//                productDaoTx.updateStock(po.getProduct().getId(), Math.max(novoStock, 0));
+//            }
+// 3.3) Inserir itens + baixa de stock
             for (ProductOrder po : order.getProducts()) {
+                // 1) Registar item da fatura
                 itemDaoTx.add(po, salvo.getId());
-                // baixa de stock (se aplicável)
-                int novoStock = po.getProduct().getStockTotal() - po.getQty();
-                productDaoTx.updateStock(po.getProduct().getId(), Math.max(novoStock, 0));
+
+                // 2) Registar movimento de stock (saída)
+                StockMovement movimento = new StockMovement();
+                movimento.setProduct(po.getProduct());
+                movimento.setQuantity(-po.getQty()); // saída = negativo
+                movimento.setType("OUT");
+                movimento.setReason("VENDA " + salvo.getPrefix() + "/" + salvo.getNumber());
+                movimento.setUser(order.getSeller());
+
+                StockMovementDao stockDao = new StockMovementDao(conn);
+                stockDao.add(movimento);
             }
 
             // 3.4) Inserir pagamentos

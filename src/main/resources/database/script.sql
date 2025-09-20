@@ -1,29 +1,17 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
---
--- Host: 127.0.0.1    Database: okudb
--- ------------------------------------------------------
--- Server version	8.0.39
+-- ============================================================================
+-- install.sql - Schema e dados iniciais (MariaDB / MySQL compatível)
+-- Charset: utf8mb4
+-- Comentários: linhas iniciando com "--"
+-- ============================================================================
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+-- Recomendação de sessão
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-START TRANSACTION;
-
---
--- Table structure for table `countries`
---
-
+-- ============================================================================
+-- 1) COUNTRIES
+-- ============================================================================
 DROP TABLE IF EXISTS `countries`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `countries` (
   `id` int NOT NULL AUTO_INCREMENT,
   `iso2` char(2) DEFAULT NULL,
@@ -35,17 +23,11 @@ CREATE TABLE `countries` (
   `calling_code` varchar(8) DEFAULT NULL,
   `cctld` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=251 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `countries`
---
-
-LOCK TABLES `countries` WRITE;
-/*!40000 ALTER TABLE `countries` DISABLE KEYS */;
-INSERT INTO `countries` VALUES (1,'AF','Afghanistan','Islamic Republic of Afghanistan','AFG','004','yes','93','.af'),
-(2,'AX','Aland Islands','&Aring;land Islands','ALA','248','no','358','.ax'),
+INSERT INTO `countries` VALUES
+(1,'AF','Afghanistan','Islamic Republic of Afghanistan','AFG','004','yes','93','.af'),
+(2,'AX','Aland Islands','Åland Islands','ALA','248','no','358','.ax'),
 (3,'AL','Albania','Republic of Albania','ALB','008','yes','355','.al'),
 (4,'DZ','Algeria','People s Democratic Republic of Algeria','DZA','012','yes','213','.dz'),
 (5,'AS','American Samoa','American Samoa','ASM','016','no','1+684','.as'),
@@ -64,35 +46,65 @@ INSERT INTO `countries` VALUES (1,'AF','Afghanistan','Islamic Republic of Afghan
 (18,'BH','Bahrain','Kingdom of Bahrain','BHR','048','yes','973','.bh'),
 (19,'BD','Bangladesh','Peoples Republic of Bangladesh','BGD','050','yes','880','.bd'),
 (20,'BB','Barbados','Barbados','BRB','052','yes','1+246','.bb'),
-(21,'BY','Belarus','Republic of Belarus','BLR','112','yes','375','.by'),(22,'BE','Belgium','Kingdom of Belgium','BEL','056','yes','32','.be'),(23,'BZ','Belize','Belize','BLZ','084','yes','501','.bz'),
-(24,'BJ','Benin','Republic of Benin','BEN','204','yes','229','.bj'),(25,'BM','Bermuda','Bermuda Islands','BMU','060','no','1+441','.bm'),(26,'BT','Bhutan','Kingdom of Bhutan','BTN','064','yes','975','.bt'),
-(27,'BO','Bolivia','Plurinational State of Bolivia','BOL','068','yes','591','.bo'),(28,'BQ','Bonaire, Sint Eustatius and Saba','Bonaire, Sint Eustatius and Saba','BES','535','no','599','.bq'),
-(29,'BA','Bosnia and Herzegovina','Bosnia and Herzegovina','BIH','070','yes','387','.ba'),(30,'BW','Botswana','Republic of Botswana','BWA','072','yes','267','.bw'),
-(31,'BV','Bouvet Island','Bouvet Island','BVT','074','no','NONE','.bv'),(32,'BR','Brazil','Federative Republic of Brazil','BRA','076','yes','55','.br'),
-(33,'IO','British Indian Ocean Territory','British Indian Ocean Territory','IOT','086','no','246','.io'),(34,'BN','Brunei','Brunei Darussalam','BRN','096','yes','673','.bn'),
-(35,'BG','Bulgaria','Republic of Bulgaria','BGR','100','yes','359','.bg'),(36,'BF','Burkina Faso','Burkina Faso','BFA','854','yes','226','.bf'),(37,'BI','Burundi','Republic of Burundi','BDI','108','yes','257','.bi'),
-(38,'KH','Cambodia','Kingdom of Cambodia','KHM','116','yes','855','.kh'),(39,'CM','Cameroon','Republic of Cameroon','CMR','120','yes','237','.cm'),(40,'CA','Canada','Canada','CAN','124','yes','1','.ca'),
-(41,'CV','Cape Verde','Republic of Cape Verde','CPV','132','yes','238','.cv'),(42,'KY','Cayman Islands','The Cayman Islands','CYM','136','no','1+345','.ky'),
-(43,'CF','Central African Republic','Central African Republic','CAF','140','yes','236','.cf'),(44,'TD','Chad','Republic of Chad','TCD','148','yes','235','.td'),(45,'CL','Chile','Republic of Chile','CHL','152','yes','56','.cl'),
-(46,'CN','China','Peoples Republic of China','CHN','156','yes','86','.cn'),(47,'CX','Christmas Island','Christmas Island','CXR','162','no','61','.cx'),
+(21,'BY','Belarus','Republic of Belarus','BLR','112','yes','375','.by'),
+(22,'BE','Belgium','Kingdom of Belgium','BEL','056','yes','32','.be'),
+(23,'BZ','Belize','Belize','BLZ','084','yes','501','.bz'),
+(24,'BJ','Benin','Republic of Benin','BEN','204','yes','229','.bj'),
+(25,'BM','Bermuda','Bermuda Islands','BMU','060','no','1+441','.bm'),
+(26,'BT','Bhutan','Kingdom of Bhutan','BTN','064','yes','975','.bt'),
+(27,'BO','Bolivia','Plurinational State of Bolivia','BOL','068','yes','591','.bo'),
+(28,'BQ','Bonaire, Sint Eustatius and Saba','Bonaire, Sint Eustatius and Saba','BES','535','no','599','.bq'),
+(29,'BA','Bosnia and Herzegovina','Bosnia and Herzegovina','BIH','070','yes','387','.ba'),
+(30,'BW','Botswana','Republic of Botswana','BWA','072','yes','267','.bw'),
+(31,'BV','Bouvet Island','Bouvet Island','BVT','074','no','NONE','.bv'),
+(32,'BR','Brazil','Federative Republic of Brazil','BRA','076','yes','55','.br'),
+(33,'IO','British Indian Ocean Territory','British Indian Ocean Territory','IOT','086','no','246','.io'),
+(34,'BN','Brunei','Brunei Darussalam','BRN','096','yes','673','.bn'),
+(35,'BG','Bulgaria','Republic of Bulgaria','BGR','100','yes','359','.bg'),
+(36,'BF','Burkina Faso','Burkina Faso','BFA','854','yes','226','.bf'),
+(37,'BI','Burundi','Republic of Burundi','BDI','108','yes','257','.bi'),
+(38,'KH','Cambodia','Kingdom of Cambodia','KHM','116','yes','855','.kh'),
+(39,'CM','Cameroon','Republic of Cameroon','CMR','120','yes','237','.cm'),
+(40,'CA','Canada','Canada','CAN','124','yes','1','.ca'),
+(41,'CV','Cape Verde','Republic of Cape Verde','CPV','132','yes','238','.cv'),
+(42,'KY','Cayman Islands','The Cayman Islands','CYM','136','no','1+345','.ky'),
+(43,'CF','Central African Republic','Central African Republic','CAF','140','yes','236','.cf'),
+(44,'TD','Chad','Republic of Chad','TCD','148','yes','235','.td'),
+(45,'CL','Chile','Republic of Chile','CHL','152','yes','56','.cl'),
+(46,'CN','China','Peoples Republic of China','CHN','156','yes','86','.cn'),
+(47,'CX','Christmas Island','Christmas Island','CXR','162','no','61','.cx'),
 (48,'CC','Cocos (Keeling) Islands','Cocos (Keeling) Islands','CCK','166','no','61','.cc'),
 (49,'CO','Colombia','Republic of Colombia','COL','170','yes','57','.co'),
-(50,'KM','Comoros','Union of the Comoros','COM','174','yes','269','.km'),(51,'CG','Congo','Republic of the Congo','COG','178','yes','242','.cg'),(52,'CK','Cook Islands','Cook Islands','COK','184','some','682','.ck'),
-(53,'CR','Costa Rica','Republic of Costa Rica','CRI','188','yes','506','.cr'),(54,'CI','Cote d\'ivoire (Ivory Coast)','Republic of C&ocirc;te D\'Ivoire (Ivory Coast)','CIV','384','yes','225','.ci'),
-(55,'HR','Croatia','Republic of Croatia','HRV','191','yes','385','.hr'),(56,'CU','Cuba','Republic of Cuba','CUB','192','yes','53','.cu'),(57,'CW','Curacao','Cura&ccedil;ao','CUW','531','no','599','.cw'),
+(50,'KM','Comoros','Union of the Comoros','COM','174','yes','269','.km'),
+(51,'CG','Congo','Republic of the Congo','COG','178','yes','242','.cg'),
+(52,'CK','Cook Islands','Cook Islands','COK','184','some','682','.ck'),
+(53,'CR','Costa Rica','Republic of Costa Rica','CRI','188','yes','506','.cr'),
+(54,'CI','Cote d\'ivoire (Ivory Coast)','Republic of Côte D\'Ivoire (Ivory Coast)','CIV','384','yes','225','.ci'),
+(55,'HR','Croatia','Republic of Croatia','HRV','191','yes','385','.hr'),
+(56,'CU','Cuba','Republic of Cuba','CUB','192','yes','53','.cu'),
+(57,'CW','Curacao','Curaçao','CUW','531','no','599','.cw'),
 (58,'CY','Cyprus','Republic of Cyprus','CYP','196','yes','357','.cy'),
-(59,'CZ','Czech Republic','Czech Republic','CZE','203','yes','420','.cz'),(60,'CD','Democratic Republic of the Congo','Democratic Republic of the Congo','COD','180','yes','243','.cd'),
-(61,'DK','Denmark','Kingdom of Denmark','DNK','208','yes','45','.dk'),(62,'DJ','Djibouti','Republic of Djibouti','DJI','262','yes','253','.dj'),(63,'DM','Dominica','Commonwealth of Dominica','DMA','212','yes','1+767','.dm'),
+(59,'CZ','Czech Republic','Czech Republic','CZE','203','yes','420','.cz'),
+(60,'CD','Democratic Republic of the Congo','Democratic Republic of the Congo','COD','180','yes','243','.cd'),
+(61,'DK','Denmark','Kingdom of Denmark','DNK','208','yes','45','.dk'),
+(62,'DJ','Djibouti','Republic of Djibouti','DJI','262','yes','253','.dj'),
+(63,'DM','Dominica','Commonwealth of Dominica','DMA','212','yes','1+767','.dm'),
 (64,'DO','Dominican Republic','Dominican Republic','DOM','214','yes','1+809, 8','.do'),
-(65,'EC','Ecuador','Republic of Ecuador','ECU','218','yes','593','.ec'),(66,'EG','Egypt','Arab Republic of Egypt','EGY','818','yes','20','.eg'),(67,'SV','El Salvador','Republic of El Salvador','SLV','222','yes','503','.sv'),
-(68,'GQ','Equatorial Guinea','Republic of Equatorial Guinea','GNQ','226','yes','240','.gq'),(69,'ER','Eritrea','State of Eritrea','ERI','232','yes','291','.er'),(70,'EE','Estonia','Republic of Estonia','EST','233','yes','372','.ee'),
-(71,'ET','Ethiopia','Federal Democratic Republic of Ethiopia','ETH','231','yes','251','.et'),(72,'FK','Falkland Islands (Malvinas)','The Falkland Islands (Malvinas)','FLK','238','no','500','.fk'),
+(65,'EC','Ecuador','Republic of Ecuador','ECU','218','yes','593','.ec'),
+(66,'EG','Egypt','Arab Republic of Egypt','EGY','818','yes','20','.eg'),
+(67,'SV','El Salvador','Republic of El Salvador','SLV','222','yes','503','.sv'),
+(68,'GQ','Equatorial Guinea','Republic of Equatorial Guinea','GNQ','226','yes','240','.gq'),
+(69,'ER','Eritrea','State of Eritrea','ERI','232','yes','291','.er'),
+(70,'EE','Estonia','Republic of Estonia','EST','233','yes','372','.ee'),
+(71,'ET','Ethiopia','Federal Democratic Republic of Ethiopia','ETH','231','yes','251','.et'),
+(72,'FK','Falkland Islands (Malvinas)','The Falkland Islands (Malvinas)','FLK','238','no','500','.fk'),
 (73,'FO','Faroe Islands','The Faroe Islands','FRO','234','no','298','.fo'),
 (74,'FJ','Fiji','Republic of Fiji','FJI','242','yes','679','.fj'),
 (75,'FI','Finland','Republic of Finland','FIN','246','yes','358','.fi'),
 (76,'FR','France','French Republic','FRA','250','yes','33','.fr'),
 (77,'GF','French Guiana','French Guiana','GUF','254','no','594','.gf'),
-(78,'PF','French Polynesia','French Polynesia','PYF','258','no','689','.pf'),(79,'TF','French Southern Territories','French Southern Territories','ATF','260','no',NULL,'.tf'),
+(78,'PF','French Polynesia','French Polynesia','PYF','258','no','689','.pf'),
+(79,'TF','French Southern Territories','French Southern Territories','ATF','260','no',NULL,'.tf'),
 (80,'GA','Gabon','Gabonese Republic','GAB','266','yes','241','.ga'),
 (81,'GM','Gambia','Republic of The Gambia','GMB','270','yes','220','.gm'),
 (82,'GE','Georgia','Georgia','GEO','268','yes','995','.ge'),
@@ -193,8 +205,11 @@ INSERT INTO `countries` VALUES (1,'AF','Afghanistan','Islamic Republic of Afghan
 (177,'PT','Portugal','Portuguese Republic','PRT','620','yes','351','.pt'),
 (178,'PR','Puerto Rico','Commonwealth of Puerto Rico','PRI','630','no','1+939','.pr'),
 (179,'QA','Qatar','State of Qatar','QAT','634','yes','974','.qa'),
-(180,'RE','Reunion','R&eacute;union','REU','638','no','262','.re'),
-(181,'RO','Romania','Romania','ROU','642','yes','40','.ro'),(182,'RU','Russia','Russian Federation','RUS','643','yes','7','.ru'),(183,'RW','Rwanda','Republic of Rwanda','RWA','646','yes','250','.rw'),(184,'BL','Saint Barthelemy','Saint Barth&eacute;lemy','BLM','652','no','590','.bl'),
+(180,'RE','Reunion','Réunion','REU','638','no','262','.re'),
+(181,'RO','Romania','Romania','ROU','642','yes','40','.ro'),
+(182,'RU','Russia','Russian Federation','RUS','643','yes','7','.ru'),
+(183,'RW','Rwanda','Republic of Rwanda','RWA','646','yes','250','.rw'),
+(184,'BL','Saint Barthelemy','Saint Barthélemy','BLM','652','no','590','.bl'),
 (185,'SH','Saint Helena','Saint Helena, Ascension and Tristan da Cunha','SHN','654','no','290','.sh'),
 (186,'KN','Saint Kitts and Nevis','Federation of Saint Christopher and Nevis','KNA','659','yes','1+869','.kn'),
 (187,'LC','Saint Lucia','Saint Lucia','LCA','662','yes','1+758','.lc'),
@@ -203,42 +218,286 @@ INSERT INTO `countries` VALUES (1,'AF','Afghanistan','Islamic Republic of Afghan
 (190,'VC','Saint Vincent and the Grenadines','Saint Vincent and the Grenadines','VCT','670','yes','1+784','.vc'),
 (191,'WS','Samoa','Independent State of Samoa','WSM','882','yes','685','.ws'),
 (192,'SM','San Marino','Republic of San Marino','SMR','674','yes','378','.sm'),
-(193,'ST','Sao Tome and Principe','Democratic Republic of S&atilde;o Tom&eacute; and Pr&iacute;ncipe','STP','678','yes','239','.st'),
+(193,'ST','Sao Tome and Principe','Democratic Republic of São Tomé and Príncipe','STP','678','yes','239','.st'),
 (194,'SA','Saudi Arabia','Kingdom of Saudi Arabia','SAU','682','yes','966','.sa'),
-(195,'SN','Senegal','Republic of Senegal','SEN','686','yes','221','.sn'),(196,'RS','Serbia','Republic of Serbia','SRB','688','yes','381','.rs'),
+(195,'SN','Senegal','Republic of Senegal','SEN','686','yes','221','.sn'),
+(196,'RS','Serbia','Republic of Serbia','SRB','688','yes','381','.rs'),
 (197,'SC','Seychelles','Republic of Seychelles','SYC','690','yes','248','.sc'),
-(198,'SL','Sierra Leone','Republic of Sierra Leone','SLE','694','yes','232','.sl'),(199,'SG','Singapore','Republic of Singapore','SGP','702','yes','65','.sg'),
+(198,'SL','Sierra Leone','Republic of Sierra Leone','SLE','694','yes','232','.sl'),
+(199,'SG','Singapore','Republic of Singapore','SGP','702','yes','65','.sg'),
 (200,'SX','Sint Maarten','Sint Maarten','SXM','534','no','1+721','.sx'),
 (201,'SK','Slovakia','Slovak Republic','SVK','703','yes','421','.sk'),
-(202,'SI','Slovenia','Republic of Slovenia','SVN','705','yes','386','.si'),(203,'SB','Solomon Islands','Solomon Islands','SLB','090','yes','677','.sb'),(204,'SO','Somalia','Somali Republic','SOM','706','yes','252','.so'),
-(205,'ZA','South Africa','Republic of South Africa','ZAF','710','yes','27','.za'),(206,'GS','South Georgia and the South Sandwich Islands','South Georgia and the South Sandwich Islands','SGS','239','no','500','.gs'),(207,'KR','South Korea','Republic of Korea','KOR','410','yes','82','.kr'),
+(202,'SI','Slovenia','Republic of Slovenia','SVN','705','yes','386','.si'),
+(203,'SB','Solomon Islands','Solomon Islands','SLB','090','yes','677','.sb'),
+(204,'SO','Somalia','Somali Republic','SOM','706','yes','252','.so'),
+(205,'ZA','South Africa','Republic of South Africa','ZAF','710','yes','27','.za'),
+(206,'GS','South Georgia and the South Sandwich Islands','South Georgia and the South Sandwich Islands','SGS','239','no','500','.gs'),
+(207,'KR','South Korea','Republic of Korea','KOR','410','yes','82','.kr'),
 (208,'SS','South Sudan','Republic of South Sudan','SSD','728','yes','211','.ss'),
-(209,'ES','Spain','Kingdom of Spain','ESP','724','yes','34','.es'),(210,'LK','Sri Lanka','Democratic Socialist Republic of Sri Lanka','LKA','144','yes','94','.lk'),(211,'SD','Sudan','Republic of the Sudan','SDN','729','yes','249','.sd'),
+(209,'ES','Spain','Kingdom of Spain','ESP','724','yes','34','.es'),
+(210,'LK','Sri Lanka','Democratic Socialist Republic of Sri Lanka','LKA','144','yes','94','.lk'),
+(211,'SD','Sudan','Republic of the Sudan','SDN','729','yes','249','.sd'),
 (212,'SR','Suriname','Republic of Suriname','SUR','740','yes','597','.sr'),
-(213,'SJ','Svalbard and Jan Mayen','Svalbard and Jan Mayen','SJM','744','no','47','.sj'),(214,'SZ','Swaziland','Kingdom of Swaziland','SWZ','748','yes','268','.sz'),(215,'SE','Sweden','Kingdom of Sweden','SWE','752','yes','46','.se'),
+(213,'SJ','Svalbard and Jan Mayen','Svalbard and Jan Mayen','SJM','744','no','47','.sj'),
+(214,'SZ','Swaziland','Kingdom of Swaziland','SWZ','748','yes','268','.sz'),
+(215,'SE','Sweden','Kingdom of Sweden','SWE','752','yes','46','.se'),
 (216,'CH','Switzerland','Swiss Confederation','CHE','756','yes','41','.ch'),
-(217,'SY','Syria','Syrian Arab Republic','SYR','760','yes','963','.sy'),(218,'TW','Taiwan','Republic of China (Taiwan)','TWN','158','former','886','.tw'),(219,'TJ','Tajikistan','Republic of Tajikistan','TJK','762','yes','992','.tj'),
+(217,'SY','Syria','Syrian Arab Republic','SYR','760','yes','963','.sy'),
+(218,'TW','Taiwan','Republic of China (Taiwan)','TWN','158','former','886','.tw'),
+(219,'TJ','Tajikistan','Republic of Tajikistan','TJK','762','yes','992','.tj'),
 (220,'TZ','Tanzania','United Republic of Tanzania','TZA','834','yes','255','.tz'),
-(221,'TH','Thailand','Kingdom of Thailand','THA','764','yes','66','.th'),(222,'TL','Timor-Leste (East Timor)','Democratic Republic of Timor-Leste','TLS','626','yes','670','.tl'),
+(221,'TH','Thailand','Kingdom of Thailand','THA','764','yes','66','.th'),
+(222,'TL','Timor-Leste (East Timor)','Democratic Republic of Timor-Leste','TLS','626','yes','670','.tl'),
 (223,'TG','Togo','Togolese Republic','TGO','768','yes','228','.tg'),
-(224,'TK','Tokelau','Tokelau','TKL','772','no','690','.tk'),(225,'TO','Tonga','Kingdom of Tonga','TON','776','yes','676','.to'),(226,'TT','Trinidad and Tobago','Republic of Trinidad and Tobago','TTO','780','yes','1+868','.tt'),
-(227,'TN','Tunisia','Republic of Tunisia','TUN','788','yes','216','.tn'),(228,'TR','Turkey','Republic of Turkey','TUR','792','yes','90','.tr'),(229,'TM','Turkmenistan','Turkmenistan','TKM','795','yes','993','.tm'),(230,'TC','Turks and Caicos Islands','Turks and Caicos Islands','TCA','796','no','1+649','.tc'),
-(231,'TV','Tuvalu','Tuvalu','TUV','798','yes','688','.tv'),(232,'UG','Uganda','Republic of Uganda','UGA','800','yes','256','.ug'),(233,'UA','Ukraine','Ukraine','UKR','804','yes','380','.ua'),(234,'AE','United Arab Emirates','United Arab Emirates','ARE','784','yes','971','.ae'),
-(235,'GB','United Kingdom','United Kingdom of Great Britain and Nothern Ireland','GBR','826','yes','44','.uk'),(236,'US','United States','United States of America','USA','840','yes','1','.us'),(237,'UM','United States Minor Outlying Islands','United States Minor Outlying Islands','UMI','581','no','NONE','NONE'),
-(238,'UY','Uruguay','Eastern Republic of Uruguay','URY','858','yes','598','.uy'),(239,'UZ','Uzbekistan','Republic of Uzbekistan','UZB','860','yes','998','.uz'),(240,'VU','Vanuatu','Republic of Vanuatu','VUT','548','yes','678','.vu'),(241,'VA','Vatican City','State of the Vatican City','VAT','336','no','39','.va'),
-(242,'VE','Venezuela','Bolivarian Republic of Venezuela','VEN','862','yes','58','.ve'),(243,'VN','Vietnam','Socialist Republic of Vietnam','VNM','704','yes','84','.vn'),(244,'VG','Virgin Islands, British','British Virgin Islands','VGB','092','no','1+284','.vg'),
-(245,'VI','Virgin Islands, US','Virgin Islands of the United States','VIR','850','no','1+340','.vi'),(246,'WF','Wallis and Futuna','Wallis and Futuna','WLF','876','no','681','.wf'),(247,'EH','Western Sahara','Western Sahara','ESH','732','no','212','.eh'),(248,'YE','Yemen','Republic of Yemen','YEM','887','yes','967','.ye'),
-(249,'ZM','Zambia','Republic of Zambia','ZMB','894','yes','260','.zm'),(250,'ZW','Zimbabwe','Republic of Zimbabwe','ZWE','716','yes','263','.zw');
-/*!40000 ALTER TABLE `countries` ENABLE KEYS */;
-UNLOCK TABLES;
+(224,'TK','Tokelau','Tokelau','TKL','772','no','690','.tk'),
+(225,'TO','Tonga','Kingdom of Tonga','TON','776','yes','676','.to'),
+(226,'TT','Trinidad and Tobago','Republic of Trinidad and Tobago','TTO','780','yes','1+868','.tt'),
+(227,'TN','Tunisia','Republic of Tunisia','TUN','788','yes','216','.tn'),
+(228,'TR','Turkey','Republic of Turkey','TUR','792','yes','90','.tr'),
+(229,'TM','Turkmenistan','Turkmenistan','TKM','795','yes','993','.tm'),
+(230,'TC','Turks and Caicos Islands','Turks and Caicos Islands','TCA','796','no','1+649','.tc'),
+(231,'TV','Tuvalu','Tuvalu','TUV','798','yes','688','.tv'),
+(232,'UG','Uganda','Republic of Uganda','UGA','800','yes','256','.ug'),
+(233,'UA','Ukraine','Ukraine','UKR','804','yes','380','.ua'),
+(234,'AE','United Arab Emirates','United Arab Emirates','ARE','784','yes','971','.ae'),
+(235,'GB','United Kingdom','United Kingdom of Great Britain and Nothern Ireland','GBR','826','yes','44','.uk'),
+(236,'US','United States','United States of America','USA','840','yes','1','.us'),
+(237,'UM','United States Minor Outlying Islands','United States Minor Outlying Islands','UMI','581','no','NONE','NONE'),
+(238,'UY','Uruguay','Eastern Republic of Uruguay','URY','858','yes','598','.uy'),
+(239,'UZ','Uzbekistan','Republic of Uzbekistan','UZB','860','yes','998','.uz'),
+(240,'VU','Vanuatu','Republic of Vanuatu','VUT','548','yes','678','.vu'),
+(241,'VA','Vatican City','State of the Vatican City','VAT','336','no','39','.va'),
+(242,'VE','Venezuela','Bolivarian Republic of Venezuela','VEN','862','yes','58','.ve'),
+(243,'VN','Vietnam','Socialist Republic of Vietnam','VNM','704','yes','84','.vn'),
+(244,'VG','Virgin Islands, British','British Virgin Islands','VGB','092','no','1+284','.vg'),
+(245,'VI','Virgin Islands, US','Virgin Islands of the United States','VIR','850','no','1+340','.vi'),
+(246,'WF','Wallis and Futuna','Wallis and Futuna','WLF','876','no','681','.wf'),
+(247,'EH','Western Sahara','Western Sahara','ESH','732','no','212','.eh'),
+(248,'YE','Yemen','Republic of Yemen','YEM','887','yes','967','.ye'),
+(249,'ZM','Zambia','Republic of Zambia','ZMB','894','yes','260','.zm'),
+(250,'ZW','Zimbabwe','Republic of Zimbabwe','ZWE','716','yes','263','.zw');
 
---
--- Table structure for table `clients`
---
+-- ============================================================================
+-- 2) USERS (precisa antes de expenses)
+-- ============================================================================
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `profile` enum('admin','seller','manager') NOT NULL DEFAULT 'seller',
+  `code` varchar(255) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `nif` varchar(255) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `birthdate` varchar(100) NOT NULL,
+  `phone` varchar(30) NOT NULL,
+  `password` varchar(250) NOT NULL DEFAULT '1234',
+  `status` TINYINT(1) NOT NULL DEFAULT '0',
+  `country` varchar(250) DEFAULT 'Angola',
+  `city` varchar(255) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ============================================================================
+-- 3) SUPPLIERS (antes de expenses e purchases)
+-- ============================================================================
+DROP TABLE IF EXISTS `suppliers`;
+CREATE TABLE `suppliers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `company` varchar(191) NOT NULL,
+  `nif` varchar(15) NOT NULL DEFAULT 'XXXXXXXXXX',
+  `phone` varchar(30) NOT NULL,
+  `email` varchar(255) NOT NULL DEFAULT 'desconhecido',
+  `country` int NOT NULL DEFAULT '0',
+  `city` varchar(100) NOT NULL DEFAULT 'desconhecido',
+  `zip_code` varchar(15) NOT NULL,
+  `state` varchar(50) NOT NULL DEFAULT 'desconhecido',
+  `address` varchar(191) NOT NULL DEFAULT 'desconhecido',
+  `status` TINYINT(1) NOT NULL DEFAULT '1',
+  `group_id` int NOT NULL DEFAULT '0',
+  `isdefault` TINYINT(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `suppliers` VALUES
+(1,'EN Entrega LDA','XXXXXXXXXXX','XXXXXXXXXXX','XXXXXXXXXXX',1,'desconhecido','ao1','desconhecido','desconhecido',0,0,0,'2024-07-20 20:31:35',NULL,NULL);
+
+-- ============================================================================
+-- 4) EXPENSE CATEGORIES (antes de expenses)
+-- ============================================================================
+DROP TABLE IF EXISTS `expense_categories`;
+CREATE TABLE `expense_categories` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================================
+-- 5) TAXES (antes de products)
+-- ============================================================================
+DROP TABLE IF EXISTS `taxes`;
+CREATE TABLE `taxes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `percentage` decimal(15,2) NOT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,0) DEFAULT NULL,
+  `isdefault` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `taxes` VALUES
+(1,'IVA',7.00,'IVA',0,0),
+(2,'IVA 14',14.00,'IVA',0,0),
+(3,'ISENTO',0.00,'ISE',0,0);
+
+-- ============================================================================
+-- 6) REASON_TAXES (antes de products)
+-- ============================================================================
+DROP TABLE IF EXISTS `reason_taxes`;
+CREATE TABLE `reason_taxes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) DEFAULT NULL,
+  `reason` text,
+  `standard` varchar(255) DEFAULT NULL,
+  `description` text,
+  `isdefault` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `reason_taxes` (`id`,`code`,`reason`,`standard`,`description`,`isdefault`) VALUES
+(1,'M00','Regime transitório','','',0),
+(2,'M02','Transmissão de bens e serviços não sujeita','','',0),
+(3,'M04','IVA – Regime de não sujeição','','',0),
+(4,'M10','Isento nos termos da alínea b) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','A transmissão dos bens alimentares, conforme anexo I do presente código',0),
+(5,'M11','Isento nos termos da alínea b) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','As transmissões de medicamentos destinados exclusivamente a fins terapêuticos e profiláticos',0),
+(6,'M12','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','As transmissões de cadeiras de rodas e veículos semelhantes, acionados manualmente ou por motor, para portadores de deficiência; máquinas de escrever com caracteres braille; impressoras para braille; artefactos destinados a invisuais ou para corrigir a audição',0),
+(7,'M13','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','A transmissão de livros, incluindo em formato digital',0),
+(8,'M14','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','A locação de bens imóveis destinados a fins habitacionais, com exceção das prestações de serviços de alojamento no âmbito da atividade hoteleira',0),
+(9,'M15','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','As operações sujeitas ao imposto de SISA, ainda que dele isentas',0),
+(10,'M16','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','A exploração e a prática de jogos de fortuna ou azar, bem como operações relacionadas, sujeitas a Imposto Especial sobre Jogos',0),
+(11,'M17','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','O transporte coletivo de passageiros',0),
+(12,'M18','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','As operações de intermediação financeira, incluindo locação financeira (exceto quando há taxa específica predeterminada)',0),
+(13,'M19','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','Seguro de saúde, seguros e resseguros do ramo vida',0),
+(14,'M20','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','As transmissões de produtos petrolíferos conforme anexo II do CIVA',0),
+(15,'M21','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','Serviços de ensino prestados por estabelecimentos integrados no sistema de educação reconhecido',0),
+(16,'M22','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','Serviços médico-sanitários prestados por hospitais, clínicas, dispensários e similares',0),
+(17,'M23','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','Transporte de doentes ou feridos em ambulâncias ou veículos apropriados',0),
+(18,'M24','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA','Artigo 12.º do CIVA','Equipamentos médicos para atividade de estabelecimentos de saúde',0),
+(19,'M30','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Bens expedidos ou transportados com destino ao estrangeiro pelo vendedor ou terceiro por conta deste',0),
+(20,'M31','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Abastecimentos postos a bordo de embarcações em alto mar que assegurem transporte remunerado de passageiros ou atividade comercial',0),
+(21,'M32','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Abastecimentos postos a bordo de aeronaves de tráfego internacional',0),
+(22,'M33','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Abastecimentos postos a bordo de embarcações de salvamento, assistência marítima, pesca costeira ou de guerra, com destino ao estrangeiro',0),
+(23,'M34','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Transmissões, transformações, reparações, manutenção, frete e aluguer de embarcações/aeronaves do tráfego internacional',0),
+(24,'M35','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Transmissões de bens no âmbito de relações diplomáticas e consulares com isenção por acordos internacionais',0),
+(25,'M36','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Transmissões de bens destinados a organismos internacionais reconhecidos por Angola',0),
+(26,'M37','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Transmissões de bens em tratados e acordos internacionais da República de Angola',0),
+(27,'M38','Isento nos termos da alínea h) do artigo 15.º do CIVA','Artigo 15.º do CIVA','Transporte de pessoas provenientes ou com destino ao estrangeiro',0),
+(28,'M80','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Importações definitivas de bens cuja transmissão seja isenta de imposto',0),
+(29,'M81','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Importação de ouro, moedas ou notas de banco efetuadas pelo Banco Nacional de Angola',0),
+(30,'M82','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Importação de bens destinados a ofertas para atenuar calamidades naturais, autorizadas pelo Executivo',0),
+(31,'M83','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Importação de mercadorias ou equipamentos destinados exclusivamente a operações petrolíferas ou mineiras',0),
+(32,'M84','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Importação de moeda estrangeira por instituições financeiras bancárias',0),
+(33,'M85','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA','Artigo 14.º do CIVA','Transmissões de bens no âmbito de tratados internacionais celebrados por Angola',0),
+(34,'M86','Isento nos termos da alínea b) do artigo 14.º do CIVA','Artigo 14.º do CIVA','Transmissões de bens no âmbito de relações diplomáticas e consulares com isenção prevista em tratados',0),
+(35,'M90','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA','Artigo 16.º do CIVA','Importações de bens em regimes aduaneiros especiais (zona franca, armazéns aduaneiros, lojas francas)',0),
+(36,'M91','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA','Artigo 16.º do CIVA','Transmissões de bens ou serviços associados a zonas francas ou depósitos aduaneiros',0),
+(37,'M92','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA','Artigo 16.º do CIVA','Transmissões de bens e serviços em regimes de trânsito, drawback ou importação temporária',0),
+(38,'M93','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA','Artigo 16.º do CIVA','Transmissões de bens abrangidos por regimes especiais de importação/exportação',0),
+(39,'M94','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA','Artigo 16.º do CIVA','Reimportação de bens no mesmo estado em que foram exportados, com isenção de direitos',0),
+(40,'Nenhum','Nenhum','Nenhum','Nenhum',0);
+
+-- ============================================================================
+-- 7) GROUPS_PRODUCT (antes de products)
+-- ============================================================================
+DROP TABLE IF EXISTS `groups_product`;
+CREATE TABLE `groups_product` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `code` varchar(40) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `groups_product` VALUES (1,'Nenhum',''),(2,'Grupo 1','GP1');
+
+-- ============================================================================
+-- 8) WAREHOUSES (usado por stock_movements)
+-- ============================================================================
+DROP TABLE IF EXISTS `warehouses`;
+CREATE TABLE `warehouses` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `status` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `warehouses` (`id`,`name`,`location`,`description`) VALUES
+(1,'Armazem 1','Desconhecido','Desconhecido');
+
+-- ============================================================================
+-- 9) PRODUCTS (depois de taxes, reason_taxes, groups_product, suppliers)
+-- ============================================================================
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE `products` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` enum('product','service') NOT NULL DEFAULT 'product',
+  `code` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `price` decimal(15,2) NOT NULL DEFAULT '0.00',
+  `purchase_price` float NOT NULL DEFAULT '0',
+  `tax_id` int NOT NULL DEFAULT '0',
+  `reason_tax_id` int NOT NULL DEFAULT '0',
+  `group_id` int NOT NULL DEFAULT '0',
+  `supplier_id` int NOT NULL,
+  `barcode` varchar(255) NOT NULL,
+  `status` TINYINT(1) NOT NULL DEFAULT '0',
+  `min_stock` int NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `deleted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_products_group` (`group_id`),
+  KEY `idx_products_supplier` (`supplier_id`),
+  KEY `idx_products_tax` (`tax_id`),
+  KEY `idx_products_reason_tax` (`reason_tax_id`),
+  CONSTRAINT `fk_products_group` FOREIGN KEY (`group_id`) REFERENCES `groups_product`(`id`),
+  CONSTRAINT `fk_products_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
+  CONSTRAINT `fk_products_tax` FOREIGN KEY (`tax_id`) REFERENCES `taxes`(`id`),
+  CONSTRAINT `fk_products_reason_tax` FOREIGN KEY (`reason_tax_id`) REFERENCES `reason_taxes`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `products` VALUES
+(1,'product','5rerer','Docker min',10000.00,9000,1,41,1,2,'112346456456',1,60,'2024-07-21 13:56:02','2024-07-21 13:56:02','2024-07-21 13:56:02'),
+(2,'service','444545','teste',0.00,400,1,1,1,2,'123456789',0,18,'2024-07-21 14:08:44','2024-07-21 14:08:44','2024-07-21 14:08:44'),
+(3,'product','4567','Jogo de copo',5000.00,450,1,1,1,2,'45678678875',0,80,'2024-07-21 14:32:41','2024-07-21 14:32:41','2024-07-21 14:32:41'),
+(4,'product','yt6776t','teste5',77.00,66,1,1,1,2,'4444447777',1,4990,'2024-07-21 14:39:15','2024-07-21 14:39:15','2024-07-21 14:39:15'),
+(7,'product','7878','teste4',40.00,30,1,1,1,2,'455445458787',1,789,'2024-07-22 20:19:06','2024-07-22 20:19:06','2024-07-22 20:19:06'),
+(8,'product','454545434','Embalagem de agua 5/4',55.00,50,1,1,1,2,'656656656',1,40,'2024-07-22 20:19:41','2024-07-22 20:19:41','2024-07-22 20:19:41'),
+(10,'product','776777876','Descriacao do produto',25000.00,0,1,1,1,2,'9889688787',0,0,'2024-07-30 22:19:38','2024-07-30 22:19:38','2024-07-30 22:19:38'),
+(12,'product','7868668587','Queijo 500 kg',5500.00,5000,3,2,1,4,'78877777689',0,30,'2024-08-05 20:50:25','2024-08-05 20:50:25','2024-08-05 20:50:25'),
+(13,'product','43434343','Copos vidros',2000.00,1700,1,1,1,2,'4545454545',1,50,'2024-08-05 20:53:26','2024-08-05 20:53:26','2024-08-05 20:53:26'),
+(14,'product','54564565','Produto de teste 18',150.00,0,1,1,1,2,'546547657457',0,0,'2024-08-06 21:06:12','2024-08-06 21:06:12','2024-08-06 21:06:12'),
+(15,'product','435456','Producto teste 18',44444.90,4000,1,41,1,2,'7767766776',1,550,'2024-08-13 18:40:51','2024-08-13 18:40:51','2024-08-13 18:40:51'),
+(16,'product','667664','Abacate',500.00,300,2,8,1,2,'7777777777',0,0,'2024-08-18 03:35:47','2024-08-18 03:35:47','2024-08-18 03:35:47'),
+(17,'product','4656664','Saco Platico 50 kilos',10.00,9,3,1,1,2,'655555566',0,4000,'2024-08-18 03:41:02','2024-08-18 03:41:02','2024-08-18 03:41:02'),
+(18,'product','6554434','Mause HP sem fio',5000.00,4500,1,41,1,2,'999999999',1,50,'2024-08-18 03:44:32','2024-08-18 03:44:32','2024-08-18 03:44:32'),
+(19,'product','6657657','Copos de vidro',2500.00,2000,3,41,2,1,'456457657',1,50,'2024-08-30 18:01:21','2024-08-30 18:01:21','2024-08-30 18:01:21');
+
+-- ============================================================================
+-- 10) CLIENTS
+-- ============================================================================
 DROP TABLE IF EXISTS `clients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `clients` (
   `id` int NOT NULL AUTO_INCREMENT,
   `company` varchar(191) NOT NULL,
@@ -257,128 +516,20 @@ CREATE TABLE `clients` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `clients`
---
-
- LOCK TABLES `clients` WRITE;
-/*!40000 ALTER TABLE `clients` DISABLE KEYS */;
- INSERT INTO `clients` VALUES (1,'Consumidor Final','XXXXXXXXXXX','XXXXXXXXXXX','XXXXXXXXXXX',7,'Desconecido','AO','Desconehcido','Desconhecido',1,0,1,'2024-07-19 19:55:45',NULL,NULL);
-/*!40000 ALTER TABLE `clients` ENABLE KEYS */;
- UNLOCK TABLES;
-
---
--- Table structure for table `groups_product`
---
-
-DROP TABLE IF EXISTS `groups_product`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `groups_product` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `code` varchar(40) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `groups_product`
---
-
-LOCK TABLES `groups_product` WRITE;
-/*!40000 ALTER TABLE `groups_product` DISABLE KEYS */;
-INSERT INTO `groups_product` VALUES (1,'Nenhum',''),(2,'Grupo 1','GP1');
-/*!40000 ALTER TABLE `groups_product` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `inventory_stock`
---
-
-DROP TABLE IF EXISTS `inventory_stock`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `inventory_stock` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `warehouse_id` varchar(45) DEFAULT NULL,
-  `product_id` int NOT NULL,
-  `qtd_stock` int NOT NULL,
-  `date_manufacture` varchar(45) DEFAULT NULL,
-  `expiry_date` varchar(45) DEFAULT NULL,
-  `purchase_price` double DEFAULT NULL,
-  `created_at` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `inventory_stock`
---
-
-LOCK TABLES `inventory_stock` WRITE;
-/*!40000 ALTER TABLE `inventory_stock` DISABLE KEYS */;
-/*!40000 ALTER TABLE `inventory_stock` ENABLE KEYS */;
-UNLOCK TABLES;
-
-CREATE TABLE IF NOT EXISTS expense_categories (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(100) NOT NULL,
-    description VARCHAR(255) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+INSERT INTO `clients` VALUES
+(1,'Consumidor Final','XXXXXXXXXXX','XXXXXXXXXXX','XXXXXXXXXXX',7,'Desconecido','AO','Desconehcido','Desconhecido',1,0,1,'2024-07-19 19:55:45',NULL,NULL);
 
-CREATE TABLE IF NOT EXISTS expenses (
-    id           INT AUTO_INCREMENT PRIMARY KEY,
-    description  VARCHAR(255)        NOT NULL DEFAULT '',
-    total        DECIMAL(15,2)       NOT NULL DEFAULT 0.00,
-    prefix       VARCHAR(11)         NOT NULL,
-    number       INT                 NOT NULL,
-
-    `date`       DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    dateFinish   DATETIME            NULL,
-
-    status       ENUM('SUCCESS','FAILED') NOT NULL DEFAULT 'SUCCESS',
-    mode         ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
-
-    reference    VARCHAR(100)        NULL,
-    notes        TEXT                NULL,          -- 👈 anotações adicionais
-    currency     VARCHAR(10)         NOT NULL DEFAULT 'AOA',
-
-    supplier_id   INT                 NOT NULL,
-    user_id       INT                 NOT NULL,
-    category_id   INT                 NULL,
-
-    created_at   TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    -- Índices úteis
-    KEY idx_expenses_date (`date`),
-    KEY idx_expenses_supplier (supplier_id),
-    KEY idx_expenses_user (user_id),
-    KEY idx_expenses_mode (mode),
-    KEY idx_expenses_status (status),
-
-    CONSTRAINT fk_expenses_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
-    CONSTRAINT fk_expenses_user FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_expenses_category FOREIGN KEY (category_id) REFERENCES expense_categories(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Table structure for table `orders`
---
-
+-- ============================================================================
+-- 11) ORDERS
+-- ============================================================================
 DROP TABLE IF EXISTS `orders`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
   `status` TINYINT(1) NOT NULL DEFAULT '1',
   `datecreate` varchar(255) NOT NULL,
-  `duedate` varchar(255) NOT NULL,
+  `duedate` varchar(255) NOT NULL DEFAULT '0',
   `year` int NOT NULL,
   `number` int NOT NULL,
   `prefix` varchar(11) NOT NULL,
@@ -396,73 +547,10 @@ CREATE TABLE `orders` (
   `note` text,
   `key` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `orders`
---
-
---
--- Table structure for table `products`
---
-
-DROP TABLE IF EXISTS `products`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `products` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `type` enum('product','service') NOT NULL DEFAULT 'product',
-  `code` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `price` decimal(15,2) NOT NULL DEFAULT '0.00',
-  `purchase_price` float NOT NULL DEFAULT '0',
-  `tax_id` int NOT NULL DEFAULT '0',
-  `reason_tax_id` int NOT NULL DEFAULT '0',
-  `group_id` int NOT NULL DEFAULT '0',
-  `supplier_id` int NOT NULL,
-  `barcode` varchar(255) NOT NULL,
-  `status` TINYINT(1) NOT NULL DEFAULT '0',
-  `stock_total` int NOT NULL DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `deleted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `warehause` int DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `products`
---
-
-LOCK TABLES `products` WRITE;
-/*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,'product','5rerer','Docker min',10000.00,9000,1,41,1,2,'112346456456','1',60,'2024-07-21 13:56:02','2024-07-21 13:56:02','2024-07-21 13:56:02',NULL),
-(2,'service','444545','teste',0.00,400,1,1,1,2,'123456789','0',18,'2024-07-21 14:08:44','2024-07-21 14:08:44','2024-07-21 14:08:44',NULL),
-(3,'product','4567','Jogo de copo',5000.00,450,1,1,1,2,'45678678875','0',80,'2024-07-21 14:32:41','2024-07-21 14:32:41','2024-07-21 14:32:41',NULL),
-(4,'product','yt6776t','teste5',77.00,66,1,1,1,2,'4444447777','1',4990,'2024-07-21 14:39:15','2024-07-21 14:39:15','2024-07-21 14:39:15',NULL),
-(7,'product','7878','teste4',40.00,30,1,1,1,2,'455445458787','1',789,'2024-07-22 20:19:06','2024-07-22 20:19:06','2024-07-22 20:19:06',NULL),
-(8,'product','454545434','Embalagem de agua 5/4',55.00,50,1,1,1,2,'656656656','1',40,'2024-07-22 20:19:41','2024-07-22 20:19:41','2024-07-22 20:19:41',NULL),
-(10,'product','776777876','Descriacao do produto',25000.00,0,1,1,1,2,'9889688787','0',0,'2024-07-30 22:19:38','2024-07-30 22:19:38','2024-07-30 22:19:38',NULL),
-(12,'product','7868668587','Queijo 500 kg',5500.00,5000,3,2,1,4,'78877777689','0',30,'2024-08-05 20:50:25','2024-08-05 20:50:25','2024-08-05 20:50:25',NULL),
-(13,'product','43434343','Copos vidros',2000.00,1700,1,1,1,2,'4545454545','1',50,'2024-08-05 20:53:26','2024-08-05 20:53:26','2024-08-05 20:53:26',NULL),
-(14,'product','54564565','Produto de teste 18',150.00,0,1,1,1,2,'546547657457','0',0,'2024-08-06 21:06:12','2024-08-06 21:06:12','2024-08-06 21:06:12',NULL),
-(15,'product','435456','Producto teste 18',44444.90,4000,1,41,1,2,'7767766776','1',550,'2024-08-13 18:40:51','2024-08-13 18:40:51','2024-08-13 18:40:51',NULL),
-(16,'product','667664','Abacate',500.00,300,2,8,1,2,'7777777777','0',0,'2024-08-18 03:35:47','2024-08-18 03:35:47','2024-08-18 03:35:47',NULL),
-(17,'product','4656664','Saco Platico 50 kilos',10.00,9,3,1,1,2,'655555566','0',4000,'2024-08-18 03:41:02','2024-08-18 03:41:02','2024-08-18 03:41:02',NULL),
-(18,'product','6554434','Mause HP sem fio',5000.00,4500,1,41,1,2,'999999999','1',50,'2024-08-18 03:44:32','2024-08-18 03:44:32','2024-08-18 03:44:32',NULL),
-(19,'product','6657657','Copos de vidro',2500.00,2000,3,41,2,1,'456457657','1',50,'2024-08-30 18:01:21','2024-08-30 18:01:21','2024-08-30 18:01:21',NULL);
-/*!40000 ALTER TABLE `products` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `products_order`
---
-
+-- Produtos do pedido
 DROP TABLE IF EXISTS `products_order`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `products_order` (
   `id` int NOT NULL AUTO_INCREMENT,
   `order_id` int NOT NULL,
@@ -483,480 +571,19 @@ CREATE TABLE `products_order` (
   `reason_standard` varchar(255) DEFAULT NULL,
   `reason` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `products_order`
---
-
---
--- Table structure for table `reason_taxes`
---
-
-DROP TABLE IF EXISTS `reason_taxes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `reason_taxes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(255) DEFAULT NULL,
-  `reason` text,
-  `standard` varchar(255) DEFAULT NULL,
-  `description` text,
-  `isdefault` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `reason_taxes`
---
-
-LOCK TABLES `reason_taxes` WRITE;
-/*!40000 ALTER TABLE `reason_taxes` DISABLE KEYS */;
-
-INSERT INTO `reason_taxes` 
-(`id`, `code`, `reason`, `standard`, `description`, `isdefault`)
-VALUES
-  (1,'M00','Regime transitório','','',0),
-  (2,'M02','Transmissão de bens e serviços não sujeita','','',0),
-  (3,'M04','IVA – Regime de não sujeição','','',0),
-
-  (4,'M10','Isento nos termos da alínea b) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'A transmissão dos bens alimentares, conforme anexo I do presente código',0),
-
-  (5,'M11','Isento nos termos da alínea b) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'As transmissões de medicamentos destinados exclusivamente a fins terapêuticos e profiláticos',0),
-
-  (6,'M12','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'As transmissões de cadeiras de rodas e veículos semelhantes, acionados manualmente ou por motor, para portadores de deficiência; máquinas de escrever com caracteres braille; impressoras para braille; artefactos destinados a invisuais ou para corrigir a audição',0),
-
-  (7,'M13','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'A transmissão de livros, incluindo em formato digital',0),
-
-  (8,'M14','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'A locação de bens imóveis destinados a fins habitacionais, com exceção das prestações de serviços de alojamento no âmbito da atividade hoteleira',0),
-
-  (9,'M15','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-      'Artigo 12.º do CIVA',
-      'As operações sujeitas ao imposto de SISA, ainda que dele isentas',0),
-
-  (10,'M16','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'A exploração e a prática de jogos de fortuna ou azar, bem como operações relacionadas, sujeitas a Imposto Especial sobre Jogos',0),
-
-  (11,'M17','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'O transporte coletivo de passageiros',0),
-
-  (12,'M18','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'As operações de intermediação financeira, incluindo locação financeira (exceto quando há taxa específica predeterminada)',0),
-
-  (13,'M19','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'Seguro de saúde, seguros e resseguros do ramo vida',0),
-
-  (14,'M20','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'As transmissões de produtos petrolíferos conforme anexo II do CIVA',0),
-
-  (15,'M21','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'Serviços de ensino prestados por estabelecimentos integrados no sistema de educação reconhecido',0),
-
-  (16,'M22','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'Serviços médico-sanitários prestados por hospitais, clínicas, dispensários e similares',0),
-
-  (17,'M23','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'Transporte de doentes ou feridos em ambulâncias ou veículos apropriados',0),
-
-  (18,'M24','Isento nos termos da alínea c) do nº 1 do artigo 12.º do CIVA',
-       'Artigo 12.º do CIVA',
-       'Equipamentos médicos para atividade de estabelecimentos de saúde',0),
-
-  (19,'M30','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Bens expedidos ou transportados com destino ao estrangeiro pelo vendedor ou terceiro por conta deste',0),
-
-  (20,'M31','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Abastecimentos postos a bordo de embarcações em alto mar que assegurem transporte remunerado de passageiros ou atividade comercial',0),
-
-  (21,'M32','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Abastecimentos postos a bordo de aeronaves de tráfego internacional',0),
-
-  (22,'M33','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Abastecimentos postos a bordo de embarcações de salvamento, assistência marítima, pesca costeira ou de guerra, com destino ao estrangeiro',0),
-
-  (23,'M34','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Transmissões, transformações, reparações, manutenção, frete e aluguer de embarcações/aeronaves do tráfego internacional',0),
-
-  (24,'M35','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Transmissões de bens no âmbito de relações diplomáticas e consulares com isenção por acordos internacionais',0),
-
-  (25,'M36','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Transmissões de bens destinados a organismos internacionais reconhecidos por Angola',0),
-
-  (26,'M37','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Transmissões de bens em tratados e acordos internacionais da República de Angola',0),
-
-  (27,'M38','Isento nos termos da alínea h) do artigo 15.º do CIVA',
-       'Artigo 15.º do CIVA',
-       'Transporte de pessoas provenientes ou com destino ao estrangeiro',0),
-
-  (28,'M80','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Importações definitivas de bens cuja transmissão seja isenta de imposto',0),
-
-  (29,'M81','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Importação de ouro, moedas ou notas de banco efetuadas pelo Banco Nacional de Angola',0),
-
-  (30,'M82','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Importação de bens destinados a ofertas para atenuar calamidades naturais, autorizadas pelo Executivo',0),
-
-  (31,'M83','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Importação de mercadorias ou equipamentos destinados exclusivamente a operações petrolíferas ou mineiras',0),
-
-  (32,'M84','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Importação de moeda estrangeira por instituições financeiras bancárias',0),
-
-  (33,'M85','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Transmissões de bens no âmbito de tratados internacionais celebrados por Angola',0),
-
-  (34,'M86','Isento nos termos da alínea b) do nº 2 do artigo 14.º do CIVA',
-       'Artigo 14.º do CIVA',
-       'Transmissões de bens no âmbito de relações diplomáticas e consulares com isenção prevista em tratados',0),
-
-  (35,'M90','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA',
-       'Artigo 16.º do CIVA',
-       'Importações de bens em regimes aduaneiros especiais (zona franca, armazéns aduaneiros, lojas francas)',0),
-
-  (36,'M91','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA',
-       'Artigo 16.º do CIVA',
-       'Transmissões de bens ou serviços associados a zonas francas ou depósitos aduaneiros',0),
-
-  (37,'M92','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA',
-       'Artigo 16.º do CIVA',
-       'Transmissões de bens e serviços em regimes de trânsito, drawback ou importação temporária',0),
-
-  (38,'M93','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA',
-       'Artigo 16.º do CIVA',
-       'Transmissões de bens abrangidos por regimes especiais de importação/exportação',0),
-
-  (39,'M94','Isento nos termos da alínea a) do nº 1 do artigo 16.º do CIVA',
-       'Artigo 16.º do CIVA',
-       'Reimportação de bens no mesmo estado em que foram exportados, com isenção de direitos',0),
-
-  (40,'Nenhum','Nenhum','Nenhum','Nenhum',0);
-
- /*!40000 ALTER TABLE `reason_taxes` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
---
--- Table structure for table `shift`
---
-
-DROP TABLE IF EXISTS `shift`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `shift` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `hash` varchar(255) NOT NULL DEFAULT '0',
-  `code` varchar(255) NOT NULL DEFAULT '0',
-  `granted_amount` double NOT NULL,
-  `incurred_amount` double NOT NULL DEFAULT '0',
-  `closing_amount` double NOT NULL DEFAULT '0',
-  `status` enum('open','close') NOT NULL DEFAULT 'open',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `dateClose` varchar(45) DEFAULT NULL,
-  `dateOpen` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `shift`
---
-
-
---
--- Table structure for table `suppliers`
---
-
-DROP TABLE IF EXISTS `suppliers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `suppliers` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `company` varchar(191) NOT NULL,
-  `nif` varchar(15) NOT NULL DEFAULT 'XXXXXXXXXX',
-  `phone` varchar(30) NOT NULL,
-  `email` varchar(255) NOT NULL DEFAULT 'desconhecido',
-  `country` int NOT NULL DEFAULT '0',
-  `city` varchar(100) NOT NULL DEFAULT 'desconhecido',
-  `zip_code` varchar(15) NOT NULL,
-  `state` varchar(50) NOT NULL DEFAULT 'desconhecido',
-  `address` varchar(191) NOT NULL DEFAULT 'desconhecido',
-  `status` TINYINT(1) NOT NULL DEFAULT '1',
-  `group_id` int NOT NULL DEFAULT '0',
-  `isdefault` TINYINT(1) NOT NULL DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `suppliers`
---
-
-LOCK TABLES `suppliers` WRITE;
-/*!40000 ALTER TABLE `suppliers` DISABLE KEYS */;
-INSERT INTO `suppliers` VALUES 
-(1,'EN Entrega LDA','XXXXXXXXXXX','XXXXXXXXXXX','XXXXXXXXXXX',1,'desconhecido','ao1','desconhecido','desconhecido',0,0,0,'2024-07-20 20:31:35',NULL,NULL);
-/*!40000 ALTER TABLE `suppliers` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `taxes`
---
-
-DROP TABLE IF EXISTS `taxes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `taxes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `percentage` decimal(15,2) NOT NULL,
-  `code` varchar(255) DEFAULT NULL,
-  `amount` decimal(10,0) DEFAULT NULL,
-  `isdefault` tinyint NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `taxes`
---
-
-LOCK TABLES `taxes` WRITE;
-/*!40000 ALTER TABLE `taxes` DISABLE KEYS */;
-INSERT INTO `taxes` VALUES 
-(1,'IVA',7.00,'IVA',0,0),
-(2,'IVA 14',14.00,'IVA',0,0),
-(3,'ISENTO',0.00,'ISE',0,0);
-/*!40000 ALTER TABLE `taxes` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `users`
---
-
-DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `profile` enum('admin','seller','manager') NOT NULL DEFAULT 'seller',
-  `code` varchar(255) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `nif` varchar(255) NOT NULL,
-  `name` varchar(50) NOT NULL,
-  `birthdate` varchar(100) NOT NULL,
-  `phone` varchar(30) NOT NULL,
-  `password` varchar(250) NOT NULL DEFAULT '1234',
-  `status` TINYINT(1) NOT NULL DEFAULT '0',
-  `country` varchar(250) DEFAULT 'Angola',
-  `city` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `deleted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
--- LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
--- INSERT INTO `users` VALUES (1,'admin','123456789','admin@admin.com','','Administrador','','','12345678',1,1,'','0','2024-07-20 19:33:47','2024-07-20 19:33:47','2024-07-20 19:33:47');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
--- UNLOCK TABLES;
-
---
--- Table structure for table `warehouse`
---
-
-DROP TABLE IF EXISTS `warehouse`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `warehouse` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `warehouse`
---
-
-LOCK TABLES `warehouse` WRITE;
-/*!40000 ALTER TABLE `warehouse` DISABLE KEYS */;
-INSERT INTO `warehouse` VALUES (1,'Armazem 1','Desconhecido');
-/*!40000 ALTER TABLE `warehouse` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- =========================
--- TABELA: purchases (Purchase)
--- =========================
-/*
-CREATE TABLE IF NOT EXISTS `purchases` (
-  `id`              INT AUTO_INCREMENT PRIMARY KEY,
-  `description`     VARCHAR(255)                NOT NULL,
-  `product_id`      INT                         NOT NULL,
-  `total`           DECIMAL(15,2)               NOT NULL DEFAULT 0.00,
-  `price_sale`      DECIMAL(15,2)               NOT NULL DEFAULT 0.00,
-  `price_purchase`  DECIMAL(15,2)               NOT NULL DEFAULT 0.00,
-  `qty`             INT                         NOT NULL DEFAULT 0,
-  `status`          VARCHAR(20)                 NOT NULL DEFAULT 'pending',      -- ex.: pending/approved/cancelled
-  `status_payment`  VARCHAR(20)                 NOT NULL DEFAULT 'unpaid',       -- ex.: unpaid/paid/partial
-  `date`            DATETIME                    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_id`         INT                         NOT NULL,
-  `supplier_id`     INT                         NOT NULL,
-  `stock_total`     INT                         NOT NULL DEFAULT 0,
-  `created_at`      TIMESTAMP                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`      TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-
-  CONSTRAINT `fk_purchases_product`
-    FOREIGN KEY (`product_id`)  REFERENCES `products`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_purchases_user`
-    FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_purchases_supplier`
-    FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
-
-  CHECK (`qty` >= 0),
-  CHECK (`stock_total` >= 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-*/;
-
-CREATE TABLE purchases (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    supplier_id INT NOT NULL,                    -- fornecedor (NIF deve estar registado)
-    invoice_number VARCHAR(50) NOT NULL,         -- nº da fatura ou documento de compra
-    invoice_type ENUM('FT','FR','NC','ND') DEFAULT 'FT', -- tipo de documento (fatura, recibo, nota crédito, etc.)
-    descricao VARCHAR(255) NULL,
-    total DECIMAL(15,2) NOT NULL,                -- valor total da compra
-    iva_total DECIMAL(15,2) DEFAULT 0.00,        -- imposto (IVA) discriminado
-    total_pago DECIMAL(15,2) DEFAULT 0.00,
-    saldo_em_aberto DECIMAL(15,2) DEFAULT 0.00,
-    data_compra DATE NOT NULL,                   -- data da compra (igual à fatura do fornecedor)
-    data_vencimento DATE NOT NULL,               -- prazo de pagamento
-    status ENUM('aberto','parcial','pago','atrasado') DEFAULT 'aberto',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-CREATE TABLE purchase_payments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    purchase_id INT NOT NULL,                    -- ligação à compra
-    valor_pago DECIMAL(15,2) NOT NULL,           -- valor pago
-    data_pagamento DATE NOT NULL,                -- data do pagamento efetivo
-    metodo ENUM('dinheiro','transferencia','cartao','cheque','outro') DEFAULT 'dinheiro',
-    referencia VARCHAR(100) NULL,                -- nº comprovativo / referência bancária
-    observacao TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_purchase_payment FOREIGN KEY (purchase_id) REFERENCES purchases(id)
-);
-CREATE TABLE purchase_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    purchase_id INT NOT NULL,                    -- ligação à compra
-    product_id INT NOT NULL,                     -- ligação ao produto registado
-    quantidade INT NOT NULL,
-    preco_custo DECIMAL(15,2) NOT NULL,          -- preço unitário de compra
-    iva DECIMAL(15,2) DEFAULT 0.00,              -- IVA aplicado ao produto
-    subtotal DECIMAL(15,2) NOT NULL,             -- quantidade * preco_custo
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_purchase_item_purchase FOREIGN KEY (purchase_id) REFERENCES purchases(id),
-    CONSTRAINT fk_purchase_item_product FOREIGN KEY (product_id) REFERENCES products(id)
-);
-
--- =====================
--- TABELA: stocks (Stock)
--- =====================
-CREATE TABLE IF NOT EXISTS `stocks` (
-  `id`           INT AUTO_INCREMENT PRIMARY KEY,
-  `type`         VARCHAR(20)                 NOT NULL,           -- ex.: IN/OUT/ADJUST (mantido como VARCHAR para flexibilidade)
-  `description`  VARCHAR(255)                         DEFAULT NULL,
-  `qty`          INT                         NOT NULL DEFAULT 0,
-  `purchase_id`  INT                                  DEFAULT NULL,
-  `user_id`      INT                         NOT NULL,
-  `created_at`   TIMESTAMP                   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at`   TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-
-  CONSTRAINT `fk_stocks_purchase`
-    FOREIGN KEY (`purchase_id`) REFERENCES `purchases`(`id`)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-
-  CONSTRAINT `fk_stocks_user`
-    FOREIGN KEY (`user_id`)     REFERENCES `users`(`id`)
-    ON DELETE RESTRICT ON UPDATE CASCADE,
-
-  CHECK (`qty` >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-CREATE TABLE IF NOT EXISTS `payment_modes` (
+-- ============================================================================
+-- 12) PAYMENT MODES
+-- ============================================================================
+DROP TABLE IF EXISTS `payment_modes`;
+CREATE TABLE `payment_modes` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NOT NULL,               -- nome do modo (ex.: Dinheiro, Cartão)
-  `description` VARCHAR(255) DEFAULT NULL,    -- descrição adicional
-  `code` VARCHAR(50) NOT NULL,                -- código interno (ex.: CASH, CARD, TRANSF)
-  `status` TINYINT(1) NOT NULL DEFAULT '1',-- 1=ativo, 0=inativo
-  `isDefault` TINYINT(1) NOT NULL DEFAULT 0,  -- 1=modo padrão, 0=normal
+  `name` VARCHAR(100) NOT NULL,
+  `description` VARCHAR(255) DEFAULT NULL,
+  `code` VARCHAR(50) NOT NULL,
+  `status` TINYINT(1) NOT NULL DEFAULT '1',
+  `isDefault` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -977,59 +604,192 @@ INSERT INTO `payment_modes` (`name`,`description`,`code`,`status`,`isDefault`) V
 ('Crédito Documentário','Pagamento via crédito documentário','CI','1',0),
 ('Outros','Outros meios de pagamento','OU','1',0);
 
-CREATE TABLE IF NOT EXISTS payments (
-  id             INT AUTO_INCREMENT PRIMARY KEY,
-  description    VARCHAR(255)           NOT NULL DEFAULT '',
-  total          DECIMAL(15,2)          NOT NULL DEFAULT 0.00,
-  prefix         VARCHAR(11)            NOT NULL,
-  number         INT                    NOT NULL,
+-- ============================================================================
+-- 13) PAYMENTS
+-- ============================================================================
+DROP TABLE IF EXISTS `payments`;
+CREATE TABLE `payments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `description` VARCHAR(255) NOT NULL DEFAULT '',
+  `total` DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  `prefix` VARCHAR(11) NOT NULL,
+  `number` INT NOT NULL,
+  `date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dateFinish` DATETIME NULL,
+  `status` ENUM('SUCCESS','FAILED') NOT NULL DEFAULT 'SUCCESS',
+  `mode` ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
+  `reference` VARCHAR(100) NULL,
+  `currency` VARCHAR(10) NOT NULL DEFAULT 'AOA',
+  `clientId` INT NOT NULL,
+  `userId` INT NOT NULL,
+  `order_id` INT NOT NULL,
+  `order_type` ENUM('ORDER','INVOICE','CREDIT_NOTE') NOT NULL DEFAULT 'ORDER',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_payments_date` (`date`),
+  KEY `idx_payments_order` (`order_id`, `order_type`),
+  KEY `idx_payments_prefix_number` (`prefix`, `number`),
+  KEY `idx_payments_client` (`clientId`),
+  KEY `idx_payments_user` (`userId`),
+  KEY `idx_payments_mode` (`mode`),
+  KEY `idx_payments_status` (`status`),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  `date`         DATETIME               NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  dateFinish     DATETIME               NULL,
+-- ============================================================================
+-- 14) PURCHASES (e itens/pagamentos)
+-- ============================================================================
+DROP TABLE IF EXISTS `purchase_payments`;
+DROP TABLE IF EXISTS `purchase_items`;
+DROP TABLE IF EXISTS `purchases`;
 
-  -- enums alinhados ao teu código Java
-  status         ENUM('SUCCESS','FAILED')     NOT NULL DEFAULT 'SUCCESS',
-  mode           ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
+CREATE TABLE `purchases` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `supplier_id` INT NOT NULL,
+  `invoice_number` VARCHAR(50) NOT NULL,
+  `invoice_type` ENUM('FT','FR','NC','ND') DEFAULT 'FT',
+  `descricao` VARCHAR(255) NULL,
+  `total` DECIMAL(15,2) NOT NULL,
+  `iva_total` DECIMAL(15,2) DEFAULT 0.00,
+  `total_pago` DECIMAL(15,2) DEFAULT 0.00,
+  `saldo_em_aberto` DECIMAL(15,2) DEFAULT 0.00,
+  `data_compra` DATE NOT NULL,
+  `data_vencimento` DATE NOT NULL,
+  `status` ENUM('aberto','parcial','pago','atrasado') DEFAULT 'aberto',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_purchases_supplier` (`supplier_id`),
+  CONSTRAINT `fk_purchases_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  reference      VARCHAR(100)           NULL,
-  currency       VARCHAR(10)            NOT NULL DEFAULT 'AOA',
+CREATE TABLE `purchase_items` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `purchase_id` INT NOT NULL,
+  `product_id` INT NOT NULL,
+  `quantidade` INT NOT NULL,
+  `preco_custo` DECIMAL(15,2) NOT NULL,
+  `iva` DECIMAL(15,2) DEFAULT 0.00,
+  `subtotal` DECIMAL(15,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_pi_purchase` (`purchase_id`),
+  KEY `idx_pi_product` (`product_id`),
+  CONSTRAINT `fk_pi_purchase` FOREIGN KEY (`purchase_id`) REFERENCES `purchases`(`id`),
+  CONSTRAINT `fk_pi_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  clientId       INT                    NOT NULL,
-  userId         INT                    NOT NULL,
-  order_id       INT                    NOT NULL,
-  order_type     ENUM('ORDER','INVOICE','CREDIT_NOTE') NOT NULL DEFAULT 'ORDER',
+CREATE TABLE `purchase_payments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `purchase_id` INT NOT NULL,
+  `valor_pago` DECIMAL(15,2) NOT NULL,
+  `data_pagamento` DATE NOT NULL,
+  `metodo` ENUM('dinheiro','transferencia','cartao','cheque','outro') DEFAULT 'dinheiro',
+  `referencia` VARCHAR(100) NULL,
+  `observacao` TEXT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_pp_purchase` (`purchase_id`),
+  CONSTRAINT `fk_pp_purchase` FOREIGN KEY (`purchase_id`) REFERENCES `purchases`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  created_at     TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at     TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+-- ============================================================================
+-- 15) SHIFT
+-- ============================================================================
+DROP TABLE IF EXISTS `shift`;
+CREATE TABLE `shift` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `hash` varchar(255) NOT NULL DEFAULT '0',
+  `code` varchar(255) NOT NULL DEFAULT '0',
+  `granted_amount` double NOT NULL,
+  `incurred_amount` double NOT NULL DEFAULT '0',
+  `closing_amount` double NOT NULL DEFAULT '0',
+  `status` enum('open','close') NOT NULL DEFAULT 'open',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `dateClose` varchar(45) DEFAULT NULL,
+  `dateOpen` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  -- índices úteis
-  KEY idx_payments_date (`date`),
-  KEY idx_payments_order (order_id, order_type),
-  KEY idx_payments_prefix_number (prefix, number),
-  KEY idx_payments_client (clientId),
-  KEY idx_payments_user (userId),
-  KEY idx_payments_mode (mode),
-  KEY idx_payments_status (status)
-);
+-- ============================================================================
+-- 16) STOCK MOVEMENTS (referencia products/warehouses)
+-- ============================================================================
+DROP TABLE IF EXISTS `stock_movements`;
+CREATE TABLE `stock_movements` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `product_id` INT NOT NULL,
+  `warehouse_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `quantity` INT NOT NULL,
+  `type` ENUM('ENTRADA','SAIDA','AJUSTE','TRANSFERENCIA') NOT NULL,
+  `origin` ENUM('COMPRA','VENDA','DEVOLUCAO','MANUAL','AJUSTE','TRANSFERENCIA') NOT NULL,
+  `reference_id` INT NULL,
+  `notes` VARCHAR(255) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_sm_product` (`product_id`),
+  KEY `idx_sm_warehouse` (`warehouse_id`),
+  CONSTRAINT `fk_sm_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`),
+  CONSTRAINT `fk_sm_warehouse` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `box` (
+-- ============================================================================
+-- 17) EXPENSES (depois de users, suppliers, expense_categories)
+-- ============================================================================
+DROP TABLE IF EXISTS `expenses`;
+CREATE TABLE `expenses` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `description` VARCHAR(255) NOT NULL DEFAULT '',
+  `total` DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  `prefix` VARCHAR(11) NOT NULL,
+  `number` INT NOT NULL,
+  `date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `dateFinish` DATETIME NULL,
+  `status` ENUM('SUCCESS','FAILED') NOT NULL DEFAULT 'SUCCESS',
+  `mode` ENUM('NUMERARIO','MULTICAIXA','TRANSFERENCIA','OUTROS') NOT NULL,
+  `reference` VARCHAR(100) NULL,
+  `notes` TEXT NULL,
+  `currency` VARCHAR(10) NOT NULL DEFAULT 'AOA',
+  `supplier_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `category_id` INT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_expenses_date` (`date`),
+  KEY `idx_expenses_supplier` (`supplier_id`),
+  KEY `idx_expenses_user` (`user_id`),
+  KEY `idx_expenses_mode` (`mode`),
+  KEY `idx_expenses_status` (`status`),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_expenses_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
+  CONSTRAINT `fk_expenses_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  CONSTRAINT `fk_expenses_category` FOREIGN KEY (`category_id`) REFERENCES `expense_categories`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================================
+-- 18) BOX
+-- ============================================================================
+DROP TABLE IF EXISTS `box`;
+CREATE TABLE `box` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
-  `status` TINYINT(1) NOT NULL DEFAULT '1',          -- opcional (ativo/inativo)
+  `status` TINYINT(1) NOT NULL DEFAULT '1',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_box_name` (`name`)                      -- remova se quiser permitir nomes repetidos
+  UNIQUE KEY `uq_box_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ===========================
--- INSTALAÇÃO INICIAL (options)
--- ===========================
-
--- START TRANSACTION;
+-- ============================================================================
+-- 19) OPTIONS
+-- ============================================================================
 DROP TABLE IF EXISTS `options`;
--- 1) Cria a tabela se não existir (ajusta o charset/collation se quiseres)
-CREATE TABLE IF NOT EXISTS `options` (
+CREATE TABLE `options` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `value` VARCHAR(255) NOT NULL,
@@ -1037,18 +797,10 @@ CREATE TABLE IF NOT EXISTS `options` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Recria o índice único de forma idempotente (compatível com MariaDB)
+DROP INDEX IF EXISTS `uq_options_name` ON `options`;
+CREATE UNIQUE INDEX `uq_options_name` ON `options` (`name`);
 
--- (Opcional mas RECOMENDADO) Garante unicidade por 'name' para poderes fazer UPSERT
--- MySQL 8.0.13+: CREATE UNIQUE INDEX IF NOT EXISTS
--- MariaDB/versões antigas: remove IF NOT EXISTS se não for suportado
-CREATE UNIQUE INDEX IF NOT EXISTS `uq_options_name` ON `options` (`name`);
-
--- 2) Semente inicial
-LOCK TABLES `options` WRITE;
-/*!40000 ALTER TABLE `options` DISABLE KEYS */;
-
--- Seed inicial (sem IDs explícitos; usa UNIQUE(name) para UPSERT)
 INSERT INTO `options` (`name`,`value`,`status`) VALUES
   ('softwareStatus','true','1'),
   ('softwareNumberValidate','','1'),
@@ -1061,8 +813,6 @@ INSERT INTO `options` (`name`,`value`,`status`) VALUES
   ('companyPhone','','1'),
   ('companyName','SupePDV','1'),
   ('companyNif','123456789','1'),
-
-  -- País (guarda ISO2 e nomes legíveis)
   ('country','Angola','1'),
   ('country_short_name','Angola','1'),
   ('country_long_name','República de Angola','1'),
@@ -1071,33 +821,30 @@ INSERT INTO `options` (`name`,`value`,`status`) VALUES
   ('country_numcode','024','1'),
   ('country_calling_code','+244','1'),
   ('country_cctld','.ao','1'),
-
-  -- Controlo de instalação/versão
   ('install_complete','true','1'),
   ('schema_version','1.0.0','1'),
   ('last_migration_ts', NOW(), '1')
 ON DUPLICATE KEY UPDATE
   `value`=VALUES(`value`),
   `status`=VALUES(`status`);
- /*!40000 ALTER TABLE `options` ENABLE KEYS */;
-UNLOCK TABLES;
 
+-- ============================================================================
+-- 20) SAFT EXPORTS
+-- ============================================================================
+DROP TABLE IF EXISTS `saft_exports`;
+CREATE TABLE `saft_exports` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `period_start` DATE NOT NULL,
+  `period_end` DATE NOT NULL,
+  `file_path` VARCHAR(512) NOT NULL,
+  `status` VARCHAR(32) NOT NULL,
+  `notes` TEXT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `exported_by` INT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
-CREATE TABLE IF NOT EXISTS saft_exports (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  period_start DATE NOT NULL,
-  period_end   DATE NOT NULL,
-  file_path    VARCHAR(512) NOT NULL,
-  status       VARCHAR(32) NOT NULL,     -- SUCCESS ou FAILED
-  notes        TEXT NULL,
-  created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-ALTER TABLE saft_exports
-  ADD COLUMN exported_by INT NULL;
-
-COMMIT;
-
-
--- Dump completed on 2024-09-19  6:31:42
+-- ============================================================================
+-- FIM
+-- ============================================================================
+SET FOREIGN_KEY_CHECKS = 1;

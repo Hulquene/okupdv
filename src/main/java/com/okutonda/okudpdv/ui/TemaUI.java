@@ -51,6 +51,14 @@ public class TemaUI {
         b.setForeground(Color.WHITE);
     }
 
+    public static void aplicarBotaoAtivo(JButton b) {
+        baseButton(b);
+        b.setBackground(TemaCores.PRIMARY);   // cor de ativo
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setBorderPainted(false);
+    }
+
     /**
      * Variante “fantasma” (apenas contorno)
      */
