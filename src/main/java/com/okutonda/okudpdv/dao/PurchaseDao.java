@@ -99,18 +99,18 @@ public class PurchaseDao {
                         pstItem.addBatch();
 
                         // 3) Criar movimento de stock
-                        StockMovement movimento = new StockMovement();
-                        movimento.setProduct(item.getProduct());
-                        movimento.setQuantity(item.getQuantidade()); // positivo = entrada
-                        movimento.setType("ENTRADA");
-                        movimento.setOrigin("COMPRA");
-                        movimento.setReason("COMPRA Nº " + purchase.getInvoiceNumber());
-                        movimento.setUser(purchase.getUser());
-                        movimento.setWarehouse(new Warehouse());
-                        movimento.getWarehouse().setId(1); // Armazém por defeito
-
-                        StockMovementDao stockDao = new StockMovementDao(conn); // usa mesma transação
-                        stockDao.add(movimento);
+//                        StockMovement movimento = new StockMovement();
+//                        movimento.setProduct(item.getProduct());
+//                        movimento.setQuantity(item.getQuantidade()); // positivo = entrada
+//                        movimento.setType("ENTRADA");
+//                        movimento.setOrigin("COMPRA");
+//                        movimento.setReason("COMPRA Nº " + purchase.getInvoiceNumber());
+//                        movimento.setUser(purchase.getUser());
+//                        movimento.setWarehouse(new Warehouse());
+//                        movimento.getWarehouse().setId(1); // Armazém por defeito
+//
+//                        StockMovementDao stockDao = new StockMovementDao(conn); // usa mesma transação
+//                        stockDao.add(movimento);
                     }
                     pstItem.executeBatch();
                 }

@@ -7,6 +7,7 @@ package com.okutonda.okudpdv.views.purchases;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.models.Purchase;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -197,8 +198,12 @@ public class JPanelPurchases extends javax.swing.JPanel {
     private void jButtonAddPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddPurchaseActionPerformed
         // TODO add your handling code here:
         JDialogFormPurchase jdForm = new JDialogFormPurchase(null, true);
-//                jdForm.setNoteCredit(id);
         jdForm.setVisible(true);
+        Boolean resp = jdForm.getResponse();
+        if (resp == true) {
+            JOptionPane.showMessageDialog(null, "Compra feita com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            listPurchases();
+        }
     }//GEN-LAST:event_jButtonAddPurchaseActionPerformed
 
 

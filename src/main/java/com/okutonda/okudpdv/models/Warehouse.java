@@ -79,14 +79,6 @@ public class Warehouse {
 
     @Override
     public String toString() {
-        return "Warehouse{"
-                + "id=" + id
-                + ", name='" + name + '\''
-                + ", location='" + location + '\''
-                + ", description='" + description + '\''
-                + ", status=" + status
-                + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt
-                + '}';
+        return name + "-" + location;
     }
 }
