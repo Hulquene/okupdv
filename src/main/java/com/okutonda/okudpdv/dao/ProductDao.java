@@ -37,32 +37,41 @@ public class ProductDao {
      * Inserir produto
      */
     public boolean add(Product obj) {
-        try {
-            String sql = """
-                INSERT INTO products (type, code, description, price, tax_id, reason_tax_id, group_id,
-                                      supplier_id, status, barcode, purchase_price, min_stock)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
-            """;
+         System.out.println("Tax ID: " + obj.getId());
+        System.out.println("Tax ID: " + obj.getTaxe().getId());
+        System.out.println("ReasonTax ID: " + obj.getReasonTaxe().getId());
+        System.out.println("Group ID: " + obj.getGroup().getId());
+        System.out.println(obj.print());
+        
+        String sql = """
+        INSERT INTO products (
+            type, code, description, price, tax_id, reason_tax_id, group_id,
+            status, barcode, purchase_price, min_stock
+        )
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    """;
 
-            PreparedStatement stmt = this.conn.prepareStatement(sql);
-            stmt.setString(1, obj.getType());
-            stmt.setString(2, obj.getCode());
-            stmt.setString(3, obj.getDescription());
-            stmt.setBigDecimal(4, obj.getPrice());
-            stmt.setInt(5, obj.getTaxe().getId());
-            stmt.setInt(6, obj.getReasonTaxe().getId());
-            stmt.setInt(7, obj.getGroup().getId());
-            stmt.setInt(8, obj.getSupplier().getId());
-            stmt.setInt(9, obj.getStatus());
-            stmt.setString(10, obj.getBarcode());
-            stmt.setBigDecimal(11, obj.getPurchasePrice());
-            stmt.setInt(12, obj.getMinStock());
-            stmt.execute();
+        try {
+            pst = this.conn.prepareStatement(sql);
+            // Preenche os parâmetros na mesma ordem das colunas
+            pst.setString(1, obj.getType());                  // type
+            pst.setString(2, obj.getCode());                  // code
+            pst.setString(3, obj.getDescription());           // description
+            pst.setBigDecimal(4, obj.getPrice());             // price
+            pst.setInt(5, obj.getTaxe().getId());             // tax_id
+            pst.setInt(6, obj.getReasonTaxe().getId());       // reason_tax_id
+            pst.setInt(7, obj.getGroup().getId());            // group_id
+            pst.setInt(8, obj.getStatus());                   // status
+            pst.setString(9, obj.getBarcode());               // barcode
+            pst.setBigDecimal(10, obj.getPurchasePrice());    // purchase_price
+            pst.setInt(11, obj.getMinStock());                // min_stock
+
+            pst.execute();
             return true;
         } catch (SQLException e) {
-            System.out.println("Erro ao salvar Produto: " + e.getMessage());
+            System.err.println("Erro ao salvar Produto: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
     /**
@@ -73,7 +82,7 @@ public class ProductDao {
             String sql = """
                 UPDATE products
                    SET type=?, code=?, description=?, price=?, tax_id=?, reason_tax_id=?,
-                       group_id=?, supplier_id=?, status=?, barcode=?, purchase_price=?, min_stock=?
+                       group_id=?, status=?, barcode=?, purchase_price=?, min_stock=?
                  WHERE id=?
             """;
 
@@ -85,12 +94,11 @@ public class ProductDao {
             pst.setInt(5, obj.getTaxe().getId());
             pst.setInt(6, obj.getReasonTaxe().getId());
             pst.setInt(7, obj.getGroup().getId());
-            pst.setInt(8, obj.getSupplier().getId());
-            pst.setInt(9, obj.getStatus());
-            pst.setString(10, obj.getBarcode());
-            pst.setBigDecimal(11, obj.getPurchasePrice());
-            pst.setInt(12, obj.getMinStock());
-            pst.setInt(13, id);
+            pst.setInt(8, obj.getStatus());
+            pst.setString(9, obj.getBarcode());
+            pst.setBigDecimal(10, obj.getPurchasePrice());
+            pst.setInt(11, obj.getMinStock());
+            pst.setInt(12, id);
 
             pst.execute();
             return true;
@@ -165,18 +173,25 @@ public class ProductDao {
     public List<Product> listForInventory() {
         List<Product> list = new ArrayList<>();
         String sql = """
-            SELECT p.id, p.code, p.barcode, p.description,
-                   IFNULL(SUM(sm.quantity), 0) AS current_stock,
-                   p.min_stock, p.price, p.purchase_price,
-                   p.type, s.id AS supplier_id, s.company AS supplier_name
-              FROM products p
-         LEFT JOIN stock_movements sm ON sm.product_id = p.id
-         LEFT JOIN suppliers s ON s.id = p.supplier_id
-             WHERE p.status = 1
-          GROUP BY p.id
-        """;
+        SELECT 
+            p.id,
+            p.code,
+            p.barcode,
+            p.description,
+            IFNULL(SUM(sm.quantity), 0) AS current_stock,
+            p.min_stock,
+            p.price,
+            p.purchase_price,
+            p.type
+        FROM products p
+        LEFT JOIN stock_movements sm ON sm.product_id = p.id
+        WHERE p.status = 1
+        GROUP BY p.id, p.code, p.barcode, p.description,
+                 p.min_stock, p.price, p.purchase_price, p.type
+    """;
 
         try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+
             while (rs.next()) {
                 Product prod = new Product();
                 prod.setId(rs.getInt("id"));
@@ -187,13 +202,7 @@ public class ProductDao {
                 prod.setMinStock(rs.getInt("min_stock"));
                 prod.setPrice(rs.getBigDecimal("price"));
                 prod.setPurchasePrice(rs.getBigDecimal("purchase_price"));
-                prod.setType(rs.getString("type"));
-
-                Supplier supp = new Supplier();
-                supp.setId(rs.getInt("supplier_id"));
-                supp.setName(rs.getString("supplier_name"));
-                prod.setSupplier(supp);
-
+                prod.setType(rs.getString("type")); // agora funciona, porque está no SELECT
                 list.add(prod);
             }
         } catch (SQLException e) {
@@ -318,7 +327,6 @@ public class ProductDao {
             obj.setGroup(gDao.searchFromId(rs.getInt("group_id")));
             obj.setTaxe(tDao.searchFromId(rs.getInt("tax_id")));
             obj.setReasonTaxe(rDao.searchFromId(rs.getInt("reason_tax_id")));
-            obj.setSupplier(sDao.getFromId(rs.getInt("supplier_id")));
             obj.setStatus(rs.getInt("status"));
             obj.setMinStock(rs.getInt("min_stock"));
 

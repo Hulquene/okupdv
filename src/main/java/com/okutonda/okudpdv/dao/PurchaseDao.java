@@ -197,6 +197,10 @@ public class PurchaseDao {
                 user.setName(rs.getString("user_name"));
                 obj.setUser(user);
 
+                // Itens da compra (usa PurchaseItemDao)
+                PurchaseItemDao itemDao = new PurchaseItemDao();
+                obj.setItems(itemDao.listByPurchase(obj.getId()));
+
                 list.add(obj);
             }
         } catch (SQLException e) {

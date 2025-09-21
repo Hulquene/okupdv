@@ -25,7 +25,7 @@ import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.views.finance.JPanelFinance;
 import com.okutonda.okudpdv.views.inventory.JPanelInventory;
 import com.okutonda.okudpdv.views.purchases.JPanelPurchases;
-import com.okutonda.okudpdv.views.stock.JPanelStock;
+import com.okutonda.okudpdv.views.stock.JPanelStockMovement;
 import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
 import java.text.SimpleDateFormat;

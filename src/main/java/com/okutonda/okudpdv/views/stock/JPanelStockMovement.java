@@ -5,16 +5,15 @@
 package com.okutonda.okudpdv.views.stock;
 
 import com.okutonda.okudpdv.controllers.ProductController;
-import com.okutonda.okudpdv.controllers.StockController;
 import com.okutonda.okudpdv.controllers.StockMovementController;
 import com.okutonda.okudpdv.controllers.SupplierController;
+import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.models.Product;
-import com.okutonda.okudpdv.models.Stock;
 import com.okutonda.okudpdv.models.StockMovement;
 import com.okutonda.okudpdv.models.Supplier;
-import com.okutonda.okudpdv.views.form.JDialogFormPurchase;
+import com.okutonda.okudpdv.models.Warehouse;
 import com.okutonda.okudpdv.views.products.JDialogFormStock;
-import com.okutonda.okudpdv.views.products.JDialogPurchaseProduct;
+import com.okutonda.okudpdv.views.products.JDialogWarehouse;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -23,17 +22,17 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author kenny
  */
-public final class JPanelStock extends javax.swing.JPanel {
+public final class JPanelStockMovement extends javax.swing.JPanel {
 
     ProductController productController = new ProductController();
-    StockController stockController = new StockController();
     SupplierController supplierController = new SupplierController();
     StockMovementController stockMovementController = new StockMovementController();
+    WarehouseController warehouseController = new WarehouseController();
 
     /**
      * Creates new form JPanelStock
      */
-    public JPanelStock() {
+    public JPanelStockMovement() {
         initComponents();
 
         jTableStocks.setModel(new DefaultTableModel(
@@ -45,7 +44,7 @@ public final class JPanelStock extends javax.swing.JPanel {
 
         loadListStockProducts(null);
         listStock();
-//        loadCombobox();
+        loadCombobox();
     }
 
 //    public void screanListProducts() {
@@ -57,6 +56,12 @@ public final class JPanelStock extends javax.swing.JPanel {
         jComboBoxSunpplierHistoryInput.removeAllItems();
         for (Supplier item : listS) {
             jComboBoxSunpplierHistoryInput.addItem(item);
+        }
+
+        List<Warehouse> listW = warehouseController.get("");
+        jComboBoxWarehauseTela1.removeAllItems();
+        for (Warehouse item : listW) {
+            jComboBoxWarehauseTela1.addItem(item);
         }
 
 //        List<ReasonTaxes> listR = reasonTaxeController.get("");
@@ -115,7 +120,7 @@ public final class JPanelStock extends javax.swing.JPanel {
                 c.getMinStock(), // ✅ stock mínimo
                 c.getPrice(),
                 c.getPurchasePrice(),
-                (c.getSupplier() != null ? c.getSupplier().getName() : ""),
+                (c.getGroup() != null ? c.getGroup().getName() : ""),
                 c.getType()
             });
         }
@@ -195,16 +200,14 @@ public final class JPanelStock extends javax.swing.JPanel {
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTableStockProducts = new javax.swing.JTable();
-        jButtonFormUpdateStock = new javax.swing.JButton();
         jTextFieldTxtSearchInventory = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jButtonPurchaseProduct = new javax.swing.JButton();
         jButtonFormPurchase = new javax.swing.JButton();
         jComboBoxSunpplierHistoryInput = new javax.swing.JComboBox();
         jLabel5 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jCheckBox2 = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
+        jComboBoxWarehauseTela1 = new javax.swing.JComboBox();
+        jLabel7 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jTextField2 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -216,6 +219,7 @@ public final class JPanelStock extends javax.swing.JPanel {
         jScrollPane4 = new javax.swing.JScrollPane();
         jTableStocks = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
@@ -246,20 +250,20 @@ public final class JPanelStock extends javax.swing.JPanel {
 
         jTableStockProducts.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "ID", "Codigo", "Codigo de Barra", "Produto", "Estoque", "Preço", "Preço Compra", "Fornecedor", "Armazem"
+                "ID", "Codigo", "Codigo de Barra", "Produto", "Stock atual", "Stock mínimo", "Preço venda", "Preço Compra", "Armazem", "Tipo"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -272,14 +276,6 @@ public final class JPanelStock extends javax.swing.JPanel {
         });
         jScrollPane2.setViewportView(jTableStockProducts);
 
-        jButtonFormUpdateStock.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonFormUpdateStock.setText("Add Estoque");
-        jButtonFormUpdateStock.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFormUpdateStockActionPerformed(evt);
-            }
-        });
-
         jTextFieldTxtSearchInventory.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 jTextFieldTxtSearchInventoryKeyReleased(evt);
@@ -289,17 +285,8 @@ public final class JPanelStock extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel3.setText("Objetivo: Permitir visualizar o stock disponível de cada produto, em cada armazém (se existir mais de um).");
 
-        jButtonPurchaseProduct.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonPurchaseProduct.setText("Comprar");
-        jButtonPurchaseProduct.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonPurchaseProductActionPerformed(evt);
-            }
-        });
-
         jButtonFormPurchase.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonFormPurchase.setText("Entrada de Mercadoria");
-        jButtonFormPurchase.setEnabled(false);
         jButtonFormPurchase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonFormPurchaseActionPerformed(evt);
@@ -309,46 +296,40 @@ public final class JPanelStock extends javax.swing.JPanel {
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel5.setText("Selecione o Fornecedor");
 
-        jCheckBox1.setText("Tudo");
-
-        jCheckBox2.setText("Filtrar");
-
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel4.setText("Pesquisar");
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel7.setText("Selecione o Armazem");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jCheckBox2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jCheckBox1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 126, Short.MAX_VALUE)
+                        .addGap(6, 6, 6)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(187, 187, 187)
+                        .addComponent(jLabel5)
+                        .addGap(57, 57, 57)
+                        .addComponent(jLabel7)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldTxtSearchInventory, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 619, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addGap(281, 281, 281))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jTextFieldTxtSearchInventory, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jComboBoxSunpplierHistoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 18, Short.MAX_VALUE)
-                                .addComponent(jButtonFormUpdateStock)
+                                .addGap(5, 5, 5)
+                                .addComponent(jComboBoxWarehauseTela1, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonPurchaseProduct)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonFormPurchase))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 619, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addGap(57, 57, 57))
+                                .addComponent(jButtonFormPurchase))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 965, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addContainerGap(63, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -356,27 +337,22 @@ public final class JPanelStock extends javax.swing.JPanel {
                 .addGap(10, 10, 10)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jCheckBox2)
-                        .addComponent(jCheckBox1))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jComboBoxSunpplierHistoryInput, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextFieldTxtSearchInventory, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBoxSunpplierHistoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonFormUpdateStock)
-                            .addComponent(jButtonPurchaseProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonFormPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addComponent(jButtonFormPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBoxWarehauseTela1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jTextFieldTxtSearchInventory))
+                .addGap(7, 7, 7)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(206, Short.MAX_VALUE))
+                .addGap(266, 266, 266))
         );
-
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonFormUpdateStock, jButtonPurchaseProduct, jComboBoxSunpplierHistoryInput, jTextFieldTxtSearchInventory});
 
         jTabbedPane3.addTab("Consulta de stock atual por produto", jPanel2);
 
@@ -443,56 +419,63 @@ public final class JPanelStock extends javax.swing.JPanel {
             }
         });
 
+        jButton2.setText("Armzem");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jFormattedTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jFormattedTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 954, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addGap(93, 93, 93)
                                 .addComponent(jLabel16)
                                 .addGap(43, 43, 43)
-                                .addComponent(jLabel17))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jFormattedTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jFormattedTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 954, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel17)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap(74, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton4)
-                            .addComponent(jFormattedTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jFormattedTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(14, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel16)
-                            .addComponent(jLabel17))
-                        .addGap(51, 51, 51)))
+                .addContainerGap(41, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel16)
+                    .addComponent(jLabel17))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(208, 208, 208))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton4)
+                    .addComponent(jFormattedTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFormattedTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 465, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(266, 266, 266))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButton4, jFormattedTextField7, jFormattedTextField8, jTextField2});
@@ -557,7 +540,6 @@ public final class JPanelStock extends javax.swing.JPanel {
 
         jButtonArmazem1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonArmazem1.setText("Armazem");
-        jButtonArmazem1.setEnabled(false);
         jButtonArmazem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonArmazem1ActionPerformed(evt);
@@ -618,7 +600,7 @@ public final class JPanelStock extends javax.swing.JPanel {
                                     .addComponent(jButton3))))))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(211, Short.MAX_VALUE))
+                .addContainerGap(270, Short.MAX_VALUE))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButton3, jFormattedTextField5, jFormattedTextField6, jTextField1});
@@ -730,7 +712,7 @@ public final class JPanelStock extends javax.swing.JPanel {
                                 .addComponent(jButton5)))))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 482, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(208, Short.MAX_VALUE))
+                .addContainerGap(267, Short.MAX_VALUE))
         );
 
         jTabbedPane3.addTab("Alertas de stock mínimo", jPanel4);
@@ -749,33 +731,6 @@ public final class JPanelStock extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonFormUpdateStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormUpdateStockActionPerformed
-        // TODO add your handling code here:
-        new JDialogFormStock(null, true).setVisible(true);
-        //        formStock.setVisible(true);
-
-        //        int value = 0;
-        //        try {
-        //            value = (int) jTableInventory.getValueAt(jTableInventory.getSelectedRow(), 0);
-        //            System.out.println("jTableUsers id:" + value);
-        //        } catch (Exception e) {
-        //            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        //        } finally {
-        ////            System.out.println("jTableUsers id:" + value);
-        //            if (value > 0) {
-        //                JDialogFormStock formStock = new JDialogFormStock(null, true);
-        //                formStock.setProduct(value);
-        //                formStock.setVisible(true);
-        //                Boolean resp = formStock.getResponse();
-        //                if (resp == true) {
-        //                    JOptionPane.showMessageDialog(null, "Estoque do Product atualizado com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-//        listProducts();
-//        listProductsInventory();
-        //                }
-        //            }
-        //        }
-    }//GEN-LAST:event_jButtonFormUpdateStockActionPerformed
-
     private void jTextFieldTxtSearchInventoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldTxtSearchInventoryKeyReleased
         // TODO add your handling code here:
         String txt = jTextFieldTxtSearchInventory.getText();
@@ -788,41 +743,26 @@ public final class JPanelStock extends javax.swing.JPanel {
 
     private void jButtonFormPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPurchaseActionPerformed
         // TODO add your handling code here:
-        JDialogFormPurchase formPurchase = new JDialogFormPurchase(null, true);
+        JDialogFormEntryProdPurchase formPurchase = new JDialogFormEntryProdPurchase(null, true);
         formPurchase.setVisible(true);
-    }//GEN-LAST:event_jButtonFormPurchaseActionPerformed
-
-    private void jButtonPurchaseProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPurchaseProductActionPerformed
-        // TODO add your handling code here:
-        int value = 0;
-        try {
-            value = (int) jTableStockProducts.getValueAt(jTableStockProducts.getSelectedRow(), 0);
-            //            System.out.println("jTableUsers id:" + value);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            //            System.out.println("jTableUsers id:" + value);
-            if (value > 0) {
-                JDialogPurchaseProduct jPurchaseProd = new JDialogPurchaseProduct(null, true);
-                jPurchaseProd.setProduct(value);
-                jPurchaseProd.setVisible(true);
-                Boolean resp = jPurchaseProd.getResponse();
-                if (resp == true) {
-                    JOptionPane.showMessageDialog(null, "Compra efetuada com com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    loadListStockProducts(null);
-                    //                    listProducts();
-                }
-            }
+        Boolean resp = formPurchase.getResponse();
+        if (resp == true) {
+            JOptionPane.showMessageDialog(null, "Compra efetuada com com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            loadListStockProducts(null);
+            //                    listProducts();
         }
-    }//GEN-LAST:event_jButtonPurchaseProductActionPerformed
+    }//GEN-LAST:event_jButtonFormPurchaseActionPerformed
 
     private void jButtonArmazem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonArmazem1ActionPerformed
         // TODO add your handling code here:
+        new JDialogWarehouse(null, true).setVisible(true);
+//        JDialogFormEntryProdPurchase formPurchase = new JDialogFormEntryProdPurchase(null, true);
+//        formPurchase.setVisible(true);
     }//GEN-LAST:event_jButtonArmazem1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-         JDialogEntryProduct jdForm = new JDialogEntryProduct(null, true);
+        JDialogFormStockMovement jdForm = new JDialogFormStockMovement(null, true);
         jdForm.setVisible(true);
         Boolean resp = jdForm.getResponse();
         if (resp == true) {
@@ -831,19 +771,22 @@ public final class JPanelStock extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        new JDialogWarehouse(null, true).setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButtonArmazem1;
     private javax.swing.JButton jButtonFormPurchase;
-    private javax.swing.JButton jButtonFormUpdateStock;
-    private javax.swing.JButton jButtonPurchaseProduct;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox2;
     private javax.swing.JComboBox jComboBoxSunpplierHistoryInput;
+    private javax.swing.JComboBox jComboBoxWarehauseTela1;
     private javax.swing.JFormattedTextField jFormattedTextField10;
     private javax.swing.JFormattedTextField jFormattedTextField5;
     private javax.swing.JFormattedTextField jFormattedTextField6;
@@ -862,6 +805,7 @@ public final class JPanelStock extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

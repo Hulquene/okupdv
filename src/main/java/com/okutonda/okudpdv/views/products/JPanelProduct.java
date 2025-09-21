@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.Supplier;
-import com.okutonda.okudpdv.views.form.JDialogFormPurchase;
+import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -20,7 +20,6 @@ import javax.swing.table.DefaultTableModel;
 public final class JPanelProduct extends javax.swing.JPanel {
 
     ProductController productController = new ProductController();
-    SupplierController supplierController = new SupplierController();
 
     /**
      * Creates new form JPanelProduct
@@ -28,8 +27,8 @@ public final class JPanelProduct extends javax.swing.JPanel {
     public JPanelProduct() {
         initComponents();
         listProducts();
-        listProductsInventory();
-        loadCombobox();
+//        listProductsInventory();
+//        loadCombobox();
     }
 
     public void screanListProducts() {
@@ -37,19 +36,19 @@ public final class JPanelProduct extends javax.swing.JPanel {
         listProducts();
     }
 
-    public void loadCombobox() {
-        List<Supplier> listS = supplierController.get("");
-        jComboBoxSunpplierHistoryInput.removeAllItems();
-        for (Supplier item : listS) {
-            jComboBoxSunpplierHistoryInput.addItem(item);
-        }
-
-//        List<ReasonTaxes> listR = reasonTaxeController.get("");
-//        jComboBoxReasonTaxeId.removeAllItems();
-//        for (ReasonTaxes item : listR) {
-//            jComboBoxReasonTaxeId.addItem(item);
+//    public void loadCombobox() {
+//        List<Supplier> listS = supplierController.get("");
+//        jComboBoxSunpplierHistoryInput.removeAllItems();
+//        for (Supplier item : listS) {
+//            jComboBoxSunpplierHistoryInput.addItem(item);
 //        }
-    }
+//
+////        List<ReasonTaxes> listR = reasonTaxeController.get("");
+////        jComboBoxReasonTaxeId.removeAllItems();
+////        for (ReasonTaxes item : listR) {
+////            jComboBoxReasonTaxeId.addItem(item);
+////        }
+//    }
 
     public void loadListProducts(List<Product> list) {
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
@@ -86,38 +85,38 @@ public final class JPanelProduct extends javax.swing.JPanel {
         loadListProducts(list);
     }
 
-    public void loadListProductsInventory(List<Product> list) {
-        if (list == null) {
-            list = productController.getForPDV(null);
-        }
-        DefaultTableModel data = (DefaultTableModel) jTableInventory.getModel();
-        data.setNumRows(0);
-        for (Product c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getCode(),
-                c.getBarcode(),
-                c.getDescription(),
-                c.getCurrentStock(),
-                c.getPrice(),
-                c.getPurchasePrice(),
-                c.getSupplier().getName(),
-                c.getType()
-            });
-        }
-    }
+//    public void loadListProductsInventory(List<Product> list) {
+//        if (list == null) {
+//            list = productController.getForPDV(null);
+//        }
+//        DefaultTableModel data = (DefaultTableModel) jTableInventory.getModel();
+//        data.setNumRows(0);
+//        for (Product c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getCode(),
+//                c.getBarcode(),
+//                c.getDescription(),
+//                c.getCurrentStock(),
+//                c.getPrice(),
+//                c.getPurchasePrice(),
+//                c.getSupplier().getName(),
+//                c.getType()
+//            });
+//        }
+//    }
 
-    public void listProductsInventory() {
-//        List<Product> list = productController.getProducts();
-        List<Product> list = productController.get(null);
-        loadListProductsInventory(list);
-    }
+//    public void listProductsInventory() {
+////        List<Product> list = productController.getProducts();
+//        List<Product> list = productController.get(null);
+//        loadListProductsInventory(list);
+//    }
 
-    public void filterListProductInventory(String txt) {
-//        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.get(txt);
-        loadListProductsInventory(list);
-    }
+//    public void filterListProductInventory(String txt) {
+////        ProductDao cDao = new ProductDao();
+//        List<Product> list = productController.get(txt);
+//        loadListProductsInventory(list);
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -140,23 +139,8 @@ public final class JPanelProduct extends javax.swing.JPanel {
         jButtonViewSeleted = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jButtonGroups = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTableInventory = new javax.swing.JTable();
-        jButtonAddProduct = new javax.swing.JButton();
-        jButtonArmazem = new javax.swing.JButton();
-        jButtonFormUpdateStock = new javax.swing.JButton();
-        jTextFieldTxtSearchInventory = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jButtonPurchaseProduct = new javax.swing.JButton();
-        jButtonFormPurchase = new javax.swing.JButton();
-        jComboBoxSunpplierHistoryInput = new javax.swing.JComboBox();
-        jLabel5 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
 
         jTabbedPaneProduct.setBackground(new java.awt.Color(255, 255, 255));
-        jTabbedPaneProduct.setEnabled(false);
         jTabbedPaneProduct.setPreferredSize(new java.awt.Dimension(925, 620));
 
         jPanelSearchSupplier.setBackground(new java.awt.Color(204, 204, 255));
@@ -312,173 +296,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
         jTabbedPaneProduct.addTab("Produtos e Serviços", jPanelSearchSupplier);
 
-        jPanel2.setBackground(new java.awt.Color(204, 204, 255));
-
-        jTableInventory.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null, null, null}
-            },
-            new String [] {
-                "ID", "Codigo", "Codigo de Barra", "Produto", "Estoque", "Preço", "Preço Compra", "Fornecedor", "Armazem"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Object.class, java.lang.Object.class, java.lang.String.class, java.lang.Integer.class, java.lang.Double.class, java.lang.Double.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane2.setViewportView(jTableInventory);
-
-        jButtonAddProduct.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonAddProduct.setText("Novo Produto");
-        jButtonAddProduct.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAddProductActionPerformed(evt);
-            }
-        });
-
-        jButtonArmazem.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonArmazem.setText("Armazem");
-        jButtonArmazem.setEnabled(false);
-        jButtonArmazem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonArmazemActionPerformed(evt);
-            }
-        });
-
-        jButtonFormUpdateStock.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonFormUpdateStock.setText("Add Estoque");
-        jButtonFormUpdateStock.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFormUpdateStockActionPerformed(evt);
-            }
-        });
-
-        jTextFieldTxtSearchInventory.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                jTextFieldTxtSearchInventoryKeyReleased(evt);
-            }
-        });
-
-        jLabel3.setText("Pesquisar");
-
-        jButtonPurchaseProduct.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonPurchaseProduct.setText("Comprar");
-        jButtonPurchaseProduct.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonPurchaseProductActionPerformed(evt);
-            }
-        });
-
-        jButtonFormPurchase.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonFormPurchase.setText("Entrada de Mercadoria");
-        jButtonFormPurchase.setEnabled(false);
-        jButtonFormPurchase.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFormPurchaseActionPerformed(evt);
-            }
-        });
-
-        jLabel5.setText("Selecione o Fornecedor");
-
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton1.setText("Entrada");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton2.setText("Saida");
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(jLabel3))
-                            .addComponent(jTextFieldTxtSearchInventory, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jComboBoxSunpplierHistoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(9, 9, 9)
-                                .addComponent(jLabel5)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 111, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jButtonAddProduct)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonFormUpdateStock)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonPurchaseProduct))
-                            .addComponent(jButtonArmazem))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2))
-                            .addComponent(jButtonFormPurchase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane2))
-                .addContainerGap())
-        );
-
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jButton2, jButtonFormUpdateStock, jButtonPurchaseProduct});
-
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(19, 19, 19)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel5)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButtonFormPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButtonArmazem, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldTxtSearchInventory, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPurchaseProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxSunpplierHistoryInput, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2)
-                    .addComponent(jButton1)
-                    .addComponent(jButtonFormUpdateStock))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 475, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButton1, jButton2, jButtonAddProduct, jButtonArmazem, jButtonFormPurchase, jButtonFormUpdateStock, jButtonPurchaseProduct, jComboBoxSunpplierHistoryInput, jTextFieldTxtSearchInventory});
-
-        jTabbedPaneProduct.addTab("Mercadoria", jPanel2);
-
         jScrollPane4.setViewportView(jTabbedPaneProduct);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -492,67 +309,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
             .addComponent(jScrollPane4)
         );
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jTextFieldTxtSearchInventoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldTxtSearchInventoryKeyReleased
-        // TODO add your handling code here:
-        String txt = jTextFieldTxtSearchInventory.getText();
-        if (!txt.isEmpty()) {
-            filterListProductInventory(txt);
-        } else {
-            listProductsInventory();
-        }
-    }//GEN-LAST:event_jTextFieldTxtSearchInventoryKeyReleased
-
-    private void jButtonFormUpdateStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormUpdateStockActionPerformed
-        // TODO add your handling code here:
-        new JDialogFormStock(null, true).setVisible(true);
-        //        formStock.setVisible(true);
-
-        //        int value = 0;
-        //        try {
-        //            value = (int) jTableInventory.getValueAt(jTableInventory.getSelectedRow(), 0);
-        //            System.out.println("jTableUsers id:" + value);
-        //        } catch (Exception e) {
-        //            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        //        } finally {
-        ////            System.out.println("jTableUsers id:" + value);
-        //            if (value > 0) {
-        //                JDialogFormStock formStock = new JDialogFormStock(null, true);
-        //                formStock.setProduct(value);
-        //                formStock.setVisible(true);
-        //                Boolean resp = formStock.getResponse();
-        //                if (resp == true) {
-        //                    JOptionPane.showMessageDialog(null, "Estoque do Product atualizado com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-        listProducts();
-        listProductsInventory();
-        //                }
-        //            }
-        //        }
-    }//GEN-LAST:event_jButtonFormUpdateStockActionPerformed
-
-    private void jButtonArmazemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonArmazemActionPerformed
-        // TODO add your handling code here:
-        new JDialogWarehouse(null, true).setVisible(true);
-    }//GEN-LAST:event_jButtonArmazemActionPerformed
-
-    private void jButtonAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductActionPerformed
-        // TODO add your handling code here:
-        JDialogFormProduct formProd = new JDialogFormProduct(null, true);
-        //        formProd.setFormProduct(prod);
-        formProd.setVisible(true);
-        Boolean resp = formProd.getResponse();
-        if (resp == true) {
-            JOptionPane.showMessageDialog(null, "Products salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            listProducts();
-            listProductsInventory();
-        }
-    }//GEN-LAST:event_jButtonAddProductActionPerformed
-
-    private void jButtonFormPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPurchaseActionPerformed
-        // TODO add your handling code here:
-        JDialogFormPurchase formPurchase = new JDialogFormPurchase(null, true);
-        formPurchase.setVisible(true);
-    }//GEN-LAST:event_jButtonFormPurchaseActionPerformed
 
     private void jButtonViewSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSeletedActionPerformed
         // TODO add your handling code here:
@@ -680,60 +436,19 @@ public final class JPanelProduct extends javax.swing.JPanel {
         jGroup.setVisible(true);
     }//GEN-LAST:event_jButtonGroupsActionPerformed
 
-    private void jButtonPurchaseProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPurchaseProductActionPerformed
-        // TODO add your handling code here:
-        int value = 0;
-        try {
-            value = (int) jTableInventory.getValueAt(jTableInventory.getSelectedRow(), 0);
-//            System.out.println("jTableUsers id:" + value);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            //            System.out.println("jTableUsers id:" + value);
-            if (value > 0) {
-                JDialogPurchaseProduct jPurchaseProd = new JDialogPurchaseProduct(null, true);
-                jPurchaseProd.setProduct(value);
-                jPurchaseProd.setVisible(true);
-                Boolean resp = jPurchaseProd.getResponse();
-                if (resp == true) {
-                    JOptionPane.showMessageDialog(null, "Compra efetuada com com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    listProducts();
-                }
-            }
-        }
-    }//GEN-LAST:event_jButtonPurchaseProductActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButtonAddProduct;
     private javax.swing.JButton jButtonAlterSeleted;
-    private javax.swing.JButton jButtonArmazem;
     private javax.swing.JButton jButtonDeleteSelectedTable;
-    private javax.swing.JButton jButtonFormPurchase;
-    private javax.swing.JButton jButtonFormUpdateStock;
     private javax.swing.JButton jButtonGroups;
     private javax.swing.JButton jButtonOpenFormProduct;
-    private javax.swing.JButton jButtonPurchaseProduct;
     private javax.swing.JButton jButtonViewSeleted;
-    private javax.swing.JComboBox jComboBoxSunpplierHistoryInput;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanelSearchSupplier;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPaneProduct;
-    private javax.swing.JTable jTableInventory;
     private javax.swing.JTable jTableProducts;
     private javax.swing.JTextField jTextFieldFilterNameTable;
-    private javax.swing.JTextField jTextFieldTxtSearchInventory;
     // End of variables declaration//GEN-END:variables
 }

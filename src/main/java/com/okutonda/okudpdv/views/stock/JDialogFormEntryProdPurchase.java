@@ -2,20 +2,35 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package com.okutonda.okudpdv.views.form;
+package com.okutonda.okudpdv.views.stock;
+
+import com.okutonda.okudpdv.controllers.ProductController;
+import com.okutonda.okudpdv.controllers.PurchaseController;
+import com.okutonda.okudpdv.controllers.SupplierController;
+import com.okutonda.okudpdv.utilities.UserSession;
 
 /**
  *
  * @author kenny
  */
-public class JDialogFormPurchase extends javax.swing.JDialog {
+public class JDialogFormEntryProdPurchase extends javax.swing.JDialog {
+
+    ProductController productController = new ProductController();
+    SupplierController supplierController = new SupplierController();
+    PurchaseController purchaseController = new PurchaseController();
+    UserSession session;
+    Boolean response = false;
 
     /**
      * Creates new form JDialogFormUpdateStock
      */
-    public JDialogFormPurchase(java.awt.Frame parent, boolean modal) {
+    public JDialogFormEntryProdPurchase(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+    }
+
+    public Boolean getResponse() {
+        return response;
     }
 
     /**
@@ -228,7 +243,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 322, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -332,21 +347,23 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JDialogFormPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogFormEntryProdPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JDialogFormPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogFormEntryProdPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JDialogFormPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogFormEntryProdPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JDialogFormPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogFormEntryProdPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                JDialogFormPurchase dialog = new JDialogFormPurchase(new javax.swing.JFrame(), true);
+                JDialogFormEntryProdPurchase dialog = new JDialogFormEntryProdPurchase(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

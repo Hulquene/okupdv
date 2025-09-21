@@ -84,7 +84,6 @@ public class ProductController {
 //        and = (and == null || and.isEmpty()) ? "" : and;
 //        return dao.filter(txt, and);
 //    }
-
     /**
      * Adicionar ou editar
      */

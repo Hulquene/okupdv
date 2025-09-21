@@ -449,50 +449,52 @@ INSERT INTO `warehouses` (`id`,`name`,`location`,`description`) VALUES
 -- 9) PRODUCTS (depois de taxes, reason_taxes, groups_product, suppliers)
 -- ============================================================================
 DROP TABLE IF EXISTS `products`;
-CREATE TABLE `products` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `type` enum('product','service') NOT NULL DEFAULT 'product',
-  `code` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `price` decimal(15,2) NOT NULL DEFAULT '0.00',
-  `purchase_price` float NOT NULL DEFAULT '0',
-  `tax_id` int NOT NULL DEFAULT '0',
-  `reason_tax_id` int NOT NULL DEFAULT '0',
-  `group_id` int NOT NULL DEFAULT '0',
-  `supplier_id` int NOT NULL,
-  `barcode` varchar(255) NOT NULL,
-  `status` TINYINT(1) NOT NULL DEFAULT '0',
-  `min_stock` int NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `deleted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_products_group` (`group_id`),
-  KEY `idx_products_supplier` (`supplier_id`),
-  KEY `idx_products_tax` (`tax_id`),
-  KEY `idx_products_reason_tax` (`reason_tax_id`),
-  CONSTRAINT `fk_products_group` FOREIGN KEY (`group_id`) REFERENCES `groups_product`(`id`),
-  CONSTRAINT `fk_products_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`),
-  CONSTRAINT `fk_products_tax` FOREIGN KEY (`tax_id`) REFERENCES `taxes`(`id`),
-  CONSTRAINT `fk_products_reason_tax` FOREIGN KEY (`reason_tax_id`) REFERENCES `reason_taxes`(`id`)
+CREATE TABLE products (
+  id INT NOT NULL AUTO_INCREMENT,
+  type ENUM('product','service') NOT NULL DEFAULT 'product',
+  code VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  price DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  purchase_price DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  tax_id INT NOT NULL,
+  reason_tax_id INT NOT NULL,
+  group_id INT NOT NULL,
+  barcode VARCHAR(255) NOT NULL,
+  status TINYINT(1) NOT NULL DEFAULT 0,
+  min_stock INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY idx_products_group (group_id),
+  KEY idx_products_tax (tax_id),
+  KEY idx_products_reason_tax (reason_tax_id),
+  CONSTRAINT fk_products_group 
+      FOREIGN KEY (group_id) REFERENCES groups_product(id)
+      ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_products_tax 
+      FOREIGN KEY (tax_id) REFERENCES taxes(id)
+      ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_products_reason_tax 
+      FOREIGN KEY (reason_tax_id) REFERENCES reason_taxes(id)
+      ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO `products` VALUES
-(1,'product','5rerer','Docker min',10000.00,9000,1,41,1,2,'112346456456',1,60,'2024-07-21 13:56:02','2024-07-21 13:56:02','2024-07-21 13:56:02'),
-(2,'service','444545','teste',0.00,400,1,1,1,2,'123456789',0,18,'2024-07-21 14:08:44','2024-07-21 14:08:44','2024-07-21 14:08:44'),
-(3,'product','4567','Jogo de copo',5000.00,450,1,1,1,2,'45678678875',0,80,'2024-07-21 14:32:41','2024-07-21 14:32:41','2024-07-21 14:32:41'),
-(4,'product','yt6776t','teste5',77.00,66,1,1,1,2,'4444447777',1,4990,'2024-07-21 14:39:15','2024-07-21 14:39:15','2024-07-21 14:39:15'),
-(7,'product','7878','teste4',40.00,30,1,1,1,2,'455445458787',1,789,'2024-07-22 20:19:06','2024-07-22 20:19:06','2024-07-22 20:19:06'),
-(8,'product','454545434','Embalagem de agua 5/4',55.00,50,1,1,1,2,'656656656',1,40,'2024-07-22 20:19:41','2024-07-22 20:19:41','2024-07-22 20:19:41'),
-(10,'product','776777876','Descriacao do produto',25000.00,0,1,1,1,2,'9889688787',0,0,'2024-07-30 22:19:38','2024-07-30 22:19:38','2024-07-30 22:19:38'),
-(12,'product','7868668587','Queijo 500 kg',5500.00,5000,3,2,1,4,'78877777689',0,30,'2024-08-05 20:50:25','2024-08-05 20:50:25','2024-08-05 20:50:25'),
-(13,'product','43434343','Copos vidros',2000.00,1700,1,1,1,2,'4545454545',1,50,'2024-08-05 20:53:26','2024-08-05 20:53:26','2024-08-05 20:53:26'),
-(14,'product','54564565','Produto de teste 18',150.00,0,1,1,1,2,'546547657457',0,0,'2024-08-06 21:06:12','2024-08-06 21:06:12','2024-08-06 21:06:12'),
-(15,'product','435456','Producto teste 18',44444.90,4000,1,41,1,2,'7767766776',1,550,'2024-08-13 18:40:51','2024-08-13 18:40:51','2024-08-13 18:40:51'),
-(16,'product','667664','Abacate',500.00,300,2,8,1,2,'7777777777',0,0,'2024-08-18 03:35:47','2024-08-18 03:35:47','2024-08-18 03:35:47'),
-(17,'product','4656664','Saco Platico 50 kilos',10.00,9,3,1,1,2,'655555566',0,4000,'2024-08-18 03:41:02','2024-08-18 03:41:02','2024-08-18 03:41:02'),
-(18,'product','6554434','Mause HP sem fio',5000.00,4500,1,41,1,2,'999999999',1,50,'2024-08-18 03:44:32','2024-08-18 03:44:32','2024-08-18 03:44:32'),
-(19,'product','6657657','Copos de vidro',2500.00,2000,3,41,2,1,'456457657',1,50,'2024-08-30 18:01:21','2024-08-30 18:01:21','2024-08-30 18:01:21');
+INSERT INTO `products` (
+  type, code, description, price, purchase_price,
+  tax_id, reason_tax_id, group_id, status, barcode,
+  min_stock, created_at, updated_at, deleted_at
+) VALUES
+('product','P1001','Arroz Branco 5Kg',4500.00,3500.00,1,1,1,1,'789123456001',10,'2025-01-01 10:00:00','2025-01-01 10:00:00',NULL),
+('product','P1002','Feijão Preto 1Kg',1200.00,900.00,1,1,1,1,'789123456002',20,'2025-01-02 11:00:00','2025-01-02 11:00:00',NULL),
+('product','P1003','Óleo de Cozinha 1L',2500.00,2100.00,1,1,2,1,'789123456003',15,'2025-01-03 12:00:00','2025-01-03 12:00:00',NULL),
+('product','P1004','Refrigerante Cola 1.5L',1000.00,700.00,1,1,2,1,'789123456004',30,'2025-01-04 13:00:00','2025-01-04 13:00:00',NULL),
+('product','P1005','Água Mineral 500ml',500.00,300.00,1,1,2,1,'789123456005',50,'2025-01-05 14:00:00','2025-01-05 14:00:00',NULL),
+('product','P1006','Detergente Líquido 1L',1800.00,1500.00,1,1,3,1,'789123456006',10,'2025-01-06 15:00:00','2025-01-06 15:00:00',NULL),
+('product','P1007','Sabão em Barra 5un',700.00,500.00,1,1,3,1,'789123456007',25,'2025-01-07 16:00:00','2025-01-07 16:00:00',NULL),
+('product','P1008','Queijo Mussarela 1Kg',9500.00,8000.00,1,1,1,1,'789123456008',5,'2025-01-08 17:00:00','2025-01-08 17:00:00',NULL),
+('service','S1001','Serviço de Entrega Local',2000.00,0.00,1,1,3,1,'789123456009',0,'2025-01-09 18:00:00','2025-01-09 18:00:00',NULL),
+('service','S1002','Serviço de Montagem',5000.00,0.00,1,1,3,1,'789123456010',0,'2025-01-10 19:00:00','2025-01-10 19:00:00',NULL);
 
 -- ============================================================================
 -- 10) CLIENTS

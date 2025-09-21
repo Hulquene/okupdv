@@ -6,6 +6,8 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.dao.StockMovementDao;
 import com.okutonda.okudpdv.models.StockMovement;
+import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.utilities.UtilDate;
 
 import java.util.List;
 
@@ -16,14 +18,10 @@ import java.util.List;
 public class StockMovementController {
 
     private final StockMovementDao dao;
+    UserSession session = UserSession.getInstance();
 
     public StockMovementController() {
         this.dao = new StockMovementDao();
-    }
-
-    // Registrar movimento
-    public boolean registrar(StockMovement movimento) {
-        return dao.add(movimento);
     }
 
     // Listar movimentos por produto
@@ -40,6 +38,35 @@ public class StockMovementController {
     public List<StockMovement> listarTodos() {
         return dao.listAll();
     }
-    // Registrar movimento
 
+    // Registrar movimento com regra de negócio
+    public boolean registrar(StockMovement movimento) {
+        int qtd = movimento.getQuantity();
+
+        switch (movimento.getType().toUpperCase()) {
+            case "SAIDA":
+                int atual = dao.getStockAtual(movimento.getProduct().getId());
+                if (atual < qtd) {
+                    throw new IllegalArgumentException("Stock insuficiente para o produto!");
+                }
+                movimento.setQuantity(-qtd); // saída negativa
+                break;
+
+            case "TRANSFERENCIA":
+                // saída no armazém origem
+                int stockOrigem = dao.getStockAtual(movimento.getProduct().getId());
+                if (stockOrigem < qtd) {
+                    throw new IllegalArgumentException("Stock insuficiente no armazém origem!");
+                }
+                // aqui podes gravar dois movimentos: saída (origem) + entrada (destino)
+                break;
+
+            case "ENTRADA":
+            case "AJUSTE":
+                // só regista
+                break;
+        }
+
+        return dao.add(movimento);
+    }
 }

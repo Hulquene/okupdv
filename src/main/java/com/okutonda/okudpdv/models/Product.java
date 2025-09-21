@@ -23,7 +23,6 @@ public class Product {
     private ReasonTaxes reasonTaxe;
     private GroupsProduct group;
     private String barcode;
-    private Supplier supplier;
     private int minStock;   // novo: mínimo em vez de stock_total
     private int status;
 
@@ -135,14 +134,6 @@ public class Product {
         this.barcode = barcode;
     }
 
-    public Supplier getSupplier() {
-        return supplier;
-    }
-
-    public void setSupplier(Supplier supplier) {
-        this.supplier = supplier;
-    }
-
     public int getStatus() {
         return status;
     }
@@ -156,17 +147,16 @@ public class Product {
         return code + " - " + description;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Product{"
-//                + "id=" + id
-//                + ", type=" + type
-//                + ", code=" + code
-//                + ", description=" + description
-//                + ", price=" + price
-//                + ", purchasePrice=" + purchasePrice
-//                + ", currentStock=" + currentStock
-//                + ", minStock=" + minStock
-//                + ", status=" + status + '}';
-//    }
+    public String print() {
+        return "Product{"
+                + "id=" + id
+                + ", type=" + type
+                + ", code=" + code
+                + ", description=" + description
+                + ", price=" + price
+                + ", purchasePrice=" + purchasePrice
+                + ", currentStock=" + currentStock
+                + ", minStock=" + minStock
+                + ", status=" + status + '}';
+    }
 }

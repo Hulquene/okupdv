@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.utilities.JpanelLoader;
 import com.okutonda.okudpdv.views.products.JPanelProduct;
 import com.okutonda.okudpdv.views.purchases.JPanelPurchases;
-import com.okutonda.okudpdv.views.stock.JPanelStock;
+import com.okutonda.okudpdv.views.stock.JPanelStockMovement;
 import javax.swing.JOptionPane;
 
 /**
@@ -204,7 +204,7 @@ public class JPanelInventory extends javax.swing.JPanel {
 
     private void jButtonInvStoqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonInvStoqueActionPerformed
         // TODO add your handling code here:
-        JPanelStock pStoque = new JPanelStock();
+        JPanelStockMovement pStoque = new JPanelStockMovement();
         jpload.jPanelLoader(jPanelInventoryContent, pStoque);
         jLabelJpanelSelected.setText("ESTOQUE");
     }//GEN-LAST:event_jButtonInvStoqueActionPerformed

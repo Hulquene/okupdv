@@ -47,7 +47,7 @@ public class PurchaseItemDao {
     public List<PurchaseItem> listByPurchase(int purchaseId) {
         List<PurchaseItem> list = new ArrayList<>();
         String sql = """
-            SELECT i.*, p.name AS product_name
+            SELECT i.*, p.description AS product_name
             FROM purchase_items i
             INNER JOIN products p ON i.product_id = p.id
             WHERE i.purchase_id = ?
