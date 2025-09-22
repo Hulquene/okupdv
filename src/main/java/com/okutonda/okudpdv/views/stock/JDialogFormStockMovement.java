@@ -92,16 +92,14 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
         }
     }
 
-    public void listPurchase() {
-//        List<Purchase> list = purchaseController.get("");
-//        loadListPurchase(list);
-    }
-
-    public void filterListPurchase(String txt) {
-//        List<Purchase> list = purchaseController.filter(txt);
-//        loadListPurchase(list);
-    }
-
+//    public void listPurchase() {
+////        List<Purchase> list = purchaseController.get("");
+////        loadListPurchase(list);
+//    }
+//    public void filterListPurchase(String txt) {
+////        List<Purchase> list = purchaseController.filter(txt);
+////        loadListPurchase(list);
+//    }
     private void carregarTabelaOrigem(String origem) {
         DefaultTableModel model = (DefaultTableModel) jTableListProduct.getModel();
         model.setRowCount(0);
@@ -118,8 +116,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                                 item.getProduct().getId(),
                                 item.getProduct().getDescription(),
                                 item.getPrecoCusto(),
-                                item.getQuantidade(),                                
-                            });
+                                item.getQuantidade(),});
                         }
                     }
                 }
@@ -241,19 +238,52 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
         }
     }
 
+    private void preencherCamposProdutoSelecionado() {
+        int row = jTableListProduct.getSelectedRow();
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto na tabela!", "Atenção", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DefaultTableModel model = (DefaultTableModel) jTableListProduct.getModel();
+
+        // Pega os valores da linha
+        int productId = (int) model.getValueAt(row, 0);        // Coluna ID
+        String descricao = (String) model.getValueAt(row, 1);  // Coluna Descrição
+//        double preco = (double) model.getValueAt(row, 2);      // Coluna Preço
+        int quantidade = (int) model.getValueAt(row, 3);       // Coluna Quantidade
+
+        // Aqui o preço pode vir como BigDecimal
+        Object precoObj = model.getValueAt(row, 2);
+        String precoStr = precoObj != null ? precoObj.toString() : "0.00";
+
+        // Preenche os fields
+        jLabelIDProdSelected.setText(String.valueOf(productId));
+        jTextFieldNameProdSelected.setText(descricao);
+        jTextFieldQtdProdSelected.setText(String.valueOf(quantidade));
+        jTextFieldPriceCustoProd.setText(String.valueOf(precoStr));
+
+        // Se tiver validade / expiração na coluna
+//        Object validade = model.getValueAt(row, 6);
+//        if (validade != null) {
+//            jFormattedTextFieldDateValidateProd.setText(validade.toString());
+//        }
+    }
+
     private void adicionarProdutoNaTabela() {
         try {
             // 1. Ler os campos
+            int productId = Integer.parseInt(jLabelIDProdSelected.getText().trim());
             String nomeProduto = jTextFieldNameProdSelected.getText().trim();
             String qtdStr = jTextFieldQtdProdSelected.getText().trim();
             String precoCusto = jTextFieldPriceCustoProd.getText().trim();
-            String referencia = jTextField1.getText().trim();
-            String notas = jTextAreaNoteOrReason.getText().trim();
+            String referencia = jTextFieldReference.getText().trim();
+//            String notas = jTextAreaNoteOrReason.getText().trim();
 
             int quantidade = Integer.parseInt(qtdStr);
 
             // Para já vamos supor que já tens o ID do produto (podes ter via hidden field ou objeto selecionado)
-            int productId = obterProdutoSelecionadoId(); // 👉 método auxiliar que vais implementar
+//            int productId = obterProdutoSelecionadoId(); // 👉 método auxiliar que vais implementar
 
             // Warehouse (armazém de origem)
             int warehouseId = jComboBoxWarehouse.getSelectedIndex() + 1; // exemplo simples
@@ -281,15 +311,15 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                 warehouseId,
                 origem,
                 tipo,
-                referencia,
-                notas
+                referencia
+//                notas
             });
 
             // 4. Limpar campos após adicionar
             jTextFieldNameProdSelected.setText("");
             jTextFieldQtdProdSelected.setText("1");
             jTextFieldPriceCustoProd.setText("");
-            jTextField1.setText("");
+            jTextFieldReference.setText("");
             jTextAreaNoteOrReason.setText("");
 
         } catch (NumberFormatException e) {
@@ -353,10 +383,11 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jFormattedTextFieldDateValidateProd = new javax.swing.JFormattedTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        jTextFieldReference = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         jButtonRemoveProdList = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jLabelIDProdSelected = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -396,6 +427,11 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
+        jTableListProduct.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableListProductMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTableListProduct);
 
         jButtonSaveMovimento.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -416,13 +452,13 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
 
         jTableProductsFromMovimento.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Title 1", "Title 2", "Title 3", "Title 4", "Title 5", "Title 6", "Title 7"
             }
         ));
         jScrollPane2.setViewportView(jTableProductsFromMovimento);
@@ -472,7 +508,11 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
 
         jLabel2.setText("Preço de custo / unitário");
 
-        jFormattedTextFieldDateValidateProd.setText("jFormattedTextField1");
+        try {
+            jFormattedTextFieldDateValidateProd.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
 
         jLabel3.setText("Data de expiração / validade");
 
@@ -491,6 +531,8 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        jLabelIDProdSelected.setText("ID");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -522,12 +564,14 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane1)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTextFieldNameProdSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                         .addGap(6, 6, 6)
-                                        .addComponent(jLabel6))
-                                    .addComponent(jTextFieldNameProdSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(jLabelIDProdSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel6)))
+                                .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addComponent(jTextFieldQtdProdSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -553,10 +597,11 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                                         .addGap(62, 62, 62))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                                 .addComponent(jComboBoxWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jFormattedTextFieldDateValidateProd, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(jFormattedTextFieldDateValidateProd, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(66, 66, 66))
                                             .addGroup(jPanel1Layout.createSequentialGroup()
                                                 .addGap(6, 6, 6)
                                                 .addComponent(jLabel8)
@@ -564,28 +609,23 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                                                 .addComponent(jLabel3)))
                                         .addGap(9, 9, 9)))
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jTextField1)
+                                    .addComponent(jTextFieldReference, javax.swing.GroupLayout.DEFAULT_SIZE, 195, Short.MAX_VALUE)
                                     .addComponent(jLabel13))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 25, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 21, Short.MAX_VALUE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabelNameUser, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButtonSaveMovimento, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap())
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGap(6, 6, 6)
-                            .addComponent(jLabel12)
-                            .addGap(279, 279, 279)))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(48, 48, 48)
+                            .addComponent(jButtonRemoveProdList))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 438, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 295, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(48, 48, 48)
-                                .addComponent(jButtonRemoveProdList))
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 438, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())))
+                            .addComponent(jLabel12)
+                            .addComponent(jLabelNameUser, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(118, 118, 118)
+                        .addComponent(jButtonSaveMovimento, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -593,9 +633,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jButtonSaveMovimento, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel12))
+                        .addComponent(jButtonSaveMovimento, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -604,7 +642,9 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                             .addComponent(jLabelDate))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel9)))
-                .addGap(9, 9, 9)
+                .addGap(11, 11, 11)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -620,11 +660,12 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
                             .addComponent(jLabel7)
-                            .addComponent(jLabel2)))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabelIDProdSelected)))
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonRemoveProdList, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jTextFieldNameProdSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -638,7 +679,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                             .addComponent(jLabel8))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldReference, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jFormattedTextFieldDateValidateProd, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jComboBoxWarehouse, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -647,9 +688,9 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextFieldSearchProd, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(29, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -663,7 +704,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(1068, 528));
+        setSize(new java.awt.Dimension(1066, 625));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -677,9 +718,9 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
         // TODO add your handling code here:
         String txt = jTextFieldSearchProd.getText();
         if (!txt.isEmpty()) {
-            filterListPurchase(txt);
+//            filterListPurchase(txt);
         } else {
-            listPurchase();
+//            listPurchase();
         }
     }//GEN-LAST:event_jTextFieldSearchProdKeyReleased
 
@@ -707,6 +748,11 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
         String origem = jComboBoxOrigin.getSelectedItem().toString();
         carregarTabelaOrigem(origem);
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTableListProductMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableListProductMouseClicked
+        // TODO add your handling code here:
+        preencherCamposProdutoSelecionado();
+    }//GEN-LAST:event_jTableListProductMouseClicked
 
     /**
      * @param args the command line arguments
@@ -773,6 +819,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelDate;
+    private javax.swing.JLabel jLabelIDProdSelected;
     private javax.swing.JLabel jLabelNameUser;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -781,10 +828,10 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
     private javax.swing.JTable jTableListProduct;
     private javax.swing.JTable jTableProductsFromMovimento;
     private javax.swing.JTextArea jTextAreaNoteOrReason;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextFieldNameProdSelected;
     private javax.swing.JTextField jTextFieldPriceCustoProd;
     private javax.swing.JTextField jTextFieldQtdProdSelected;
+    private javax.swing.JTextField jTextFieldReference;
     private javax.swing.JTextField jTextFieldSearchProd;
     // End of variables declaration//GEN-END:variables
 }
