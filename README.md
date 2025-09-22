@@ -311,21 +311,6 @@ RGB float: new Color(0.392f, 0.710f, 0.965f)
 HSL: 207°, 89%, 68%
 
 
-// Definição centralizada das cores
-public class TemaCores {
-
-    public static final Color PRIMARY = new Color(25, 118, 210);   // Azul
-    public static final Color SECONDARY = new Color(66, 66, 66);   // Cinza escuro
-    public static final Color SUCCESS = new Color(56, 142, 60);    // Verde
-    public static final Color WARNING = new Color(245, 124, 0);    // Laranja
-    public static final Color ERROR = new Color(211, 47, 47);      // Vermelho
-    public static final Color BG_LIGHT = new Color(245, 245, 245); // Cinza claro
-    public static final Color TEXT_DARK = new Color(33, 33, 33);   // Texto principal
-    public static final Color TEXT_GRAY = new Color(97, 97, 97);   // Texto secundário
-    public static final Color HIGHLIGHT = new Color(100, 181, 246);// Realce ativo
-}
-
-
 
 
 
