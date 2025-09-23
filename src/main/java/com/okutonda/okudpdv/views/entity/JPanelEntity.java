@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package com.okutonda.okudpdv.views.clients;
+package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.SupplierController;
@@ -20,7 +20,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author kenny
  */
-public final class JPanelClient extends javax.swing.JPanel {
+public final class JPanelEntity extends javax.swing.JPanel {
 
 //    CountryController countryController = new CountryController();
     ClientController clientController = new ClientController();
@@ -30,7 +30,7 @@ public final class JPanelClient extends javax.swing.JPanel {
     /**
      * Creates new form JPanelClient
      */
-    public JPanelClient() {
+    public JPanelEntity() {
         initComponents();
         applyTheme();
         session = UserSession.getInstance();
@@ -704,12 +704,12 @@ public final class JPanelClient extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonAlterClientSeletedTable;
-    private javax.swing.JButton jButtonAlterSeleted;
+    public javax.swing.JButton jButtonAlterClientSeletedTable;
+    public javax.swing.JButton jButtonAlterSeleted;
     private javax.swing.JButton jButtonCreateNewClient;
     private javax.swing.JButton jButtonCreateViewClient;
-    private javax.swing.JButton jButtonDeleteClientSelectedTable;
-    private javax.swing.JButton jButtonDeleteSelected;
+    public javax.swing.JButton jButtonDeleteClientSelectedTable;
+    public javax.swing.JButton jButtonDeleteSelected;
     private javax.swing.JButton jButtonFilterClientNameTable;
     private javax.swing.JButton jButtonOpenFormSupplier;
     private javax.swing.JButton jButtonViewSupplierSelected;

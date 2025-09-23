@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package com.okutonda.okudpdv.views.products;
+package com.okutonda.okudpdv.views.warehouse;
 
 import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.models.Warehouse;

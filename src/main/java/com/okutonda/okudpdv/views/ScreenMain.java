@@ -9,7 +9,7 @@ import com.okutonda.okudpdv.views.products.JPanelProduct;
 import com.okutonda.okudpdv.views.setting.JDialogSetting;
 import com.okutonda.okudpdv.views.dashboard.JPanelDashboard;
 import com.okutonda.okudpdv.views.pdv.ScreenPdv;
-import com.okutonda.okudpdv.views.clients.JPanelClient;
+import com.okutonda.okudpdv.views.entity.JPanelEntity;
 import com.okutonda.okudpdv.views.sales.JPanelSales;
 import com.okutonda.okudpdv.views.users.JPanelUser;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
@@ -514,7 +514,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarClientActionPerformed
         // TODO add your handling code here:
-        JPanelClient pClient = new JPanelClient();
+        JPanelEntity pClient = new JPanelEntity();
         jpload.jPanelLoader(jPanelContent, pClient);
         jLabelNamePanelOpen.setText("CLIENTES");
 
