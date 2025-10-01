@@ -554,7 +554,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         } finally {
             if (id > 0) {
                 JDialogGenerateNoteCredit jdNoteCredit = new JDialogGenerateNoteCredit(null, true);
-                jdNoteCredit.setNoteCredit(id);
+                jdNoteCredit.setNoteCredit(id,"FR");
                 jdNoteCredit.setVisible(true);
             }
         }
