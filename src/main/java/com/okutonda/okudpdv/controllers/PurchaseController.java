@@ -106,9 +106,9 @@ public class PurchaseController {
 //        this.dao = new PurchaseDao();
 //    }
 //
-//    public Purchase getId(int id) {
-//        return dao.getId(id);
-//    }
+    public Purchase getId(int id) {
+        return dao.getId(id);
+    }
 //
 ////    public Purchase getFromBarCode(String barcode) {
 ////        return dao.searchFromBarCode(barcode);

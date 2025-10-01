@@ -73,7 +73,7 @@ public final class JPanelSales extends javax.swing.JPanel {
     private void initComponents() {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
+        jPanelFR = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTableOrders = new javax.swing.JTable();
         jButtonDeleteOrder = new javax.swing.JButton();
@@ -84,8 +84,22 @@ public final class JPanelSales extends javax.swing.JPanel {
         jButtonFilterOrder = new javax.swing.JButton();
         jFormattedTextFieldDateFinish = new javax.swing.JFormattedTextField();
         jFormattedTextFieldDateStart = new javax.swing.JFormattedTextField();
-        jButtonGenerateNoteCredit = new javax.swing.JButton();
+        jButtonGenerateNoteCreditFR = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jFormattedTextFieldDateStartFT = new javax.swing.JFormattedTextField();
+        jFormattedTextFieldDateFinishFT = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jButtonFilterOrderFT = new javax.swing.JButton();
+        jButtonPrintFT = new javax.swing.JButton();
+        jButtonDeleteOrder1 = new javax.swing.JButton();
+        jButtonGenerateNoteCreditFT = new javax.swing.JButton();
+        jButtonViewOrder2 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        jButtonPrintOrder1 = new javax.swing.JButton();
+        jButtonViewOrder1 = new javax.swing.JButton();
 
         addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
@@ -98,8 +112,9 @@ public final class JPanelSales extends javax.swing.JPanel {
         });
 
         jTabbedPane1.setBackground(new java.awt.Color(255, 255, 255));
+        jTabbedPane1.setEnabled(false);
 
-        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
+        jPanelFR.setBackground(new java.awt.Color(204, 204, 255));
 
         jTableOrders.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -194,88 +209,262 @@ public final class JPanelSales extends javax.swing.JPanel {
         }
         jFormattedTextFieldDateStart.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
-        jButtonGenerateNoteCredit.setBackground(new java.awt.Color(153, 255, 255));
-        jButtonGenerateNoteCredit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
-        jButtonGenerateNoteCredit.setText("Gerar Nota de Credito");
-        jButtonGenerateNoteCredit.setContentAreaFilled(false);
-        jButtonGenerateNoteCredit.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonGenerateNoteCredit.addActionListener(new java.awt.event.ActionListener() {
+        jButtonGenerateNoteCreditFR.setBackground(new java.awt.Color(153, 255, 255));
+        jButtonGenerateNoteCreditFR.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
+        jButtonGenerateNoteCreditFR.setText("Gerar Nota de Credito");
+        jButtonGenerateNoteCreditFR.setContentAreaFilled(false);
+        jButtonGenerateNoteCreditFR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonGenerateNoteCreditFR.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonGenerateNoteCreditActionPerformed(evt);
+                jButtonGenerateNoteCreditFRActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanelFRLayout = new javax.swing.GroupLayout(jPanelFR);
+        jPanelFR.setLayout(jPanelFRLayout);
+        jPanelFRLayout.setHorizontalGroup(
+            jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelFRLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 913, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 947, Short.MAX_VALUE)
+                    .addGroup(jPanelFRLayout.createSequentialGroup()
+                        .addGroup(jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
                         .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelFRLayout.createSequentialGroup()
                                 .addComponent(jFormattedTextFieldDateFinish, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonFilterOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButtonGenerateNoteCredit)
+                                .addComponent(jButtonGenerateNoteCreditFR)
                                 .addGap(18, 18, 18)
                                 .addComponent(jButtonDeleteOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonViewOrder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonPrintOrder))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanelFRLayout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addGap(88, 88, 88)))))
                 .addContainerGap())
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jFormattedTextFieldDateFinish, jFormattedTextFieldDateStart});
+        jPanelFRLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jFormattedTextFieldDateFinish, jFormattedTextFieldDateStart});
 
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        jPanelFRLayout.setVerticalGroup(
+            jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFRLayout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanelFRLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jFormattedTextFieldDateStart, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jFormattedTextFieldDateFinish, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonFilterOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonDeleteOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonViewOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonPrintOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonGenerateNoteCredit, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButtonGenerateNoteCreditFR, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jTabbedPane1.addTab("Faturas FR", jPanel1);
+        jTabbedPane1.addTab("FATURAS - FR", jPanelFR);
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane3.setViewportView(jTable1);
+
+        try {
+            jFormattedTextFieldDateStartFT.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+        jFormattedTextFieldDateStartFT.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+
+        try {
+            jFormattedTextFieldDateFinishFT.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+        jFormattedTextFieldDateFinishFT.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setText("Data Inicio:");
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setText("Data Fim:");
+
+        jButtonFilterOrderFT.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonFilterOrderFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
+        jButtonFilterOrderFT.setText("Filtrar");
+        jButtonFilterOrderFT.setBorderPainted(false);
+        jButtonFilterOrderFT.setContentAreaFilled(false);
+        jButtonFilterOrderFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonFilterOrderFT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonFilterOrderFTActionPerformed(evt);
+            }
+        });
+
+        jButtonPrintFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/printer_8139457.png"))); // NOI18N
+        jButtonPrintFT.setText("Imprimir");
+        jButtonPrintFT.setContentAreaFilled(false);
+        jButtonPrintFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonPrintFT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPrintFTActionPerformed(evt);
+            }
+        });
+
+        jButtonDeleteOrder1.setBackground(new java.awt.Color(255, 0, 0));
+        jButtonDeleteOrder1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
+        jButtonDeleteOrder1.setText("Apagar a ultima");
+        jButtonDeleteOrder1.setContentAreaFilled(false);
+        jButtonDeleteOrder1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonDeleteOrder1.setEnabled(false);
+        jButtonDeleteOrder1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteOrder1ActionPerformed(evt);
+            }
+        });
+
+        jButtonGenerateNoteCreditFT.setBackground(new java.awt.Color(153, 255, 255));
+        jButtonGenerateNoteCreditFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
+        jButtonGenerateNoteCreditFT.setText("Gerar Nota de Credito");
+        jButtonGenerateNoteCreditFT.setContentAreaFilled(false);
+        jButtonGenerateNoteCreditFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonGenerateNoteCreditFT.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGenerateNoteCreditFTActionPerformed(evt);
+            }
+        });
+
+        jButtonViewOrder2.setBackground(new java.awt.Color(255, 255, 102));
+        jButtonViewOrder2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
+        jButtonViewOrder2.setText("Ver");
+        jButtonViewOrder2.setContentAreaFilled(false);
+        jButtonViewOrder2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonViewOrder2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonViewOrder2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 925, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jFormattedTextFieldDateStartFT, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(33, 33, 33)
+                                .addComponent(jButtonViewOrder2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButtonGenerateNoteCreditFT)
+                                .addGap(34, 34, 34)
+                                .addComponent(jButtonDeleteOrder1)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButtonPrintFT))))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 591, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(15, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jFormattedTextFieldDateStartFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPrintFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonDeleteOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonGenerateNoteCreditFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonViewOrder2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
-        jTabbedPane1.addTab("Nota de Credito", jPanel2);
+        jTabbedPane1.addTab("FATURAS - FT", jPanel2);
+
+        jButtonPrintOrder1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/printer_8139457.png"))); // NOI18N
+        jButtonPrintOrder1.setText("Imprimir");
+        jButtonPrintOrder1.setContentAreaFilled(false);
+        jButtonPrintOrder1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonPrintOrder1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPrintOrder1ActionPerformed(evt);
+            }
+        });
+
+        jButtonViewOrder1.setBackground(new java.awt.Color(255, 255, 102));
+        jButtonViewOrder1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
+        jButtonViewOrder1.setText("Ver");
+        jButtonViewOrder1.setContentAreaFilled(false);
+        jButtonViewOrder1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonViewOrder1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonViewOrder1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(762, Short.MAX_VALUE)
+                .addComponent(jButtonViewOrder1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonPrintOrder1)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(36, 36, 36)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonViewOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPrintOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(522, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Nota de Credito", jPanel3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -355,7 +544,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonDeleteOrderActionPerformed
 
-    private void jButtonGenerateNoteCreditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditActionPerformed
+    private void jButtonGenerateNoteCreditFRActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditFRActionPerformed
         // TODO add your handling code here:
         int id = 0;
         try {
@@ -369,23 +558,65 @@ public final class JPanelSales extends javax.swing.JPanel {
                 jdNoteCredit.setVisible(true);
             }
         }
-    }//GEN-LAST:event_jButtonGenerateNoteCreditActionPerformed
+    }//GEN-LAST:event_jButtonGenerateNoteCreditFRActionPerformed
+
+    private void jButtonFilterOrderFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFilterOrderFTActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonFilterOrderFTActionPerformed
+
+    private void jButtonPrintFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrintFTActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonPrintFTActionPerformed
+
+    private void jButtonDeleteOrder1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteOrder1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonDeleteOrder1ActionPerformed
+
+    private void jButtonGenerateNoteCreditFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditFTActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonGenerateNoteCreditFTActionPerformed
+
+    private void jButtonPrintOrder1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrintOrder1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonPrintOrder1ActionPerformed
+
+    private void jButtonViewOrder1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewOrder1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonViewOrder1ActionPerformed
+
+    private void jButtonViewOrder2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewOrder2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonViewOrder2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jButtonDeleteOrder;
+    public javax.swing.JButton jButtonDeleteOrder1;
     private javax.swing.JButton jButtonFilterOrder;
-    public javax.swing.JButton jButtonGenerateNoteCredit;
+    private javax.swing.JButton jButtonFilterOrderFT;
+    public javax.swing.JButton jButtonGenerateNoteCreditFR;
+    public javax.swing.JButton jButtonGenerateNoteCreditFT;
+    private javax.swing.JButton jButtonPrintFT;
     private javax.swing.JButton jButtonPrintOrder;
+    private javax.swing.JButton jButtonPrintOrder1;
     private javax.swing.JButton jButtonViewOrder;
+    private javax.swing.JButton jButtonViewOrder1;
+    private javax.swing.JButton jButtonViewOrder2;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateFinish;
+    private javax.swing.JFormattedTextField jFormattedTextFieldDateFinishFT;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateStart;
+    private javax.swing.JFormattedTextField jFormattedTextFieldDateStartFT;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanelFR;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTable1;
     private javax.swing.JTable jTableOrders;
     // End of variables declaration//GEN-END:variables
 }

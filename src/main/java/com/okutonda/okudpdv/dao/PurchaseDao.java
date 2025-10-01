@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -27,6 +28,7 @@ import java.util.List;
 public class PurchaseDao {
 
     private final Connection conn;
+    private final String table = "purchases";
 
     public PurchaseDao() {
         this.conn = ConnectionDatabase.getConnect();
@@ -208,6 +210,68 @@ public class PurchaseDao {
         }
 
         return list;
+    }
+
+    public Purchase getId(int id) {
+        try {
+            String sql = "SELECT p.*, s.name AS supplier_name, u.name AS user_name "
+                    + "FROM " + table + " p "
+                    + "LEFT JOIN suppliers s ON p.supplier_id = s.id "
+                    + "LEFT JOIN users u ON p.user_id = u.id "
+                    + "WHERE p.id = ?";
+
+            try (PreparedStatement pst = conn.prepareStatement(sql)) {
+                pst.setInt(1, id);
+
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        Purchase obj = new Purchase();
+
+                        // Campos principais
+                        obj.setId(rs.getInt("id"));
+                        obj.setInvoiceNumber(rs.getString("invoice_number"));
+                        obj.setDescricao(rs.getString("descricao"));
+                        obj.setTotal(rs.getBigDecimal("total"));
+                        obj.setIvaTotal(rs.getBigDecimal("iva_total"));
+                        obj.setDataCompra(rs.getDate("data_compra"));
+                        obj.setDataVencimento(rs.getDate("data_vencimento"));
+                        obj.setStatus(rs.getString("status"));
+
+                        // InvoiceType com segurança
+                        String invoiceTypeStr = rs.getString("invoice_type");
+                        if (invoiceTypeStr != null) {
+                            try {
+                                obj.setInvoiceType(InvoiceType.valueOf(invoiceTypeStr));
+                            } catch (IllegalArgumentException ex) {
+                                System.out.println("⚠ Tipo de documento inválido no banco: " + invoiceTypeStr);
+                                obj.setInvoiceType(null);
+                            }
+                        }
+
+                        // Fornecedor
+                        Supplier supplier = new Supplier();
+                        supplier.setId(rs.getInt("supplier_id"));
+                        supplier.setName(rs.getString("supplier_name"));
+                        obj.setSupplier(supplier);
+
+                        // Usuário
+                        User user = new User();
+                        user.setId(rs.getInt("user_id"));
+                        user.setName(rs.getString("user_name"));
+                        obj.setUser(user);
+
+                        // Itens da compra
+                        PurchaseItemDao itemDao = new PurchaseItemDao();
+                        obj.setItems(itemDao.listByPurchase(obj.getId()));
+
+                        return obj;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao buscar Compra: " + e.getMessage());
+        }
+        return null;
     }
 
 //    private final Connection conn;

@@ -1535,6 +1535,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         // TODO add your handling code here:
         if (Util.checkIsNumber(jTextFieldQtdProductsSelected.getText()) == false) {
             JOptionPane.showMessageDialog(null, "Insira um numero valido!");
+//            jTextFieldQtdProductsSelected.setText("1");
         }
     }//GEN-LAST:event_jTextFieldQtdProductsSelectedKeyReleased
 
