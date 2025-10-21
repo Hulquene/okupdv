@@ -239,8 +239,9 @@ public class OrderController {
         // order.setKey(saftService.gerarChave(numberOrder, date));  // se existir
         // 3) Transação única (usar MESMA connection para todos os DAOs)
         Connection conn = null;
+        boolean sucesso = false;
         try {
-            conn = ConnectionDatabase.getConnect();
+            conn = ConnectionDatabase.getConnect(); 
             conn.setAutoCommit(false);
 
             OrderDao orderDaoTx = new OrderDao(conn);
@@ -276,7 +277,8 @@ public class OrderController {
                 StockMovement movimento = new StockMovement();
                 movimento.setProduct(po.getProduct());
                 movimento.setQuantity(-po.getQty()); // saída = negativo
-                movimento.setType("OUT");
+                movimento.setOrigin("VENDA");
+                movimento.setType("SAIDA");
                 movimento.setReason("VENDA " + salvo.getPrefix() + "/" + salvo.getNumber());
                 movimento.setUser(order.getSeller());
 
@@ -305,21 +307,30 @@ public class OrderController {
                 paymentDaoTx.add(p, salvo.getId());
             }
 
-            conn.commit();
+            conn.commit();// ✅ confirma tudo
+            sucesso = true;
             return orderDaoTx.getId(salvo.getId());
         } catch (Exception e) {
+            System.err.println("Erro ao processar venda: " + e.getMessage());
             if (conn != null) {
-                conn.rollback();
+                try {
+                    if (!sucesso) { // 🚧 só tenta rollback se não comitou ainda
+                        conn.rollback();
+                        System.err.println("Transação revertida.");
+                    }
+                } catch (SQLException ex) {
+                    System.err.println("Erro ao reverter: " + ex.getMessage());
+                }
             }
             throw e;
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true);
-                } catch (SQLException ignore) {
+                    conn.setAutoCommit(true); // ✅ volta ao normal
+//                    conn.close(); // ✅ fecha conexão
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar conexão: " + e.getMessage());
                 }
-//                conn.setAutoCommit(true);
-//                conn.close();
             }
         }
     }

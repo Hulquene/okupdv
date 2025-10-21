@@ -683,6 +683,10 @@ CREATE TABLE `purchase_items` (
   CONSTRAINT `fk_pi_product` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE purchase_items
+ADD COLUMN quantidade_entrada INT DEFAULT 0,
+ADD COLUMN entrada_status ENUM('nao_iniciado','parcial','completo') DEFAULT 'nao_iniciado';
+
 CREATE TABLE `purchase_payments` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `purchase_id` INT NOT NULL,

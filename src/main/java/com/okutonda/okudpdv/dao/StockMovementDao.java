@@ -33,33 +33,112 @@ public class StockMovementDao {
      * Regista um movimento de stock (entrada/saída/ajuste).
      */
     public boolean add(StockMovement movimento) {
-        try {
-            String sql = """
-            INSERT INTO stock_movements
-            (product_id, warehouse_id, user_id, quantity, type, origin, reference_id, notes, reason)
-            VALUES (?,?,?,?,?,?,?,?,?)
-        """;
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setInt(1, movimento.getProduct().getId());
-            pst.setInt(2, movimento.getWarehouse() != null ? movimento.getWarehouse().getId() : 1); // default 1
-            pst.setInt(3, movimento.getUser().getId());
-            pst.setInt(4, movimento.getQuantity());
-            pst.setString(5, movimento.getType());
-            pst.setString(6, movimento.getOrigin() != null ? movimento.getOrigin() : "MANUAL");
-            if (movimento.getReferenceId() != null) {
-                pst.setInt(7, movimento.getReferenceId());
-            } else {
-                pst.setNull(7, java.sql.Types.INTEGER);
-            }
-            pst.setString(8, movimento.getNotes() != null ? movimento.getNotes() : "");
-            pst.setString(9, movimento.getReason() != null ? movimento.getReason() : "");
+        String sqlInsert = """
+        INSERT INTO stock_movements
+        (product_id, warehouse_id, user_id, quantity, type, origin, reference_id, notes, reason)
+        VALUES (?,?,?,?,?,?,?,?,?)
+    """;
 
-            pst.execute();
+        PreparedStatement pstInsert = null;
+
+        try {
+            // 🔒 Inicia transação manual
+            conn.setAutoCommit(false);
+
+            pstInsert = conn.prepareStatement(sqlInsert);
+            pstInsert.setInt(1, movimento.getProduct().getId());
+            pstInsert.setInt(2, movimento.getWarehouse() != null ? movimento.getWarehouse().getId() : 1);
+            pstInsert.setInt(3, movimento.getUser().getId());
+            pstInsert.setInt(4, movimento.getQuantity());
+            pstInsert.setString(5, movimento.getType());
+            pstInsert.setString(6, movimento.getOrigin() != null ? movimento.getOrigin() : "MANUAL");
+            if (movimento.getReferenceId() != null) {
+                pstInsert.setInt(7, movimento.getReferenceId());
+            } else {
+                pstInsert.setNull(7, java.sql.Types.INTEGER);
+            }
+            pstInsert.setString(8, movimento.getNotes() != null ? movimento.getNotes() : "");
+            pstInsert.setString(9, movimento.getReason() != null ? movimento.getReason() : "");
+
+            pstInsert.executeUpdate();
+
+            // ✅ Se veio de uma compra, atualiza o item correspondente
+            if ("COMPRA".equalsIgnoreCase(movimento.getOrigin())) {
+                atualizarEntradaItemCompra(movimento);
+            }
+
+            // 💾 Tudo certo → confirma
+            conn.commit();
             return true;
+
         } catch (SQLException e) {
-            System.out.println("Erro ao registar movimento de stock: " + e.getMessage());
+            System.err.println("❌ Erro ao registar movimento de stock: " + e.getMessage());
+            try {
+                conn.rollback(); // ⛔ Reverte tudo
+                System.err.println("⚠ Transação revertida devido a erro.");
+            } catch (SQLException ex) {
+                System.err.println("Erro ao reverter transação: " + ex.getMessage());
+            }
+        } finally {
+            try {
+                if (pstInsert != null) {
+                    pstInsert.close();
+                }
+                conn.setAutoCommit(true); // 🔁 volta ao modo normal
+            } catch (SQLException e) {
+                System.err.println("Erro ao restaurar autocommit: " + e.getMessage());
+            }
         }
+
         return false;
+    }
+
+    private void atualizarEntradaItemCompra(StockMovement movimento) {
+        try {
+            // 1️⃣ Obter a quantidade atual de entrada do item
+            String sqlSelect = "SELECT quantidade, quantidade_entrada "
+                    + "FROM purchase_items "
+                    + "WHERE purchase_id = ? AND product_id = ?";
+            PreparedStatement pst1 = conn.prepareStatement(sqlSelect);
+            pst1.setInt(1, movimento.getReferenceId());
+            pst1.setInt(2, movimento.getProduct().getId());
+            ResultSet rs = pst1.executeQuery();
+
+            if (rs.next()) {
+                int quantidadeTotal = rs.getInt("quantidade");
+                int quantidadeEntradaAtual = rs.getInt("quantidade_entrada");
+
+                int novaQuantidadeEntrada = quantidadeEntradaAtual + movimento.getQuantity();
+
+                String novoStatus;
+                if (novaQuantidadeEntrada >= quantidadeTotal) {
+                    novaQuantidadeEntrada = quantidadeTotal;
+                    novoStatus = "completo";
+                } else if (novaQuantidadeEntrada > 0) {
+                    novoStatus = "parcial";
+                } else {
+                    novoStatus = "nao_iniciado";
+                }
+
+                // 2️⃣ Atualizar o item
+                String sqlUpdate = "UPDATE purchase_items "
+                        + "SET quantidade_entrada = ?, entrada_status = ? "
+                        + "WHERE purchase_id = ? AND product_id = ?";
+                PreparedStatement pst2 = conn.prepareStatement(sqlUpdate);
+                pst2.setInt(1, novaQuantidadeEntrada);
+                pst2.setString(2, novoStatus);
+                pst2.setInt(3, movimento.getReferenceId());
+                pst2.setInt(4, movimento.getProduct().getId());
+                pst2.executeUpdate();
+
+                System.out.println("🔄 Item de compra atualizado → produto: "
+                        + movimento.getProduct().getDescription()
+                        + " (" + novaQuantidadeEntrada + "/" + quantidadeTotal + ")");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao atualizar entrada do item de compra: " + e.getMessage());
+        }
     }
 
     /**
@@ -141,7 +220,7 @@ public class StockMovementDao {
                 list.add(m);
             }
         } catch (SQLException e) {
-            System.out.println("Erro ao listar movimentos de stock: " + e.getMessage());
+            System.out.println("Erro ao carregar lista movimentos de stock: " + e.getMessage());
         }
         return list;
     }

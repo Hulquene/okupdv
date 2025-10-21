@@ -6,8 +6,11 @@ package com.okutonda.okudpdv.views.sales;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.models.Order;
+import com.okutonda.okudpdv.ui.TemaUI;
+import com.okutonda.okudpdv.utilities.JpanelLoader;
 import com.okutonda.okudpdv.utilities.UtilSales;
 import com.okutonda.okudpdv.views.Orders.JDialogDetailOrder;
+import com.okutonda.okudpdv.views.Orders.JPanelOrders;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -20,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public final class JPanelSales extends javax.swing.JPanel {
 
+    JpanelLoader jpload = new JpanelLoader();
     OrderController orderController = new OrderController();
 
     /**
@@ -27,7 +31,51 @@ public final class JPanelSales extends javax.swing.JPanel {
      */
     public JPanelSales() {
         initComponents();
+        applyTheme();
+        JPanelOrders pOrder = new JPanelOrders();
+        jpload.jPanelLoader(jPanelSalesContent, pOrder);
+        jLabelJpanelSelected.setText("Pedidos");
         listOrder();
+    }
+
+    private void applyTheme() {
+//        TemaCleaner.clearBuilderOverrides(getContentPane());
+        // Painel de fundo da janela
+//        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
+
+        TemaUI.aplicarTitulo(jLabelJpanelSelected);
+//        jPanelSidebar.setBackground(TemaCores.PRIMARY);
+        // Card do login
+//        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
+        // Título
+//        TemaUI.aplicarTitulo(jLabelNameCompany);
+//        jLabelNameCompany.setForeground(TemaCores.PRIMARY);
+        // Labels
+//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
+//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
+        // Campos
+//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
+//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
+
+        // Botões
+        TemaUI.aplicarBotaoPrimario(jButton1);
+        TemaUI.aplicarBotaoPrimario(jButton2);
+        TemaUI.aplicarBotaoPrimario(jButton3);
+        TemaUI.aplicarBotaoPrimario(jButton4);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
+        
+        
+//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
+//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
+//        jButtonInstall.setForeground(TemaCores.PRIMARY);
+//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
+        // Status de BD (cor dinâmica) — chama depois de testar a conexão
+//        updateDbStatusLabel(this.conn != null);
+        // Borda superior/rodapé (opcional)
+        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
+        // Se o GUI Builder deixou cores hardcoded em initComponents,
+        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
     }
 
     public void listTable(List<Order> list) {
@@ -100,6 +148,14 @@ public final class JPanelSales extends javax.swing.JPanel {
         jPanel3 = new javax.swing.JPanel();
         jButtonPrintOrder1 = new javax.swing.JButton();
         jButtonViewOrder1 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jToolBar1 = new javax.swing.JToolBar();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jLabelJpanelSelected = new javax.swing.JLabel();
+        jPanelSalesContent = new javax.swing.JPanel();
 
         addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
@@ -271,7 +327,7 @@ public final class JPanelSales extends javax.swing.JPanel {
                     .addComponent(jButtonPrintOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonGenerateNoteCreditFR, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -402,7 +458,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(15, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jLabel4))
@@ -461,20 +517,94 @@ public final class JPanelSales extends javax.swing.JPanel {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonViewOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonPrintOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(522, Short.MAX_VALUE))
+                .addContainerGap(163, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Nota de Credito", jPanel3);
+
+        jToolBar1.setRollover(true);
+
+        jButton1.setText("Faturas - FR");
+        jButton1.setFocusable(false);
+        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(jButton1);
+
+        jButton2.setText("Faturas -FT");
+        jButton2.setFocusable(false);
+        jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(jButton2);
+
+        jButton3.setText("Nota de Credito -NC");
+        jButton3.setFocusable(false);
+        jButton3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(jButton3);
+
+        jButton4.setText("Proposta -PP");
+        jButton4.setFocusable(false);
+        jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButton4.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jToolBar1.add(jButton4);
+
+        jLabelJpanelSelected.setText("Tela Selecionada");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 536, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabelJpanelSelected)
+                .addGap(86, 86, 86))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabelJpanelSelected)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jPanelSalesContentLayout = new javax.swing.GroupLayout(jPanelSalesContent);
+        jPanelSalesContent.setLayout(jPanelSalesContentLayout);
+        jPanelSalesContentLayout.setHorizontalGroup(
+            jPanelSalesContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanelSalesContentLayout.setVerticalGroup(
+            jPanelSalesContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 286, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addComponent(jTabbedPane1)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanelSalesContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanelSalesContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -554,7 +684,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         } finally {
             if (id > 0) {
                 JDialogGenerateNoteCredit jdNoteCredit = new JDialogGenerateNoteCredit(null, true);
-                jdNoteCredit.setNoteCredit(id,"FR");
+                jdNoteCredit.setNoteCredit(id, "FR");
                 jdNoteCredit.setVisible(true);
             }
         }
@@ -588,8 +718,19 @@ public final class JPanelSales extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButtonViewOrder2ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+          JPanelOrders pOrder = new JPanelOrders();
+        jpload.jPanelLoader(jPanelSalesContent, pOrder);
+        jLabelJpanelSelected.setText("Pedidos");
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     public javax.swing.JButton jButtonDeleteOrder;
     public javax.swing.JButton jButtonDeleteOrder1;
     private javax.swing.JButton jButtonFilterOrder;
@@ -610,13 +751,17 @@ public final class JPanelSales extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabelJpanelSelected;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanelFR;
+    private javax.swing.JPanel jPanelSalesContent;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTableOrders;
+    private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
 }

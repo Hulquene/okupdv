@@ -6,7 +6,6 @@ package com.okutonda.okudpdv.models;
 
 import java.math.BigDecimal;
 
-
 /**
  *
  * @author rog
@@ -20,6 +19,8 @@ public class PurchaseItem {
     private BigDecimal precoCusto;
     private BigDecimal iva;
     private BigDecimal subtotal;
+    private Integer quantidadeEntrada;
+    private String entradaStatus;
 
     // Getters e Setters
     public Integer getId() {
@@ -76,5 +77,21 @@ public class PurchaseItem {
 
     public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public Integer getQuantidadeEntrada() {
+        return quantidadeEntrada;
+    }
+
+    public void setQuantidadeEntrada(Integer q) {
+        this.quantidadeEntrada = q;
+    }
+
+    public String getEntradaStatus() {
+        return entradaStatus;
+    }
+
+    public void setEntradaStatus(String s) {
+        this.entradaStatus = s;
     }
 }

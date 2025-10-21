@@ -21,10 +21,7 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
-              <Component id="jScrollPane2" min="-2" pref="1057" max="-2" attributes="0"/>
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-          </Group>
+          <Component id="jScrollPane2" alignment="0" pref="1118" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -90,7 +87,7 @@
                                           <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <EmptySpace min="0" pref="282" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="292" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -296,7 +293,7 @@
                                           <Component id="jButton4" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <EmptySpace min="0" pref="363" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="373" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -348,8 +345,8 @@
                             <Column editable="false" title="Comprador" type="java.lang.String"/>
                             <Column editable="false" title="Fornecedor" type="java.lang.String"/>
                             <Column editable="false" title="Pagamento" type="java.lang.String"/>
-                            <Column editable="true" title="Data de de Favrico" type="java.lang.String"/>
-                            <Column editable="false" title="Data de expira&#xe7;&#xe3;o" type="java.lang.String"/>
+                            <Column editable="true" title="Data Fabrico" type="java.lang.String"/>
+                            <Column editable="false" title="Data expira&#xe7;&#xe3;o" type="java.lang.String"/>
                           </Table>
                         </Property>
                         <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
@@ -535,7 +532,7 @@
                                       <Component id="jComboBoxSalesFromSeller" alignment="0" min="-2" pref="165" max="-2" attributes="0"/>
                                       <Component id="jLabel27" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace min="0" pref="144" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="154" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -742,8 +739,8 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jTabbedPane2" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="63" max="32767" attributes="0"/>
+                          <Component id="jTabbedPane2" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -774,7 +771,7 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="1027" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="1094" max="32767" attributes="0"/>
                               <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -1106,7 +1103,7 @@
                       <Layout>
                         <DimensionLayout dim="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="1027" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="1094" max="32767" attributes="0"/>
                               <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -1149,9 +1146,9 @@
                                                   <Component id="jFormattedTextField12" alignment="0" min="-2" pref="78" max="-2" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="jFormattedTextField11" alignment="0" min="-2" pref="75" max="-2" attributes="0"/>
-                                                  <Component id="jLabel32" alignment="0" min="-2" pref="62" max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="1" attributes="0">
+                                                  <Component id="jFormattedTextField11" min="-2" pref="75" max="-2" attributes="0"/>
+                                                  <Component id="jLabel32" min="-2" pref="62" max="-2" attributes="0"/>
                                               </Group>
                                               <Group type="103" groupAlignment="0" attributes="0">
                                                   <Group type="102" alignment="0" attributes="0">
@@ -1218,10 +1215,12 @@
                                               </Group>
                                           </Group>
                                           <Group type="102" alignment="1" attributes="0">
-                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                  <Component id="jLabel33" alignment="1" max="32767" attributes="0"/>
-                                                  <Component id="jLabel32" alignment="1" max="32767" attributes="0"/>
-                                                  <Component id="jLabel17" alignment="1" min="-2" pref="27" max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="1" attributes="0">
+                                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                      <Component id="jLabel33" alignment="1" max="32767" attributes="0"/>
+                                                      <Component id="jLabel17" alignment="1" min="-2" pref="27" max="-2" attributes="0"/>
+                                                  </Group>
+                                                  <Component id="jLabel32" alignment="0" min="-2" pref="27" max="-2" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="3" attributes="0">

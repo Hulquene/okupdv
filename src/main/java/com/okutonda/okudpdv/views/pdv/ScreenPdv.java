@@ -25,6 +25,7 @@ import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
@@ -1533,10 +1534,44 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jTextFieldQtdProductsSelectedKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldQtdProductsSelectedKeyReleased
         // TODO add your handling code here:
-        if (Util.checkIsNumber(jTextFieldQtdProductsSelected.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Insira um numero valido!");
-//            jTextFieldQtdProductsSelected.setText("1");
+//        if (Util.checkIsNumber(jTextFieldQtdProductsSelected.getText()) == false) {
+//            JOptionPane.showMessageDialog(null, "Insira um numero valido!");
+////            jTextFieldQtdProductsSelected.setText("1");
+//        }
+        String texto = jTextFieldQtdProductsSelected.getText().trim();
+        int quantidade = 1; // valor padrão
+
+        // 🔹 1️⃣ Se o campo estiver vazio → não forçar nada (permite o utilizador digitar)
+        if (texto.isEmpty()) {
+            return;
         }
+
+        // 🔹 2️⃣ Verifica se é número válido
+        if (!Util.checkIsNumber(texto)) {
+            // opcional: alerta visual sem forçar "1"
+//            jTextFieldQtdProductsSelected.setBackground(Color.decode("#f8d7da")); // vermelho leve
+            jTextFieldQtdProductsSelected.setText(String.valueOf("1"));
+            return;
+        } else {
+//            jTextFieldQtdProductsSelected.setBackground(Color.WHITE);
+        }
+
+        try {
+            quantidade = Integer.parseInt(texto);
+
+            // 🔹 3️⃣ Garante que nunca seja menor que 1
+            if (quantidade < 1) {
+                quantidade = 1;
+            }
+
+        } catch (NumberFormatException e) {
+            quantidade = 1; // fallback de segurança
+        }
+
+        // 🔹 4️⃣ Atualiza o campo com o valor ajustado (só se for válido)
+        jTextFieldQtdProductsSelected.setText(String.valueOf(quantidade));
+        
+        
     }//GEN-LAST:event_jTextFieldQtdProductsSelectedKeyReleased
 
     private void jTextFieldBarCodeProductSelectKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldBarCodeProductSelectKeyPressed

@@ -6,12 +6,14 @@ package com.okutonda.okudpdv.dao;
 
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.models.InvoiceType;
+import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.Purchase;
 import com.okutonda.okudpdv.models.PurchaseItem;
 import com.okutonda.okudpdv.models.StockMovement;
 import com.okutonda.okudpdv.models.Supplier;
 import com.okutonda.okudpdv.models.User;
 import com.okutonda.okudpdv.models.Warehouse;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -166,45 +168,47 @@ public class PurchaseDao {
             while (rs.next()) {
                 Purchase obj = new Purchase();
 
-                // Campos principais
+                // 🧾 Campos principais
                 obj.setId(rs.getInt("id"));
                 obj.setInvoiceNumber(rs.getString("invoice_number"));
                 obj.setDescricao(rs.getString("descricao"));
                 obj.setTotal(rs.getBigDecimal("total"));
                 obj.setIvaTotal(rs.getBigDecimal("iva_total"));
+                obj.setTotal_pago(rs.getBigDecimal("total_pago"));
                 obj.setDataCompra(rs.getDate("data_compra"));
                 obj.setDataVencimento(rs.getDate("data_vencimento"));
                 obj.setStatus(rs.getString("status"));
 
-                // InvoiceType com segurança
+                // 📄 Tipo de documento com segurança
                 String invoiceTypeStr = rs.getString("invoice_type");
                 if (invoiceTypeStr != null) {
                     try {
                         obj.setInvoiceType(InvoiceType.valueOf(invoiceTypeStr));
                     } catch (IllegalArgumentException ex) {
                         System.out.println("⚠ Tipo de documento inválido no banco: " + invoiceTypeStr);
-                        obj.setInvoiceType(null); // ou podes definir um default
+                        obj.setInvoiceType(null);
                     }
                 }
 
-                // Fornecedor
+                // 🧍‍♂️ Fornecedor
                 Supplier supplier = new Supplier();
                 supplier.setId(rs.getInt("supplier_id"));
                 supplier.setName(rs.getString("supplier_name"));
                 obj.setSupplier(supplier);
 
-                // Usuário
+                // 👤 Usuário
                 User user = new User();
                 user.setId(rs.getInt("user_id"));
                 user.setName(rs.getString("user_name"));
                 obj.setUser(user);
 
-                // Itens da compra (usa PurchaseItemDao)
+                // 📦 Itens da compra com status de entrada (PurchaseItemDao atualizado)
                 PurchaseItemDao itemDao = new PurchaseItemDao();
-                obj.setItems(itemDao.listByPurchase(obj.getId()));
+                obj.setItems(itemDao.listByPurchase(obj.getId())); // já carrega quantidade_entrada e entrada_status
 
                 list.add(obj);
             }
+
         } catch (SQLException e) {
             System.out.println("Erro ao listar compras: " + e.getMessage());
         }
@@ -212,10 +216,50 @@ public class PurchaseDao {
         return list;
     }
 
+    public List<PurchaseItem> listByPurchase(int purchaseId) {
+        List<PurchaseItem> list = new ArrayList<>();
+
+        String sql = """
+        SELECT pi.*, pr.description AS product_description
+        FROM purchase_items pi
+        INNER JOIN products pr ON pr.id = pi.product_id
+        WHERE pi.purchase_id = ?
+        ORDER BY pi.id ASC
+    """;
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, purchaseId);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                PurchaseItem item = new PurchaseItem();
+                item.setId(rs.getInt("id"));
+                item.setPurchaseId(rs.getInt("purchase_id"));
+                item.setQuantidade(rs.getInt("quantidade"));
+                item.setPrecoCusto(rs.getBigDecimal("preco_custo"));
+                item.setIva(rs.getBigDecimal("iva"));
+                item.setSubtotal(rs.getBigDecimal("subtotal"));
+                item.setQuantidadeEntrada(rs.getInt("quantidade_entrada"));
+                item.setEntradaStatus(rs.getString("entrada_status"));
+
+                Product product = new Product();
+                product.setId(rs.getInt("product_id"));
+                product.setDescription(rs.getString("product_description"));
+                item.setProduct(product);
+
+                list.add(item);
+            }
+        } catch (SQLException e) {
+            System.out.println("Erro ao listar itens da compra: " + e.getMessage());
+        }
+
+        return list;
+    }
+
     public Purchase getId(int id) {
         try {
-            String sql = "SELECT p.*, s.name AS supplier_name, u.name AS user_name "
-                    + "FROM " + table + " p "
+            String sql = "SELECT p.*, s.company AS supplier_name, u.name AS user_name "
+                    + "FROM purchases p "
                     + "LEFT JOIN suppliers s ON p.supplier_id = s.id "
                     + "LEFT JOIN users u ON p.user_id = u.id "
                     + "WHERE p.id = ?";
@@ -233,11 +277,12 @@ public class PurchaseDao {
                         obj.setDescricao(rs.getString("descricao"));
                         obj.setTotal(rs.getBigDecimal("total"));
                         obj.setIvaTotal(rs.getBigDecimal("iva_total"));
+                        obj.setPayTotal(rs.getBigDecimal("total_pago"));
                         obj.setDataCompra(rs.getDate("data_compra"));
                         obj.setDataVencimento(rs.getDate("data_vencimento"));
                         obj.setStatus(rs.getString("status"));
 
-                        // InvoiceType com segurança
+                        // InvoiceType seguro
                         String invoiceTypeStr = rs.getString("invoice_type");
                         if (invoiceTypeStr != null) {
                             try {
@@ -263,6 +308,18 @@ public class PurchaseDao {
                         // Itens da compra
                         PurchaseItemDao itemDao = new PurchaseItemDao();
                         obj.setItems(itemDao.listByPurchase(obj.getId()));
+
+                        // Pagamentos da compra
+                        PurchasePaymentDao paymentDao = new PurchasePaymentDao();
+                        obj.setPayments(paymentDao.listByPurchase(obj.getId()));
+
+                        // Atualiza o saldo em aberto se o total e total_pago estiverem disponíveis
+                        BigDecimal saldo = BigDecimal.ZERO;
+                        if (obj.getTotal() != null && obj.getPayTotal() != null) {
+                            saldo = obj.getTotal().subtract(obj.getPayTotal());
+                        }
+                        obj.setTotal_pago(obj.getPayTotal());
+                        // opcional: adicionar campo saldo no modelo se quiseres persistir
 
                         return obj;
                     }

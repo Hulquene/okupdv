@@ -1,107 +1,3 @@
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package com.okutonda.okudpdv.jdbc;
-//
-//import java.sql.Connection;
-//import java.sql.DriverManager;
-//import java.sql.SQLException;
-//import javax.swing.JOptionPane;
-//
-///**
-// *
-// * @author kenny
-// */
-//public class ConnectionDatabase {
-//
-//    public static Connection connection;
-//
-//    // Método para criar ou recuperar uma conexão com o banco de dados
-//    public static Connection getConnect() {
-////        final String url = "jdbc:mysql://localhost:3306/okudpdv";
-////        final String url = "jdbc:mysql://localhost:3306/oku";
-//
-//        String dbHost = System.getenv("oku_host");
-//        String dbUsername = System.getenv("oku_username");
-//        String dbPassword = "";//System.getenv("oku_password");
-//        String dbPort = System.getenv("oku_port");
-//        String dbDatabase = System.getenv("oku_database");
-//        final String url = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbDatabase;
-////        final String username = "root";
-////        final String password = "";
-//
-//        try {
-//            if (dbUsername == null || dbPassword == null || dbHost == null || dbPort == null) {
-//                JOptionPane.showMessageDialog(null, "Uma ou mais variáveis de ambiente não estão definidas.", "Atenção", JOptionPane.ERROR_MESSAGE);
-////                System.err.println("Uma ou mais variáveis de ambiente não estão definidas.");
-//            } else if (dbDatabase == null) {
-//                JOptionPane.showMessageDialog(null, "Banco de dados, a variáveis de ambiente não esta definida.", "Atenção", JOptionPane.ERROR_MESSAGE);
-//            } else {
-////                System.out.println("DB_USER: " + dbUsername);
-////                System.out.println("DB_PASSWORD: " + dbPassword);
-////                System.out.println("DB_NAME: " + dbDatabase);
-//
-//                if (connection == null) {
-//                    connection = DriverManager.getConnection(url, dbUsername, dbPassword);
-//                    System.out.println("Criou conexao, Conectado!!");
-//                    return connection;
-//                }
-////            System.out.println("Recuperou a conexao");
-//                return connection;
-//            }
-//
-//        } catch (SQLException e) {
-//            System.out.println("Error connect database" + e.getMessage());
-////            JOptionPane.showMessageDialog(null, "Error connect database: " + e.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    // Método para fechar a conexão com o banco de dados
-//    public void disconnect() {
-//        if (connection != null) {
-//            try {
-//                connection.close();
-//            } catch (SQLException e) {
-//                JOptionPane.showMessageDialog(null, "Error close connected database: " + e.getMessage());
-//            }
-//        }
-//    }
-//
-//    private static String envOr(String key, String def) {
-//        String v = System.getenv(key);
-//        v = (v == null) ? null : v.trim();
-//        if (isBlank(v)) {
-//            return def;
-//        }
-//        return v;
-//    }
-//
-//    private static boolean isBlank(String s) {
-//        return s == null || s.trim().isEmpty();
-//    }
-//
-//    private static void safeClose(AutoCloseable c) {
-//        try {
-//            if (c != null) {
-//                c.close();
-//            }
-//        } catch (Exception ignore) {
-//        }
-//    }
-//
-//    private static void logSQLException(SQLException e) {
-//        SQLException curr = e;
-//        while (curr != null) {
-//            System.err.println("  Message   : " + curr.getMessage());
-//            System.err.println("  SQLState  : " + curr.getSQLState());
-//            System.err.println("  ErrorCode : " + curr.getErrorCode());
-//            curr = curr.getNextException();
-//        }
-//        e.printStackTrace(System.err);
-//    }
-//}
 package com.okutonda.okudpdv.jdbc;
 
 import java.sql.Connection;
@@ -255,3 +151,123 @@ public class ConnectionDatabase {
         e.printStackTrace(System.err);
     }
 }
+
+
+
+
+
+
+
+//
+//package com.okutonda.okudpdv.jdbc;
+//
+//import java.sql.Connection;
+//import java.sql.DriverManager;
+//import java.sql.SQLException;
+//import java.util.Properties;
+//import javax.swing.JOptionPane;
+//
+//public class ConnectionDatabase {
+//
+//    // 🔹 Conexão global (para compatibilidade)
+//    private static volatile Connection connection;
+//
+//    static {
+//        try {
+//            Class.forName("com.mysql.cj.jdbc.Driver");
+//        } catch (ClassNotFoundException e) {
+//            JOptionPane.showMessageDialog(null,
+//                    "Driver MySQL não encontrado (mysql-connector-j).\n" + e.getMessage(),
+//                    "Erro", JOptionPane.ERROR_MESSAGE);
+//        }
+//    }
+//
+//    // ============================================================
+//    // 🔹 1️⃣ Modo compatível (usado em partes antigas da app)
+//    // ============================================================
+//    public static synchronized Connection getConnect() {
+//        try {
+//            if (connection != null && !connection.isClosed() && connection.isValid(3)) {
+//                return connection;
+//            }
+//        } catch (SQLException ignore) {
+//        }
+//        safeClose(connection);
+//        connection = createNewConnection(true);
+//        return connection;
+//    }
+//
+//    // ============================================================
+//    // 🔹 2️⃣ Novo modo transacional (para commits e rollbacks)
+//    // ============================================================
+//    public static Connection getNewConnection() {
+//        return createNewConnection(false);
+//    }
+//
+//    // ============================================================
+//    // 🔹 3️⃣ Fecha manualmente a conexão global (se necessário)
+//    // ============================================================
+//    public static synchronized void disconnect() {
+//        safeClose(connection);
+//        connection = null;
+//    }
+//
+//    // ============================================================
+//    // 🔹 4️⃣ Função central de criação de conexão
+//    // ============================================================
+//    private static Connection createNewConnection(boolean isGlobal) {
+//        String host = envOr("oku_host", "127.0.0.1");
+//        String port = envOr("oku_port", "3306");
+//        String db = envOr("oku_database", "okutonda");
+//        String user = envOr("oku_username", "root");
+//        String pass = System.getenv("oku_password");
+//
+//        final String url = "jdbc:mysql://" + host + ":" + port + "/" + db
+//                + "?useUnicode=true&characterEncoding=UTF-8"
+//                + "&useSSL=false&allowPublicKeyRetrieval=true"
+//                + "&serverTimezone=UTC"
+//                + "&connectTimeout=5000&socketTimeout=5000";
+//
+//        Properties props = new Properties();
+//        props.setProperty("user", user);
+//        props.setProperty("password", pass != null ? pass : "");
+//
+//        try {
+//            Connection c = DriverManager.getConnection(url, props);
+//
+//            // ⚠️ A conexão transacional começa SEM autocommit
+////            c.setAutoCommit(isGlobal); // global = true → mantém autocommit
+//              c.setAutoCommit(isGlobal ? true : false);
+//            System.out.println("[DB] " + (isGlobal ? "Conexão global" : "Nova conexão transacional") + " estabelecida!");
+//            return c;
+//
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(null,
+//                    "Erro ao conectar ao banco de dados:\n" + e.getMessage(),
+//                    "Erro de ligação", JOptionPane.ERROR_MESSAGE);
+//            throw new RuntimeException("Falha ao conectar ao banco de dados", e);
+//        }
+//    }
+//
+//    // ============================================================
+//    // 🔹 5️⃣ Utilitários auxiliares
+//    // ============================================================
+//    static String envOr(String key, String def) {
+//        String v = System.getenv(key);
+//        v = (v == null) ? null : v.trim();
+//        return isBlank(v) ? def : v;
+//    }
+//
+//    private static boolean isBlank(String s) {
+//        return s == null || s.trim().isEmpty();
+//    }
+//
+//    private static void safeClose(AutoCloseable c) {
+//        try {
+//            if (c != null) {
+//                c.close();
+//            }
+//        } catch (Exception ignore) {
+//        }
+//    }
+//}

@@ -5,7 +5,12 @@
 package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.controllers.PurchaseController;
+import com.okutonda.okudpdv.models.Product;
 import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.models.PurchaseItem;
+import java.math.BigDecimal;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -13,8 +18,8 @@ import com.okutonda.okudpdv.models.Purchase;
  */
 public class JDialogDetailPurchase extends javax.swing.JDialog {
 
-    Purchase purchase;
-    PurchaseController purchasesController;
+    private Purchase purchase;
+    private PurchaseController purchasesController = new PurchaseController();
 
     /**
      * Creates new form JDialogDetailPurchase
@@ -27,8 +32,81 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
     public void setOrder(int id) {
         System.out.println("id purchase view: " + id);
         this.purchase = this.purchasesController.getId(id);
-//        this.order = order;
-//        jLabelTotalOrder.setText(order.getTotal().toString());
+        preencherCampos(); // ✅ atualiza os labels e tabela
+    }
+
+    private void preencherCampos() {
+        if (purchase == null) {
+            JOptionPane.showMessageDialog(this, "Nenhuma compra selecionada.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 🧾 Dados principais
+        jLabelNumber.setText("Nº: " + purchase.getInvoiceNumber());
+        jLabelData.setText("Data: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(purchase.getDataCompra()));
+        jLabelTotal.setText("Total: " + purchase.getTotal() + " AOA");
+
+        // 🧍‍♂️ Fornecedor (comprado de)
+        if (purchase.getSupplier() != null) {
+            jLabelDadosVendedor.setText(
+                    "<html><b>Fornecedor:</b> " + purchase.getSupplier().getName() + "</html>"
+            );
+        } else {
+            jLabelDadosVendedor.setText("<html><b>Fornecedor:</b> - </html>");
+        }
+
+        // 👤 Usuário que registou
+        if (purchase.getUser() != null) {
+            jLabelDadosComprador.setText(
+                    "<html><b>Registado por:</b> " + purchase.getUser().getName() + "</html>"
+            );
+        } else {
+            jLabelDadosComprador.setText("<html><b>Registado por:</b> - </html>");
+        }
+
+        // 💰 Pagamentos
+        BigDecimal totalPago = purchase.getTotal_pago() != null ? purchase.getTotal_pago() : BigDecimal.ZERO;
+        BigDecimal saldo = purchase.getTotal().subtract(totalPago);
+        jLabelDadosPagamentos.setText(
+                "<html><b>Total Pago:</b> " + totalPago + " AOA<br>"
+                + "<b>Saldo:</b> " + saldo + " AOA<br>"
+                + "<b>Status:</b> " + purchase.getStatus() + "</html>"
+        );
+
+        // 🧾 Tabela de produtos
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Produto");
+        model.addColumn("Quantidade");
+        model.addColumn("Preço Custo");
+        model.addColumn("IVA (%)");
+        model.addColumn("Subtotal");
+        model.addColumn("Total c/ IVA"); // nova coluna
+
+        if (purchase.getItems() != null) {
+            for (PurchaseItem item : purchase.getItems()) {
+                Product produto = item.getProduct();
+
+                // Cálculo seguro do subtotal
+                BigDecimal subtotal = item.getSubtotal() != null
+                        ? item.getSubtotal()
+                        : item.getPrecoCusto().multiply(BigDecimal.valueOf(item.getQuantidade()));
+
+                BigDecimal ivaPercent = item.getIva() != null ? item.getIva() : BigDecimal.ZERO;
+                BigDecimal valorIva = subtotal.multiply(ivaPercent.divide(BigDecimal.valueOf(100)));
+                BigDecimal totalComIva = subtotal.add(valorIva);
+
+                model.addRow(new Object[]{
+                    (produto != null ? produto.getDescription(): "—"),
+                    item.getQuantidade(),
+                    item.getPrecoCusto(),
+                    ivaPercent + " %",
+                    subtotal,
+                    totalComIva
+                });
+            }
+        }
+
+        jTableTabelaProdutos.setModel(model);
     }
 
     /**
@@ -41,18 +119,20 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTableTabelaProdutos = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabelDadosPagamentos = new javax.swing.JLabel();
+        jLabelDadosComprador = new javax.swing.JLabel();
+        jLabelDadosVendedor = new javax.swing.JLabel();
+        jLabelTotal = new javax.swing.JLabel();
+        jLabelData = new javax.swing.JLabel();
+        jLabelNumber = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTableTabelaProdutos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -63,65 +143,94 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(jTableTabelaProdutos);
 
         jLabel1.setText("Produtos comprados");
 
-        jLabel2.setText("Numero");
+        jLabelDadosPagamentos.setText("Pagamentos");
 
-        jLabel3.setText("Datas");
+        jLabelDadosComprador.setText("Comprador");
 
-        jLabel4.setText("Total");
+        jLabelDadosVendedor.setText("Dados do cliente");
 
-        jLabel5.setText("Dados do cliente");
+        jLabelTotal.setText("Total");
 
-        jLabel6.setText("Comprador");
+        jLabelData.setText("Datas");
 
-        jLabel7.setText("Pagamentos");
+        jLabelNumber.setText("Numero");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabelDadosPagamentos)
+                    .addComponent(jLabelData)
+                    .addComponent(jLabelTotal)
+                    .addComponent(jLabelDadosVendedor)
+                    .addComponent(jLabelDadosComprador)
+                    .addComponent(jLabelNumber))
+                .addContainerGap(98, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addComponent(jLabelNumber)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabelData)
+                .addGap(18, 18, 18)
+                .addComponent(jLabelDadosVendedor)
+                .addGap(22, 22, 22)
+                .addComponent(jLabelDadosComprador)
+                .addGap(27, 27, 27)
+                .addComponent(jLabelTotal)
+                .addGap(27, 27, 27)
+                .addComponent(jLabelDadosPagamentos)
+                .addContainerGap(27, Short.MAX_VALUE))
+        );
+
+        jLabel2.setText("Detalhes da compra");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel7)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 272, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 414, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 487, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(60, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel7)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
-        pack();
+        setSize(new java.awt.Dimension(735, 469));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     /**
@@ -169,12 +278,14 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabelDadosComprador;
+    private javax.swing.JLabel jLabelDadosPagamentos;
+    private javax.swing.JLabel jLabelDadosVendedor;
+    private javax.swing.JLabel jLabelData;
+    private javax.swing.JLabel jLabelNumber;
+    private javax.swing.JLabel jLabelTotal;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTableTabelaProdutos;
     // End of variables declaration//GEN-END:variables
 }
