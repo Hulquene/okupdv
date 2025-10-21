@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.SupplierDao;
-import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.data.dao.SupplierDao;
+import com.okutonda.okudpdv.data.entities.Supplier;
 import java.util.List;
 
 /**

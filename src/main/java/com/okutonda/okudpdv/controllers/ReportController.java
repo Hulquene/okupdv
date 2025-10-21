@@ -4,7 +4,7 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ReportDao;
+import com.okutonda.okudpdv.data.dao.ReportDao;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.UtillFiles;
 import java.io.IOException;

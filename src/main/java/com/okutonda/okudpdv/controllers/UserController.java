@@ -4,9 +4,9 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.UserDao;
+import com.okutonda.okudpdv.data.dao.UserDao;
 import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.models.User;
+import com.okutonda.okudpdv.data.entities.User;
 import java.util.List;
 
 /**

@@ -5,9 +5,9 @@
 package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.controllers.PurchaseController;
-import com.okutonda.okudpdv.models.Product;
-import com.okutonda.okudpdv.models.Purchase;
-import com.okutonda.okudpdv.models.PurchaseItem;
+import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.Purchase;
+import com.okutonda.okudpdv.data.entities.PurchaseItem;
 import java.math.BigDecimal;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;

@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ExpenseCategoryDao;
-import com.okutonda.okudpdv.models.ExpenseCategory;
+import com.okutonda.okudpdv.data.dao.ExpenseCategoryDao;
+import com.okutonda.okudpdv.data.entities.ExpenseCategory;
 
 import java.util.List;
 

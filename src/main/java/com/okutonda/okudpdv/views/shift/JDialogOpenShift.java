@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.shift;
 
 import com.okutonda.okudpdv.controllers.ShiftController;
-import com.okutonda.okudpdv.models.Shift;
+import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.utilities.ShiftSession;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Util;

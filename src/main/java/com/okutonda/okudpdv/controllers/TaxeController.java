@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.TaxeDao;
-import com.okutonda.okudpdv.models.Taxes;
+import com.okutonda.okudpdv.data.dao.TaxeDao;
+import com.okutonda.okudpdv.data.entities.Taxes;
 import java.util.List;
 
 /**

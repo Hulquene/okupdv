@@ -4,8 +4,19 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.*;
-import com.okutonda.okudpdv.models.*;
+import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.Clients;
+import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.ExportSaftFat;
+import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.dao.ProductDao;
+import com.okutonda.okudpdv.data.dao.ProductOrderDao;
+import com.okutonda.okudpdv.data.dao.SettingsDao;
+import com.okutonda.okudpdv.data.dao.ClientDao;
+import com.okutonda.okudpdv.data.dao.PaymentDao;
+import com.okutonda.okudpdv.data.dao.OrderDao;
+import com.okutonda.okudpdv.data.dao.SaftFatDao;
 import com.okutonda.okudpdv.utilities.UserSession;
 
 import javax.xml.stream.XMLOutputFactory;

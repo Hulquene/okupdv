@@ -217,3 +217,23 @@ Venda = apenas um dos casos que geram movimentos.
 A lógica certa é: qualquer entrada ou saída de stock → criar um registo em stock_movements.
 
 Assim, stock atual = soma de todos os movimentos.
+
+
+
+
+
+
+com.okutonda.okudpdv
+├── app/                  → ponto de arranque / lógica global
+├── data/
+│   ├── connection/        → conexões, pool, inicialização (substitui jdbc)
+│   │   ├── DatabaseProvider.java
+│   │   ├── ConnectionConfig.java (futuro)
+│   │   └── DatabaseBootProbe.java
+│   ├── dao/               → DAOs refatorados que usam DatabaseProvider
+│   └── entities/          → modelos (Clients, Products, etc.) futuramente movidos de `models`
+├── controllers/
+├── ui/
+├── views/
+├── utilities/
+└── Okudpdv.java

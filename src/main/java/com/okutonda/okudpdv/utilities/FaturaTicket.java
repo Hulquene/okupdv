@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.utilities;
 
-import com.okutonda.okudpdv.models.Order;
-import com.okutonda.okudpdv.models.ProductOrder;
+import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.entities.ProductOrder;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;

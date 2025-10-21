@@ -4,9 +4,9 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.PurchaseDao;
-import com.okutonda.okudpdv.models.InvoiceType;
-import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.data.dao.PurchaseDao;
+import com.okutonda.okudpdv.data.entities.InvoiceType;
+import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.utilities.UserSession;
 import java.math.BigDecimal;
 import java.sql.SQLException;

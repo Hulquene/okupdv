@@ -4,17 +4,17 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.OrderDao;
-import com.okutonda.okudpdv.dao.PaymentDao;
-import com.okutonda.okudpdv.dao.ProductDao;
-import com.okutonda.okudpdv.dao.ProductOrderDao;
-import com.okutonda.okudpdv.dao.StockMovementDao;
+import com.okutonda.okudpdv.data.dao.OrderDao;
+import com.okutonda.okudpdv.data.dao.PaymentDao;
+import com.okutonda.okudpdv.data.dao.ProductDao;
+import com.okutonda.okudpdv.data.dao.ProductOrderDao;
+import com.okutonda.okudpdv.data.dao.StockMovementDao;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.models.Order;
-import com.okutonda.okudpdv.models.Payment;
-import com.okutonda.okudpdv.models.PaymentStatus;
-import com.okutonda.okudpdv.models.ProductOrder;
-import com.okutonda.okudpdv.models.StockMovement;
+import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
+import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.UtilDate;
 import com.okutonda.okudpdv.utilities.UtilSaft;

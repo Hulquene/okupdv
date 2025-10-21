@@ -6,8 +6,8 @@ package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.CountryController;
-import com.okutonda.okudpdv.dao.ClientDao;
-import com.okutonda.okudpdv.models.Clients;
+import com.okutonda.okudpdv.data.dao.ClientDao;
+import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.utilities.Utilities;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;

@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.BoxDao;
-import com.okutonda.okudpdv.models.Box;
+import com.okutonda.okudpdv.data.dao.BoxDao;
+import com.okutonda.okudpdv.data.entities.Box;
 import com.okutonda.okudpdv.utilities.UserSession;
 import java.util.List;
 

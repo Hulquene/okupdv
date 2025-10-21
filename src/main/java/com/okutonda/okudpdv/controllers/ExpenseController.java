@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ExpenseDao;
-import com.okutonda.okudpdv.models.Expense;
+import com.okutonda.okudpdv.data.dao.ExpenseDao;
+import com.okutonda.okudpdv.data.entities.Expense;
 
 import java.util.List;
 

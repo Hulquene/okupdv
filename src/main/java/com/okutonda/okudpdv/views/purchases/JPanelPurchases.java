@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.purchases;
 
 import com.okutonda.okudpdv.controllers.PurchaseController;
-import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.views.pdv.JDialogDetailPurchase;
 import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
 import java.util.List;

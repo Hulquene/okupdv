@@ -4,7 +4,7 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.models.Options;
+import com.okutonda.okudpdv.data.entities.Options;
 import com.okutonda.okudpdv.utilities.CompanySession;
 import java.time.LocalDate;
 import java.time.Period;

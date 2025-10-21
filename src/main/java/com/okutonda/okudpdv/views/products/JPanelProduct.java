@@ -6,8 +6,8 @@ package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.SupplierController;
-import com.okutonda.okudpdv.models.Product;
-import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
 import java.util.List;
 import javax.swing.JOptionPane;

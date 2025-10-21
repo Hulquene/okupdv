@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ShiftDao;
-import com.okutonda.okudpdv.models.Shift;
+import com.okutonda.okudpdv.data.dao.ShiftDao;
+import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.utilities.ShiftSession;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Util;

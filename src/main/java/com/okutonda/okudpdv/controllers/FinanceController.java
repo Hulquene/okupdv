@@ -4,11 +4,11 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.FinanceDao;
-import com.okutonda.okudpdv.models.Expense;
-import com.okutonda.okudpdv.models.Order;
-import com.okutonda.okudpdv.models.Payment;
-import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.data.dao.FinanceDao;
+import com.okutonda.okudpdv.data.entities.Expense;
+import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.utilities.UserSession;
 
 import java.util.List;

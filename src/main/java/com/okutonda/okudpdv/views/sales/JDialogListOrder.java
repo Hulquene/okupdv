@@ -6,8 +6,8 @@ package com.okutonda.okudpdv.views.sales;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
-import com.okutonda.okudpdv.models.Order;
-import com.okutonda.okudpdv.models.Purchase;
+import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.utilities.UtilSales;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;

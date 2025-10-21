@@ -5,8 +5,8 @@
 package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.controllers.ProductController;
-import com.okutonda.okudpdv.dao.ProductDao;
-import com.okutonda.okudpdv.models.Product;
+import com.okutonda.okudpdv.data.dao.ProductDao;
+import com.okutonda.okudpdv.data.entities.Product;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 

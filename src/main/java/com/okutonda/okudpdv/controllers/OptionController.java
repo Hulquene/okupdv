@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.OptionsDao;
-import com.okutonda.okudpdv.models.Options;
+import com.okutonda.okudpdv.data.dao.OptionsDao;
+import com.okutonda.okudpdv.data.entities.Options;
 
 /**
  *

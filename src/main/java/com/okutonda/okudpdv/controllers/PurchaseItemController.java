@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.PurchaseItemDao;
-import com.okutonda.okudpdv.models.PurchaseItem;
+import com.okutonda.okudpdv.data.dao.PurchaseItemDao;
+import com.okutonda.okudpdv.data.entities.PurchaseItem;
 
 import java.util.List;
 

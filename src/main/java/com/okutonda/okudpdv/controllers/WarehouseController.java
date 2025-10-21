@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.WarehouseDao;
-import com.okutonda.okudpdv.models.Warehouse;
+import com.okutonda.okudpdv.data.dao.WarehouseDao;
+import com.okutonda.okudpdv.data.entities.Warehouse;
 import java.util.List;
 
 /**

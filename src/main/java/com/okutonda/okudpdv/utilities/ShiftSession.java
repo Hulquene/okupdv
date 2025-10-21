@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.utilities;
 
-import com.okutonda.okudpdv.models.Shift;
-import com.okutonda.okudpdv.models.User;
+import com.okutonda.okudpdv.data.entities.Shift;
+import com.okutonda.okudpdv.data.entities.User;
 
 /**
  *

@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.Orders;
 
 import com.okutonda.okudpdv.controllers.OrderController;
-import com.okutonda.okudpdv.models.Order;
+import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.utilities.UtilSales;
 import com.okutonda.okudpdv.views.sales.JDialogGenerateNoteCredit;
 import java.time.LocalDate;

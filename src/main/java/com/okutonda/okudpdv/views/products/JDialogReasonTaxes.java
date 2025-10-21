@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.ReasonTaxeController;
-import com.okutonda.okudpdv.models.ReasonTaxes;
+import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;

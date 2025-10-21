@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.utilities;
 
-import com.okutonda.okudpdv.dao.OrderDao;
-import com.okutonda.okudpdv.models.Order;
+import com.okutonda.okudpdv.data.dao.OrderDao;
+import com.okutonda.okudpdv.data.entities.Order;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.PrinterException;

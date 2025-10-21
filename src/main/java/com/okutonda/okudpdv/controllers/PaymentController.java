@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.PaymentDao;
-import com.okutonda.okudpdv.models.Payment;
+import com.okutonda.okudpdv.data.dao.PaymentDao;
+import com.okutonda.okudpdv.data.entities.Payment;
 import java.util.List;
 
 /**

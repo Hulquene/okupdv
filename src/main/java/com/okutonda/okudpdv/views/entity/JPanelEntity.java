@@ -6,9 +6,9 @@ package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.SupplierController;
-import com.okutonda.okudpdv.dao.ClientDao;
-import com.okutonda.okudpdv.models.Clients;
-import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.data.dao.ClientDao;
+import com.okutonda.okudpdv.data.entities.Clients;
+import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.ui.TemaCleaner;
 import com.okutonda.okudpdv.ui.TemaCores;
 import com.okutonda.okudpdv.utilities.UserSession;

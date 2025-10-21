@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.GroupsProductController;
-import com.okutonda.okudpdv.models.GroupsProduct;
+import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;

@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.ClientController;
-import com.okutonda.okudpdv.models.Clients;
+import com.okutonda.okudpdv.data.entities.Clients;
 
 /**
  *

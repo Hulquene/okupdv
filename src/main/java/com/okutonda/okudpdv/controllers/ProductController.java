@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ProductDao;
-import com.okutonda.okudpdv.models.Product;
+import com.okutonda.okudpdv.data.dao.ProductDao;
+import com.okutonda.okudpdv.data.entities.Product;
 import java.math.BigDecimal;
 import java.util.List;
 

@@ -4,9 +4,9 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.PurchaseItemDao;
-import com.okutonda.okudpdv.dao.StockMovementDao;
-import com.okutonda.okudpdv.models.StockMovement;
+import com.okutonda.okudpdv.data.dao.PurchaseItemDao;
+import com.okutonda.okudpdv.data.dao.StockMovementDao;
+import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.UtilDate;
 

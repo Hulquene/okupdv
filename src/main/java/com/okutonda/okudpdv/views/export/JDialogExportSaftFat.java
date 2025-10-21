@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.export;
 
 import com.okutonda.okudpdv.controllers.ExportSaftFatController;
-import com.okutonda.okudpdv.models.ExportSaftFat;
+import com.okutonda.okudpdv.data.entities.ExportSaftFat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;

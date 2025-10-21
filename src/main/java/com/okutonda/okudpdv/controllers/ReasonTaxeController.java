@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.ReasonTaxeDao;
-import com.okutonda.okudpdv.models.ReasonTaxes;
+import com.okutonda.okudpdv.data.dao.ReasonTaxeDao;
+import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import java.util.List;
 
 /**

@@ -4,8 +4,8 @@
  */
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.dao.CountryDao;
-import com.okutonda.okudpdv.models.Countries;
+import com.okutonda.okudpdv.data.dao.CountryDao;
+import com.okutonda.okudpdv.data.entities.Countries;
 import java.util.List;
 
 /**

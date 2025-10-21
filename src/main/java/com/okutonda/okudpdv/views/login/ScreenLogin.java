@@ -8,7 +8,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.models.User;
+import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.ui.TemaCleaner;
 import com.okutonda.okudpdv.ui.TemaCores;
 import com.okutonda.okudpdv.ui.TemaUI;

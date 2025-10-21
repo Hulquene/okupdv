@@ -6,9 +6,9 @@ package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.SupplierController;
-import com.okutonda.okudpdv.dao.SupplierDao;
-import com.okutonda.okudpdv.models.Countries;
-import com.okutonda.okudpdv.models.Supplier;
+import com.okutonda.okudpdv.data.dao.SupplierDao;
+import com.okutonda.okudpdv.data.entities.Countries;
+import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.utilities.UserSession;
 import com.okutonda.okudpdv.utilities.Utilities;
 import java.awt.event.KeyEvent;

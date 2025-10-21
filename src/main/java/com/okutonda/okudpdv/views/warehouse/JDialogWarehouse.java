@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.warehouse;
 
 import com.okutonda.okudpdv.controllers.WarehouseController;
-import com.okutonda.okudpdv.models.Warehouse;
+import com.okutonda.okudpdv.data.entities.Warehouse;
 import com.okutonda.okudpdv.utilities.Utilities;
 import java.util.List;
 import javax.swing.JOptionPane;
