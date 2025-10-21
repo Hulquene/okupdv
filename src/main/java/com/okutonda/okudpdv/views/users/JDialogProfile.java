@@ -196,7 +196,7 @@ public class JDialogProfile extends javax.swing.JDialog {
         // TODO add your handling code here:
 //        String code = jPasswordFieldCodeManager.getText();
         String code = new String(jPasswordFieldCodeManager.getPassword());
-        userController.updateCodeManager(code, session.getUser().getId());
+        userController.updateManagerCode(code, session.getUser().getId());
     }//GEN-LAST:event_jButtonSaveCodeManagerActionPerformed
 
     private void jButtonUpdatePasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonUpdatePasswordActionPerformed

@@ -228,7 +228,7 @@ public class PaymentDao {
             Payment obj = new Payment();
 
             // relacionamentos (usa teus DAOs atuais)
-            User user = new UserDao().getId(rs.getInt("userId"));
+            User user = new UserDao().findById(rs.getInt("userId"));
             Clients client = new ClientDao().getId(rs.getInt("clientId"));
 
             // ENUMs

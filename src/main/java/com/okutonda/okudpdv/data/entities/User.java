@@ -13,7 +13,8 @@ public class User {
     private int id;
     private String name;
     private String email;
-    private String nif;
+    private String nif;    
+    private String code;
     private String profile;
     private String birthdate;
     private String address;
@@ -37,6 +38,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getEmail() {

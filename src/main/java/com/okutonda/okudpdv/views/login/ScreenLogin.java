@@ -51,7 +51,7 @@ public class ScreenLogin extends javax.swing.JFrame {
             jLabelStatusBdConect.setText("Desconectado");
         }
         jLabelNameCompany.setText(companySession.getName());
-        List<User> response = userController.get("");
+        List<User> response = userController.getAll();
         if (response == null || response.isEmpty()) {
             JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
             jdInstallUser.setVisible(true);

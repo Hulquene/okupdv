@@ -212,7 +212,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             char[] password = passwordFild.getPassword();
             String paString = new String(password);
             if (!paString.isEmpty()) {
-                statusClose = userController.validateManager(paString);
+                statusClose = userController.validateManagerCode(paString);
                 System.out.println("codigo do supervisor:" + statusClose);
                 if (statusClose == true) {
                     dispose();

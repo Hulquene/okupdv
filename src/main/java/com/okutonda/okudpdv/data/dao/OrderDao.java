@@ -269,7 +269,7 @@ public class OrderDao {
             client = clientDao.getId(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
-            seller = sellerDao.getId(rs.getInt("user_id"));
+            seller = sellerDao.findById(rs.getInt("user_id"));
 
             List<ProductOrder> products;
             ProductOrderDao pDao = new ProductOrderDao();
@@ -308,7 +308,7 @@ public class OrderDao {
             client = clientDao.getId(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
-            seller = sellerDao.getId(rs.getInt("user_id"));
+            seller = sellerDao.findById(rs.getInt("user_id"));
 
 //            List<ProductOrder> products;
 //            ProductOrderDao pDao = new ProductOrderDao();

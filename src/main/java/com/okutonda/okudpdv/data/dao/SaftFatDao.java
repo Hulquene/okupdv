@@ -222,7 +222,7 @@ public class SaftFatDao {
         if (!rs.wasNull()) {
             // carrega o utilizador via UserDao
             UserDao udao = new UserDao();
-            User u = udao.getId(exportedBy);
+            User u = udao.findById(exportedBy);
             m.setUser(u);
         } else {
             m.setUser(null);

@@ -270,7 +270,7 @@ public class StockDao {
             
             User user;
             UserDao uDao = new UserDao();
-            user = uDao.getId(rs.getInt("user_id"));
+            user = uDao.findById(rs.getInt("user_id"));
 
             obj.setId(rs.getInt("id"));
             obj.setType(rs.getString("type"));

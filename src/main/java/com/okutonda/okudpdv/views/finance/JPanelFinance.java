@@ -465,7 +465,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
             jComboBoxPaymentFromClient.addItem(item);
             jComboBoxSalesFromClient.addItem(item);
         }
-        List<User> listU = userController.get("");
+        List<User> listU = userController.getAll();
         jComboBoxPaymentFromClient.removeAllItems();
         for (User item : listU) {
             jComboBoxFlowShiftFromSeller.addItem(item);

@@ -124,7 +124,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
             jComboBoxSeletecBox.addItem(item.getName());
         }
 
-        List<User> listW = userController.get("");
+        List<User> listW = userController.getAll();
         jComboBoxSelectedUser.removeAllItems();
         jComboBoxSelectedManager.removeAllItems();
         for (User item : listW) {

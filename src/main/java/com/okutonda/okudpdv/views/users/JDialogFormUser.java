@@ -54,7 +54,7 @@ public class JDialogFormUser extends javax.swing.JDialog {
     }
 
     public void setUser(int id) {
-        this.user = userController.getId(id);
+        this.user = userController.getById(id);
 //        setFormUser(user);
     }
 
@@ -509,21 +509,21 @@ public class JDialogFormUser extends javax.swing.JDialog {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String name = jTextFieldName.getText();
             User cModel;
-            cModel = userController.getName(name);
-            if (cModel.getName() != null) {
-                jTextFieldID.setText(Integer.toString(cModel.getId()));
-                jTextFieldNif.setText(cModel.getNif());
-                jTextFieldName.setText(cModel.getName());
-                jTextFieldEmail.setText(cModel.getEmail());
-                jTextFieldCity.setText(cModel.getCity());
-                jTextFieldCountry.setText(cModel.getCountry());
-                jTextFieldAddress.setText(cModel.getAddress());
-                jTextFieldPhone.setText(cModel.getPhone());
-                jComboBoxProfile.setSelectedItem(cModel.getProfile());
-                jComboBoxStatus.setSelectedItem(cModel.getStatus());
-            } else {
-                JOptionPane.showMessageDialog(null, "usuario nao encontrado!");
-            }
+//            cModel = userController.getName(name);
+//            if (cModel.getName() != null) {
+//                jTextFieldID.setText(Integer.toString(cModel.getId()));
+//                jTextFieldNif.setText(cModel.getNif());
+//                jTextFieldName.setText(cModel.getName());
+//                jTextFieldEmail.setText(cModel.getEmail());
+//                jTextFieldCity.setText(cModel.getCity());
+//                jTextFieldCountry.setText(cModel.getCountry());
+//                jTextFieldAddress.setText(cModel.getAddress());
+//                jTextFieldPhone.setText(cModel.getPhone());
+//                jComboBoxProfile.setSelectedItem(cModel.getProfile());
+//                jComboBoxStatus.setSelectedItem(cModel.getStatus());
+//            } else {
+//                JOptionPane.showMessageDialog(null, "usuario nao encontrado!");
+//            }
 
         }
     }//GEN-LAST:event_jTextFieldNameKeyPressed
@@ -535,21 +535,21 @@ public class JDialogFormUser extends javax.swing.JDialog {
     private void jButtonSearchClientFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSearchClientFormActionPerformed
         // TODO add your handling code here:
         String name = jTextFieldName.getText();
-        User cModel = userController.getName(name);
-        if (cModel.getName() != null) {
-            jTextFieldID.setText(Integer.toString(cModel.getId()));
-            jTextFieldNif.setText(cModel.getNif());
-            jTextFieldName.setText(cModel.getName());
-            jFormattedTextFieldBirthdate.setText(cModel.getBirthdate());
-            jTextFieldEmail.setText(cModel.getEmail());
-            jTextFieldAddress.setText(cModel.getAddress());
-            jTextFieldPhone.setText(cModel.getPhone());
-            jComboBoxProfile.setSelectedItem(cModel.getProfile());
-            jComboBoxStatus.setSelectedItem(cModel.getStatus());
-//            jComboBoxCountry.setSelectedItem(cModel.getCountry());
-        } else {
-            JOptionPane.showMessageDialog(null, "Cliente nao encontrado!");
-        }
+//        User cModel = userController.getName(name);
+//        if (cModel.getName() != null) {
+//            jTextFieldID.setText(Integer.toString(cModel.getId()));
+//            jTextFieldNif.setText(cModel.getNif());
+//            jTextFieldName.setText(cModel.getName());
+//            jFormattedTextFieldBirthdate.setText(cModel.getBirthdate());
+//            jTextFieldEmail.setText(cModel.getEmail());
+//            jTextFieldAddress.setText(cModel.getAddress());
+//            jTextFieldPhone.setText(cModel.getPhone());
+//            jComboBoxProfile.setSelectedItem(cModel.getProfile());
+//            jComboBoxStatus.setSelectedItem(cModel.getStatus());
+////            jComboBoxCountry.setSelectedItem(cModel.getCountry());
+//        } else {
+//            JOptionPane.showMessageDialog(null, "Cliente nao encontrado!");
+//        }
     }//GEN-LAST:event_jButtonSearchClientFormActionPerformed
 
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
@@ -561,11 +561,11 @@ public class JDialogFormUser extends javax.swing.JDialog {
             int id = jTextFieldID.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldID.getText());
             status = false;
             if (id > 0) {
-                userController.add(cModel, id);
+                userController.save(cModel, id);
                 status = true;
                 System.out.println("atualizar");
             } else {
-                userController.add(cModel, 0);
+                userController.save(cModel, 0);
 
                 System.out.println("Adicionar");
                 status = true;

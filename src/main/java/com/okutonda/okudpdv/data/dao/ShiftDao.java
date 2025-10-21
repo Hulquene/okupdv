@@ -248,7 +248,7 @@ public class ShiftDao {
             Shift obj = new Shift();
             User user;
             UserDao uDao = new UserDao();
-            user = uDao.getId(rs.getInt("user_id"));
+            user = uDao.findById(rs.getInt("user_id"));
             obj.setId(rs.getInt("id"));
             obj.setCode(rs.getString("code"));
             obj.setHash(rs.getString("hash"));

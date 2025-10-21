@@ -22,7 +22,7 @@ public final class JPanelUser extends javax.swing.JPanel {
     UserSession session;
 
     public void listUsers() {
-        List<User> list = userController.get("");
+        List<User> list = userController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableUsers.getModel();
         data.setNumRows(0);
         for (User c : list) {
@@ -365,10 +365,10 @@ public final class JPanelUser extends javax.swing.JPanel {
         } finally {
             System.out.println("jTableUsers id:" + value);
             if (value > 0) {
-                User userD = userController.getId(value);
+                User userD = userController.getById(value);
                 int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja deletar," + userD.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
                 if (sair == JOptionPane.YES_OPTION) {
-                    if (userController.deleteId(userD.getId())) {
+                    if (userController.deleteById(userD.getId())) {
                         JOptionPane.showMessageDialog(null, "Usuario excluido com Sucesso!!");
                         listUsers();
                     }
@@ -404,7 +404,7 @@ public final class JPanelUser extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Selecione um usuario na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (value > 0) {
-                User user = userController.getId(value);
+                User user = userController.getById(value);
                 JOptionPane.showMessageDialog(null, "Usuario :" + user.getName() + "\n Perfil:" + user.getProfile() + "\n Email:" + user.getEmail() + "\n Endereço:" + user.getAddress());
 //                JDialogFormUser formUser = new JDialogFormUser(null, true);
 //                formUser.setUser(value);

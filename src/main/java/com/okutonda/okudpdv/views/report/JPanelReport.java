@@ -851,7 +851,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 
     private void jComboBoxReportSalesOrderSellerAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jComboBoxReportSalesOrderSellerAncestorAdded
         // TODO add your handling code here:
-        List<User> list = sellerController.get("");
+        List<User> list = sellerController.getAll();
         jComboBoxReportSalesOrderSeller.removeAllItems();
         for (User item : list) {
             jComboBoxReportSalesOrderSeller.addItem(item);
