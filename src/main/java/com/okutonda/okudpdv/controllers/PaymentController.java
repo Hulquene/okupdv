@@ -1,73 +1,116 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.entities.Payment;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
+ * Controller responsável pela lógica de alto nível dos pagamentos.
  *
- * @author kenny
+ * Atua como intermediário entre a interface e o DAO, seguindo o padrão de
+ * arquitetura baseado em BaseDao + DatabaseProvider.
+ *
+ * Fornece métodos para CRUD, filtragem e relatórios.
+ *
+ * @author …
  */
 public class PaymentController {
 
-    PaymentDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final PaymentDao dao;
 
     public PaymentController() {
         this.dao = new PaymentDao();
-//        this.prodOrderDao = new ProductOrderDao();
     }
 
-//    public Boolean add(Payment payment, int id) {
-//        boolean status = false;
-//        if (id == 0) {
-//            status = dao.add(payment, payment.getInvoiceId());
-//        } else {
-//            status = dao.edit(payment, id);
-//        }
-//
-////        if (status == true) {
-////            Payment responde = dao.searchFromName(payment.getName());
-//////            for (ProductOrder object : order.getProducts()) {
-//////                prodOrderDao.add(object);
-//////            }
-////            return responde;
-////        }
-//        return status;
-//    }
-    public Boolean add(Payment payment, int invoiceId) {
-        boolean status = false;
-        if (invoiceId > 0) {
-            status = dao.add(payment, invoiceId);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    /**
+     * Adiciona um novo pagamento vinculado a uma fatura/ordem.
+     *
+     * @param payment objeto Payment preenchido
+     * @param invoiceId id da fatura ou ordem associada
+     * @return true se inserido com sucesso
+     */
+    public boolean add(Payment payment, int invoiceId) {
+        if (invoiceId <= 0 || payment == null) {
+            System.err.println("[PaymentController] Falha ao adicionar: dados inválidos.");
+            return false;
         }
-        return status;
+        return dao.add(payment, invoiceId);
     }
 
-    public Boolean edit(Payment payment, int id) {
-        boolean status = false;
-        if (id > 0) {
-            status = dao.edit(payment, id);
+    /**
+     * Atualiza um pagamento existente.
+     *
+     * @param payment objeto Payment com ID válido
+     * @return true se atualizado
+     */
+    public boolean edit(Payment payment) {
+        if (payment == null || payment.getId() <= 0) {
+            System.err.println("[PaymentController] Falha ao editar: ID inválido.");
+            return false;
         }
-        return status;
+        return dao.update(payment);
     }
 
-    public Payment getId(int id) {
-        return dao.getId(id);
-    }
-
-    public Boolean deleteId(int id) {
+    /**
+     * Exclui um pagamento pelo ID.
+     *
+     * @param id identificador do pagamento
+     * @return true se excluído
+     */
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[PaymentController] ID inválido para exclusão.");
+            return false;
+        }
         return dao.delete(id);
     }
 
+    // ==========================================================
+    // 🔹 CONSULTAS
+    // ==========================================================
+    /**
+     * Obtém pagamento por ID.
+     */
+    public Payment getById(int id) {
+        return dao.findById(id);
+    }
+
+    /**
+     * Obtém pagamento pela referência (ex: código de transação).
+     */
+    public Payment getByReference(String ref) {
+        return dao.findByReference(ref);
+    }
+
+    /**
+     * Lista todos os pagamentos.
+     */
+    public List<Payment> getAll() {
+        return dao.findAll();
+    }
+
+    /**
+     * Lista pagamentos com cláusula WHERE customizada.
+     */
     public List<Payment> get(String where) {
         return dao.list(where);
     }
 
+    /**
+     * Filtra pagamentos por texto (referência, data, prefixo, descrição, etc.).
+     */
     public List<Payment> filter(String txt) {
         return dao.filter(txt);
+    }
+
+    /**
+     * Filtra pagamentos entre duas datas (ex: para relatórios financeiros).
+     */
+    public List<Payment> filterDate(LocalDate from, LocalDate to) {
+        return dao.filterDate(from, to);
     }
 }

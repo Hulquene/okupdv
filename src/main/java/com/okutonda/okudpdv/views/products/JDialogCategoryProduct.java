@@ -38,7 +38,7 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
     }
 
     public void listGroup() {
-        List<GroupsProduct> list = groupController.get("");
+        List<GroupsProduct> list = groupController.getAll();
         loadListGroup(list);
     }
 
@@ -257,9 +257,9 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
                 int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
 //            boolean response;
                 if (id == 0) {
-                    status = groupController.add(cModel, 0);
+                    status = groupController.save(cModel, 0);
                 } else {
-                    status = groupController.add(cModel, id);
+                    status = groupController.save(cModel, id);
                 }
 
                 if (status == true) {

@@ -459,7 +459,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
 //    }
     public void loadCombobox() {
 
-        List<Clients> listC = clientController.get("");
+        List<Clients> listC = clientController.getAll();
         jComboBoxPaymentFromClient.removeAllItems();
         for (Clients item : listC) {
             jComboBoxPaymentFromClient.addItem(item);

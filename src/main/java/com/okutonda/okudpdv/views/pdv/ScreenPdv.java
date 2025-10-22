@@ -157,7 +157,7 @@ public class ScreenPdv extends javax.swing.JFrame {
             // 1) Cliente padrão (se não selecionado)
             if (clientSelected == null) {
                 ClientDao clientDao = new ClientDao();
-                clientSelected = clientDao.getClientDefault();
+                clientSelected = clientDao.getDefaultClient();
                 if (clientSelected == null) {
                     JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -358,7 +358,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         }
 
         // 1) Buscar produto
-        Product prod = productController.getFromBarCode(bc);
+        Product prod = productController.getByBarcode(bc);
         if (prod == null || prod.getId() <= 0 || prod.getDescription() == null) {
             JOptionPane.showMessageDialog(this, "Produto não encontrado para o código informado.", "Atenção", JOptionPane.ERROR_MESSAGE);
             return false;
@@ -546,7 +546,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     public void listProduts(List<Product> list) {
         if (list == null) {
-            list = productController.getForPDV(null);
+            list = productController.listForPDV(null);
         }
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
@@ -573,7 +573,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 c.getDescription(),
                 c.getPrice(),
                 c.getQty(),
-                productController.calculateTotalProduct(c.getProduct(), c.getQty())
+                productController.calculateTotal(c.getProduct(), c.getQty())
 //                c.getQty() * c.getPrice()
             }
             );
@@ -581,7 +581,7 @@ public class ScreenPdv extends javax.swing.JFrame {
     }
 
     public void filterListProducts(String txt) {
-        listProduts(productController.getForPDV(txt));
+        listProduts(productController.listForPDV(txt));
     }
 
 //    public void listClients() {
@@ -646,7 +646,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     public void clearClient() {
         ClientDao clientDao = new ClientDao();
-        clientSelected = clientDao.getClientDefault();
+        clientSelected = clientDao.getDefaultClient();
         jTextFieldNifClient.setText(clientSelected.getNif());
         jLabelNameClienteSelected.setText(clientSelected.getName());
     }
@@ -1608,7 +1608,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         // TODO add your handling code here:
         String nif = jTextFieldNifClient.getText();
         ClientDao cDao = new ClientDao();
-        clientSelected = cDao.searchFromNif(nif);
+        clientSelected = cDao.findByNif(nif);
         if (clientSelected.getName() != null) {
             jTextFieldNifClient.setText(clientSelected.getNif());
             jLabelNameClienteSelected.setText(clientSelected.getName());

@@ -132,7 +132,7 @@ public class JDialogFormStockMovement extends javax.swing.JDialog {
             case "TRANSFERENCIA":
                 // listar produtos ativos
                 ProductController pc = new ProductController();
-                List<Product> produtos = pc.getProducts();
+                List<Product> produtos = pc.listProducts();
                 for (Product prod : produtos) {
                     model.addRow(new Object[]{
                         prod.getId(),

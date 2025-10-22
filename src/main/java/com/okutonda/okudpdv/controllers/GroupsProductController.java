@@ -14,40 +14,62 @@ import java.util.List;
  */
 public class GroupsProductController {
 
-    GroupsProductDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final GroupsProductDao dao;
 
     public GroupsProductController() {
         this.dao = new GroupsProductDao();
     }
 
-    public GroupsProduct getId(int id) {
-        return dao.searchFromId(id);
-    }
-
-    public GroupsProduct getCode(String code) {
-        return dao.searchFromCode(code);
-    }
-
-    public List<GroupsProduct> filter(String txt) {
-        return dao.filter(txt);
-    }
-
-    public List<GroupsProduct> get(String where) {
-        return dao.list(where);
-    }
-
-    public Boolean add(GroupsProduct group, int id) {
-        boolean status;
+    // ======================
+    // 🔹 CRUD
+    // ======================
+    /**
+     * Cria ou atualiza grupo (id = 0 → cria, id > 0 → atualiza).
+     */
+    public boolean save(GroupsProduct group, int id) {
         if (id == 0) {
-            status = dao.add(group);
+            return dao.add(group);
         } else {
-            status = dao.edit(group, id);
+            group.setId(id);
+            return dao.update(group);
         }
-        return status;
     }
 
-    public Boolean deleteId(int id) {
+    /**
+     * Exclui grupo pelo ID.
+     */
+    public boolean deleteById(int id) {
         return dao.delete(id);
+    }
+
+    /**
+     * Busca grupo pelo ID.
+     */
+    public GroupsProduct getById(int id) {
+        return dao.findById(id);
+    }
+
+    /**
+     * Lista todos os grupos.
+     */
+    public List<GroupsProduct> getAll() {
+        return dao.findAll();
+    }
+
+    // ======================
+    // 🔹 Extras
+    // ======================
+    /**
+     * Busca grupo pelo código.
+     */
+    public GroupsProduct getByCode(String code) {
+        return dao.findByCode(code);
+    }
+
+    /**
+     * Filtra grupos por nome ou código.
+     */
+    public List<GroupsProduct> filter(String text) {
+        return dao.filter(text);
     }
 }

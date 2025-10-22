@@ -67,7 +67,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
 //        listOptionCompany.add(
 //                new Options("companyCountry", jComboBoxCountry.getSelectedItem().toString(), "1"));
         for (Options options : listOptionCompany) {
-            optionController.add(options);
+            optionController.saveOption(options);
         }
     }
 

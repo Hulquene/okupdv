@@ -182,7 +182,7 @@ public class ExportSaftFatController {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         for (Integer cid : customerIds) {
-            Clients c = clientDao.getId(cid);
+            Clients c = clientDao.findById(cid);
             if (c == null) {
                 continue;
             }
@@ -228,7 +228,7 @@ public class ExportSaftFatController {
             }
         }
         for (Integer pid : productIds) {
-            Product p = productDao.getId(pid);
+            Product p = productDao.findById(pid);
             if (p == null) {
                 continue;
             }

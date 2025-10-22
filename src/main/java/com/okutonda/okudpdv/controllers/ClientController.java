@@ -14,41 +14,80 @@ import java.util.List;
  */
 public class ClientController {
 
-    ClientDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final ClientDao dao;
 
     public ClientController() {
         this.dao = new ClientDao();
-//        this.prodOrderDao = new ProductOrderDao();
     }
 
-    public Clients add(Clients client, int id) {
+    // ===========================
+    // 🔹 CRUD e Regras de Negócio
+    // ===========================
+    /**
+     * Cria ou atualiza cliente (id = 0 → cria, id > 0 → atualiza).
+     */
+    public Clients save(Clients client, int id) {
         boolean status;
+
         if (id == 0) {
             status = dao.add(client);
         } else {
-            status = dao.edit(client, id);
+            client.setId(id);
+            status = dao.update(client);
         }
 
-        if (status == true) {
-            Clients responde = dao.searchFromName(client.getName());
-//            for (ProductOrder object : order.getProducts()) {
-//                prodOrderDao.add(object);
-//            }
-            return responde;
+        if (status) {
+            return dao.findByNif(client.getNif());
         }
         return null;
     }
 
-    public Clients getId(int id) {
-        return dao.getId(id);
-    }
-
-    public Boolean deleteId(int id) {
+    /**
+     * Exclui cliente pelo ID.
+     */
+    public boolean deleteById(int id) {
         return dao.delete(id);
     }
 
-    public List<Clients> get(String where) {
-        return dao.list(where);
+    /**
+     * Busca cliente pelo ID.
+     */
+    public Clients getById(int id) {
+        return dao.findById(id);
+    }
+
+    /**
+     * Lista todos os clientes.
+     */
+    public List<Clients> getAll() {
+        return dao.findAll();
+    }
+
+    /**
+     * Filtra clientes por nome, NIF ou cidade.
+     */
+    public List<Clients> filter(String text) {
+        return dao.filter(text);
+    }
+
+    /**
+     * Retorna o cliente padrão (isdefault = 1).
+     */
+    public Clients getDefaultClient() {
+        return dao.getDefaultClient();
+    }
+
+    /**
+     * Busca cliente pelo nome exato.
+     */
+    public Clients getByName(String name) {
+        return dao.findByName(name);
+    }
+
+    /**
+     * Busca cliente pelo NIF.
+     */
+    public Clients getByNif(String nif) {
+        return dao.findByNif(nif);
     }
 }

@@ -64,7 +64,7 @@ public class JDialogFormClient extends javax.swing.JDialog {
     }
 
     public void setClient(int id) {
-        this.client = clientController.getId(id);
+        this.client = clientController.getById(id);
 //        setFormUser(user);
     }
 
@@ -428,7 +428,7 @@ public class JDialogFormClient extends javax.swing.JDialog {
             Clients cModel;
             // cModel = new Clients();
             ClientDao cDao = new ClientDao();
-            cModel = cDao.searchFromName(name);
+            cModel = cDao.findByName(name);
             if (cModel.getName() != null) {
                 jTextFieldIdClient.setText(Integer.toString(cModel.getId()));
                 jTextFieldNifClient.setText(cModel.getNif());
@@ -465,11 +465,11 @@ public class JDialogFormClient extends javax.swing.JDialog {
             int id = jTextFieldIdClient.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldIdClient.getText());
             status = false;
             if (id > 0) {
-                clientController.add(cModel, id);
+                clientController.save(cModel, id);
                 status = true;
                 System.out.println("atualizar");
             } else {
-                clientController.add(cModel, 0);
+                clientController.save(cModel, 0);
 
                 System.out.println("Adicionar");
                 status = true;

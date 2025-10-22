@@ -13,7 +13,6 @@ import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.ui.TemaCores;
-import com.okutonda.okudpdv.ui.TemaUI;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -133,7 +132,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     private void loadComboBoxProdutosCompra() {
         jComboBoxListProduto.removeAllItems(); // limpa primeiro
 
-        List<Product> produtos = productController.getProducts();
+        List<Product> produtos = productController.listProducts();
         for (Product p : produtos) {
             jComboBoxListProduto.addItem(p);
         }

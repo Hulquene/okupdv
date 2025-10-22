@@ -30,7 +30,7 @@ public class JDialogFormStock extends javax.swing.JDialog {
     }
 
     public void listProducts() {
-        List<Product> list = productController.getProducts();
+        List<Product> list = productController.listProducts();
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -46,7 +46,7 @@ public class JDialogFormStock extends javax.swing.JDialog {
 
     public void filterListProduct(String txt) {
         
-        List<Product> list = productController.get(txt);
+        List<Product> list = productController.listForPDV(txt);
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -78,7 +78,7 @@ public class JDialogFormStock extends javax.swing.JDialog {
     }
 
     public void setProduct(int id) {
-        Product prod = productController.getId(id);
+        Product prod = productController.getById(id);
         setFormProduct(prod);
     }
 

@@ -105,7 +105,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
 //    }
     public void loadListStockProducts(List<Product> list) {
         if (list == null) {
-            list = productController.getForInventory();
+            list = productController.listForInventory();
         }
         DefaultTableModel data = (DefaultTableModel) jTableStockProducts.getModel();
         data.setNumRows(0);
@@ -126,7 +126,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
     }
 
     public void filterListProductInventory(String txt) {
-        List<Product> list = productController.get(txt);
+        List<Product> list = productController.listForPDV(txt);
         loadListStockProducts(list);
     }
 

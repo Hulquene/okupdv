@@ -207,7 +207,7 @@ public class ProductOrderDao {
             ProductOrder obj = new ProductOrder();
             Product product;// = new Client();
             ProductDao productDao = new ProductDao();
-            product = productDao.getId(rs.getInt("product_id"));
+            product = productDao.findById(rs.getInt("product_id"));
 //            Order order;// = new Order();
 //            OrderDao orderDao = new OrderDao();
 //            order = orderDao.searchFromId(rs.getInt("order_id"));

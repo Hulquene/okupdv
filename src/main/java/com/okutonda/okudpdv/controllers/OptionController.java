@@ -6,6 +6,7 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.OptionsDao;
 import com.okutonda.okudpdv.data.entities.Options;
+import java.util.List;
 
 /**
  *
@@ -13,44 +14,49 @@ import com.okutonda.okudpdv.data.entities.Options;
  */
 public class OptionController {
 
-    OptionsDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final OptionsDao dao;
 
     public OptionController() {
         this.dao = new OptionsDao();
     }
 
-    public Options getOptions(String name) {
-        Options op = dao.searchFromName(name);
-//        System.out.println("valor: "+op);
-        if (op == null) {
-        } else {
-            return op;
-        }
-        return null;
+    // =========================
+    // 🔹 Regras de negócio
+    // =========================
+    /**
+     * Retorna o objeto Options completo pelo nome.
+     */
+    public Options getOption(String name) {
+        return dao.findByName(name);
     }
 
-    public String getValueOptions(String name) {
-        Options op = dao.searchFromName(name);
-        if (op != null) {
-            return op.getValue();
-        }
-        return "";
+    /**
+     * Retorna o valor da opção (ou string vazia se não existir).
+     */
+    public String getOptionValue(String name) {
+        String value = dao.findValueByName(name);
+        return (value != null) ? value : "";
     }
 
-    public Boolean add(Options options) {
-        Options opt = getOptions(options.getName());
-        if (opt != null) {
-            return dao.edit(options);
-        } else {
-            return dao.add(options);
-        }
+    /**
+     * Cria ou atualiza a opção automaticamente. (Se existir → atualiza, se não
+     * → insere)
+     */
+    public boolean saveOption(Options option) {
+        return dao.saveOrUpdate(option);
     }
 
-    public Boolean save(Options options) {
-        return dao.add(options);
+    /**
+     * Remove uma opção pelo ID.
+     */
+    public boolean deleteOption(int id) {
+        return dao.delete(id);
     }
-//    public Boolean deleteId(int id) {
-//        return dao.delete(id);
-//    }
+
+    /**
+     * Lista todas as opções do sistema.
+     */
+    public List<Options> getAllOptions() {
+        return dao.findAll();
+    }
 }

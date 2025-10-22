@@ -12,8 +12,9 @@ import java.util.function.Function;
 import org.apache.poi.ss.formula.functions.T;
 
 /**
- * Base genérica para DAOs — centraliza operações SQL comuns.
- * Classe base para os DAOs — centraliza a execução de queries e updates.
+ * Base genérica para DAOs — centraliza operações SQL comuns. Classe base para
+ * os DAOs — centraliza a execução de queries e updates.
+ *
  * @param <T> Tipo de entidade manipulada pelo DAO
  * @author Hulquene
  */
@@ -60,4 +61,28 @@ public abstract class BaseDao<T> implements GenericDao<T> {
             pst.setObject(i + 1, params[i]);
         }
     }
+
+    /**
+     * Executa uma query que retorna um único inteiro (ex: COUNT, SUM, etc.)
+     */
+    protected int executeScalarInt(String sql, Object... params) {
+        try (var conn = DatabaseProvider.getConnection(); var pst = conn.prepareStatement(sql)) {
+
+            // define parâmetros dinamicamente
+            for (int i = 0; i < params.length; i++) {
+                pst.setObject(i + 1, params[i]);
+            }
+
+            try (var rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1); // pega a primeira coluna do primeiro resultado
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("[DB] Erro em executeScalarInt: " + e.getMessage());
+        }
+        return 0; // valor padrão se falhar ou não encontrar nada
+    }
+
 }

@@ -266,7 +266,7 @@ public class OrderDao {
             Order obj = new Order();
             Clients client;// = new Clients();
             ClientDao clientDao = new ClientDao();
-            client = clientDao.getId(rs.getInt("client_id"));
+            client = clientDao.findById(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
             seller = sellerDao.findById(rs.getInt("user_id"));
@@ -305,7 +305,7 @@ public class OrderDao {
             Order obj = new Order();
             Clients client;// = new Clients();
             ClientDao clientDao = new ClientDao();
-            client = clientDao.getId(rs.getInt("client_id"));
+            client = clientDao.findById(rs.getInt("client_id"));
             User seller;// = new User();
             UserDao sellerDao = new UserDao();
             seller = sellerDao.findById(rs.getInt("user_id"));

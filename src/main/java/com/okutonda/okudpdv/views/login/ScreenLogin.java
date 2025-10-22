@@ -114,12 +114,12 @@ public class ScreenLogin extends javax.swing.JFrame {
 
     public void loadDataCompany() {
 //        System.out.println("key:"+optionController.getValueOptions("companyKeyLicence"));
-        companySession.setName(optionController.getValueOptions("companyName"));
-        companySession.setNif(optionController.getValueOptions("companyNif"));
-        companySession.setAddress(optionController.getValueOptions("companyAddress"));
-        companySession.setPhone(optionController.getValueOptions("companyPhone"));
-        companySession.setEntity(optionController.getValueOptions("entity"));
-        companySession.setKeyLicence(optionController.getValueOptions("companyKeyLicence"));
+        companySession.setName(optionController.getOptionValue("companyName"));
+        companySession.setNif(optionController.getOptionValue("companyNif"));
+        companySession.setAddress(optionController.getOptionValue("companyAddress"));
+        companySession.setPhone(optionController.getOptionValue("companyPhone"));
+        companySession.setEntity(optionController.getOptionValue("entity"));
+        companySession.setKeyLicence(optionController.getOptionValue("companyKeyLicence"));
     }
 
     public void login(String email, String password) {

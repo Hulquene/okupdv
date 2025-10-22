@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.PaymentModeDao;
@@ -9,44 +5,92 @@ import com.okutonda.okudpdv.data.entities.PaymentModes;
 import java.util.List;
 
 /**
+ * Controller responsável pela lógica de negócio dos modos de pagamento.
  *
- * @author kenny
+ * Orquestra operações de CRUD e filtros, utilizando o PaymentModeDao.
+ *
+ * Totalmente compatível com o novo padrão BaseDao + DatabaseProvider.
+ *
+ * @author …
  */
 public class PaymentModeController {
 
-    PaymentModeDao dao;
+    private final PaymentModeDao dao;
 
     public PaymentModeController() {
         this.dao = new PaymentModeDao();
     }
 
-    public Boolean add(PaymentModes paymentModes, int id) {
-        boolean status = false;
-        if (id == 0) {
-            status = dao.add(paymentModes);
-        } else {
-            status = dao.edit(paymentModes, id);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    /**
+     * Adiciona ou atualiza um modo de pagamento
+     */
+    public boolean save(PaymentModes mode) {
+        if (mode == null) {
+            System.err.println("[PaymentModeController] Objeto inválido.");
+            return false;
         }
-        return status;
-//        if (status == true) {
-//            PaymentModes responde = dao.searchFromName(paymentModes.getName());
-////            for (ProductOrder object : order.getProducts()) {
-////                prodOrderDao.add(object);
-////            }
-//            return responde;
-//        }
-//        return null;
+        if (mode.getId() > 0) {
+            return dao.update(mode);
+        }
+        return dao.add(mode);
     }
 
-    public PaymentModes getId(int id) {
-        return dao.getId(id);
-    }
-
-    public Boolean deleteId(int id) {
+    /**
+     * Remove modo de pagamento pelo ID
+     */
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[PaymentModeController] ID inválido para exclusão.");
+            return false;
+        }
         return dao.delete(id);
     }
 
-    public List<PaymentModes> get(String where) {
-        return dao.list(where);
+    // ==========================================================
+    // 🔹 CONSULTAS
+    // ==========================================================
+    /**
+     * Obtém modo de pagamento por ID
+     */
+    public PaymentModes getById(int id) {
+        return dao.findById(id);
+    }
+
+    /**
+     * Obtém modo de pagamento pelo nome
+     */
+    public PaymentModes getByName(String name) {
+        return dao.findByName(name);
+    }
+
+    /**
+     * Obtém modo de pagamento pelo código
+     */
+    public PaymentModes getByCode(String code) {
+        return dao.findByCode(code);
+    }
+
+    /**
+     * Obtém modo de pagamento padrão (isDefault=1)
+     */
+    public PaymentModes getDefault() {
+        return dao.findDefault();
+    }
+
+    /**
+     * Lista todos os modos de pagamento
+     */
+    public List<PaymentModes> getAll() {
+        return dao.findAll();
+    }
+
+    /**
+     * Filtra modos de pagamento por texto
+     */
+    public List<PaymentModes> filter(String txt) {
+        return dao.filter(txt);
     }
 }

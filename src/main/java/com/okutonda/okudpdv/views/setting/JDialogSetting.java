@@ -18,7 +18,6 @@ import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.utilities.CompanySession;
 import com.okutonda.okudpdv.utilities.Util;
 import com.okutonda.okudpdv.utilities.UtilDatabase;
-import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -49,7 +48,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     public void listPaymentModes() {
 //        ClientDao cDao = new ClientDao();
-        List<PaymentModes> list = paymentModes.get("");
+        List<PaymentModes> list = paymentModes.getAll();
 //        jTableClients.setModel(new DefaultTableModel);
         DefaultTableModel data = (DefaultTableModel) jTablePaymentModes.getModel();
 //        data.setM
@@ -1223,7 +1222,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 //        listOptionCompany.add(
 //                new Options("companyCountry", jComboBoxOptionCountryCompany.getSelectedItem().toString(), "1"));
         for (Options options : listOptionCompany) {
-            optionController.add(options);
+            optionController.saveOption(options);
         }
 
         JOptionPane.showMessageDialog(null, "Salvo com sucesso!!");
@@ -1253,13 +1252,13 @@ public final class JDialogSetting extends javax.swing.JDialog {
         listPaymentModes();
 //        listComboCountries();
 
-        jTextFieldOptionNameCompany.setText(optionController.getValueOptions("companyName"));
-        jTextFieldOptionNifCompany.setText(optionController.getValueOptions("companyNif"));
-        jTextFieldOptionCityCompany.setText(optionController.getValueOptions("companyCity"));
-        jTextFieldOptionPhoneCompany.setText(optionController.getValueOptions("companyPhone"));
-        jTextFieldOptionAddressCompany.setText(optionController.getValueOptions("companyAddress"));
-        jTextFieldOptionEmailCompany.setText(optionController.getValueOptions("companyEmail"));
-        jTextFieldOptionCountryCompany.setText(optionController.getValueOptions("country"));
+        jTextFieldOptionNameCompany.setText(optionController.getOptionValue("companyName"));
+        jTextFieldOptionNifCompany.setText(optionController.getOptionValue("companyNif"));
+        jTextFieldOptionCityCompany.setText(optionController.getOptionValue("companyCity"));
+        jTextFieldOptionPhoneCompany.setText(optionController.getOptionValue("companyPhone"));
+        jTextFieldOptionAddressCompany.setText(optionController.getOptionValue("companyAddress"));
+        jTextFieldOptionEmailCompany.setText(optionController.getOptionValue("companyEmail"));
+        jTextFieldOptionCountryCompany.setText(optionController.getOptionValue("country"));
 //        jComboBoxOptionCountryCompany.setSelectedItem(optionController.getValueOptions("companyCountry"));
 
         jLabelDateLicence.setText(companySession.getDateKeyLicence());
@@ -1297,11 +1296,11 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
         int id = Integer.parseInt(jTablePaymentModes.getValueAt(jTablePaymentModes.getSelectedRow(), 0).toString());
 //        Taxes tax = taxesController.getId(id);
-        PaymentModes paymentMode = paymentModes.getId(id);
+        PaymentModes paymentMode = paymentModes.getById(id);
 //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
         int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + paymentMode.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
         if (sair == JOptionPane.YES_OPTION) {
-            if (paymentModes.deleteId(id)) {
+            if (paymentModes.delete(id)) {
                 JOptionPane.showMessageDialog(null, "payment Mode excluido com Sucesso!!");
 //                listTaxes();
                 listPaymentModes();
@@ -1364,13 +1363,13 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 int id = jTextFieldPaymentModeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldPaymentModeId.getText());
                 boolean response;
                 if (id == 0) {
-                    response = paymentModes.add(cModel, 0);
+                    response = paymentModes.save(cModel);
                     if (response) {
                         JOptionPane.showMessageDialog(null, "Taxes salvo com Sucesso!!");
                         listTaxes();
                     }
                 } else {
-                    response = paymentModes.add(cModel, id);
+                    response = paymentModes.save(cModel);
                     if (response) {
                         JOptionPane.showMessageDialog(null, "taxes Atualizado com Sucesso!!");
                         listTaxes();

@@ -120,7 +120,7 @@ public final class JPanelReport extends javax.swing.JPanel {
     }
 
     public void filterListProduct(String txt, String type) {
-        List<Product> list = productController.get(txt);
+        List<Product> list = productController.listForPDV(txt);
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
         for (Product c : list) {
@@ -860,7 +860,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 
     private void jComboBoxReportSalesOrderProductAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jComboBoxReportSalesOrderProductAncestorAdded
         // TODO add your handling code here:
-        List<Product> list = productController.get("");
+        List<Product> list = productController.listAll();
         jComboBoxReportSalesOrderProduct.removeAllItems();
         for (Product item : list) {
             jComboBoxReportSalesOrderProduct.addItem(item);

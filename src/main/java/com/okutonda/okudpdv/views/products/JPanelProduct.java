@@ -75,13 +75,13 @@ public final class JPanelProduct extends javax.swing.JPanel {
     }
 
     public void listProducts() {
-        List<Product> list = productController.get("");
+        List<Product> list = productController.listAll();
         loadListProducts(list);
     }
 
     public void filterListProduct(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.get(txt);
+        List<Product> list = productController.listForPDV(txt);
         loadListProducts(list);
     }
 
@@ -323,7 +323,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
 //            int id = Integer.parseInt(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0).toString());
             if (id > 0) {
-                Product prod = productController.getId(id);
+                Product prod = productController.getById(id);
                 JOptionPane.showMessageDialog(null, "Produto :" + prod.getDescription() + "\n Codigo de barra:" + prod.getBarcode() + "\n Preço:" + prod.getPrice() + "\n Status:" + prod.getStatus());
 
 //                JDialogFormProduct formProd = new JDialogFormProduct(null, true);
@@ -383,11 +383,11 @@ public final class JPanelProduct extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
 
-            Product prod = productController.getId(id);
+            Product prod = productController.getById(id);
             //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
             int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + prod.getDescription() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
             if (sair == JOptionPane.YES_OPTION) {
-                if (productController.deleteId(id)) {
+                if (productController.delete(id)) {
                     JOptionPane.showMessageDialog(null, "products excluido com Sucesso!!");
                     listProducts();
                 }

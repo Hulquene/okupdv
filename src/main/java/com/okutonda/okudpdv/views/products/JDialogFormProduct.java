@@ -7,15 +7,11 @@ package com.okutonda.okudpdv.views.products;
 import com.okutonda.okudpdv.controllers.GroupsProductController;
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.ReasonTaxeController;
-import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.TaxeController;
-import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
-import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.data.entities.Taxes;
-import com.okutonda.okudpdv.data.entities.Warehouse;
 import com.okutonda.okudpdv.utilities.Util;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
@@ -76,7 +72,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 
     public void setProduct(int id) {
         loadCombobox();
-        Product prod = productController.getId(id);
+        Product prod = productController.getById(id);
         setFormProduct(prod);
     }
 
@@ -549,7 +545,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             String description = jTextFieldDescription.getText();
             Product cModel;
-            cModel = productController.getName(description);
+            cModel = productController.getByDescription(description);
             if (cModel.getDescription() != null) {
                 changeValueTextFildForm(cModel);
             } else {
@@ -564,7 +560,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 
     private void jComboBoxGroupAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jComboBoxGroupAncestorAdded
         // TODO add your handling code here:
-        List<GroupsProduct> list = groupsProductController.get("");
+        List<GroupsProduct> list = groupsProductController.getAll();
         jComboBoxGroup.removeAllItems();
         for (GroupsProduct item : list) {
             jComboBoxGroup.addItem(item);
@@ -608,13 +604,13 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
 //            boolean response;
             if (id == 0) {
-                status = productController.add(cModel, 0);
+                status = productController.save(cModel);
 //                if (response) {
 //                    JOptionPane.showMessageDialog(null, "products salvo com Sucesso!!");
 //                    screanListProducts();
 //                }
             } else {
-                status = productController.add(cModel, id);
+                status = productController.save(cModel);
 //                if (response) {
 //                    JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
 //                    screanListProducts();

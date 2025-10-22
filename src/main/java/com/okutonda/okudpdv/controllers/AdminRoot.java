@@ -148,7 +148,7 @@ public class AdminRoot {
     public Boolean saveLicence(String key) {
         if (validateLicence(key) == true) {
             Options obj = new Options("companyKeyLicence", key, "1");
-            return optionController.add(obj);
+            return optionController.saveOption(obj);
         }
         return false;
     }
@@ -197,7 +197,7 @@ public class AdminRoot {
 //        return getOptions("companyKeyLicence");
 //    }
     public Boolean getStatusLicence() {
-        String value = optionController.getValueOptions("companyKeyLicence");
+        String value = optionController.getOptionValue("companyKeyLicence");
         Boolean status = true;
 //        if (!value.isEmpty()) {
 //            status = validateLicence(value);
@@ -207,6 +207,6 @@ public class AdminRoot {
     }
 
     public String getStatusSoftware() {
-        return optionController.getValueOptions("softwareStatus");
+        return optionController.getOptionValue("softwareStatus");
     }
 }

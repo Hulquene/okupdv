@@ -28,7 +28,7 @@ public class JDialogViewClient extends javax.swing.JDialog {
     }
 
     public void setClient(int id) {
-        this.client = clientController.getId(id);
+        this.client = clientController.getById(id);
 //        setFormUser(user);
     }
 

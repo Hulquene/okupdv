@@ -46,7 +46,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
     public void listClients() {
         ClientDao cDao = new ClientDao();
-        List<Clients> list = cDao.list("");
+        List<Clients> list = cDao.findAll();
 //        jTableClients.setModel(new DefaultTableModel);
         DefaultTableModel data = (DefaultTableModel) jTableClients.getModel();
 //        data.setM
@@ -71,7 +71,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
     public void filterListClients(String txt) {
         ClientDao cDao = new ClientDao();
-        List<Clients> list = cDao.filterClient(txt);
+        List<Clients> list = cDao.filter(txt);
         DefaultTableModel data = (DefaultTableModel) jTableClients.getModel();
         data.setNumRows(0);
         for (Clients c : list) {
@@ -638,10 +638,10 @@ public final class JPanelEntity extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (id > 0) {
-                Clients client = clientController.getId(id);
+                Clients client = clientController.getById(id);
                 int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
                 if (sair == JOptionPane.YES_OPTION) {
-                    if (clientController.deleteId(id)) {
+                    if (clientController.deleteById(id)) {
                         JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
                         listClients();
                     }

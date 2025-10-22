@@ -29,14 +29,14 @@ public class JDialogProductSearch extends javax.swing.JDialog {
     }
 
     public void listProducts() {
-        List<Product> list = productController.get("WHERE stock_total>0 and status='1'");
+        List<Product> list = productController.list("WHERE stock_total>0 and status='1'");
 //        List<Product> list = productController.get("");
         loadListProducts(list);
     }
 
     public void filterListProducts(String txt) {
 //        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.getForPDV(txt);
+        List<Product> list = productController.listForPDV(txt);
         loadListProducts(list);
     }
 

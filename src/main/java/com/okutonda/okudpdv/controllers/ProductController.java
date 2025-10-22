@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.ProductDao;
@@ -10,8 +6,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
+ * Controller responsável pela lógica de alto nível dos produtos.
  *
- * @author kenny
+ * Intermedia o acesso entre UI e ProductDao (CRUD, filtros, PDV, inventário).
+ *
+ * @author …
  */
 public class ProductController {
 
@@ -21,103 +20,80 @@ public class ProductController {
         this.dao = new ProductDao();
     }
 
-    /**
-     * Buscar por ID
-     */
-    public Product getId(int id) {
-        return dao.getId(id);
+    // ==========================================================
+    // 🔹 CONSULTAS
+    // ==========================================================
+    public Product getById(int id) {
+        return dao.findById(id);
     }
 
-    /**
-     * Buscar por código de barras
-     */
-    public Product getFromBarCode(String barcode) {
-        return dao.searchFromBarCode(barcode);
+    public Product getByBarcode(String barcode) {
+        return dao.findByBarcode(barcode);
     }
 
-    /**
-     * Buscar por nome
-     */
-    public Product getName(String description) {
-        return dao.searchFromName(description);
+    public Product getByDescription(String description) {
+        return dao.findByDescription(description);
     }
 
-    /**
-     * Lista genérica (com ou sem WHERE)
-     */
-    public List<Product> get(String where) {
-        return dao.listWithStock(where == null ? "" : where);
+    public List<Product> listAll() {
+        return dao.findAll();
     }
 
-    /**
-     * Apenas produtos (sem serviços)
-     */
-    public List<Product> getProducts() {
-        return dao.listWithStock(" WHERE p.type ='product'");
+    public List<Product> list(String where) {
+        return dao.listWithStock(where);
     }
 
-    /**
-     * Apenas serviços
-     */
-    public List<Product> getServices() {
-        return dao.listWithStock(" WHERE p.type ='service'");
+    public List<Product> listProducts() {
+        return dao.listWithStock(" WHERE p.type='product'");
     }
 
-    /**
-     * Inventário (para o menu de stock)
-     */
-    public List<Product> getForInventory() {
+    public List<Product> listServices() {
+        return dao.listWithStock(" WHERE p.type='service'");
+    }
+
+    public List<Product> listForInventory() {
         return dao.listForInventory();
     }
 
-    /**
-     * Produtos para PDV (somente ativos, com stock disponível)
-     */
-    public List<Product> getForPDV(String filtro) {
+    public List<Product> listForPDV(String filtro) {
         return dao.listForPDV(filtro);
     }
 
-    /**
-     * Filtro geral
-     */
-//    public List<Product> filter(String txt, String and) {
-//        and = (and == null || and.isEmpty()) ? "" : and;
-//        return dao.filter(txt, and);
-//    }
-    /**
-     * Adicionar ou editar
-     */
-    public Boolean add(Product prod, int id) {
-        if (id == 0) {
-            return dao.add(prod);
-        } else {
-            return dao.edit(prod, id);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(Product product) {
+        if (product == null) {
+            System.err.println("[ProductController] Produto inválido.");
+            return false;
         }
+        if (product.getId() > 0) {
+            return dao.update(product);
+        }
+        return dao.add(product);
     }
 
-    /**
-     * Apagar
-     */
-    public Boolean deleteId(int id) {
+    public boolean delete(int id) {
         return dao.delete(id);
     }
 
+    // ==========================================================
+    // 🔹 UTILITÁRIOS
+    // ==========================================================
     /**
-     * Calcular total de um produto × quantidade
+     * Calcula total de produto × quantidade
      */
-    public BigDecimal calculateTotalProduct(Product prod, int qtd) {
+    public BigDecimal calculateTotal(Product prod, int qty) {
         if (prod == null || prod.getPrice() == null) {
             return BigDecimal.ZERO;
         }
-        return prod.getPrice().multiply(BigDecimal.valueOf(qtd));
+        return prod.getPrice().multiply(BigDecimal.valueOf(qty));
     }
 
-    // Futuro: podes implementar descontos, impostos ou trocos
-    public Double CalculateTotalChangeProduct(Product prod) {
-        return null;
-    }
-
-    public Double CalculateTotalValueTaxeProduct(Product prod) {
-        return null;
+    /**
+     * Obtém stock atual de um produto
+     */
+    public int getCurrentStock(int productId) {
+        return dao.getCurrentStock(productId);
     }
 }
