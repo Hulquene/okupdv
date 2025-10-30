@@ -13,7 +13,16 @@ import java.util.List;
  * @author …
  */
 public class GroupsProductDao extends BaseDao<GroupsProduct> {
+// ✅ Construtor padrão (usa conexão do pool automaticamente)
 
+    public GroupsProductDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public GroupsProductDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
     // 🔹 Função de mapeamento SQL → objeto
     private GroupsProduct map(ResultSet rs) {
         try {

@@ -13,11 +13,11 @@ import com.okutonda.okudpdv.controllers.TaxeController;
 import com.okutonda.okudpdv.data.entities.Box;
 import com.okutonda.okudpdv.data.entities.Options;
 import com.okutonda.okudpdv.data.entities.PaymentModes;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.Utilities;
 import com.okutonda.okudpdv.data.entities.Taxes;
-import com.okutonda.okudpdv.utilities.CompanySession;
-import com.okutonda.okudpdv.utilities.Util;
-import com.okutonda.okudpdv.utilities.UtilDatabase;
+import com.okutonda.okudpdv.helpers.CompanySession;
+import com.okutonda.okudpdv.helpers.Util;
+import com.okutonda.okudpdv.helpers.ExportHelper;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -67,7 +67,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     public void listBox() {
 //        ClientDao cDao = new ClientDao();
-        List<Box> list = boxController.get("");
+        List<Box> list = boxController.findAll();
 //        jTableClients.setModel(new DefaultTableModel);
         DefaultTableModel data = (DefaultTableModel) jTableBox.getModel();
 //        data.setM
@@ -84,7 +84,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     public void listTaxes() {
 //        ClientDao cDao = new ClientDao();
-        List<Taxes> list = taxesController.get("");
+        List<Taxes> list = taxesController.listarTodas();
 //        jTableClients.setModel(new DefaultTableModel);
         DefaultTableModel data = (DefaultTableModel) jTableTaxes.getModel();
 //        data.setM
@@ -101,7 +101,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
     }
 
     public void filterListTaxes(String txt) {
-        List<Taxes> list = taxesController.filter(txt);
+        List<Taxes> list = taxesController.filtrar(txt);
         DefaultTableModel data = (DefaultTableModel) jTableTaxes.getModel();
         data.setNumRows(0);
         for (Taxes c : list) {
@@ -1148,13 +1148,14 @@ public final class JDialogSetting extends javax.swing.JDialog {
             int id = jTextFieldTaxeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldTaxeId.getText());
             boolean response;
             if (id == 0) {
-                response = taxesController.add(cModel, 0);
+                response = taxesController.save(cModel);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Taxes salvo com Sucesso!!");
                     listTaxes();
                 }
             } else {
-                response = taxesController.add(cModel, id);
+                cModel.setId(id);
+                response = taxesController.save(cModel);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "taxes Atualizado com Sucesso!!");
                     listTaxes();
@@ -1180,11 +1181,11 @@ public final class JDialogSetting extends javax.swing.JDialog {
         jTextFieldTaxeId.setText(jTableTaxes.getValueAt(jTableTaxes.getSelectedRow(), 0).toString());
 
         int id = Integer.parseInt(jTableTaxes.getValueAt(jTableTaxes.getSelectedRow(), 0).toString());
-        Taxes tax = taxesController.getId(id);
+        Taxes tax = taxesController.getById(id);
 //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
         int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + tax.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
         if (sair == JOptionPane.YES_OPTION) {
-            if (taxesController.deleteId(id)) {
+            if (taxesController.delete(id)) {
                 JOptionPane.showMessageDialog(null, "Imposto excluido com Sucesso!!");
                 listTaxes();
             }
@@ -1269,15 +1270,15 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     private void jButtonExportDatabaseInExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExportDatabaseInExcelActionPerformed
         // TODO add your handling code here:
-        UtilDatabase utlDB = new UtilDatabase();
-        utlDB.exportAllTableToExcel();
+        ExportHelper utlDB = new ExportHelper();
+        utlDB.exportAllTablesToExcel();
 
     }//GEN-LAST:event_jButtonExportDatabaseInExcelActionPerformed
 
     private void jButtonExportDatabaseInCSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExportDatabaseInCSVActionPerformed
         // TODO add your handling code here:
-        UtilDatabase utlDB = new UtilDatabase();
-        utlDB.exportAllTableToCSV();
+        ExportHelper utlDB = new ExportHelper();
+        utlDB.exportAllTablesToCSV();
     }//GEN-LAST:event_jButtonExportDatabaseInCSVActionPerformed
 
     private void jButtonViewLicenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewLicenceActionPerformed
@@ -1394,13 +1395,14 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 int id = jTextFieldBoxId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldBoxId.getText());
                 boolean response;
                 if (id == 0) {
-                    response = boxController.add(cModel, 0);
+                    response = boxController.save(cModel);
                     if (response) {
                         JOptionPane.showMessageDialog(null, "Caixa salvo com Sucesso!!");
                         listBox();
                     }
                 } else {
-                    response = boxController.add(cModel, id);
+                    cModel.setId(id);
+                    response = boxController.save(cModel);
                     if (response) {
                         JOptionPane.showMessageDialog(null, "Caixa Atualizado com Sucesso!!");
                         listBox();

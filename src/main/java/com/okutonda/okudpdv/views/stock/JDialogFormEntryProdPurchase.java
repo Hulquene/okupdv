@@ -7,7 +7,7 @@ package com.okutonda.okudpdv.views.stock;
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.controllers.SupplierController;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 
 /**
  *

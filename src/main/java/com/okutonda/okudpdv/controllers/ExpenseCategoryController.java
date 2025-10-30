@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.ExpenseCategoryDao;
@@ -10,8 +6,11 @@ import com.okutonda.okudpdv.data.entities.ExpenseCategory;
 import java.util.List;
 
 /**
+ * Controller responsável pela lógica de negócio das categorias de despesas.
  *
- * @author rog
+ * Intermedia a interface com o DAO e aplica validações simples.
+ *
+ * @author Hulquene
  */
 public class ExpenseCategoryController {
 
@@ -21,19 +20,42 @@ public class ExpenseCategoryController {
         this.dao = new ExpenseCategoryDao();
     }
 
-    public void save(ExpenseCategory c) {
-        if (c.getId() == null) {
-            dao.insert(c);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(ExpenseCategory c) {
+        if (c == null) {
+            System.err.println("[Controller] Categoria inválida (nula).");
+            return false;
+        }
+
+        if (c.getId() == null || c.getId() <= 0) {
+            return dao.add(c);
         } else {
-            dao.update(c);
+            return dao.update(c);
         }
     }
 
-    public void delete(int id) {
-        dao.delete(id);
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[Controller] ID inválido para exclusão.");
+            return false;
+        }
+        return dao.delete(id);
     }
 
+    // ==========================================================
+    // 🔹 Consultas
+    // ==========================================================
     public List<ExpenseCategory> getAll() {
-        return dao.getAll();
+        return dao.findAll();
+    }
+
+    public ExpenseCategory getById(int id) {
+        return dao.findById(id);
+    }
+
+    public List<ExpenseCategory> searchByName(String namePart) {
+        return dao.filterByName(namePart);
     }
 }

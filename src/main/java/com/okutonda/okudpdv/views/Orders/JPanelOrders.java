@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.Orders;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import com.okutonda.okudpdv.views.sales.JDialogGenerateNoteCredit;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -49,12 +49,13 @@ public class JPanelOrders extends javax.swing.JPanel {
     }
 
     public void listOrder() {
-        List<Order> list = orderController.get();
+        List<Order> list = orderController.getAll();
         listTable(list);
     }
 
     public void filterListOrder(String txt) {
-        List<Order> list = orderController.filter(txt);
+//        List<Order> list = orderController.filter(txt);
+        List<Order> list = orderController.filterDate(LocalDate.MIN, LocalDate.MIN);
         listTable(list);
     }
 

@@ -13,6 +13,16 @@ import java.util.List;
  * @author …
  */
 public class PaymentModeDao extends BaseDao<PaymentModes> {
+    // ✅ Construtor padrão (usa conexão do pool automaticamente)
+
+    public PaymentModeDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public PaymentModeDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
 
     // ==========================================================
     // 🔹 Mapeamento SQL → Objeto

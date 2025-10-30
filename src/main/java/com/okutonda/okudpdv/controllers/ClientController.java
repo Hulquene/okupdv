@@ -53,14 +53,18 @@ public class ClientController {
      * Busca cliente pelo ID.
      */
     public Clients getById(int id) {
-        return dao.findById(id);
+        Clients cliente = dao.findById(id);
+        dao.close();
+        return cliente;
     }
 
     /**
      * Lista todos os clientes.
      */
     public List<Clients> getAll() {
-        return dao.findAll();
+        List<Clients> lista = dao.findAll();
+        dao.close();
+        return lista;
     }
 
     /**

@@ -1,36 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.CountryDao;
 import com.okutonda.okudpdv.data.entities.Countries;
+
 import java.util.List;
 
 /**
+ * Controller responsável pelas regras de negócio dos países (Countries).
  *
- * @author kenny
+ * Atua como camada intermediária entre a interface (UI) e o DAO. Aplica
+ * validações simples e padroniza as consultas.
+ *
+ * @author Hulquene
  */
 public class CountryController {
-    
-    CountryDao dao;
-//    ProductOrderDao prodOrderDao;
+
+    private final CountryDao dao;
 
     public CountryController() {
         this.dao = new CountryDao();
-//        this.prodOrderDao = new ProductOrderDao();
     }
 
-    public Countries getId(int id) {
-        return dao.searchFromId(id);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(Countries country) {
+        if (country == null) {
+            System.err.println("[Controller] País inválido (objeto nulo).");
+            return false;
+        }
+
+        if (country.getId() <= 0) {
+            return dao.add(country);
+        } else {
+            return dao.update(country);
+        }
     }
 
-    public List<Countries> get(String where) {
-        return dao.list(where);
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[Controller] ID inválido para exclusão de país.");
+            return false;
+        }
+        return dao.delete(id);
     }
 
-    public List<Countries> filter(String txt) {
-        return dao.filter(txt);
+    // ==========================================================
+    // 🔹 Consultas
+    // ==========================================================
+    public Countries getById(int id) {
+        return dao.findById(id);
+    }
+
+    public List<Countries> listarTodos() {
+        return dao.findAll();
+    }
+
+    public List<Countries> filtrar(String texto) {
+        return dao.filter(texto);
+    }
+
+    public Countries getByIso2(String iso2) {
+        return dao.findByIso2(iso2);
+    }
+
+    public Countries getByName(String nome) {
+        return dao.findByName(nome);
     }
 }

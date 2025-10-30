@@ -51,13 +51,13 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
 //        listProducts();
 //    }
     public void loadCombobox() {
-        List<Supplier> listS = supplierController.get("");
+        List<Supplier> listS = supplierController.listarTodos();
         jComboBoxSunpplierHistoryInput.removeAllItems();
         for (Supplier item : listS) {
             jComboBoxSunpplierHistoryInput.addItem(item);
         }
 
-        List<Warehouse> listW = warehouseController.get("");
+        List<Warehouse> listW = warehouseController.listarTodos();
         jComboBoxWarehauseTela1.removeAllItems();
         for (Warehouse item : listW) {
             jComboBoxWarehauseTela1.addItem(item);

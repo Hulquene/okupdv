@@ -4,7 +4,7 @@
  */
 package com.okutonda.okudpdv.views.dashboard;
 
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 

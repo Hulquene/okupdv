@@ -6,13 +6,13 @@ package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.GroupsProductController;
 import com.okutonda.okudpdv.controllers.ProductController;
-import com.okutonda.okudpdv.controllers.ReasonTaxeController;
+import com.okutonda.okudpdv.controllers.TaxeReasonController;
 import com.okutonda.okudpdv.controllers.TaxeController;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Taxes;
-import com.okutonda.okudpdv.utilities.Util;
+import com.okutonda.okudpdv.helpers.Util;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,7 +27,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     ProductController productController = new ProductController();
 //    SupplierController supplierController = new SupplierController();
     TaxeController taxeController = new TaxeController();
-    ReasonTaxeController reasonTaxeController = new ReasonTaxeController();
+    TaxeReasonController reasonTaxeController = new TaxeReasonController();
     GroupsProductController groupsProductController = new GroupsProductController();
 //    WarehouseController warehouseController = new WarehouseController();
     Boolean status = false;
@@ -148,13 +148,13 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 //            jComboBoxWarehause.addItem(item);
 //        }
 
-        List<ReasonTaxes> listR = reasonTaxeController.get("");
+        List<ReasonTaxes> listR = reasonTaxeController.listarTodas();
         jComboBoxReasonTaxeId.removeAllItems();
         for (ReasonTaxes item : listR) {
             jComboBoxReasonTaxeId.addItem(item);
         }
 
-        List<Taxes> list = taxeController.get("");
+        List<Taxes> list = taxeController.listarTodas();
         jComboBoxTaxeId.removeAllItems();
         for (Taxes item : list) {
             jComboBoxTaxeId.addItem(item);

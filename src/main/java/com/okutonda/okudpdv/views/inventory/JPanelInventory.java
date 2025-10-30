@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.views.inventory;
 
 import com.okutonda.okudpdv.ui.TemaUI;
-import com.okutonda.okudpdv.utilities.JpanelLoader;
+import com.okutonda.okudpdv.helpers.JpanelLoader;
 import com.okutonda.okudpdv.views.products.JPanelProduct;
 import com.okutonda.okudpdv.views.purchases.JPanelPurchases;
 import com.okutonda.okudpdv.views.stock.JPanelStockMovement;

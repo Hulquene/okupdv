@@ -116,7 +116,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
     private void loadComboBoxSuppliers() {
 
-        List<Supplier> fornecedores = supplierController.get("");
+        List<Supplier> fornecedores = supplierController.listarTodos();
 
         for (Supplier s : fornecedores) {
             jComboBoxListFornecedor.addItem(s);

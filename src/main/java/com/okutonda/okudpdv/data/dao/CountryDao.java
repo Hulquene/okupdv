@@ -1,107 +1,126 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.data.entities.Countries;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 /**
+ * DAO responsável pela gestão de países (Countries).
  *
- * @author kenny
+ * Compatível com BaseDao e HikariCP. Fornece operações CRUD básicas e consultas
+ * filtradas.
+ *
+ * @author Hulquene
  */
-public class CountryDao {
-
-    private final Connection conn;
-    PreparedStatement pst = null;
-    ResultSet rs = null;
+public class CountryDao extends BaseDao<Countries> {
 
     public CountryDao() {
-        this.conn = ConnectionDatabase.getConnect();
+        super(); // utiliza o pool de conexões via DatabaseProvider
     }
 
-    public Countries searchFromId(int id) {
+    public CountryDao(java.sql.Connection externalConn) {
+        super(externalConn); // permite uso transacional externo
+    }
+
+    // ==========================================================
+    // 🔹 Mapeamento ResultSet → Entidade
+    // ==========================================================
+    private Countries map(ResultSet rs) {
         try {
-            // 1 passo
-            String sql = "SELECT * FROM countries WHERE id =?";
-            pst = conn.prepareStatement(sql);
-            pst.setInt(1, id);
-            rs = pst.executeQuery();
-            Countries obj = null;
-            if (rs.next()) {
-                obj = formatObj(rs);
-            }
-            return obj;
-            // 2 passo
+            Countries c = new Countries();
+            c.setId(rs.getInt("id"));
+            c.setIso2(rs.getString("iso2"));
+            c.setIso3(rs.getString("iso3"));
+            c.setShort_name(rs.getString("short_name"));
+            c.setLong_name(rs.getString("long_name"));
+            c.setUn_member(rs.getString("un_member"));
+            c.setNumcode(rs.getString("numcode"));
+            c.setCalling_code(rs.getString("calling_code"));
+            c.setCctld(rs.getString("cctld"));
+            return c;
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer consulta do countries: " + e.getMessage());
+            System.err.println("[DB] Erro ao mapear Countries: " + e.getMessage());
+            return null;
         }
-        return null;
     }
 
-    public List<Countries> list(String where) {
-        List<Countries> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM countries";
-            PreparedStatement ptmt = this.conn.prepareStatement(sql);
-            rs = ptmt.executeQuery();
-            Countries obj;
-            while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
-            }
-            return list;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de countries: " + e.getMessage());
-        }
-        return null;
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    @Override
+    public boolean add(Countries c) {
+        String sql = """
+            INSERT INTO countries (iso2, iso3, short_name, long_name, un_member, numcode, calling_code, cctld)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        return executeUpdate(sql,
+                c.getIso2(),
+                c.getIso3(),
+                c.getShort_name(),
+                c.getLong_name(),
+                c.getUn_member(),
+                c.getNumcode(),
+                c.getCalling_code(),
+                c.getCctld());
     }
 
+    @Override
+    public boolean update(Countries c) {
+        String sql = """
+            UPDATE countries
+               SET iso2=?, iso3=?, short_name=?, long_name=?, un_member=?, numcode=?, calling_code=?, cctld=?
+             WHERE id=?
+        """;
+        return executeUpdate(sql,
+                c.getIso2(),
+                c.getIso3(),
+                c.getShort_name(),
+                c.getLong_name(),
+                c.getUn_member(),
+                c.getNumcode(),
+                c.getCalling_code(),
+                c.getCctld(),
+                c.getId());
+    }
+
+    @Override
+    public boolean delete(int id) {
+        return executeUpdate("DELETE FROM countries WHERE id=?", id);
+    }
+
+    @Override
+    public Countries findById(int id) {
+        String sql = "SELECT * FROM countries WHERE id=?";
+        return findOne(sql, this::map, id);
+    }
+
+    @Override
+    public List<Countries> findAll() {
+        String sql = "SELECT * FROM countries ORDER BY long_name ASC";
+        return executeQuery(sql, this::map);
+    }
+
+    // ==========================================================
+    // 🔹 Consultas adicionais
+    // ==========================================================
     public List<Countries> filter(String txt) {
-        List<Countries> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM countries WHERE short_name LIKE ? OR long_name LIKE ? OR iso2 LIKE ?";
-            PreparedStatement ptmt = this.conn.prepareStatement(sql);
-            ptmt.setString(1, "%" + txt + "%");
-            ptmt.setString(2, "%" + txt + "%");
-            ptmt.setString(3, "%" + txt + "%");
-            rs = ptmt.executeQuery();
-            Countries obj;
-            while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
-            }
-            return list;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de countries: " + e.getMessage());
-        }
-        return null;
+        String like = "%" + txt + "%";
+        String sql = """
+            SELECT * FROM countries
+             WHERE short_name LIKE ? OR long_name LIKE ? OR iso2 LIKE ? OR iso3 LIKE ?
+          ORDER BY long_name ASC
+        """;
+        return executeQuery(sql, this::map, like, like, like, like);
     }
 
-    public Countries formatObj(ResultSet rs) {
-        try {
-            Countries obj = new Countries();
-            obj.setId(rs.getInt("id"));
-            obj.setIso2(rs.getString("iso2"));
-            obj.setIso3(rs.getString("iso3"));
-            obj.setShort_name(rs.getString("short_name"));
-            obj.setLong_name(rs.getString("long_name"));
-            obj.setUn_member(rs.getString("un_member"));
-            obj.setNumcode(rs.getString("numcode"));
-            obj.setCalling_code(rs.getString("calling_code"));
-            obj.setCctld(rs.getString("cctld"));
-            return obj;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao formatar obj Countries: " + e.getMessage());
-        }
-        return null;
+    public Countries findByIso2(String iso2) {
+        String sql = "SELECT * FROM countries WHERE iso2=?";
+        return findOne(sql, this::map, iso2);
+    }
+
+    public Countries findByName(String name) {
+        String sql = "SELECT * FROM countries WHERE long_name LIKE ? LIMIT 1";
+        return findOne(sql, this::map, "%" + name + "%");
     }
 }

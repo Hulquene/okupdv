@@ -1,234 +1,143 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.data.entities.Countries;
 import com.okutonda.okudpdv.data.entities.Supplier;
-import java.awt.HeadlessException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 /**
+ * DAO responsável pela gestão de Fornecedores (Suppliers).
  *
- * @author kenny
+ * Compatível com BaseDao + HikariCP. Fornece CRUD completo e consultas
+ * personalizadas (por NIF, nome, etc).
+ *
+ * @author Hulquene
  */
-public class SupplierDao {
-
-    private final Connection conn;
-    PreparedStatement pst = null;
-    ResultSet rs = null;
+public class SupplierDao extends BaseDao<Supplier> {
 
     public SupplierDao() {
-        this.conn = ConnectionDatabase.getConnect();
+        super(); // Usa o pool de conexões via DatabaseProvider
     }
 
-    public Boolean add(Supplier obj) {
-        try {
-            // 1 passo
-            String sql = "INSERT INTO suppliers (company,nif,phone,email,address,city,zip_code,group_id,status,isdefault)"
-                    + "values(?,?,?,?,?,?,?,?,?,?)";
-            // 2 passo
-            pst = this.conn.prepareStatement(sql);
-            pst.setString(1, obj.getName());
-            pst.setString(2, obj.getNif());
-            pst.setString(3, obj.getPhone());
-            pst.setString(4, obj.getEmail());
-            pst.setString(5, obj.getAddress());
-            pst.setString(6, obj.getCity());
-//            pst.setString(7, obj.getState());
-//            pst.setInt(8, obj.getCountry().getId());
-            pst.setString(7, obj.getZipCode());
-            pst.setInt(8, obj.getGroupId());
-            pst.setInt(9, obj.getStatus());
-            pst.setInt(10, obj.getIsDefault());
-            //3 passo
-            pst.execute();
-            // 4 passo
-            pst.close();
-            return true;
-        } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao salvar Supplier: " + e.getMessage());
-        }
-        return false;
+    public SupplierDao(java.sql.Connection externalConn) {
+        super(externalConn); // Suporte a transações externas
     }
 
-    public Boolean edit(Supplier obj, int id) {
+    // ==========================================================
+    // 🔹 Mapeamento ResultSet → Entidade
+    // ==========================================================
+    private Supplier map(ResultSet rs) {
         try {
-            // 1 passo
-            String sql = "UPDATE suppliers SET company=?,nif=?,phone=?,email=?,address=?,city=?,zip_code=?,group_id=?,status=?,isdefault=? WHERE id=?";
-            // 2 passo
-            pst = this.conn.prepareStatement(sql);
-            pst.setString(1, obj.getName());
-            pst.setString(2, obj.getNif());
-            pst.setString(3, obj.getPhone());
-            pst.setString(4, obj.getEmail());
-            pst.setString(5, obj.getAddress());
-            pst.setString(6, obj.getCity());
-//            pst.setString(7, obj.getState());
-//            pst.setInt(8, obj.getCountry().getId());
-            pst.setString(7, obj.getZipCode());
-            pst.setInt(8, obj.getGroupId());
-            pst.setInt(9, obj.getStatus());
-            pst.setInt(10, obj.getIsDefault());
-            pst.setInt(11, id);
-
-            pst.execute();
-            // 4 passo
-            pst.close();
-            return true;
-        } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao atualizar suppliers: " + e.getMessage());
-        }
-        return false;
-    }
-
-    public Boolean delete(int id) {
-        try {
-            // 1 passo
-            String sql = "DELETE FROM suppliers WHERE id =?";
-            pst = conn.prepareStatement(sql);
-            pst.setInt(1, id);
-            pst.execute();
-            pst.close();
-
-            return true;
+            Supplier s = new Supplier();
+            s.setId(rs.getInt("id"));
+            s.setName(rs.getString("company"));
+            s.setNif(rs.getString("nif"));
+            s.setPhone(rs.getString("phone"));
+            s.setEmail(rs.getString("email"));
+            s.setAddress(rs.getString("address"));
+            s.setCity(rs.getString("city"));
+            s.setZipCode(rs.getString("zip_code"));
+            s.setGroupId(rs.getInt("group_id"));
+            s.setStatus(rs.getInt("status"));
+            s.setIsDefault(rs.getInt("isdefault"));
+            return s;
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao excluir suppliers: " + e.getMessage());
+            System.err.println("[DB] Erro ao mapear Supplier: " + e.getMessage());
+            return null;
         }
-        return false;
     }
 
-    public Supplier searchFromName(String name) {
-        try {
-            // 1 passo
-            String sql = "SELECT * FROM suppliers WHERE company =?";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, name);
-            rs = pst.executeQuery();
-            Supplier obj = new Supplier();
-            if (rs.next()) {
-                obj = formatObj(rs);
-            }
-            return obj;
-            // 2 passo
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer consulta do suppliers: " + e.getMessage());
-        }
-        return null;
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    @Override
+    public boolean add(Supplier s) {
+        String sql = """
+            INSERT INTO suppliers (company, nif, phone, email, address, city, zip_code, group_id, status, isdefault)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        return executeUpdate(sql,
+                s.getName(),
+                s.getNif(),
+                s.getPhone(),
+                s.getEmail(),
+                s.getAddress(),
+                s.getCity(),
+                s.getZipCode(),
+                s.getGroupId(),
+                s.getStatus(),
+                s.getIsDefault());
     }
 
-    public Supplier getFromId(int id) {
-        try {
-            // 1 passo
-            String sql = "SELECT * FROM suppliers WHERE id=?";
-            pst = conn.prepareStatement(sql);
-            pst.setInt(1, id);
-            rs = pst.executeQuery();
-            Supplier obj = new Supplier();
-            if (rs.next()) {
-                obj = formatObj(rs);
-            }
-            return obj;
-            // 2 passo
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer consulta do suppliers: " + e.getMessage());
-        }
-        return null;
+    @Override
+    public boolean update(Supplier s) {
+        String sql = """
+            UPDATE suppliers
+               SET company=?, nif=?, phone=?, email=?, address=?, city=?, zip_code=?, group_id=?, status=?, isdefault=?
+             WHERE id=?
+        """;
+        return executeUpdate(sql,
+                s.getName(),
+                s.getNif(),
+                s.getPhone(),
+                s.getEmail(),
+                s.getAddress(),
+                s.getCity(),
+                s.getZipCode(),
+                s.getGroupId(),
+                s.getStatus(),
+                s.getIsDefault(),
+                s.getId());
     }
 
-    public Supplier searchFromNif(String nif) {
-        try {
-            // 1 passo
-            String sql = "SELECT * FROM clients WHERE nif =?";
-            pst = conn.prepareStatement(sql);
-            pst.setString(1, nif);
-            rs = pst.executeQuery();
-            Supplier obj = new Supplier();
-            if (rs.next()) {
-                obj = formatObj(rs);
-            }
-            return obj;
-            // 2 passo
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao fazer consulta do client: " + e.getMessage());
-        }
-        return null;
+    @Override
+    public boolean delete(int id) {
+        return executeUpdate("DELETE FROM suppliers WHERE id=?", id);
     }
 
-    public List<Supplier> list(String where) {
-        List<Supplier> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM suppliers";
-            pst = this.conn.prepareStatement(sql);
-            rs = pst.executeQuery();
-            Supplier obj;
-            while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
-            }
-            return list;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de suppliers: " + e.getMessage());
-        }
-        return null;
+    @Override
+    public Supplier findById(int id) {
+        String sql = "SELECT * FROM suppliers WHERE id=?";
+        return findOne(sql, this::map, id);
     }
 
-    public List<Supplier> filter(String txt) {
-        List<Supplier> list = new ArrayList<>();
-        try {
-            String sql = "SELECT * FROM suppliers WHERE company LIKE ? OR nif LIKE ? OR city LIKE ?  OR email LIKE ?";
-            pst = this.conn.prepareStatement(sql);
-            pst.setString(1, "%" + txt + "%");
-            pst.setString(2, "%" + txt + "%");
-            pst.setString(3, "%" + txt + "%");
-            pst.setString(4, "%" + txt + "%");
-
-            rs = pst.executeQuery();
-            Supplier obj;
-            while (rs.next()) {
-                obj = formatObj(rs);
-                list.add(obj);
-            }
-            return list;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao pegar lista de suppliers: " + e.getMessage());
-        }
-        return null;
+    @Override
+    public List<Supplier> findAll() {
+        String sql = "SELECT * FROM suppliers ORDER BY company ASC";
+        return executeQuery(sql, this::map);
     }
 
-    public Supplier formatObj(ResultSet rs) {
+    // ==========================================================
+    // 🔹 Consultas adicionais
+    // ==========================================================
+    public Supplier findByName(String name) {
+        String sql = "SELECT * FROM suppliers WHERE company = ?";
+        return findOne(sql, this::map, name);
+    }
 
-        try {
-            Supplier obj = new Supplier();
-//            Countries country;
-//            CountryDao sDao = new CountryDao();
-//            country = sDao.searchFromId(rs.getInt("country"));
+    public Supplier findByNif(String nif) {
+        String sql = "SELECT * FROM suppliers WHERE nif = ?";
+        return findOne(sql, this::map, nif);
+    }
 
-            obj.setId(rs.getInt("id"));
-            obj.setNif(rs.getString("nif"));
-            obj.setName(rs.getString("company"));
-            obj.setEmail(rs.getString("email"));
-            obj.setPhone(rs.getString("phone"));
-            obj.setAddress(rs.getString("address"));
-//            obj.setCountry(country);
-            obj.setCity(rs.getString("city"));
-//            obj.setState(rs.getString("state"));
-            obj.setZipCode(rs.getString("zip_code"));
-            obj.setGroupId(rs.getInt("group_id"));
-            obj.setStatus(rs.getInt("status"));
-            obj.setIsDefault(rs.getInt("isdefault"));
-            return obj;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao formatar obj Supplier: " + e.getMessage());
-        }
-        return null;
+    public List<Supplier> filter(String text) {
+        String like = "%" + text + "%";
+        String sql = """
+            SELECT * FROM suppliers
+             WHERE company LIKE ? OR nif LIKE ? OR city LIKE ? OR email LIKE ?
+          ORDER BY company ASC
+        """;
+        return executeQuery(sql, this::map, like, like, like, like);
+    }
+
+    public boolean existsByNif(String nif) {
+        String sql = "SELECT COUNT(*) FROM suppliers WHERE nif = ?";
+        int count = executeScalarInt(sql, nif);
+        return count > 0;
+    }
+
+    public List<Supplier> findActive() {
+        String sql = "SELECT * FROM suppliers WHERE status = 1 ORDER BY company ASC";
+        return executeQuery(sql, this::map);
     }
 }

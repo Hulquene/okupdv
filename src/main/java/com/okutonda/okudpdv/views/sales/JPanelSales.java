@@ -7,8 +7,8 @@ package com.okutonda.okudpdv.views.sales;
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.ui.TemaUI;
-import com.okutonda.okudpdv.utilities.JpanelLoader;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.JpanelLoader;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import com.okutonda.okudpdv.views.Orders.JDialogDetailOrder;
 import com.okutonda.okudpdv.views.Orders.JPanelOrders;
 import java.time.LocalDate;
@@ -63,8 +63,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         TemaUI.aplicarBotaoPrimario(jButton3);
         TemaUI.aplicarBotaoPrimario(jButton4);
 //        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
-        
-        
+
 //        TemaUI.aplicarBotaoPrimario(jButtonLogin);
 //        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
 //        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
@@ -97,12 +96,13 @@ public final class JPanelSales extends javax.swing.JPanel {
     }
 
     public void listOrder() {
-        List<Order> list = orderController.get();
+        List<Order> list = orderController.getAll();
         listTable(list);
     }
 
     public void filterListOrder(String txt) {
-        List<Order> list = orderController.filter(txt);
+//        List<Order> list = orderController.filter(txt);
+        List<Order> list = orderController.filterDate(LocalDate.MIN, LocalDate.MIN);
         listTable(list);
     }
 
@@ -720,7 +720,7 @@ public final class JPanelSales extends javax.swing.JPanel {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-          JPanelOrders pOrder = new JPanelOrders();
+        JPanelOrders pOrder = new JPanelOrders();
         jpload.jPanelLoader(jPanelSalesContent, pOrder);
         jLabelJpanelSelected.setText("Pedidos");
     }//GEN-LAST:event_jButton1ActionPerformed

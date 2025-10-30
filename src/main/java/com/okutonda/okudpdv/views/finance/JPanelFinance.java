@@ -22,7 +22,7 @@ import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -385,7 +385,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listShifts() {
-        List<Shift> list = shiftController.get("");
+        List<Shift> list = shiftController.findAll();
         loadListShifts(list);
     }
 
@@ -414,7 +414,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.get("");
+        List<ProductOrder> list = productOrderController.list("");
         loadListSalesProducts(list);
     }
 

@@ -1,115 +1,75 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.ReportDao;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.UtillFiles;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.UtillFiles;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 /**
- *
- * @author kenny
+ * Controller responsável pela geração de relatórios.
+ * 
+ * Camada intermediária entre a UI e o DAO.
+ * Contém apenas lógica de negócio e exportação.
+ * 
+ * @author Hulquene
  */
 public class ReportController {
 
-    ReportDao dao;
-    UserSession session = UserSession.getInstance();
+    private final ReportDao dao;
+    private final UserSession session = UserSession.getInstance();
 
     public ReportController() {
         this.dao = new ReportDao();
     }
 
-    public Boolean salesProductsArrayListToExcell(List<List<String>> data) {
-
-//        List<List<String>> data = new ArrayList<>();
-//        data.add(List.of("ID", "Data", "Descricao", "Produto", "QTD", "Preço", "Imposto", "Ttal"));
-//        data.add(List.of("Alice", "30", "São Paulo"));
-//        data.add(List.of("Bob", "25", "Rio de Janeiro"));
-//        data.add(List.of("Carol", "35", "Belo Horizonte"));
-//        data.add(List.of("Carol", "35", "Belo Horizonte"));
-//        for (ProductOrder prod : listProd) {
-//            data.add(List.of(String.valueOf(prod.getId()), String.valueOf(prod.getDate()), "", prod.getDescription(), String.valueOf(prod.getQty()), prod.getPrice().toString(), prod.getTaxeCode(), ""));
-//        }
-        String filePath = "dados.xlsx";
-        try {
-            UtillFiles.convertArrayListToExcel(data, filePath);
-            System.out.println("Arquivo Excel criado com sucesso.");
-            return true;
-        } catch (IOException e) {
-        }
-        return false;
+    // ==========================================================
+    // 🔹 Relatórios de Vendas
+    // ==========================================================
+    public List<Map<String, Object>> getSalesByProduct(String from, String to) {
+        return dao.getSalesByProduct(from, to);
     }
 
-    public Boolean salesProductsSellerArrayListToExcell(List<List<String>> data) {
-
-//        List<List<String>> data = new ArrayList<>();
-//        data.add(List.of("ID", "Data", "Descricao", "Vendedor", "Produto", "QTD", "Preço", "Imposto", "Ttal"));
-//        for (ProductOrder prod : listProd) {
-//            data.add(List.of(String.valueOf(prod.getId()), String.valueOf(prod.getDate()), "", "", prod.getDescription(), String.valueOf(prod.getQty()), prod.getPrice().toString(), prod.getTaxeCode(), ""));
-//        }
-        String filePath = "dados.xlsx";
-        try {
-            UtillFiles.convertArrayListToExcel(data, filePath);
-            System.out.println("Arquivo Excel criado com sucesso.");
-            return true;
-        } catch (IOException e) {
-        }
-        return false;
+    public List<Map<String, Object>> getSalesBySeller(String from, String to) {
+        return dao.getSalesBySeller(from, to);
     }
 
-    public Boolean salesOrderSellerArrayListToExcell(List<List<String>> data) {
-
-//        List<List<String>> data = new ArrayList<>();
-//        data.add(List.of("ID", "Vendedor", "Fatura", "Data", "SubTotal", "Total"));
-//        for (Order order : listOrders) {
-//            data.add(List.of(String.valueOf(order.getId()), "", order.getPrefix(), order.getDatecreate(), String.valueOf(order.getSubTotal()), String.valueOf(order.getTotal())));
-//        }
-        String filePath = "dados.xlsx";
-        try {
-            UtillFiles.convertArrayListToExcel(data, filePath);
-            System.out.println("Arquivo Excel criado com sucesso.");
-            return true;
-        } catch (IOException e) {
-        }
-        return false;
+    // ==========================================================
+    // 🔹 Relatórios de Turnos
+    // ==========================================================
+    public Map<String, Object> getShiftSummary(int shiftId) {
+        return dao.getShiftSummary(shiftId);
     }
 
-    public Boolean salesOrderArrayListToExcell(List<List<String>> data) {
-
-//        List<List<String>> data = new ArrayList<>();
-//        data.add(List.of("ID", "Fatura", "Data", "SubTotal", "Total"));
-//        for (Order order : listOrders) {
-//            data.add(List.of(String.valueOf(order.getId()),order.getPrefix(), order.getDatecreate(), String.valueOf(order.getSubTotal()), String.valueOf(order.getTotal())));
-//        }
-        String filePath = "dados.xlsx";
-        try {
-            UtillFiles.convertArrayListToExcel(data, filePath);
-            System.out.println("Arquivo Excel criado com sucesso.");
-            return true;
-        } catch (IOException e) {
-        }
-        return false;
+    public List<Map<String, Object>> listClosedShifts(String from, String to) {
+        return dao.listClosedShifts(from, to);
     }
 
-    public Boolean historyShiftArrayListToExcell(List<List<String>> data) {
-
-//        List<List<String>> data = new ArrayList<>();
-//        data.add(List.of("ID", "Fatura", "Data", "SubTotal", "Total"));
-//        for (Order order : listOrders) {
-//            data.add(List.of(String.valueOf(order.getId()),order.getPrefix(), order.getDatecreate(), String.valueOf(order.getSubTotal()), String.valueOf(order.getTotal())));
-//        }
-        String filePath = "dados.xlsx";
+    // ==========================================================
+    // 🔹 Exportação para Excel
+    // ==========================================================
+    public boolean exportToExcel(List<List<String>> data, String filePath) {
         try {
             UtillFiles.convertArrayListToExcel(data, filePath);
-            System.out.println("Arquivo Excel criado com sucesso.");
+            System.out.println("✅ Arquivo Excel criado com sucesso em: " + filePath);
             return true;
         } catch (IOException e) {
+            System.err.println("[Export] Erro ao gerar Excel: " + e.getMessage());
+            return false;
         }
-        return false;
     }
 
+    public boolean exportSalesByProductExcel(String from, String to, String filePath) {
+        List<Map<String, Object>> result = dao.getSalesByProduct(from, to);
+        List<List<String>> rows = new ArrayList<>();
+        rows.add(List.of("Produto", "Quantidade", "Total"));
+        for (Map<String, Object> r : result) {
+            rows.add(List.of(
+                    String.valueOf(r.get("produto")),
+                    String.valueOf(r.get("quantidade")),
+                    String.valueOf(r.get("total"))
+            ));
+        }
+        return exportToExcel(rows, filePath);
+    }
 }

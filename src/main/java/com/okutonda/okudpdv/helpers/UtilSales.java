@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.okutonda.okudpdv.utilities;
+package com.okutonda.okudpdv.helpers;
 
 import com.okutonda.okudpdv.data.dao.OrderDao;
 import com.okutonda.okudpdv.data.entities.Order;
@@ -26,7 +26,7 @@ public class UtilSales {
     public static String FormatedNumberPrefix(int id, String type) {
         String format = "";
         OrderDao dao = new OrderDao();
-        Order obj = dao.getId(id);
+        Order obj = dao.findById(id);
         if (obj != null) {
             format = obj.getPrefix() + " " + obj.getYear() + "/" + obj.getNumber();
         }

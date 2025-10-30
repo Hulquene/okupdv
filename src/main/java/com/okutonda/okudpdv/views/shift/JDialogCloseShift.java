@@ -5,9 +5,9 @@
 package com.okutonda.okudpdv.views.shift;
 
 import com.okutonda.okudpdv.controllers.ShiftController;
-import com.okutonda.okudpdv.utilities.ShiftSession;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.UtilDate;
+import com.okutonda.okudpdv.helpers.ShiftSession;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.UtilDate;
 import javax.swing.JOptionPane;
 
 /**

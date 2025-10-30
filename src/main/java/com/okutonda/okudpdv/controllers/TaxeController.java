@@ -1,52 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.TaxeDao;
 import com.okutonda.okudpdv.data.entities.Taxes;
+
 import java.util.List;
 
 /**
+ * Controller responsável pelas regras de negócio dos impostos (Taxes).
  *
- * @author kenny
+ * Aplica validações simples e delega persistência ao DAO. Mantém
+ * compatibilidade com as camadas fiscais e SAFT.
+ *
+ * @author Hulquene
  */
 public class TaxeController {
 
-    TaxeDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final TaxeDao dao;
 
     public TaxeController() {
         this.dao = new TaxeDao();
     }
 
-    public Taxes getId(int id) {
-        return dao.searchFromId(id);
-    }
-
-    public Taxes getCode(String code) {
-        return dao.searchFromCode(code);
-    }
-
-    public List<Taxes> filter(String txt) {
-        return dao.filter(txt);
-    }
-    public List<Taxes> get(String where) {
-        return dao.list(where);
-    }
-
-    public Boolean add(Taxes tax, int id) {
-        boolean status;
-        if (id == 0) {
-            status = dao.add(tax);
-        } else {
-            status = dao.edit(tax, id);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(Taxes tax) {
+        if (tax == null) {
+            System.err.println("[Controller] Objeto Tax inválido (nulo).");
+            return false;
         }
-        return status;
+
+        if (tax.getId() <= 0) {
+            return dao.add(tax);
+        } else {
+            return dao.update(tax);
+        }
     }
-    
-    public Boolean deleteId(int id) {
+
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[Controller] ID inválido para exclusão de imposto.");
+            return false;
+        }
         return dao.delete(id);
+    }
+
+    // ==========================================================
+    // 🔹 Consultas
+    // ==========================================================
+    public Taxes getById(int id) {
+        return dao.findById(id);
+    }
+
+    public Taxes getByCode(String code) {
+        return dao.findByCode(code);
+    }
+
+    public List<Taxes> listarTodas() {
+        return dao.findAll();
+    }
+
+    public List<Taxes> filtrar(String termo) {
+        return dao.filter(termo);
+    }
+
+    public Taxes getDefaultTax() {
+        return dao.findDefaultTax();
     }
 }

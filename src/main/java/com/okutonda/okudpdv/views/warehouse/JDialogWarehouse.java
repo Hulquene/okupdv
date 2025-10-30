@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.warehouse;
 
 import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.data.entities.Warehouse;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.Utilities;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -29,7 +29,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
     }
 
     public void listWarehouse() {
-        List<Warehouse> list = warehouseController.get("");
+        List<Warehouse> list = warehouseController.listarTodos();
         DefaultTableModel data = (DefaultTableModel) jTableWarehouse.getModel();
         data.setNumRows(0);
         for (Warehouse c : list) {
@@ -41,7 +41,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
     }
 
     public void filterListWarehouse(String txt) {
-        List<Warehouse> list = warehouseController.filter(txt);
+        List<Warehouse> list = warehouseController.filtrar(txt);
         DefaultTableModel data = (DefaultTableModel) jTableWarehouse.getModel();
         data.setNumRows(0);
         for (Warehouse c : list) {
@@ -308,13 +308,14 @@ public class JDialogWarehouse extends javax.swing.JDialog {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
             boolean response;
             if (id == 0) {
-                response = warehouseController.add(cModel, 0);
+                response = warehouseController.save(cModel);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Warehouse salvo com Sucesso!!");
 
                 }
             } else {
-                response = warehouseController.add(cModel, id);
+                     cModel.setId(id);
+                response = warehouseController.save(cModel);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Warehouse Atualizado com Sucesso!!");
 
@@ -359,10 +360,10 @@ public class JDialogWarehouse extends javax.swing.JDialog {
         } finally {
             System.out.println("warehouseController id:" + value);
             if (value > 0) {
-                Warehouse userD = warehouseController.getId(value);
+                Warehouse userD = warehouseController.getById(value);
                 int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja deletar," + userD.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
                 if (sair == JOptionPane.YES_OPTION) {
-                    if (warehouseController.deleteId(userD.getId())) {
+                    if (warehouseController.delete(userD.getId())) {
                         JOptionPane.showMessageDialog(null, "jTableWarehouse excluido com Sucesso!!");
                         listWarehouse();
                     }

@@ -2,7 +2,7 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.UserDao;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 import java.util.List;
 
 /**
@@ -14,10 +14,10 @@ import java.util.List;
  * @author Hul…
  */
 public class UserController {
-
+    
     private final UserDao dao;
     private final UserSession session = UserSession.getInstance();
-
+    
     public UserController() {
         this.dao = new UserDao();
     }
@@ -34,6 +34,7 @@ public class UserController {
             session.clearSession();
             session.setUser(user);
         }
+        dao.close();
         return user;
     }
 
@@ -60,7 +61,7 @@ public class UserController {
             user.setId(id);
             status = dao.update(user);
         }
-
+        
         if (status) {
             return dao.findByNif(user.getNif());
         }
@@ -85,14 +86,20 @@ public class UserController {
      * Lista todos os usuários.
      */
     public List<User> getAll() {
-        return dao.findAll();
+        List<User> lista = dao.findAll();
+        dao.close();
+        return lista;
+//        return dao.findAll();
     }
 
     /**
      * Pesquisa usuários com base em texto (nome, email, endereço).
      */
     public List<User> filter(String txt) {
-        return dao.filter(txt);
+        List<User> lista = dao.filter(txt);
+        dao.close();
+        return lista;
+//        return dao.filter(txt);
     }
 
     // =====================
@@ -109,7 +116,7 @@ public class UserController {
         if (session.getUser().getId() != id) {
             return false;
         }
-
+        
         return dao.updateManagerCode(id, code);
     }
 
@@ -121,7 +128,7 @@ public class UserController {
         if (logged == null || logged.getId() != id) {
             return false;
         }
-
+        
         if (logged.getPassword() != null && logged.getPassword().equals(oldPassword)) {
             boolean ok = dao.updatePassword(id, newPassword);
             if (ok) {

@@ -1,92 +1,184 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.data.entities.Expense;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.data.entities.User;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author rog
+ * DAO responsável pela gestão das despesas.
+ * 
+ * Compatível com o padrão BaseDao e HikariCP (DatabaseProvider).
+ * Todas as conexões são automaticamente devolvidas ao pool.
+ * 
+ * @author Hulquene
  */
-public class ExpenseDao {
-
-    private final Connection conn;
+public class ExpenseDao extends BaseDao<Expense> {
 
     public ExpenseDao() {
-        this.conn = ConnectionDatabase.getConnect();
+        super(); // usa conexão automática via pool
     }
 
-    public List<Expense> listDespesas(String dateFrom, String dateTo) {
-        List<Expense> list = new ArrayList<>();
-        String sql = """
-            SELECT e.id,
-                   e.description,
-                   e.total,
-                   e.prefix,
-                   e.number,
-                   e.date,
-                   e.mode,
-                   e.reference,
-                   e.notes,
-                   e.currency,
-                   s.id   AS supplier_id,
-                   s.name AS supplier_name,
-                   u.id   AS user_id,
-                   u.name AS user_name
-            FROM expenses e
-            LEFT JOIN suppliers s ON e.supplier_id = s.id
-            LEFT JOIN users u     ON e.user_id = u.id
-            WHERE DATE(e.date) BETWEEN ? AND ?
-            ORDER BY e.date ASC
-        """;
+    public ExpenseDao(Connection externalConn) {
+        super(externalConn); // para uso em transações externas
+    }
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, dateFrom);
-            pst.setString(2, dateTo);
+    // ==========================================================
+    // 🔹 Mapeamento ResultSet → Entidade Expense
+    // ==========================================================
+    private Expense map(ResultSet rs) {
+        try {
+            Expense e = new Expense();
+            e.setId(rs.getInt("id"));
+            e.setDescription(rs.getString("description"));
+            e.setTotal(rs.getBigDecimal("total"));
+            e.setPrefix(rs.getString("prefix"));
+            e.setNumber(rs.getInt("number"));
+            e.setDate(rs.getString("date"));
+            e.setMode(rs.getString("mode"));
+            e.setReference(rs.getString("reference"));
+            e.setNotes(rs.getString("notes"));
+            e.setCurrency(rs.getString("currency"));
 
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Expense obj = new Expense();
-                    obj.setId(rs.getInt("id"));
-                    obj.setDescription(rs.getString("description"));
-                    obj.setTotal(rs.getBigDecimal("total"));
-                    obj.setPrefix(rs.getString("prefix"));
-                    obj.setNumber(rs.getInt("number"));
-                    obj.setDate(rs.getString("date"));
-                    obj.setMode(rs.getString("mode"));
-                    obj.setReference(rs.getString("reference"));
-                    obj.setNotes(rs.getString("notes"));
-                    obj.setCurrency(rs.getString("currency"));
-
-                    // Relacionamentos
-                    if (rs.getInt("supplier_id") > 0) {
-                        Supplier s = new Supplier();
-                        s.setId(rs.getInt("supplier_id"));
-                        s.setName(rs.getString("supplier_name"));
-                        obj.setSupplier(s);
-                    }
-                    if (rs.getInt("user_id") > 0) {
-                        User u = new User();
-                        u.setId(rs.getInt("user_id"));
-                        u.setName(rs.getString("user_name"));
-                        obj.setUser(u);
-                    }
-
-                    list.add(obj);
-                }
+            // 🔹 Relacionamentos
+            int supplierId = rs.getInt("supplier_id");
+            if (supplierId > 0) {
+                Supplier s = new Supplier();
+                s.setId(supplierId);
+                s.setName(rs.getString("supplier_name"));
+                e.setSupplier(s);
             }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar despesas: " + e.getMessage());
+
+            int userId = rs.getInt("user_id");
+            if (userId > 0) {
+                User u = new User();
+                u.setId(userId);
+                u.setName(rs.getString("user_name"));
+                e.setUser(u);
+            }
+
+            return e;
+        } catch (SQLException ex) {
+            System.err.println("[DB] Erro ao mapear Expense: " + ex.getMessage());
+            return null;
         }
-        return list;
+    }
+
+    // ==========================================================
+    // 🔹 CRUD BÁSICO
+    // ==========================================================
+    @Override
+    public boolean add(Expense e) {
+        String sql = """
+            INSERT INTO expenses
+            (description, total, prefix, number, date, mode, reference, notes, currency, supplier_id, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
+        return executeUpdate(sql,
+                e.getDescription(),
+                e.getTotal(),
+                e.getPrefix(),
+                e.getNumber(),
+                e.getDate(),
+                e.getMode(),
+                e.getReference(),
+                e.getNotes(),
+                e.getCurrency(),
+                e.getSupplier() != null ? e.getSupplier().getId() : 0,
+                e.getUser() != null ? e.getUser().getId() : 0
+        );
+    }
+
+    @Override
+    public boolean update(Expense e) {
+        String sql = """
+            UPDATE expenses
+               SET description=?, total=?, mode=?, reference=?, notes=?, currency=?, supplier_id=?, user_id=?
+             WHERE id=?
+        """;
+        return executeUpdate(sql,
+                e.getDescription(),
+                e.getTotal(),
+                e.getMode(),
+                e.getReference(),
+                e.getNotes(),
+                e.getCurrency(),
+                e.getSupplier() != null ? e.getSupplier().getId() : 0,
+                e.getUser() != null ? e.getUser().getId() : 0,
+                e.getId()
+        );
+    }
+
+    @Override
+    public boolean delete(int id) {
+        return executeUpdate("DELETE FROM expenses WHERE id=?", id);
+    }
+
+    @Override
+    public Expense findById(int id) {
+        String sql = """
+            SELECT e.*, 
+                   s.id AS supplier_id, s.name AS supplier_name,
+                   u.id AS user_id, u.name AS user_name
+              FROM expenses e
+         LEFT JOIN suppliers s ON e.supplier_id = s.id
+         LEFT JOIN users u ON e.user_id = u.id
+             WHERE e.id=?
+        """;
+        return findOne(sql, this::map, id);
+    }
+
+    @Override
+    public List<Expense> findAll() {
+        String sql = """
+            SELECT e.*, 
+                   s.id AS supplier_id, s.name AS supplier_name,
+                   u.id AS user_id, u.name AS user_name
+              FROM expenses e
+         LEFT JOIN suppliers s ON e.supplier_id = s.id
+         LEFT JOIN users u ON e.user_id = u.id
+          ORDER BY e.date DESC
+        """;
+        return executeQuery(sql, this::map);
+    }
+
+    // ==========================================================
+    // 🔹 CONSULTAS PERSONALIZADAS
+    // ==========================================================
+    /**
+     * Lista despesas entre duas datas específicas.
+     */
+    public List<Expense> listDespesas(String dateFrom, String dateTo) {
+        String sql = """
+            SELECT e.*, 
+                   s.id AS supplier_id, s.name AS supplier_name,
+                   u.id AS user_id, u.name AS user_name
+              FROM expenses e
+         LEFT JOIN suppliers s ON e.supplier_id = s.id
+         LEFT JOIN users u ON e.user_id = u.id
+             WHERE DATE(e.date) BETWEEN ? AND ?
+          ORDER BY e.date ASC
+        """;
+        return executeQuery(sql, this::map, dateFrom, dateTo);
+    }
+
+    /**
+     * Busca despesas com filtro textual (descrição ou referência).
+     */
+    public List<Expense> filter(String text) {
+        String like = "%" + text + "%";
+        String sql = """
+            SELECT e.*, 
+                   s.id AS supplier_id, s.name AS supplier_name,
+                   u.id AS user_id, u.name AS user_name
+              FROM expenses e
+         LEFT JOIN suppliers s ON e.supplier_id = s.id
+         LEFT JOIN users u ON e.user_id = u.id
+             WHERE e.description LIKE ? OR e.reference LIKE ?
+          ORDER BY e.date DESC
+        """;
+        return executeQuery(sql, this::map, like, like);
     }
 }

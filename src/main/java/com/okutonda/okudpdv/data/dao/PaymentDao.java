@@ -17,6 +17,16 @@ import java.math.BigDecimal;
  * @author …
  */
 public class PaymentDao extends BaseDao<Payment> {
+// ✅ Construtor padrão (usa conexão do pool automaticamente)
+
+    public PaymentDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public PaymentDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
 
     // ==========================================================
     // 🔹 Mapeamento SQL → Objeto Payment

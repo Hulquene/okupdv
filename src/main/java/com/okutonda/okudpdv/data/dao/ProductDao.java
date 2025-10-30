@@ -14,7 +14,16 @@ import java.util.List;
  * @author …
  */
 public class ProductDao extends BaseDao<Product> {
+    // ✅ Construtor padrão (usa conexão do pool automaticamente)
 
+    public ProductDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public ProductDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
     // ==========================================================
     // 🔹 MAPEAMENTO SQL → OBJETO
     // ==========================================================
@@ -24,7 +33,7 @@ public class ProductDao extends BaseDao<Product> {
 
             GroupsProductDao gDao = new GroupsProductDao();
             TaxeDao tDao = new TaxeDao();
-            ReasonTaxeDao rDao = new ReasonTaxeDao();
+            TaxeReasonDao rDao = new TaxeReasonDao();
 
             obj.setId(rs.getInt("id"));
             obj.setType(rs.getString("type"));
@@ -34,8 +43,8 @@ public class ProductDao extends BaseDao<Product> {
             obj.setPrice(rs.getBigDecimal("price"));
             obj.setPurchasePrice(rs.getBigDecimal("purchase_price"));
             obj.setGroup(gDao.findById(rs.getInt("group_id")));
-            obj.setTaxe(tDao.searchFromId(rs.getInt("tax_id")));
-            obj.setReasonTaxe(rDao.searchFromId(rs.getInt("reason_tax_id")));
+            obj.setTaxe(tDao.findById(rs.getInt("tax_id")));
+            obj.setReasonTaxe(rDao.findById(rs.getInt("reason_tax_id")));
             obj.setStatus(rs.getInt("status"));
             obj.setMinStock(rs.getInt("min_stock"));
             return obj;

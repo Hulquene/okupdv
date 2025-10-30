@@ -17,7 +17,7 @@ import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.dao.OrderDao;
 import com.okutonda.okudpdv.data.dao.SaftFatDao;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -41,7 +41,7 @@ import java.util.Locale;
  *
  * @author hr
  */
-public class ExportSaftFatController {
+public class SaftFatController {
 
     // DAOs
     private final SaftFatDao saftDao = new SaftFatDao();
@@ -536,7 +536,7 @@ public class ExportSaftFatController {
             String originNo = "";
             String invType = nz(p.getInvoiceType());
             if (p.getInvoiceId() > 0) {
-                Order inv = orderDao.getId(p.getInvoiceId());
+                Order inv = orderDao.findById(p.getInvoiceId());
                 if (inv != null) {
                     originNo = (inv.getPrefix() == null ? "" : inv.getPrefix() + " ") + inv.getNumber();
                     if (invType.isEmpty()) {

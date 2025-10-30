@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.SupplierDao;
@@ -9,46 +5,80 @@ import com.okutonda.okudpdv.data.entities.Supplier;
 import java.util.List;
 
 /**
+ * Controller responsável pelas regras de negócio dos Fornecedores (Suppliers).
  *
- * @author kenny
+ * Aplica validações, previne duplicidades e faz ligação entre interface e DAO.
+ *
+ * @author Hulquene
  */
 public class SupplierController {
 
-    SupplierDao dao;
-//    ProductOrderDao prodOrderDao;
+    private final SupplierDao dao;
 
     public SupplierController() {
         this.dao = new SupplierDao();
-//        this.prodOrderDao = new ProductOrderDao();
     }
 
-    public Supplier add(Supplier supplier, int id) {
-        boolean status;
-        if (id == 0) {
-            status = dao.add(supplier);
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(Supplier supplier) {
+        if (supplier == null) {
+            System.err.println("[Controller] Objeto Supplier inválido (nulo).");
+            return false;
+        }
+
+        // Valida NIF duplicado
+        if ((supplier.getId() == 0)
+                && dao.existsByNif(supplier.getNif())) {
+            System.err.println("[Controller] Já existe um fornecedor com este NIF.");
+            return false;
+        }
+
+        if (supplier.getId() <= 0) {
+            return dao.add(supplier);
         } else {
-            status = dao.edit(supplier, id);
+            return dao.update(supplier);
         }
-        if (status == true) {
-            Supplier responde = dao.searchFromName(supplier.getNif());
-            return responde;
-        }
-        return null;
     }
 
-    public Supplier getId(int id) {
-        return dao.getFromId(id);
-    }
-
-    public Boolean deleteId(int id) {
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[Controller] ID inválido para exclusão de fornecedor.");
+            return false;
+        }
         return dao.delete(id);
     }
 
-    public List<Supplier> get(String where) {
-        return dao.list(where);
+    // ==========================================================
+    // 🔹 Consultas
+    // ==========================================================
+    public Supplier getById(int id) {
+        return dao.findById(id);
     }
 
-    public List<Supplier> filter(String txt) {
-        return dao.filter(txt);
+    public Supplier getByName(String name) {
+        return dao.findByName(name);
+    }
+
+    public Supplier getByNif(String nif) {
+        return dao.findByNif(nif);
+    }
+
+    public List<Supplier> listarTodos() {
+        List<Supplier> lista = dao.findAll();
+        dao.close();
+        return lista;
+    }
+
+    public List<Supplier> listarAtivos() {
+        List<Supplier> lista = dao.findActive();
+        dao.close();
+        return lista;
+//        return dao.findActive();
+    }
+
+    public List<Supplier> filtrar(String texto) {
+        return dao.filter(texto);
     }
 }

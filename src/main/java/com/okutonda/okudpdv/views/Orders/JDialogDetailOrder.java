@@ -7,7 +7,7 @@ package com.okutonda.okudpdv.views.Orders;
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import java.math.BigDecimal;
 import javax.swing.table.DefaultTableModel;
 
@@ -48,7 +48,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
 
     public void setOrder(int id) {
         System.out.println("id order: " + id);
-        this.order = this.orderController.getId(id);
+        this.order = this.orderController.getById(id);
 //        this.order = order;
 //        jLabelTotalOrder.setText(order.getTotal().toString());
     }

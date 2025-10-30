@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.okutonda.okudpdv.utilities;
+package com.okutonda.okudpdv.helpers;
 
 import javax.swing.JPanel;
 

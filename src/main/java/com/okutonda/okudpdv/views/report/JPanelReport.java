@@ -13,7 +13,7 @@ import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import com.okutonda.okudpdv.views.export.JDialogExportSaftFat;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.get("");
+        List<ProductOrder> list = productOrderController.list("");
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
         for (ProductOrder c : list) {
@@ -101,7 +101,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listButSalesProducts() {
-        List<ProductOrder> list = productOrderController.get("");
+        List<ProductOrder> list = productOrderController.list("");
         DefaultTableModel data = (DefaultTableModel) jTableReportButSalesProduct.getModel();
         data.setNumRows(0);
 
@@ -138,7 +138,7 @@ public final class JPanelReport extends javax.swing.JPanel {
     }
 
     public void listOrder() {
-        List<Order> list = orderController.get();
+        List<Order> list = orderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrders.getModel();
         data.setNumRows(0);
         for (Order c : list) {
@@ -155,7 +155,7 @@ public final class JPanelReport extends javax.swing.JPanel {
     }
 
     public void listOrderSeller() {
-        List<Order> list = orderController.get();
+        List<Order> list = orderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderSeller.getModel();
         data.setNumRows(0);
         for (Order c : list) {
@@ -171,19 +171,19 @@ public final class JPanelReport extends javax.swing.JPanel {
     }
 
     public void filterListOrderSeller(int idSeller) {
-        List<Order> list = orderController.getOrderSeller(0);
-        DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderSeller.getModel();
-        data.setNumRows(0);
-        for (Order c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getSeller().getName(),
-                UtilSales.FormatedNumberPrefix(c.getId(), c.getPrefix()),
-                c.getDatecreate(),
-                c.getTotalTaxe(),
-                c.getTotal()
-            });
-        }
+//        List<Order> list = orderController.getOrderSeller(0);
+//        DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderSeller.getModel();
+//        data.setNumRows(0);
+//        for (Order c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getSeller().getName(),
+//                UtilSales.FormatedNumberPrefix(c.getId(), c.getPrefix()),
+//                c.getDatecreate(),
+//                c.getTotalTaxe(),
+//                c.getTotal()
+//            });
+//        }
     }
 
     /**
@@ -913,7 +913,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //            listProd.add(prod);
         }
 
-        reportController.salesProductsArrayListToExcell(data);
+//        reportController.salesProductsArrayListToExcell(data);
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
@@ -947,7 +947,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //            listProd.add(prod);
         }
 
-        reportController.salesProductsSellerArrayListToExcell(data);
+//        reportController.salesProductsSellerArrayListToExcell(data);
     }//GEN-LAST:event_jButton15ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -976,7 +976,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //            order.setTotal((Double) jTableReportSalesOrderSeller.getValueAt(i, 5));
 //            listOrders.add(order);
         }
-        reportController.salesOrderSellerArrayListToExcell(data);
+//        reportController.salesOrderSellerArrayListToExcell(data);
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -994,7 +994,7 @@ public final class JPanelReport extends javax.swing.JPanel {
                     jTableReportSalesOrders.getValueAt(i, 5).toString()
             ));
         }
-        reportController.salesOrderArrayListToExcell(data);
+//        reportController.salesOrderArrayListToExcell(data);
     }//GEN-LAST:event_jButtonExportOrderAllExcellActionPerformed
 
     private void jButtonExpSaftFactActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonExpSaftFactActionPerformed

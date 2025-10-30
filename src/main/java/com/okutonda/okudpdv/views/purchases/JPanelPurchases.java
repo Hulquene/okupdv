@@ -56,7 +56,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
     }
 
     public void listPurchases() {
-        List<Purchase> list = purchaseController.get();
+        List<Purchase> list = purchaseController.listar();
         loadListPurchases(list);
     }
 

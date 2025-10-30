@@ -4,30 +4,12 @@
 package com.okutonda.okudpdv;
 
 import com.formdev.flatlaf.FlatLightLaf;
-//import com.okutonda.okudpdv.controllers.AdminRoot;
-//import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-//import com.okutonda.okudpdv.jdbc.DatabaseBootProbe;
-//import static com.okutonda.okudpdv.jdbc.DatabaseBootProbe.AppState.DB_NOT_FOUND;
-//import static com.okutonda.okudpdv.jdbc.DatabaseBootProbe.AppState.DB_UNREACHABLE;
-//import static com.okutonda.okudpdv.jdbc.DatabaseBootProbe.AppState.INSTALL_INCOMPLETE;
-//import static com.okutonda.okudpdv.jdbc.DatabaseBootProbe.AppState.READY;
-//import static com.okutonda.okudpdv.jdbc.DatabaseBootProbe.AppState.SCHEMA_MISSING;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
-//import java.awt.Toolkit;
-//import java.sql.Connection;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-//import javax.swing.UIManager;
-//import javax.swing.UnsupportedLookAndFeelException;
-
-//import com.okutonda.okudpdv.data.connection.DatabaseBootProbe;
-//import com.okutonda.okudpdv.data.connection.DatabaseBootProbe.AppState;
 import com.okutonda.okudpdv.data.connection.DatabaseBootProbe;
-//import com.okutonda.okudpdv.data.connection.DatabaseBootProbe.AppState;
 import com.okutonda.okudpdv.data.connection.DatabaseProvider;
-//import com.okutonda.okudpdv.ui.ScreenInstall;
-//import com.okutonda.okudpdv.ui.ScreenLogin;
 /**
  *
  * @author kenny

@@ -2,48 +2,69 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.okutonda.okudpdv.utilities;
+package com.okutonda.okudpdv.helpers;
 
+import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 
 /**
  *
  * @author kenny
  */
-public class UserSession {
+public class ShiftSession {
 
-    private static UserSession instance;
-    private User user;
-//    private String username;
+    private static ShiftSession instance;
+    private Shift shift;
+    private User seller;
+//    private Double shiftValue;
+//    private int shiftStatus;
 //    private String userProfile;
 //    private int userId;
 //    private int userStatus;
 
-    private UserSession() {
+    private ShiftSession() {
         // Construtor privado para evitar instanciamento externo
     }
 
-    public static UserSession getInstance() {
+    public static ShiftSession getInstance() {
         if (instance == null) {
-            instance = new UserSession();
+            instance = new ShiftSession();
         }
         return instance;
     }
 
-    public User getUser() {
-        return user;
+    public Shift getShift() {
+        return shift;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setShift(Shift shift) {
+        this.shift = shift;
     }
-//
-//    public void setUsername(String username) {
-//        this.username = username;
+
+    public User getSeller() {
+        return seller;
+    }
+
+    public void setSeller(User seller) {
+        this.seller = seller;
+    }
+
+//    
+//    
+//    public int getShiftStatus() {
+//        return shiftStatus;
 //    }
 //
-//    public String getUsername() {
-//        return username;
+//    public void setShiftStatus(int shiftStatus) {
+//        this.shiftStatus = shiftStatus;
+//    }
+//
+//    public Double getShiftValue() {
+//        return shiftValue;
+//    }
+//
+//    public void setShiftValue(Double shiftValue) {
+//        this.shiftValue = shiftValue;
 //    }
 //
 //    public void setUserId(int userId) {
@@ -69,14 +90,16 @@ public class UserSession {
 //    public void setUserStatus(int userStatus) {
 //        this.userStatus = userStatus;
 //    }
+
     // Método para limpar a sessão
     public void clearSession() {
-        this.user = null;
-//        username = null;
-//        userId = 0;
-//        username = null;
+        shift = null;
+        seller = null;
+//        shiftValue = null;
 //        userProfile = null;
+//        userId = 0;
 //        userStatus = 0;
+//        shiftStatus = 0;
     }
 
     // Método para evitar clonagem da instância

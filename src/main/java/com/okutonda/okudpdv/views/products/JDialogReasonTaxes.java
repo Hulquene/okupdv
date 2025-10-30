@@ -4,7 +4,7 @@
  */
 package com.okutonda.okudpdv.views.products;
 
-import com.okutonda.okudpdv.controllers.ReasonTaxeController;
+import com.okutonda.okudpdv.controllers.TaxeReasonController;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -16,11 +16,11 @@ import javax.swing.table.DefaultTableModel;
  */
 public final class JDialogReasonTaxes extends javax.swing.JDialog {
 
-    ReasonTaxeController reasonTaxeController = new ReasonTaxeController();
+    TaxeReasonController reasonTaxeController = new TaxeReasonController();
 
     public void listReasonTaxes() {
 //        ClientDao cDao = new ClientDao();
-        List<ReasonTaxes> list = reasonTaxeController.get("");
+        List<ReasonTaxes> list = reasonTaxeController.listarTodas();
 //        jTableClients.setModel(new DefaultTableModel);
         DefaultTableModel data = (DefaultTableModel) jTableReasonTaxes.getModel();
 //        data.setM
@@ -168,7 +168,7 @@ public final class JDialogReasonTaxes extends javax.swing.JDialog {
     private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
         // TODO add your handling code here:
         int id = Integer.parseInt(jTableReasonTaxes.getValueAt(jTableReasonTaxes.getSelectedRow(), 0).toString());
-        ReasonTaxes reasonT = reasonTaxeController.getId(id);
+        ReasonTaxes reasonT = reasonTaxeController.getById(id);
         JOptionPane.showMessageDialog(null, "Dados\n Code:\n " + reasonT.getCode() + "\nRazao:" + reasonT.getReason() + "\n Standard:\n" + reasonT.getStandard() + "\n Descrçao:\n" + reasonT.getDescription());
     }//GEN-LAST:event_jButtonViewActionPerformed
 

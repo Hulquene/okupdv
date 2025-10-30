@@ -1,16 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.WarehouseDao;
 import com.okutonda.okudpdv.data.entities.Warehouse;
+
 import java.util.List;
 
 /**
+ * Controller responsável pelas regras de negócio dos armazéns (Warehouses).
  *
- * @author kenny
+ * Camada intermediária entre a interface e o DAO. Realiza validações simples e
+ * padroniza operações CRUD.
+ *
+ * @author Hulquene
  */
 public class WarehouseController {
 
@@ -20,42 +21,51 @@ public class WarehouseController {
         this.dao = new WarehouseDao();
     }
 
-    /**
-     * Adicionar ou editar
-     */
-    public Boolean add(Warehouse warehouse, int id) {
-        if (id == 0) {
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public boolean save(Warehouse warehouse) {
+        if (warehouse == null) {
+            System.err.println("[Controller] Armazém inválido (objeto nulo).");
+            return false;
+        }
+
+        if (warehouse.getId() <= 0) {
+            // Verifica duplicidade
+            if (dao.existsByName(warehouse.getName())) {
+                System.err.println("[Controller] Já existe um armazém com o nome informado.");
+                return false;
+            }
             return dao.add(warehouse);
         } else {
-            return dao.edit(warehouse, id);
+            return dao.update(warehouse);
         }
     }
 
-    /**
-     * Buscar por ID
-     */
-    public Warehouse getId(int id) {
-        return dao.searchFromId(id);
-    }
-
-    /**
-     * Listar com filtro LIKE
-     */
-    public List<Warehouse> filter(String txt) {
-        return dao.filter(txt);
-    }
-
-    /**
-     * Excluir
-     */
-    public Boolean deleteId(int id) {
+    public boolean delete(int id) {
+        if (id <= 0) {
+            System.err.println("[Controller] ID inválido para exclusão de armazém.");
+            return false;
+        }
         return dao.delete(id);
     }
 
-    /**
-     * Listar todos (com ou sem WHERE)
-     */
-    public List<Warehouse> get(String where) {
-        return dao.list(where);
+    // ==========================================================
+    // 🔹 Consultas
+    // ==========================================================
+    public Warehouse getById(int id) {
+        return dao.findById(id);
+    }
+
+    public List<Warehouse> listarTodos() {
+        return dao.findAll();
+    }
+
+    public List<Warehouse> filtrar(String texto) {
+        return dao.filter(texto);
+    }
+
+    public List<Warehouse> listarAtivos() {
+        return dao.findActive();
     }
 }

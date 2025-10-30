@@ -9,8 +9,8 @@ import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.dao.SupplierDao;
 import com.okutonda.okudpdv.data.entities.Countries;
 import com.okutonda.okudpdv.data.entities.Supplier;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Utilities;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -43,7 +43,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 
     public void listComboCountries() {
 
-        List<Countries> list = countryController.get("");
+        List<Countries> list = countryController.listarTodos();
         jComboBoxCountry.removeAllItems();
         for (Countries item : list) {
             jComboBoxCountry.addItem(item.getLong_name());
@@ -68,7 +68,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
     }
 
     public void setSupplier(int id) {
-        this.supplier = supplierController.getId(id);
+        this.supplier = supplierController.getById(id);
 //        setFormUser(user);
     }
 
@@ -404,7 +404,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             String name = jTextFieldName.getText();
             Supplier cModel;
             SupplierDao cDao = new SupplierDao();
-            cModel = cDao.searchFromName(name);
+            cModel = cDao.findByName(name);
             if (cModel.getName() != null) {
                 jTextFieldId.setText(Integer.toString(cModel.getId()));
                 jTextFieldNif.setText(cModel.getNif());
@@ -434,10 +434,10 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
             status = false;
             if (id > 0) {
-                supplierController.add(cModel, id);
+                supplierController.save(cModel);
                 status = true;
             } else {
-                supplierController.add(cModel, 0);
+                supplierController.save(cModel);
                 status = true;
             }
             this.dispose();

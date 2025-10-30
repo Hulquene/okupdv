@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.entities.Clients;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.Utilities;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 

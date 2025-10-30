@@ -12,15 +12,15 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.dao.StockMovementDao;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.Utilities;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
-import com.okutonda.okudpdv.utilities.CompanySession;
-import com.okutonda.okudpdv.utilities.ShiftSession;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.Util;
+import com.okutonda.okudpdv.helpers.CompanySession;
+import com.okutonda.okudpdv.helpers.ShiftSession;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Util;
 import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
@@ -76,7 +76,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         productController = new ProductController();
         listProductOrder = new ArrayList<>();
         clientSelected = null;//new Clients();
-        shiftController.getShiftSession();
+        shiftController.loadActiveShift();
         userController = new UserController();
 
         // Atalhos globais

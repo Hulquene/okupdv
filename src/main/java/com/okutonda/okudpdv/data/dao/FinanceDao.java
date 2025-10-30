@@ -1,111 +1,94 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-import com.okutonda.okudpdv.data.entities.Clients;
-import com.okutonda.okudpdv.data.entities.Expense;
-import com.okutonda.okudpdv.data.entities.ExpenseCategory;
-import com.okutonda.okudpdv.data.entities.InvoiceType;
-import com.okutonda.okudpdv.data.entities.Order;
-import com.okutonda.okudpdv.data.entities.Payment;
-import com.okutonda.okudpdv.data.entities.Purchase;
-import com.okutonda.okudpdv.data.entities.Supplier;
-import com.okutonda.okudpdv.data.entities.User;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import com.okutonda.okudpdv.data.connection.DatabaseProvider;
+import static com.okutonda.okudpdv.data.connection.DatabaseProvider.getConnection;
+import com.okutonda.okudpdv.data.entities.*;
+import java.sql.*;
+import java.util.*;
 
 /**
+ * DAO de relatórios e controle financeiro: - Contas a Pagar - Contas a Receber
+ * - Fluxo de Caixa - Receitas e Despesas
  *
- * @author rog
+ * Herda diretamente de DatabaseProvider para usar o pool de conexões
+ * (HikariCP). Não implementa GenericDao, pois é um DAO analítico, não CRUD.
+ *
+ * @author Hulquene
  */
-public class FinanceDao {
-
-    private final Connection conn;
+public class FinanceDao extends DatabaseProvider {
 
     public FinanceDao() {
-        this.conn = ConnectionDatabase.getConnect();
+        super();
     }
 
+    // ==========================================================
+    // 🔹 CONTAS A PAGAR
+    // ==========================================================
     public List<Purchase> listContasAPagar() {
-        List<Purchase> list = new ArrayList<>();
         String sql = """
-        SELECT p.id,
-               p.invoice_number,
-               p.invoice_type,
-               p.descricao,
-               p.total,
-               p.iva_total,
-               p.data_compra,
-               p.data_vencimento,
-               p.status,
-               s.id   AS supplier_id,
-               s.name AS supplier_name,
-               (p.total - IFNULL(SUM(pp.valor_pago), 0)) AS saldo_em_aberto,
-               IFNULL(SUM(pp.valor_pago), 0) AS total_pago
-        FROM purchases p
-        LEFT JOIN purchase_payments pp ON p.id = pp.purchase_id
-        LEFT JOIN suppliers s ON p.supplier_id = s.id
-        GROUP BY p.id, p.invoice_number, p.invoice_type, p.descricao, p.total, p.iva_total,
-                 p.data_compra, p.data_vencimento, p.status, s.id, s.name
-        HAVING saldo_em_aberto > 0
-        ORDER BY p.data_vencimento ASC
-    """;
+            SELECT p.id,
+                   p.invoice_number,
+                   p.invoice_type,
+                   p.descricao,
+                   p.total,
+                   p.iva_total,
+                   p.data_compra,
+                   p.data_vencimento,
+                   p.status,
+                   s.id   AS supplier_id,
+                   s.name AS supplier_name,
+                   (p.total - IFNULL(SUM(pp.valor_pago), 0)) AS saldo_em_aberto,
+                   IFNULL(SUM(pp.valor_pago), 0) AS total_pago
+              FROM purchases p
+              LEFT JOIN purchase_payments pp ON p.id = pp.purchase_id
+              LEFT JOIN suppliers s ON p.supplier_id = s.id
+             GROUP BY p.id, p.invoice_number, p.invoice_type, p.descricao,
+                      p.total, p.iva_total, p.data_compra, p.data_vencimento,
+                      p.status, s.id, s.name
+             HAVING saldo_em_aberto > 0
+             ORDER BY p.data_vencimento ASC
+        """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+        List<Purchase> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+
             while (rs.next()) {
-                Purchase obj = new Purchase();
-                // ENUMs
-                String invoice_typeStr = rs.getString("invoice_type");
-                
-                obj.setId(rs.getInt("id"));
-                obj.setInvoiceNumber(rs.getString("invoice_number"));
-//                obj.setInvoiceType(rs.getString("invoice_type"));
-                obj.setDescricao(rs.getString("descricao"));
-                obj.setTotal(rs.getBigDecimal("total"));
-                obj.setIvaTotal(rs.getBigDecimal("iva_total"));
+                Purchase p = new Purchase();
+                p.setId(rs.getInt("id"));
+                p.setInvoiceNumber(rs.getString("invoice_number"));
+                p.setDescricao(rs.getString("descricao"));
+                p.setTotal(rs.getBigDecimal("total"));
+                p.setIvaTotal(rs.getBigDecimal("iva_total"));
+                p.setDataCompra(rs.getDate("data_compra"));
+                p.setDataVencimento(rs.getDate("data_vencimento"));
+                p.setStatus(rs.getString("status"));
+                p.setPayTotal(rs.getBigDecimal("total_pago"));
+                p.setNote("Saldo em aberto: " + rs.getBigDecimal("saldo_em_aberto"));
 
-                // Datas (converte de SQL Date → java.util.Date)
-                obj.setDataCompra(rs.getDate("data_compra"));
-                obj.setDataVencimento(rs.getDate("data_vencimento"));
-
-                obj.setStatus(rs.getString("status"));
-                obj.setPayTotal(rs.getBigDecimal("total_pago"));
-                obj.setNote("Saldo em aberto: " + rs.getBigDecimal("saldo_em_aberto"));
-
-                if (invoice_typeStr != null) {
-                    obj.setInvoiceType(InvoiceType.valueOf(invoice_typeStr));
-                }
-                // fornecedor
-                if (rs.getInt("supplier_id") > 0) {
-                    Supplier s = new Supplier();
-                    s.setId(rs.getInt("supplier_id"));
-                    s.setName(rs.getString("supplier_name"));
-                    obj.setSupplier(s);
+                String tipo = rs.getString("invoice_type");
+                if (tipo != null) {
+                    p.setInvoiceType(InvoiceType.valueOf(tipo));
                 }
 
-                list.add(obj);
+                Supplier s = new Supplier();
+                s.setId(rs.getInt("supplier_id"));
+                s.setName(rs.getString("supplier_name"));
+                p.setSupplier(s);
+
+                list.add(p);
             }
+
         } catch (SQLException e) {
-            System.out.println("Erro ao listar contas a pagar: " + e.getMessage());
+            System.err.println("[DB] Erro ao listar contas a pagar: " + e.getMessage());
         }
         return list;
     }
 
-    /**
-     * Lista todas as faturas que ainda têm saldo em aberto (Contas a Receber).
-     *
-     * @return
-     */
+    // ==========================================================
+    // 🔹 CONTAS A RECEBER
+    // ==========================================================
     public List<Order> listContasAReceber() {
-        List<Order> list = new ArrayList<>();
         String sql = """
             SELECT o.id,
                    o.number,
@@ -113,72 +96,61 @@ public class FinanceDao {
                    o.total,
                    o.datecreate,
                    o.duedate,
-                   o.note,
-                   o.client_id,
+                   c.id AS client_id,
                    c.company AS client_name,
                    c.nif AS client_nif,
                    u.id AS user_id,
                    u.name AS user_name,
                    (o.total - IFNULL(SUM(p.total), 0)) AS saldo_em_aberto,
                    IFNULL(SUM(p.total), 0) AS total_pago
-            FROM orders o
-            LEFT JOIN payments p
-              ON o.id = p.order_id AND p.status='SUCCESS'
-            LEFT JOIN clients c
-              ON o.client_id = c.id
-            LEFT JOIN users u
-              ON o.user_id = u.id
-            GROUP BY o.id, c.company, c.nif, u.id, u.name
-            HAVING saldo_em_aberto > 0
-            ORDER BY o.datecreate ASC
+              FROM orders o
+              LEFT JOIN payments p ON o.id = p.order_id AND p.status='SUCCESS'
+              LEFT JOIN clients c ON o.client_id = c.id
+              LEFT JOIN users u ON o.user_id = u.id
+             GROUP BY o.id, c.company, c.nif, u.id, u.name
+             HAVING saldo_em_aberto > 0
+             ORDER BY o.datecreate ASC
         """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+        List<Order> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-                Order obj = new Order();
-                obj.setId(rs.getInt("id"));
-                obj.setNumber(rs.getInt("number"));
-                obj.setPrefix(rs.getString("prefix"));
-                obj.setTotal(rs.getDouble("total"));
-                obj.setDatecreate(rs.getString("datecreate"));
-//                obj.setDuedate(rs.getString("duedate"));
-                obj.setNote("Saldo em aberto: " + rs.getDouble("saldo_em_aberto"));
-                obj.setPayTotal(rs.getDouble("total_pago"));
+                Order o = new Order();
+                o.setId(rs.getInt("id"));
+                o.setNumber(rs.getInt("number"));
+                o.setPrefix(rs.getString("prefix"));
+                o.setTotal(rs.getDouble("total"));
+                o.setDatecreate(rs.getString("datecreate"));
+                o.setDuedate(rs.getString("duedate"));
+                o.setPayTotal(rs.getDouble("total_pago"));
+                o.setNote("Saldo em aberto: " + rs.getDouble("saldo_em_aberto"));
 
-                // Cliente
-                if (rs.getInt("client_id") > 0) {
-                    Clients c = new Clients();
-                    c.setId(rs.getInt("client_id"));
-                    c.setName(rs.getString("client_name"));
-                    c.setNif(rs.getString("client_nif"));
-                    obj.setClient(c);
-                }
+                Clients c = new Clients();
+                c.setId(rs.getInt("client_id"));
+                c.setName(rs.getString("client_name"));
+                c.setNif(rs.getString("client_nif"));
+                o.setClient(c);
 
-                // Usuário
-                if (rs.getInt("user_id") > 0) {
-                    User u = new User();
-                    u.setId(rs.getInt("user_id"));
-                    u.setName(rs.getString("user_name"));
-                    obj.setSeller(u);
-                }
+                User u = new User();
+                u.setId(rs.getInt("user_id"));
+                u.setName(rs.getString("user_name"));
+                o.setSeller(u);
 
-                list.add(obj);
+                list.add(o);
             }
+
         } catch (SQLException e) {
-            System.out.println("Erro ao listar contas a receber: " + e.getMessage());
+            System.err.println("[DB] Erro ao listar contas a receber: " + e.getMessage());
         }
         return list;
     }
 
-    /**
-     * Lista histórico de vendas (todas as faturas pagas no ato ou já
-     * liquidadas).
-     *
-     * @return
-     */
+    // ==========================================================
+    // 🔹 HISTÓRICO DE VENDAS
+    // ==========================================================
     public List<Order> listHistoricoVendas() {
-        List<Order> list = new ArrayList<>();
         String sql = """
             SELECT o.id,
                    o.number,
@@ -187,260 +159,225 @@ public class FinanceDao {
                    o.datecreate,
                    o.duedate,
                    o.note,
-                   o.client_id,
+                   c.id AS client_id,
                    c.company AS client_name,
-                   c.nif AS client_nif,
                    u.id AS user_id,
                    u.name AS user_name,
                    IFNULL(SUM(p.total), 0) AS total_pago
-            FROM orders o
-            INNER JOIN payments p
-              ON o.id = p.order_id AND p.status='SUCCESS'
-            LEFT JOIN clients c
-              ON o.client_id = c.id
-            LEFT JOIN users u
-              ON o.user_id = u.id
-            GROUP BY o.id, c.company, c.nif, u.id, u.name
-            ORDER BY o.datecreate DESC
+              FROM orders o
+              INNER JOIN payments p ON o.id = p.order_id AND p.status='SUCCESS'
+              LEFT JOIN clients c ON o.client_id = c.id
+              LEFT JOIN users u ON o.user_id = u.id
+             GROUP BY o.id, c.company, u.id
+             ORDER BY o.datecreate DESC
         """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
+        List<Order> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-                Order obj = new Order();
-                obj.setId(rs.getInt("id"));
-                obj.setNumber(rs.getInt("number"));
-                obj.setPrefix(rs.getString("prefix"));
-                obj.setTotal(rs.getDouble("total"));
-                obj.setDatecreate(rs.getString("datecreate"));
-                obj.setDuedate(rs.getString("duedate"));
-                obj.setNote(rs.getString("note"));
-                obj.setPayTotal(rs.getDouble("total_pago"));
+                Order o = new Order();
+                o.setId(rs.getInt("id"));
+                o.setNumber(rs.getInt("number"));
+                o.setPrefix(rs.getString("prefix"));
+                o.setTotal(rs.getDouble("total"));
+                o.setDatecreate(rs.getString("datecreate"));
+                o.setDuedate(rs.getString("duedate"));
+                o.setNote(rs.getString("note"));
+                o.setPayTotal(rs.getDouble("total_pago"));
 
-                // Cliente
-                if (rs.getInt("client_id") > 0) {
+                Clients c = new Clients();
+                c.setId(rs.getInt("client_id"));
+                c.setName(rs.getString("client_name"));
+                o.setClient(c);
+
+                User u = new User();
+                u.setId(rs.getInt("user_id"));
+                u.setName(rs.getString("user_name"));
+                o.setSeller(u);
+
+                list.add(o);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[DB] Erro ao listar histórico de vendas: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // ==========================================================
+    // 🔹 FLUXO DE CAIXA
+    // ==========================================================
+    public List<Payment> listFluxoCaixa(String dateFrom, String dateTo) {
+        String sql = """
+            SELECT DATE(p.date) AS dia, p.mode, SUM(p.total) AS valor
+              FROM payments p
+             WHERE p.status='SUCCESS' AND DATE(p.date) BETWEEN ? AND ?
+             GROUP BY DATE(p.date), p.mode
+             ORDER BY dia ASC
+        """;
+
+        List<Payment> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            pst.setString(1, dateFrom);
+            pst.setString(2, dateTo);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Payment p = new Payment();
+                    p.setDate(rs.getString("dia"));
+                    p.setPaymentMode(PaymentMode.valueOf(rs.getString("mode")));
+                    p.setTotal(rs.getBigDecimal("valor"));
+                    list.add(p);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[DB] Erro ao listar fluxo de caixa: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // ==========================================================
+    // 🔹 RECEITAS
+    // ==========================================================
+    public List<Payment> listReceitas(String dateFrom, String dateTo) {
+        String sql = """
+            SELECT p.id, p.description, p.total, p.date, p.mode, p.reference,
+                   c.id AS client_id, c.company AS client_name,
+                   u.id AS user_id, u.name AS user_name
+              FROM payments p
+              LEFT JOIN clients c ON p.clientId = c.id
+              LEFT JOIN users u ON p.userId = u.id
+             WHERE p.status='SUCCESS'
+               AND DATE(p.date) BETWEEN ? AND ?
+             ORDER BY p.date ASC
+        """;
+
+        List<Payment> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            pst.setString(1, dateFrom);
+            pst.setString(2, dateTo);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Payment p = new Payment();
+                    p.setId(rs.getInt("id"));
+                    p.setDescription(rs.getString("description"));
+                    p.setTotal(rs.getBigDecimal("total"));
+                    p.setDate(rs.getString("date"));
+                    p.setPaymentMode(PaymentMode.valueOf(rs.getString("mode")));
+                    p.setReference(rs.getString("reference"));
+
                     Clients c = new Clients();
                     c.setId(rs.getInt("client_id"));
                     c.setName(rs.getString("client_name"));
-                    c.setNif(rs.getString("client_nif"));
-                    obj.setClient(c);
-                }
+                    p.setClient(c);
 
-                // Usuário
-                if (rs.getInt("user_id") > 0) {
                     User u = new User();
                     u.setId(rs.getInt("user_id"));
                     u.setName(rs.getString("user_name"));
-                    obj.setSeller(u);
-                }
+                    p.setUser(u);
 
-                list.add(obj);
+                    list.add(p);
+                }
             }
+
         } catch (SQLException e) {
-            System.out.println("Erro ao listar histórico de vendas: " + e.getMessage());
+            System.err.println("[DB] Erro ao listar receitas: " + e.getMessage());
         }
         return list;
     }
 
-    /**
-     * Fluxo de caixa consolidado por dia e forma de pagamento.
-     *
-     * @param dateFrom
-     * @param dateTo
-     * @return
-     */
-    public List<Payment> listFluxoCaixa(String dateFrom, String dateTo) {
-        List<Payment> list = new ArrayList<>();
-        String sql = """
-            SELECT DATE(p.date) AS dia,
-                   p.mode,
-                   SUM(p.total) AS valor
-            FROM payments p
-            WHERE p.status='SUCCESS'
-              AND DATE(p.date) BETWEEN ? AND ?
-            GROUP BY DATE(p.date), p.mode
-            ORDER BY dia ASC
-        """;
-
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, dateFrom);
-            pst.setString(2, dateTo);
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Payment obj = new Payment();
-                    obj.setDate(rs.getString("dia"));
-                    obj.setPaymentMode(com.okutonda.okudpdv.data.entities.PaymentMode.valueOf(rs.getString("mode")));
-                    obj.setTotal(rs.getBigDecimal("valor"));
-                    list.add(obj);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar fluxo de caixa: " + e.getMessage());
-        }
-        return list;
-    }
-
-    public List<Payment> listReceitas(String dateFrom, String dateTo) {
-        List<Payment> list = new ArrayList<>();
-        String sql = """
-        SELECT p.id,
-               p.description,
-               p.total,
-               p.date,
-               p.mode,
-               p.reference,
-               c.id   AS client_id,
-               c.company AS client_name,
-               u.id   AS user_id,
-               u.name AS user_name
-        FROM payments p
-        LEFT JOIN clients c ON p.clientId = c.id
-        LEFT JOIN users u   ON p.userId = u.id
-        WHERE p.status='SUCCESS'
-          AND DATE(p.date) BETWEEN ? AND ?
-        ORDER BY p.date ASC
-    """;
-
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, dateFrom);
-            pst.setString(2, dateTo);
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Payment obj = new Payment();
-                    obj.setId(rs.getInt("id"));
-                    obj.setDescription(rs.getString("description"));
-                    obj.setTotal(rs.getBigDecimal("total"));
-                    obj.setDate(rs.getString("date"));
-                    obj.setPaymentMode(com.okutonda.okudpdv.data.entities.PaymentMode.valueOf(rs.getString("mode")));
-                    obj.setReference(rs.getString("reference"));
-
-                    // Cliente
-                    com.okutonda.okudpdv.data.entities.Clients c = new com.okutonda.okudpdv.data.entities.Clients();
-                    c.setId(rs.getInt("client_id"));
-                    c.setName(rs.getString("client_name"));
-                    obj.setClient(c);
-
-                    // Usuário
-                    com.okutonda.okudpdv.data.entities.User u = new com.okutonda.okudpdv.data.entities.User();
-                    u.setId(rs.getInt("user_id"));
-                    u.setName(rs.getString("user_name"));
-                    obj.setUser(u);
-
-                    list.add(obj);
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar receitas: " + e.getMessage());
-        }
-        return list;
-    }
-
-    /**
-     * Total de receitas no período (somatório de todos os pagamentos).
-     *
-     * @param dateFrom
-     * @param dateTo
-     * @return
-     */
     public double getTotalReceitas(String dateFrom, String dateTo) {
         String sql = """
             SELECT SUM(p.total) AS valor
-            FROM payments p
-            WHERE p.status='SUCCESS'
-              AND DATE(p.date) BETWEEN ? AND ?
+              FROM payments p
+             WHERE p.status='SUCCESS'
+               AND DATE(p.date) BETWEEN ? AND ?
         """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql)) {
+
             pst.setString(1, dateFrom);
             pst.setString(2, dateTo);
-
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getDouble("valor");
                 }
             }
+
         } catch (SQLException e) {
-            System.out.println("Erro ao calcular total de receitas: " + e.getMessage());
+            System.err.println("[DB] Erro ao calcular total de receitas: " + e.getMessage());
         }
         return 0d;
     }
 
+    // ==========================================================
+    // 🔹 DESPESAS
+    // ==========================================================
     public List<Expense> listDespesas(String dateFrom, String dateTo) {
-        List<Expense> list = new ArrayList<>();
         String sql = """
-        SELECT e.id,
-               e.description,
-               e.total,
-               e.date,
-               e.dateFinish,
-               e.mode,
-               e.reference,
-               e.currency,
-               e.notes,
-               s.id   AS supplier_id,
-               s.name AS supplier_name,
-               u.id   AS user_id,
-               u.name AS user_name,
-               c.id   AS category_id,
-               c.name AS category_name
-        FROM expenses e
-        LEFT JOIN suppliers s ON e.supplier_id = s.id
-        LEFT JOIN users u     ON e.user_id = u.id
-        LEFT JOIN expense_categories c ON e.category_id = c.id
-        WHERE DATE(e.date) BETWEEN ? AND ?
-        ORDER BY e.date ASC
-    """;
+            SELECT e.id, e.description, e.total, e.date, e.dateFinish, e.mode, e.reference,
+                   e.currency, e.notes,
+                   s.id AS supplier_id, s.name AS supplier_name,
+                   u.id AS user_id, u.name AS user_name,
+                   c.id AS category_id, c.name AS category_name
+              FROM expenses e
+              LEFT JOIN suppliers s ON e.supplier_id = s.id
+              LEFT JOIN users u ON e.user_id = u.id
+              LEFT JOIN expense_categories c ON e.category_id = c.id
+             WHERE DATE(e.date) BETWEEN ? AND ?
+             ORDER BY e.date ASC
+        """;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        List<Expense> list = new ArrayList<>();
+
+        try (Connection conn = getConnection(); PreparedStatement pst = conn.prepareStatement(sql)) {
+
             pst.setString(1, dateFrom);
             pst.setString(2, dateTo);
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    Expense obj = new Expense();
-                    obj.setId(rs.getInt("id"));
-                    obj.setDescription(rs.getString("description"));
-                    obj.setTotal(rs.getBigDecimal("total"));
-                    obj.setDate(rs.getString("date"));
-                    obj.setDateFinish(rs.getString("dateFinish"));
-                    obj.setMode(rs.getString("mode"));
-                    obj.setReference(rs.getString("reference"));
-                    obj.setCurrency(rs.getString("currency"));
-                    obj.setNotes(rs.getString("notes"));
+                    Expense e = new Expense();
+                    e.setId(rs.getInt("id"));
+                    e.setDescription(rs.getString("description"));
+                    e.setTotal(rs.getBigDecimal("total"));
+                    e.setDate(rs.getString("date"));
+                    e.setDateFinish(rs.getString("dateFinish"));
+                    e.setMode(rs.getString("mode"));
+                    e.setReference(rs.getString("reference"));
+                    e.setCurrency(rs.getString("currency"));
+                    e.setNotes(rs.getString("notes"));
 
-                    // fornecedor
-                    if (rs.getInt("supplier_id") > 0) {
-                        Supplier supplier = new Supplier();
-                        supplier.setId(rs.getInt("supplier_id"));
-                        supplier.setName(rs.getString("supplier_name"));
-                        obj.setSupplier(supplier);
-                    }
+                    Supplier s = new Supplier();
+                    s.setId(rs.getInt("supplier_id"));
+                    s.setName(rs.getString("supplier_name"));
+                    e.setSupplier(s);
 
-                    // usuário
-                    if (rs.getInt("user_id") > 0) {
-                        User u = new User();
-                        u.setId(rs.getInt("user_id"));
-                        u.setName(rs.getString("user_name"));
-                        obj.setUser(u);
-                    }
+                    User u = new User();
+                    u.setId(rs.getInt("user_id"));
+                    u.setName(rs.getString("user_name"));
+                    e.setUser(u);
 
-                    // categoria
-                    if (rs.getInt("category_id") > 0) {
-                        ExpenseCategory c = new ExpenseCategory();
-                        c.setId(rs.getInt("category_id"));
-                        c.setName(rs.getString("category_name"));
-                        obj.setCategory(c);
-                    }
+                    ExpenseCategory c = new ExpenseCategory();
+                    c.setId(rs.getInt("category_id"));
+                    c.setName(rs.getString("category_name"));
+                    e.setCategory(c);
 
-                    list.add(obj);
+                    list.add(e);
                 }
             }
-        } catch (SQLException e) {
-            System.out.println("Erro ao listar despesas: " + e.getMessage());
+
+        } catch (SQLException ex) {
+            System.err.println("[DB] Erro ao listar despesas: " + ex.getMessage());
         }
         return list;
     }
-
 }

@@ -6,9 +6,9 @@ package com.okutonda.okudpdv.views.shift;
 
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.data.entities.Shift;
-import com.okutonda.okudpdv.utilities.ShiftSession;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.Util;
+import com.okutonda.okudpdv.helpers.ShiftSession;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Util;
 import javax.swing.JOptionPane;
 
 /**
@@ -110,7 +110,7 @@ public class JDialogOpenShift extends javax.swing.JDialog {
             shift.setClosingAmount(0.0);
             
             shift.setUser(session.getUser());
-            Boolean resp = shiftController.add(shift, 0);
+            Boolean resp = shiftController.openShift(shift);
             if (resp == true) {
                 dispose();
             }

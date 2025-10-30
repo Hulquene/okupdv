@@ -12,8 +12,8 @@ import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
 import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.data.entities.Warehouse;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.Util;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Util;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -74,7 +74,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
     }
 
     public void listPurchase() {
-        List<Purchase> list = purchaseController.get(); // busca todas as compras ou compras abertas
+        List<Purchase> list = purchaseController.listar(); // busca todas as compras ou compras abertas
         loadListPurchase(list);
     }
 
@@ -129,7 +129,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
 
         switch (origem.toUpperCase()) {
             case "COMPRA":
-                lista = purchaseController.get(); // busca todas as compras ou compras abertas
+                lista = purchaseController.listar(); // busca todas as compras ou compras abertas
                 for (Purchase p : (List<Purchase>) lista) {
                     if (p.getItems() != null) {  // protege contra null
                         for (PurchaseItem item : p.getItems()) {

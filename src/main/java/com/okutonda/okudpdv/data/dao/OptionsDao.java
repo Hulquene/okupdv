@@ -13,6 +13,16 @@ import java.util.List;
  * @author …
  */
 public class OptionsDao extends BaseDao<Options> {
+    // ✅ Construtor padrão (usa conexão do pool automaticamente)
+
+    public OptionsDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public OptionsDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
 
     // 🔹 Mapeamento de ResultSet → objeto Options
     private Options map(ResultSet rs) {

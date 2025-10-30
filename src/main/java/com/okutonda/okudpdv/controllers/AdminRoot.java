@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.entities.Options;
-import com.okutonda.okudpdv.utilities.CompanySession;
+import com.okutonda.okudpdv.helpers.CompanySession;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;

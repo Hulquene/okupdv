@@ -14,9 +14,9 @@ import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
-import com.okutonda.okudpdv.utilities.ShiftSession;
-import com.okutonda.okudpdv.utilities.UtilDate;
-import com.okutonda.okudpdv.utilities.UtilSales;
+import com.okutonda.okudpdv.helpers.ShiftSession;
+import com.okutonda.okudpdv.helpers.UtilDate;
+import com.okutonda.okudpdv.helpers.UtilSales;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -132,7 +132,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             }
 
             // 7) Persistir: order + itens + pagamentos (numeração/hash no controller)
-            Order salvo = orderController.criarEFinalizarComPagamentos(order, listPayment);
+            Order salvo = orderController.criarComPagamentos(order, listPayment);
             if (salvo != null && salvo.getId() > 0) {
                 JOptionPane.showMessageDialog(this, "Venda gravada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 this.response = true;  // se o diálogo usa getResponse()

@@ -7,19 +7,17 @@ package com.okutonda.okudpdv.views.login;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
-import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.ui.TemaCleaner;
 import com.okutonda.okudpdv.ui.TemaCores;
 import com.okutonda.okudpdv.ui.TemaUI;
-import com.okutonda.okudpdv.utilities.CompanySession;
+import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.views.suport.JDialogSuport;
 import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.install.JDialogInstallInsertUser;
 import com.okutonda.okudpdv.views.pdv.ScreenPdv;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
 import com.okutonda.okudpdv.views.suport.JDialogAbout;
-import java.sql.Connection;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -33,7 +31,7 @@ public class ScreenLogin extends javax.swing.JFrame {
     UserController userController = new UserController();
     CompanySession companySession = CompanySession.getInstance();
     OptionController optionController = new OptionController();
-    private final Connection conn;
+//    private final Connection conn;
 
     /**
      * Creates new form ScreenLogin
@@ -43,13 +41,13 @@ public class ScreenLogin extends javax.swing.JFrame {
 //         1) aplica tema (depois do init)
         applyTheme();
 
-        this.conn = ConnectionDatabase.getConnect();
-        if (this.conn != null) {
-            jLabelStatusBdConect.setText("Conectado");
-            loadDataCompany();
-        } else {
-            jLabelStatusBdConect.setText("Desconectado");
-        }
+//        this.conn = ConnectionDatabase.getConnect();
+//        if (this.conn != null) {
+//            jLabelStatusBdConect.setText("Conectado");
+//            loadDataCompany();
+//        } else {
+//            jLabelStatusBdConect.setText("Desconectado");
+//        }
         jLabelNameCompany.setText(companySession.getName());
         List<User> response = userController.getAll();
         if (response == null || response.isEmpty()) {
@@ -97,7 +95,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 //        jButtonInstall.setForeground(TemaCores.PRIMARY);
 //        jButtonCloseScreen.setForeground(TemaCores.ERROR);
         // Status de BD (cor dinâmica) — chama depois de testar a conexão
-        updateDbStatusLabel(this.conn != null);
+//        updateDbStatusLabel(this.conn != null);
 
         // Borda superior/rodapé (opcional)
         // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));

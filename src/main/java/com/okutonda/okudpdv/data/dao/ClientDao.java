@@ -14,6 +14,16 @@ import java.util.List;
  * @author …
  */
 public class ClientDao extends BaseDao<Clients> {
+// ✅ Construtor padrão (usa conexão do pool automaticamente)
+
+    public ClientDao() {
+        // não precisa chamar super(), ele já existe por padrão
+    }
+
+    // ✅ Construtor alternativo (usa conexão externa — transação)
+    public ClientDao(java.sql.Connection externalConn) {
+        super(externalConn);
+    }
 
     // 🔹 Mapeia o resultado SQL → objeto Clients
     private Clients map(ResultSet rs) {

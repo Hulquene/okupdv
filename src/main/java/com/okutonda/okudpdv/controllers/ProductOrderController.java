@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.ProductOrderDao;
@@ -9,44 +5,74 @@ import com.okutonda.okudpdv.data.entities.ProductOrder;
 import java.util.List;
 
 /**
+ * Controller para os itens de pedidos (products_order).
  *
- * @author kenny
+ * Agora usa o orderId interno do objeto ProductOrder.
+ *
+ * @author …
  */
 public class ProductOrderController {
 
-    ProductOrderDao dao;
-//    ProductDao prodDao;
-//    ProductOrderDao pOrderDao;
+    private final ProductOrderDao dao;
 
     public ProductOrderController() {
         this.dao = new ProductOrderDao();
-//        this.prodDao = new ProductDao();
-//        this.pOrderDao = new ProductOrderDao();
     }
 
-    public ProductOrder getId(int id) {
-        return dao.searchFromId(id);
+    /**
+     * Obtém um item pelo ID
+     */
+    public ProductOrder getById(int id) {
+        return dao.findById(id);
     }
 
-    public List<ProductOrder> getOrderId(int idOrder) {
-        return dao.listProductFromOrderId(idOrder);
+    /**
+     * Lista todos os itens de um pedido
+     */
+    public List<ProductOrder> getByOrderId(int orderId) {
+        return dao.listProductFromOrderId(orderId);
     }
 
-    public List<ProductOrder> get(String where) {
+    /**
+     * Lista com cláusula WHERE
+     */
+    public List<ProductOrder> list(String where) {
         return dao.list(where);
     }
 
-    public boolean add(ProductOrder prod, int orderId) {
-        Boolean status = dao.add(prod, orderId);
-        if (status == true) {
-//            System.out.println("teste"+prod.getQty());
-//            Product product = prodDao.getId(orderId);
-//            System.out.println("teste2"+product.getStockTotal());
-//            int total = product.getStockTotal() - prod.getQty();
-//            System.out.println("total"+total);
-//            prodDao.updateStock(orderId, total);
-            return true;
+    /**
+     * Adiciona novo item (usa orderId do próprio objeto)
+     */
+    public boolean add(ProductOrder item) {
+        if (item == null || item.getOrderId() <= 0) {
+            System.err.println("[Controller] ProductOrder inválido — orderId ausente.");
+            return false;
         }
-        return status;
+        return dao.add(item);
+    }
+
+    /**
+     * Atualiza item existente
+     */
+    public boolean edit(ProductOrder item) {
+        if (item == null || item.getId() <= 0) {
+            System.err.println("[Controller] ID inválido para atualização de ProductOrder.");
+            return false;
+        }
+        return dao.update(item);
+    }
+
+    /**
+     * Remove item
+     */
+    public boolean delete(int id) {
+        return dao.delete(id);
+    }
+
+    /**
+     * Filtro por texto
+     */
+    public List<ProductOrder> filter(String text) {
+        return dao.filter(text);
     }
 }

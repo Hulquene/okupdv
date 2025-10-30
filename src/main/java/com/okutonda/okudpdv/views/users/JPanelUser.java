@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.users;
 
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;

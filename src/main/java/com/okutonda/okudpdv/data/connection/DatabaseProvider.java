@@ -45,7 +45,7 @@ public class DatabaseProvider {
         }
     }
 
-    private DatabaseProvider() {
+    public DatabaseProvider() {
     }
 
     /**
@@ -53,7 +53,19 @@ public class DatabaseProvider {
      * ao pool (não a encerra fisicamente).
      */
     public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        Connection conn = dataSource.getConnection();
+        // Estatísticas atuais do pool
+        int total = dataSource.getHikariPoolMXBean().getTotalConnections();
+        int active = dataSource.getHikariPoolMXBean().getActiveConnections();
+        int idle = dataSource.getHikariPoolMXBean().getIdleConnections();
+
+        System.out.printf(
+                "[DB] Conexão #%d obtida do pool. (Ativas: %d | Ociosas: %d | Total: %d)%n",
+                conn.hashCode(), active, idle, total
+        );
+
+        return conn;
+//        return dataSource.getConnection();
     }
 
     /**

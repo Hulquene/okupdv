@@ -2,69 +2,48 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.okutonda.okudpdv.utilities;
+package com.okutonda.okudpdv.helpers;
 
-import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 
 /**
  *
  * @author kenny
  */
-public class ShiftSession {
+public class UserSession {
 
-    private static ShiftSession instance;
-    private Shift shift;
-    private User seller;
-//    private Double shiftValue;
-//    private int shiftStatus;
+    private static UserSession instance;
+    private User user;
+//    private String username;
 //    private String userProfile;
 //    private int userId;
 //    private int userStatus;
 
-    private ShiftSession() {
+    private UserSession() {
         // Construtor privado para evitar instanciamento externo
     }
 
-    public static ShiftSession getInstance() {
+    public static UserSession getInstance() {
         if (instance == null) {
-            instance = new ShiftSession();
+            instance = new UserSession();
         }
         return instance;
     }
 
-    public Shift getShift() {
-        return shift;
+    public User getUser() {
+        return user;
     }
 
-    public void setShift(Shift shift) {
-        this.shift = shift;
+    public void setUser(User user) {
+        this.user = user;
     }
-
-    public User getSeller() {
-        return seller;
-    }
-
-    public void setSeller(User seller) {
-        this.seller = seller;
-    }
-
-//    
-//    
-//    public int getShiftStatus() {
-//        return shiftStatus;
+//
+//    public void setUsername(String username) {
+//        this.username = username;
 //    }
 //
-//    public void setShiftStatus(int shiftStatus) {
-//        this.shiftStatus = shiftStatus;
-//    }
-//
-//    public Double getShiftValue() {
-//        return shiftValue;
-//    }
-//
-//    public void setShiftValue(Double shiftValue) {
-//        this.shiftValue = shiftValue;
+//    public String getUsername() {
+//        return username;
 //    }
 //
 //    public void setUserId(int userId) {
@@ -90,16 +69,14 @@ public class ShiftSession {
 //    public void setUserStatus(int userStatus) {
 //        this.userStatus = userStatus;
 //    }
-
     // Método para limpar a sessão
     public void clearSession() {
-        shift = null;
-        seller = null;
-//        shiftValue = null;
-//        userProfile = null;
+        this.user = null;
+//        username = null;
 //        userId = 0;
+//        username = null;
+//        userProfile = null;
 //        userStatus = 0;
-//        shiftStatus = 0;
     }
 
     // Método para evitar clonagem da instância

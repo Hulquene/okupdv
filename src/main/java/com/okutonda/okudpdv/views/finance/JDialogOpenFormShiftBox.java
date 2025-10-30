@@ -10,8 +10,8 @@ import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.Box;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.UserSession;
-import com.okutonda.okudpdv.utilities.Util;
+import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Util;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -118,7 +118,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
     }
 
     public void loadCombobox() {
-        List<Box> listS = boxController.get("");
+        List<Box> listS = boxController.findAll();
         jComboBoxSeletecBox.removeAllItems();
         for (Box item : listS) {
             jComboBoxSeletecBox.addItem(item.getName());
@@ -275,7 +275,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
         Shift shift = validateShift();
         if (shift != null) {
 //            shift.setUser(session.getUser());
-            Boolean resp = shiftController.add(shift, 0);
+            Boolean resp = shiftController.openShift(shift);
             if (resp == true) {
                 dispose();
             }

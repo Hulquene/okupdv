@@ -6,9 +6,9 @@ package com.okutonda.okudpdv.views.users;
 
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.CompanySession;
-import com.okutonda.okudpdv.utilities.ShiftSession;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.CompanySession;
+import com.okutonda.okudpdv.helpers.ShiftSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 
 /**
  *

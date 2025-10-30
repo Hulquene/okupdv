@@ -4,7 +4,7 @@
  */
 package com.okutonda.okudpdv.views.export;
 
-import com.okutonda.okudpdv.controllers.ExportSaftFatController;
+import com.okutonda.okudpdv.controllers.SaftFatController;
 import com.okutonda.okudpdv.data.entities.ExportSaftFat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -16,7 +16,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class JDialogExportSaftFat extends javax.swing.JDialog {
 
-    ExportSaftFatController exportSaftFat = new ExportSaftFatController();
+    SaftFatController exportSaftFat = new SaftFatController();
 
     /**
      * Creates new form JDialogExportSaftFat
@@ -297,7 +297,7 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
             java.nio.file.Path output = fc.getSelectedFile().toPath();
 
             // chama o controller
-            long exportId = new ExportSaftFatController().export(start, end, output);
+            long exportId = new SaftFatController().export(start, end, output);
 
             javax.swing.JOptionPane.showMessageDialog(this,
                     "SAF-T gerado com sucesso!\nID export: " + exportId + "\nFicheiro: " + output);

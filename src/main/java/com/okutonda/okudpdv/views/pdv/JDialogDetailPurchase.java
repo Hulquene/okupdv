@@ -31,7 +31,7 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
 
     public void setOrder(int id) {
         System.out.println("id purchase view: " + id);
-        this.purchase = this.purchasesController.getId(id);
+        this.purchase = this.purchasesController.findById(id);
         preencherCampos(); // ✅ atualiza os labels e tabela
     }
 

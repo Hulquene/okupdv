@@ -11,7 +11,7 @@ import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.ui.TemaCleaner;
 import com.okutonda.okudpdv.ui.TemaCores;
-import com.okutonda.okudpdv.utilities.UserSession;
+import com.okutonda.okudpdv.helpers.UserSession;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -94,7 +94,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
     public void listSuppliers() {
 //        SupplierDao cDao = new SupplierDao();
-        List<Supplier> list = supplierController.get("");
+        List<Supplier> list = supplierController.listarTodos();
         DefaultTableModel data = (DefaultTableModel) jTableSuppliers.getModel();
         data.setNumRows(0);
         for (Supplier c : list) {
@@ -115,7 +115,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
     public void filterSupplierList(String txt) {
 //        SupplierDao cDao = new SupplierDao();
-        List<Supplier> list = supplierController.filter(txt);
+        List<Supplier> list = supplierController.filtrar(txt);
         DefaultTableModel data = (DefaultTableModel) jTableSuppliers.getModel();
         data.setNumRows(0);
         for (Supplier c : list) {
@@ -480,7 +480,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
     private void jButtonViewSupplierSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSupplierSelectedActionPerformed
         // TODO add your handling code here:
         int id = Integer.parseInt(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        Supplier supplier = supplierController.getId(id);
+        Supplier supplier = supplierController.getById(id);
         JOptionPane.showMessageDialog(null, "supplier :" + supplier.getName() + "\n NIF:" + supplier.getNif() + "\n Email:" + supplier.getEmail() + "\n Endereço:" + supplier.getAddress());
     }//GEN-LAST:event_jButtonViewSupplierSelectedActionPerformed
 
@@ -523,10 +523,10 @@ public final class JPanelEntity extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Selecione um Fornecedor na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
         } finally {
             if (id > 0) {
-                Supplier client = supplierController.getId(id);
+                Supplier client = supplierController.getById(id);
                 int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
                 if (sair == JOptionPane.YES_OPTION) {
-                    if (supplierController.deleteId(id)) {
+                    if (supplierController.delete(id)) {
                         JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
                         listSuppliers();
                     }

@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.users;
 
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.utilities.Utilities;
+import com.okutonda.okudpdv.helpers.Utilities;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
