@@ -1,226 +1,273 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Product;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão de produtos.
- *
- * Segue o padrão BaseDao<Product> com suporte ao novo DatabaseProvider. Inclui
- * métodos especializados de inventário e PDV.
- *
- * @author …
- */
-public class ProductDao extends BaseDao<Product> {
-    // ✅ Construtor padrão (usa conexão do pool automaticamente)
+public class ProductDao {
 
-    public ProductDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
+    private final Class<Product> entityClass = Product.class;
 
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public ProductDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
     // ==========================================================
-    // 🔹 MAPEAMENTO SQL → OBJETO
+    // 🔹 CRUD
     // ==========================================================
-    private Product map(ResultSet rs) {
+    public Optional<Product> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            Product obj = new Product();
-
-            GroupsProductDao gDao = new GroupsProductDao();
-            TaxeDao tDao = new TaxeDao();
-            TaxeReasonDao rDao = new TaxeReasonDao();
-
-            obj.setId(rs.getInt("id"));
-            obj.setType(rs.getString("type"));
-            obj.setCode(rs.getString("code"));
-            obj.setBarcode(rs.getString("barcode"));
-            obj.setDescription(rs.getString("description"));
-            obj.setPrice(rs.getBigDecimal("price"));
-            obj.setPurchasePrice(rs.getBigDecimal("purchase_price"));
-            obj.setGroup(gDao.findById(rs.getInt("group_id")));
-            obj.setTaxe(tDao.findById(rs.getInt("tax_id")));
-            obj.setReasonTaxe(rDao.findById(rs.getInt("reason_tax_id")));
-            obj.setStatus(rs.getInt("status"));
-            obj.setMinStock(rs.getInt("min_stock"));
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear Product: " + e.getMessage());
-            return null;
+            Product entity = session.find(Product.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Product por ID: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
-    // ==========================================================
-    // 🔹 CRUD (GENÉRICO)
-    // ==========================================================
-    @Override
-    public boolean add(Product obj) {
-        String sql = """
-            INSERT INTO products (
-                type, code, description, price, tax_id, reason_tax_id, group_id,
-                status, barcode, purchase_price, min_stock
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)
-        """;
-        return executeUpdate(sql,
-                obj.getType(),
-                obj.getCode(),
-                obj.getDescription(),
-                obj.getPrice(),
-                obj.getTaxe().getId(),
-                obj.getReasonTaxe().getId(),
-                obj.getGroup().getId(),
-                obj.getStatus(),
-                obj.getBarcode(),
-                obj.getPurchasePrice(),
-                obj.getMinStock()
-        );
-    }
-
-    @Override
-    public boolean update(Product obj) {
-        String sql = """
-            UPDATE products
-               SET type=?, code=?, description=?, price=?, tax_id=?, reason_tax_id=?,
-                   group_id=?, status=?, barcode=?, purchase_price=?, min_stock=?
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                obj.getType(),
-                obj.getCode(),
-                obj.getDescription(),
-                obj.getPrice(),
-                obj.getTaxe().getId(),
-                obj.getReasonTaxe().getId(),
-                obj.getGroup().getId(),
-                obj.getStatus(),
-                obj.getBarcode(),
-                obj.getPurchasePrice(),
-                obj.getMinStock(),
-                obj.getId()
-        );
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM products WHERE id=?", id);
-    }
-
-    @Override
-    public Product findById(int id) {
-        return findOne("SELECT * FROM products WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<Product> findAll() {
-        return executeQuery("SELECT * FROM products", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+            cq.select(root);
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Products: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Product save(Product product) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(product);
+            tx.commit();
+
+            System.out.println("✅ Product salvo: " + product.getDescription());
+            return product;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Product: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Product", e);
+        }
+    }
+
+    public Product update(Product product) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Product merged = session.merge(product);
+            tx.commit();
+
+            System.out.println("✅ Product atualizado: " + product.getDescription());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Product: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Product", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Product product = session.find(Product.class, id);
+            if (product != null) {
+                session.remove(product);
+            }
+
+            tx.commit();
+            System.out.println("✅ Product removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Product: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Product", e);
+        }
     }
 
     // ==========================================================
     // 🔹 MÉTODOS ESPECÍFICOS
     // ==========================================================
-    /**
-     * Busca produto pelo código de barras
-     */
-    public Product findByBarcode(String barcode) {
-        return findOne("SELECT * FROM products WHERE barcode=?", this::map, barcode);
-    }
+    public Optional<Product> findByBarcode(String barcode) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
 
-    /**
-     * Busca produto pela descrição
-     */
-    public Product findByDescription(String desc) {
-        return findOne("SELECT * FROM products WHERE description=?", this::map, desc);
-    }
+            cq.select(root).where(cb.equal(root.get("barcode"), barcode));
 
-    /**
-     * Lista produtos com stock calculado
-     */
-    public List<Product> listWithStock(String where) {
-        String sql = """
-            SELECT p.*, COALESCE(SUM(sm.quantity),0) AS current_stock
-              FROM products p
-         LEFT JOIN stock_movements sm ON sm.product_id = p.id
-        """ + (where != null ? where : "") + """
-          GROUP BY p.id
-        """;
-        return executeQuery(sql, rs -> {
-            Product p = map(rs);
-            try {
-                p.setCurrentStock(rs.getInt("current_stock"));
-            } catch (SQLException e) {
-                System.err.println("[DB] Erro ao definir current_stock: " + e.getMessage());
-            }
-            return p;
-        });
-    }
+            return session.createQuery(cq).uniqueResultOptional();
 
-    /**
-     * Retorna o stock atual de um produto
-     */
-    public int getCurrentStock(int productId) {
-        String sql = "SELECT IFNULL(SUM(quantity),0) AS stock_atual FROM stock_movements WHERE product_id=?";
-        return executeScalarInt(sql, productId);
-    }
-
-    /**
-     * Lista simplificada de produtos para inventário
-     */
-    public List<Product> listForInventory() {
-        String sql = """
-            SELECT 
-                p.id, p.code, p.barcode, p.description,
-                IFNULL(SUM(sm.quantity),0) AS current_stock,
-                p.min_stock, p.price, p.purchase_price, p.type
-              FROM products p
-         LEFT JOIN stock_movements sm ON sm.product_id = p.id
-             WHERE p.status=1
-          GROUP BY p.id, p.code, p.barcode, p.description,
-                   p.min_stock, p.price, p.purchase_price, p.type
-        """;
-        return executeQuery(sql, rs -> {
-            Product p = new Product();
-            try {
-                p.setId(rs.getInt("id"));
-                p.setCode(rs.getString("code"));
-                p.setBarcode(rs.getString("barcode"));
-                p.setDescription(rs.getString("description"));
-                p.setCurrentStock(rs.getInt("current_stock"));
-                p.setMinStock(rs.getInt("min_stock"));
-                p.setPrice(rs.getBigDecimal("price"));
-                p.setPurchasePrice(rs.getBigDecimal("purchase_price"));
-                p.setType(rs.getString("type"));
-            } catch (SQLException e) {
-                System.err.println("[DB] Erro ao mapear inventário: " + e.getMessage());
-            }
-            return p;
-        });
-    }
-
-    /**
-     * Lista produtos disponíveis para o PDV
-     */
-    public List<Product> listForPDV(String filtro) {
-        StringBuilder sql = new StringBuilder("""
-            SELECT p.*, COALESCE(SUM(sm.quantity),0) AS current_stock
-              FROM products p
-         LEFT JOIN stock_movements sm ON sm.product_id = p.id
-             WHERE p.status=1 AND p.type='product'
-        """);
-        if (filtro != null && !filtro.trim().isEmpty()) {
-            sql.append(" AND (p.description LIKE ? OR p.barcode LIKE ? OR p.code LIKE ?) ");
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Product por barcode: " + e.getMessage());
+            return Optional.empty();
         }
-        sql.append(" GROUP BY p.id HAVING current_stock > 0");
+    }
 
-        if (filtro == null || filtro.trim().isEmpty()) {
-            return executeQuery(sql.toString(), this::map);
+    public Optional<Product> findByDescription(String description) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            cq.select(root).where(cb.equal(root.get("description"), description));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Product por descrição: " + e.getMessage());
+            return Optional.empty();
         }
+    }
 
-        String like = "%" + filtro + "%";
-        return executeQuery(sql.toString(), this::map, like, like, like);
+    public List<Product> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate barcodePredicate = cb.like(root.get("barcode"), likePattern);
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+
+            cq.select(root).where(cb.or(descriptionPredicate, barcodePredicate, codePredicate));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Products: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Product> findActive() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            cq.select(root).where(cb.equal(root.get("status"), 1));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Products ativos: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Product> findByType(String type) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            cq.select(root).where(cb.equal(root.get("type"), type));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Products por tipo: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Busca produtos para PDV (ativos, tipo produto, com stock) Nota: A lógica
+     * de stock precisa ser implementada separadamente
+     */
+    public List<Product> findForPDV(String filter) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            // Condições base
+            Predicate statusPredicate = cb.equal(root.get("status"), 1);
+            Predicate typePredicate = cb.equal(root.get("type"), "product");
+
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(statusPredicate);
+            predicates.add(typePredicate);
+
+            // Filtro opcional
+            if (filter != null && !filter.trim().isEmpty()) {
+                String likePattern = "%" + filter + "%";
+                Predicate filterPredicate = cb.or(
+                        cb.like(root.get("description"), likePattern),
+                        cb.like(root.get("barcode"), likePattern),
+                        cb.like(root.get("code"), likePattern)
+                );
+                predicates.add(filterPredicate);
+            }
+
+            cq.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Products para PDV: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Verifica se um código de barras já existe
+     */
+    public boolean barcodeExists(String barcode) {
+        return findByBarcode(barcode).isPresent();
+    }
+
+    /**
+     * Verifica se um código de produto já existe
+     */
+    public boolean codeExists(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Product> root = cq.from(Product.class);
+
+            cq.select(cb.count(root)).where(cb.equal(root.get("code"), code));
+
+            Long count = session.createQuery(cq).getSingleResult();
+            return count > 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar código: " + e.getMessage());
+            return false;
+        }
     }
 }

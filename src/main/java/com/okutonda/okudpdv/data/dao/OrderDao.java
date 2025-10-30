@@ -1,171 +1,471 @@
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.data.entities.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.Order;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão das encomendas/pedidos (Order).
- *
- * Totalmente compatível com o DatabaseProvider (HikariCP) e BaseDao. Pode ser
- * usado tanto isoladamente como dentro de transações partilhadas.
- *
- * @author Hulquene
- */
-public class OrderDao extends BaseDao<Order> {
+public class OrderDao {
 
-    // ✅ Construtor padrão (usa conexão do pool automaticamente)
-    public OrderDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
-
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public OrderDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
-
-    // ==========================================================
-    // 🔹 MAPEAMENTO SQL → OBJETO
-    // ==========================================================
-    private Order map(ResultSet rs) {
-        try {
-            Order o = new Order();
-
-            o.setId(rs.getInt("id"));
-            o.setStatus(rs.getInt("status"));
-            o.setDatecreate(rs.getString("datecreate"));
-            o.setNumber(rs.getInt("number"));
-            o.setPrefix(rs.getString("prefix"));
-            o.setTotal(rs.getDouble("total"));
-            o.setSubTotal(rs.getDouble("sub_total"));
-            o.setTotalTaxe(rs.getDouble("total_taxe"));
-            o.setPayTotal(rs.getDouble("pay_total"));
-            o.setAmountReturned(rs.getDouble("amount_returned"));
-            o.setHash(rs.getString("hash"));
-            o.setYear(rs.getInt("year"));
-            o.setKey(rs.getString("key"));
-            o.setNote(rs.getString("note"));
-
-            try {
-                ClientDao cDao = new ClientDao();
-                UserDao uDao = new UserDao();
-                o.setClient(cDao.findById(rs.getInt("client_id")));
-                o.setSeller(uDao.findById(rs.getInt("user_id")));
-            } catch (Exception e) {
-                System.err.println("[OrderDao] Aviso: erro ao carregar relações -> " + e.getMessage());
-            }
-
-            return o;
-        } catch (SQLException e) {
-            System.err.println("[OrderDao] Erro ao mapear Order: " + e.getMessage());
-            return null;
-        }
-    }
+    private final Class<Order> entityClass = Order.class;
 
     // ==========================================================
     // 🔹 CRUD PADRÃO
     // ==========================================================
-    @Override
-    public boolean add(Order o) {
-        String sql = """
-            INSERT INTO orders 
-            (status,datecreate,number,prefix,total,sub_total,total_taxe,pay_total,
-             amount_returned,hash,client_id,user_id,year,`key`,note)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """;
-        return executeUpdate(sql,
-                o.getStatus(),
-                o.getDatecreate(),
-                o.getNumber(),
-                o.getPrefix(),
-                safe(o.getTotal()),
-                safe(o.getSubTotal()),
-                safe(o.getTotalTaxe()),
-                safe(o.getPayTotal()),
-                safe(o.getAmountReturned()),
-                o.getHash(),
-                o.getClient() != null ? o.getClient().getId() : 0,
-                o.getSeller() != null ? o.getSeller().getId() : 0,
-                o.getYear(),
-                o.getKey(),
-                o.getNote());
+    public Optional<Order> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            Order entity = session.find(Order.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Order por ID: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean update(Order o) {
-        String sql = """
-            UPDATE orders 
-               SET status=?, datecreate=?, number=?, prefix=?, total=?, sub_total=?, 
-                   total_taxe=?, pay_total=?, amount_returned=?, hash=?, client_id=?, 
-                   user_id=?, year=?, `key`=?, note=? 
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                o.getStatus(),
-                o.getDatecreate(),
-                o.getNumber(),
-                o.getPrefix(),
-                safe(o.getTotal()),
-                safe(o.getSubTotal()),
-                safe(o.getTotalTaxe()),
-                safe(o.getPayTotal()),
-                safe(o.getAmountReturned()),
-                o.getHash(),
-                o.getClient() != null ? o.getClient().getId() : 0,
-                o.getSeller() != null ? o.getSeller().getId() : 0,
-                o.getYear(),
-                o.getKey(),
-                o.getNote(),
-                o.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM orders WHERE id=?", id);
-    }
-
-    @Override
-    public Order findById(int id) {
-        return findOne("SELECT * FROM orders WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<Order> findAll() {
-        return executeQuery("SELECT * FROM orders ORDER BY datecreate DESC", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+            cq.select(root).orderBy(cb.desc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Orders: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Order save(Order order) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(order);
+            tx.commit();
+
+            System.out.println("✅ Order salvo: " + order.getPrefix() + "/" + order.getNumber());
+            return order;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Order: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Order", e);
+        }
+    }
+
+    public Order update(Order order) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Order merged = session.merge(order);
+            tx.commit();
+
+            System.out.println("✅ Order atualizado: " + order.getPrefix() + "/" + order.getNumber());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Order: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Order", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Order order = session.find(Order.class, id);
+            if (order != null) {
+                session.remove(order);
+            }
+
+            tx.commit();
+            System.out.println("✅ Order removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Order: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Order", e);
+        }
     }
 
     // ==========================================================
     // 🔹 CONSULTAS CUSTOM
     // ==========================================================
-    public Order findByNumber(int number) {
-        return findOne("SELECT * FROM orders WHERE number=?", this::map, number);
+    public Optional<Order> findByNumber(Integer number) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(root).where(cb.equal(root.get("number"), number));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Order por número: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    public List<Order> list(String where) {
-        String sql = "SELECT * FROM orders " + (where != null ? where : "");
-        return executeQuery(sql, this::map);
+    public List<Order> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate prefixPredicate = cb.like(root.get("prefix"), likePattern);
+            Predicate notePredicate = cb.like(root.get("note"), likePattern);
+            Predicate clientPredicate = cb.like(root.get("client").get("name"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(prefixPredicate, notePredicate, clientPredicate))
+                    .orderBy(cb.desc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Orders: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public List<Order> filterDate(LocalDate from, LocalDate to, String where) {
-        String sql = """
-            SELECT * FROM orders 
-            WHERE DATE(datecreate) BETWEEN ? AND ? 
-        """ + (where != null ? where : "") + " ORDER BY datecreate ASC";
-        return executeQuery(sql, this::map, from.toString(), to.toString());
+    public List<Order> filterByDate(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(root)
+                    .where(cb.between(root.get("datecreate"), from.toString(), to.toString()))
+                    .orderBy(cb.asc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Orders por data: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public int getNextNumber() {
-        Integer num = executeScalarInt("SELECT MAX(number) FROM orders");
-        return (num == null) ? 1 : num + 1;
+    public List<Order> findByClientId(Integer clientId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("client").get("id"), clientId))
+                    .orderBy(cb.desc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Orders por cliente: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    private static Double safe(Double v) {
-        return (v == null) ? 0d : v;
+    public List<Order> findBySellerId(Integer sellerId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("seller").get("id"), sellerId))
+                    .orderBy(cb.desc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Orders por vendedor: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Order> findByStatus(Integer status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Order> cq = cb.createQuery(Order.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("status"), status))
+                    .orderBy(cb.desc(root.get("datecreate")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Orders por status: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Obtém o próximo número de ordem
+     */
+    public Integer getNextNumber() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(cb.coalesce(cb.max(root.get("number")), 0));
+
+            Integer maxNumber = session.createQuery(cq).getSingleResult();
+            return maxNumber + 1;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao obter próximo número: " + e.getMessage());
+            return 1;
+        }
+    }
+
+    /**
+     * Calcula o total de vendas em um período
+     */
+    public Double calculateTotalSalesByPeriod(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Double> cq = cb.createQuery(Double.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(cb.sum(root.get("total")))
+                    .where(cb.and(
+                            cb.between(root.get("datecreate"), from.toString(), to.toString()),
+                            cb.equal(root.get("status"), 2) // Status de pedido concluído
+                    ));
+
+            Double total = session.createQuery(cq).getSingleResult();
+            return total != null ? total : 0.0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total de vendas: " + e.getMessage());
+            return 0.0;
+        }
+    }
+
+    /**
+     * Conta pedidos por status
+     */
+    public Long countByStatus(Integer status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Order> root = cq.from(Order.class);
+
+            cq.select(cb.count(root))
+                    .where(cb.equal(root.get("status"), status));
+
+            return session.createQuery(cq).getSingleResult();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao contar pedidos por status: " + e.getMessage());
+            return 0L;
+        }
     }
 }
 
+//package com.okutonda.okudpdv.data.dao;
+//
+//import com.okutonda.okudpdv.data.entities.*;
+//import java.sql.ResultSet;
+//import java.sql.SQLException;
+//import java.time.LocalDate;
+//import java.util.List;
+//
+///**
+// * DAO responsável pela gestão das encomendas/pedidos (Order).
+// *
+// * Totalmente compatível com o DatabaseProvider (HikariCP) e BaseDao. Pode ser
+// * usado tanto isoladamente como dentro de transações partilhadas.
+// *
+// * @author Hulquene
+// */
+//public class OrderDao extends BaseDao<Order> {
+//
+//    // ✅ Construtor padrão (usa conexão do pool automaticamente)
+//    public OrderDao() {
+//        // não precisa chamar super(), ele já existe por padrão
+//    }
+//
+//    // ✅ Construtor alternativo (usa conexão externa — transação)
+//    public OrderDao(java.sql.Connection externalConn) {
+//        super(externalConn);
+//    }
+//
+//    // ==========================================================
+//    // 🔹 MAPEAMENTO SQL → OBJETO
+//    // ==========================================================
+//    private Order map(ResultSet rs) {
+//        try {
+//            Order o = new Order();
+//
+//            o.setId(rs.getInt("id"));
+//            o.setStatus(rs.getInt("status"));
+//            o.setDatecreate(rs.getString("datecreate"));
+//            o.setNumber(rs.getInt("number"));
+//            o.setPrefix(rs.getString("prefix"));
+//            o.setTotal(rs.getDouble("total"));
+//            o.setSubTotal(rs.getDouble("sub_total"));
+//            o.setTotalTaxe(rs.getDouble("total_taxe"));
+//            o.setPayTotal(rs.getDouble("pay_total"));
+//            o.setAmountReturned(rs.getDouble("amount_returned"));
+//            o.setHash(rs.getString("hash"));
+//            o.setYear(rs.getInt("year"));
+//            o.setKey(rs.getString("key"));
+//            o.setNote(rs.getString("note"));
+//
+//            try {
+//                ClientDao cDao = new ClientDao();
+//                UserDao uDao = new UserDao();
+//                o.setClient(cDao.findById(rs.getInt("client_id")));
+//                o.setSeller(uDao.findById(rs.getInt("user_id")));
+//            } catch (Exception e) {
+//                System.err.println("[OrderDao] Aviso: erro ao carregar relações -> " + e.getMessage());
+//            }
+//
+//            return o;
+//        } catch (SQLException e) {
+//            System.err.println("[OrderDao] Erro ao mapear Order: " + e.getMessage());
+//            return null;
+//        }
+//    }
+//
+//    // ==========================================================
+//    // 🔹 CRUD PADRÃO
+//    // ==========================================================
+//    @Override
+//    public boolean add(Order o) {
+//        String sql = """
+//            INSERT INTO orders 
+//            (status,datecreate,number,prefix,total,sub_total,total_taxe,pay_total,
+//             amount_returned,hash,client_id,user_id,year,`key`,note)
+//            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+//        """;
+//        return executeUpdate(sql,
+//                o.getStatus(),
+//                o.getDatecreate(),
+//                o.getNumber(),
+//                o.getPrefix(),
+//                safe(o.getTotal()),
+//                safe(o.getSubTotal()),
+//                safe(o.getTotalTaxe()),
+//                safe(o.getPayTotal()),
+//                safe(o.getAmountReturned()),
+//                o.getHash(),
+//                o.getClient() != null ? o.getClient().getId() : 0,
+//                o.getSeller() != null ? o.getSeller().getId() : 0,
+//                o.getYear(),
+//                o.getKey(),
+//                o.getNote());
+//    }
+//
+//    @Override
+//    public boolean update(Order o) {
+//        String sql = """
+//            UPDATE orders 
+//               SET status=?, datecreate=?, number=?, prefix=?, total=?, sub_total=?, 
+//                   total_taxe=?, pay_total=?, amount_returned=?, hash=?, client_id=?, 
+//                   user_id=?, year=?, `key`=?, note=? 
+//             WHERE id=?
+//        """;
+//        return executeUpdate(sql,
+//                o.getStatus(),
+//                o.getDatecreate(),
+//                o.getNumber(),
+//                o.getPrefix(),
+//                safe(o.getTotal()),
+//                safe(o.getSubTotal()),
+//                safe(o.getTotalTaxe()),
+//                safe(o.getPayTotal()),
+//                safe(o.getAmountReturned()),
+//                o.getHash(),
+//                o.getClient() != null ? o.getClient().getId() : 0,
+//                o.getSeller() != null ? o.getSeller().getId() : 0,
+//                o.getYear(),
+//                o.getKey(),
+//                o.getNote(),
+//                o.getId());
+//    }
+//
+//    @Override
+//    public boolean delete(int id) {
+//        return executeUpdate("DELETE FROM orders WHERE id=?", id);
+//    }
+//
+//    @Override
+//    public Order findById(int id) {
+//        return findOne("SELECT * FROM orders WHERE id=?", this::map, id);
+//    }
+//
+//    @Override
+//    public List<Order> findAll() {
+//        return executeQuery("SELECT * FROM orders ORDER BY datecreate DESC", this::map);
+//    }
+//
+//    // ==========================================================
+//    // 🔹 CONSULTAS CUSTOM
+//    // ==========================================================
+//    public Order findByNumber(int number) {
+//        return findOne("SELECT * FROM orders WHERE number=?", this::map, number);
+//    }
+//
+//    public List<Order> list(String where) {
+//        String sql = "SELECT * FROM orders " + (where != null ? where : "");
+//        return executeQuery(sql, this::map);
+//    }
+//
+//    public List<Order> filterDate(LocalDate from, LocalDate to, String where) {
+//        String sql = """
+//            SELECT * FROM orders 
+//            WHERE DATE(datecreate) BETWEEN ? AND ? 
+//        """ + (where != null ? where : "") + " ORDER BY datecreate ASC";
+//        return executeQuery(sql, this::map, from.toString(), to.toString());
+//    }
+//
+//    public int getNextNumber() {
+//        Integer num = executeScalarInt("SELECT MAX(number) FROM orders");
+//        return (num == null) ? 1 : num + 1;
+//    }
+//
+//    private static Double safe(Double v) {
+//        return (v == null) ? 0d : v;
+//    }
+//}
 ///*
 // * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 // * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template

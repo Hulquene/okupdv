@@ -1,107 +1,212 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pelas razões de isenção e códigos fiscais (ReasonTaxes).
- *
- * Compatível com BaseDao e HikariCP (DatabaseProvider). Oferece consultas por
- * ID, código e listagem geral.
- *
- * @author Hulquene
- */
-public class TaxeReasonDao extends BaseDao<ReasonTaxes> {
+public class TaxeReasonDao {
 
-    public TaxeReasonDao() {
-        super(); // Usa o pool de conexões (DatabaseProvider)
-    }
-
-    public TaxeReasonDao(java.sql.Connection externalConn) {
-        super(externalConn); // Permite uso transacional externo
-    }
-
-    // ==========================================================
-    // 🔹 Mapeamento ResultSet → Entidade
-    // ==========================================================
-    private ReasonTaxes map(ResultSet rs) {
-        try {
-            ReasonTaxes obj = new ReasonTaxes();
-            obj.setId(rs.getInt("id"));
-            obj.setCode(rs.getString("code"));
-            obj.setDescription(rs.getString("description"));
-            obj.setReason(rs.getString("reason"));
-            obj.setStandard(rs.getString("standard"));
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear ReasonTaxes: " + e.getMessage());
-            return null;
-        }
-    }
+    private final Class<ReasonTaxes> entityClass = ReasonTaxes.class;
 
     // ==========================================================
     // 🔹 CRUD
     // ==========================================================
-    @Override
-    public boolean add(ReasonTaxes obj) {
-        String sql = """
-            INSERT INTO reason_taxes (code, description, reason, standard)
-            VALUES (?, ?, ?, ?)
-        """;
-        return executeUpdate(sql, obj.getCode(), obj.getDescription(), obj.getReason(), obj.getStandard());
+    
+    public Optional<ReasonTaxes> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            ReasonTaxes entity = session.find(ReasonTaxes.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ReasonTaxes por ID: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean update(ReasonTaxes obj) {
-        String sql = """
-            UPDATE reason_taxes
-               SET code=?, description=?, reason=?, standard=?
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                obj.getCode(),
-                obj.getDescription(),
-                obj.getReason(),
-                obj.getStandard(),
-                obj.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM reason_taxes WHERE id=?", id);
-    }
-
-    @Override
-    public ReasonTaxes findById(int id) {
-        String sql = "SELECT * FROM reason_taxes WHERE id=?";
-        return findOne(sql, this::map, id);
-    }
-
-    @Override
     public List<ReasonTaxes> findAll() {
-        String sql = "SELECT * FROM reason_taxes ORDER BY code ASC";
-        return executeQuery(sql, this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ReasonTaxes> cq = cb.createQuery(ReasonTaxes.class);
+            Root<ReasonTaxes> root = cq.from(ReasonTaxes.class);
+            cq.select(root).orderBy(cb.asc(root.get("code")));
+            
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os ReasonTaxes: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ReasonTaxes save(ReasonTaxes reasonTax) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(reasonTax);
+            tx.commit();
+            
+            System.out.println("✅ ReasonTaxes salvo: " + reasonTax.getCode());
+            return reasonTax;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar ReasonTaxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar ReasonTaxes", e);
+        }
+    }
+
+    public ReasonTaxes update(ReasonTaxes reasonTax) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            ReasonTaxes merged = session.merge(reasonTax);
+            tx.commit();
+            
+            System.out.println("✅ ReasonTaxes atualizado: " + reasonTax.getCode());
+            return merged;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar ReasonTaxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar ReasonTaxes", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            ReasonTaxes reasonTax = session.find(ReasonTaxes.class, id);
+            if (reasonTax != null) {
+                session.remove(reasonTax);
+            }
+            
+            tx.commit();
+            System.out.println("✅ ReasonTaxes removido ID: " + id);
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover ReasonTaxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover ReasonTaxes", e);
+        }
     }
 
     // ==========================================================
     // 🔹 Consultas personalizadas
     // ==========================================================
-    /**
-     * Busca uma razão fiscal pelo código (ex: M02, M04, etc.)
-     */
-    public ReasonTaxes searchFromCode(String code) {
-        String sql = "SELECT * FROM reason_taxes WHERE code=?";
-        return findOne(sql, this::map, code);
+    
+    public Optional<ReasonTaxes> findByCode(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ReasonTaxes> cq = cb.createQuery(ReasonTaxes.class);
+            Root<ReasonTaxes> root = cq.from(ReasonTaxes.class);
+            
+            cq.select(root).where(cb.equal(root.get("code"), code));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ReasonTaxes por código: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<ReasonTaxes> searchByDescription(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ReasonTaxes> cq = cb.createQuery(ReasonTaxes.class);
+            Root<ReasonTaxes> root = cq.from(ReasonTaxes.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate reasonPredicate = cb.like(root.get("reason"), likePattern);
+            
+            cq.select(root)
+              .where(cb.or(descriptionPredicate, reasonPredicate))
+              .orderBy(cb.asc(root.get("code")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ReasonTaxes por descrição: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ReasonTaxes> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ReasonTaxes> cq = cb.createQuery(ReasonTaxes.class);
+            Root<ReasonTaxes> root = cq.from(ReasonTaxes.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate reasonPredicate = cb.like(root.get("reason"), likePattern);
+            Predicate standardPredicate = cb.like(root.get("standard"), likePattern);
+            
+            cq.select(root)
+              .where(cb.or(codePredicate, descriptionPredicate, reasonPredicate, standardPredicate))
+              .orderBy(cb.asc(root.get("code")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar ReasonTaxes: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Busca razões fiscais que contenham o texto informado.
+     * Busca razões fiscais por padrão (standard)
      */
-    public List<ReasonTaxes> searchByDescription(String text) {
-        String like = "%" + text + "%";
-        String sql = "SELECT * FROM reason_taxes WHERE description LIKE ? OR reason LIKE ? ORDER BY code ASC";
-        return executeQuery(sql, this::map, like, like);
+    public List<ReasonTaxes> findByStandard(String standard) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ReasonTaxes> cq = cb.createQuery(ReasonTaxes.class);
+            Root<ReasonTaxes> root = cq.from(ReasonTaxes.class);
+            
+            cq.select(root)
+              .where(cb.equal(root.get("standard"), standard))
+              .orderBy(cb.asc(root.get("code")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ReasonTaxes por padrão: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Verifica se um código já existe
+     */
+    public boolean codeExists(String code) {
+        return findByCode(code).isPresent();
     }
 }

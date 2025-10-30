@@ -1,114 +1,220 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Taxes;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão dos impostos (Taxes).
- *
- * Compatível com BaseDao + HikariCP. Oferece operações CRUD e consultas por
- * código, nome e percentagem.
- *
- * @author Hulquene
- */
-public class TaxeDao extends BaseDao<Taxes> {
+public class TaxeDao {
 
-    public TaxeDao() {
-        super(); // usa o pool de conexões
-    }
-
-    public TaxeDao(java.sql.Connection externalConn) {
-        super(externalConn); // permite uso em transações
-    }
-
-    // ==========================================================
-    // 🔹 Mapeamento ResultSet → Entidade
-    // ==========================================================
-    private Taxes map(ResultSet rs) {
-        try {
-            Taxes t = new Taxes();
-            t.setId(rs.getInt("id"));
-            t.setCode(rs.getString("code"));
-            t.setName(rs.getString("name"));
-            t.setPercetage(rs.getBigDecimal("percentage"));
-            t.setIsDefault(rs.getInt("isdefault"));
-            return t;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear Taxes: " + e.getMessage());
-            return null;
-        }
-    }
+    private final Class<Taxes> entityClass = Taxes.class;
 
     // ==========================================================
     // 🔹 CRUD
     // ==========================================================
-    @Override
-    public boolean add(Taxes obj) {
-        String sql = """
-            INSERT INTO taxes (name, code, percentage, isdefault)
-            VALUES (?, ?, ?, ?)
-        """;
-        return executeUpdate(sql,
-                obj.getName(),
-                obj.getCode(),
-                obj.getPercetage(),
-                obj.getIsDefault());
+    
+    public Optional<Taxes> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            Taxes entity = session.find(Taxes.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Taxes por ID: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean update(Taxes obj) {
-        String sql = """
-            UPDATE taxes
-               SET name=?, code=?, percentage=?, isdefault=?
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                obj.getName(),
-                obj.getCode(),
-                obj.getPercetage(),
-                obj.getIsDefault(),
-                obj.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM taxes WHERE id=?", id);
-    }
-
-    @Override
-    public Taxes findById(int id) {
-        String sql = "SELECT * FROM taxes WHERE id=?";
-        return findOne(sql, this::map, id);
-    }
-
-    @Override
     public List<Taxes> findAll() {
-        String sql = "SELECT * FROM taxes ORDER BY name ASC";
-        return executeQuery(sql, this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Taxes> cq = cb.createQuery(Taxes.class);
+            Root<Taxes> root = cq.from(Taxes.class);
+            cq.select(root).orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Taxes: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Taxes save(Taxes tax) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(tax);
+            tx.commit();
+            
+            System.out.println("✅ Taxes salvo: " + tax.getName());
+            return tax;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Taxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Taxes", e);
+        }
+    }
+
+    public Taxes update(Taxes tax) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Taxes merged = session.merge(tax);
+            tx.commit();
+            
+            System.out.println("✅ Taxes atualizado: " + tax.getName());
+            return merged;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Taxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Taxes", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            Taxes tax = session.find(Taxes.class, id);
+            if (tax != null) {
+                session.remove(tax);
+            }
+            
+            tx.commit();
+            System.out.println("✅ Taxes removido ID: " + id);
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Taxes: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Taxes", e);
+        }
     }
 
     // ==========================================================
     // 🔹 Consultas personalizadas
     // ==========================================================
-    public Taxes findByCode(String code) {
-        String sql = "SELECT * FROM taxes WHERE code=?";
-        return findOne(sql, this::map, code);
+    
+    public Optional<Taxes> findByCode(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Taxes> cq = cb.createQuery(Taxes.class);
+            Root<Taxes> root = cq.from(Taxes.class);
+            
+            cq.select(root).where(cb.equal(root.get("code"), code));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Taxes por código: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public List<Taxes> filter(String text) {
-        String like = "%" + text + "%";
-        String sql = """
-            SELECT * FROM taxes
-             WHERE name LIKE ? OR code LIKE ? OR percentage LIKE ?
-          ORDER BY name ASC
-        """;
-        return executeQuery(sql, this::map, like, like, like);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Taxes> cq = cb.createQuery(Taxes.class);
+            Root<Taxes> root = cq.from(Taxes.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+            Predicate percentagePredicate = cb.like(root.get("percentage").as(String.class), likePattern);
+            
+            cq.select(root)
+              .where(cb.or(namePredicate, codePredicate, percentagePredicate))
+              .orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Taxes: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    public Taxes findDefaultTax() {
-        String sql = "SELECT * FROM taxes WHERE isdefault = 1 LIMIT 1";
-        return findOne(sql, this::map);
+    public Optional<Taxes> findDefaultTax() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Taxes> cq = cb.createQuery(Taxes.class);
+            Root<Taxes> root = cq.from(Taxes.class);
+            
+            cq.select(root).where(cb.equal(root.get("isDefault"), 1));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Tax padrão: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Define um imposto como padrão e remove o padrão anterior
+     */
+    public boolean setDefaultTax(Integer taxId) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            // Remove padrão atual
+            session.createMutationQuery("UPDATE Taxes SET isDefault = 0 WHERE isDefault = 1")
+                  .executeUpdate();
+            
+            // Define novo padrão
+            session.createMutationQuery("UPDATE Taxes SET isDefault = 1 WHERE id = :id")
+                  .setParameter("id", taxId)
+                  .executeUpdate();
+            
+            tx.commit();
+            System.out.println("✅ Tax padrão definido: " + taxId);
+            return true;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao definir tax padrão: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifica se um código já existe
+     */
+    public boolean codeExists(String code) {
+        return findByCode(code).isPresent();
+    }
+
+    /**
+     * Busca impostos ativos (status implícito - todos são considerados ativos)
+     */
+    public List<Taxes> findActive() {
+        return findAll(); // Todos os impostos são considerados ativos
     }
 }

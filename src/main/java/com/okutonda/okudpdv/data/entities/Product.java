@@ -1,56 +1,71 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
-/**
- *
- * @author kenny
- */
+@Entity
+@Table(name = "products")
 public class Product {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "type", length = 20)
     private String type;
+
+    @Column(name = "code", length = 50)
     private String code;
-    private String description;
-    private String longDescription;
-    private BigDecimal price;
-    private BigDecimal purchasePrice;
-    private Taxes taxe;
-    private ReasonTaxes reasonTaxe;
-    private GroupsProduct group;
+
+    @Column(name = "barcode", length = 100)
     private String barcode;
-    private int minStock;   // novo: mínimo em vez de stock_total
-    private int status;
 
-    // 🔹 campo somente leitura, calculado em runtime (não persistido)
-    private int currentStock;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
-    // getters/setters...
-    public int getMinStock() {
-        return minStock;
+    @Column(name = "price", precision = 10, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "purchase_price", precision = 10, scale = 2)
+    private BigDecimal purchasePrice;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private GroupsProduct group;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tax_id")
+    private Taxes taxe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reason_tax_id")
+    private ReasonTaxes reasonTaxe;
+
+    @Column(name = "status")
+    private Integer status = 1;
+
+    @Column(name = "min_stock")
+    private Integer minStock = 0;
+
+    @Transient
+    private Integer currentStock;
+
+    // Construtores
+    public Product() {
     }
 
-    public void setMinStock(int minStock) {
-        this.minStock = minStock;
+    public Product(String description, BigDecimal price, String type) {
+        this.description = description;
+        this.price = price;
+        this.type = type;
     }
 
-    public int getCurrentStock() {
-        return currentStock;
-    }
-
-    public void setCurrentStock(int currentStock) {
-        this.currentStock = currentStock;
-    }
-
-    public int getId() {
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -70,20 +85,20 @@ public class Product {
         this.code = code;
     }
 
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
+
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getLongDescription() {
-        return longDescription;
-    }
-
-    public void setLongDescription(String longDescription) {
-        this.longDescription = longDescription;
     }
 
     public BigDecimal getPrice() {
@@ -102,6 +117,14 @@ public class Product {
         this.purchasePrice = purchasePrice;
     }
 
+    public GroupsProduct getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupsProduct group) {
+        this.group = group;
+    }
+
     public Taxes getTaxe() {
         return taxe;
     }
@@ -118,45 +141,32 @@ public class Product {
         this.reasonTaxe = reasonTaxe;
     }
 
-    public GroupsProduct getGroup() {
-        return group;
-    }
-
-    public void setGroup(GroupsProduct group) {
-        this.group = group;
-    }
-
-    public String getBarcode() {
-        return barcode;
-    }
-
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
-    }
-
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Integer getMinStock() {
+        return minStock;
+    }
+
+    public void setMinStock(Integer minStock) {
+        this.minStock = minStock;
+    }
+
+    public Integer getCurrentStock() {
+        return currentStock;
+    }
+
+    public void setCurrentStock(Integer currentStock) {
+        this.currentStock = currentStock;
     }
 
     @Override
     public String toString() {
-        return code + " - " + description;
-    }
-
-    public String print() {
-        return "Product{"
-                + "id=" + id
-                + ", type=" + type
-                + ", code=" + code
-                + ", description=" + description
-                + ", price=" + price
-                + ", purchasePrice=" + purchasePrice
-                + ", currentStock=" + currentStock
-                + ", minStock=" + minStock
-                + ", status=" + status + '}';
+        return "Product{id=" + id + ", description='" + description + "', price=" + price + "}";
     }
 }

@@ -1,26 +1,43 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
-/**
- *
- * @author kenny
- */
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "reason_taxes")
 public class ReasonTaxes {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "code", length = 20)
     private String code;
-    private String reason;
-    private String standard;
+
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    public int getId() {
+    @Column(name = "reason", length = 100)
+    private String reason;
+
+    @Column(name = "standard", length = 50)
+    private String standard;
+
+    // Construtores
+    public ReasonTaxes() {
+    }
+
+    public ReasonTaxes(String code, String description, String reason) {
+        this.code = code;
+        this.description = description;
+        this.reason = reason;
+    }
+
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -30,6 +47,14 @@ public class ReasonTaxes {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getReason() {
@@ -48,16 +73,8 @@ public class ReasonTaxes {
         this.standard = standard;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     @Override
     public String toString() {
-        return this.getCode() + " - " + this.getReason();
+        return "ReasonTaxes{id=" + id + ", code='" + code + "', reason='" + reason + "'}";
     }
 }

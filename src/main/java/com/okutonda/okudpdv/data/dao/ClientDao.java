@@ -1,123 +1,219 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Clients;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO para gestão de Clientes.
- *
- * Herda a estrutura genérica de BaseDao, usando o pool de conexões via
- * DatabaseProvider.
- *
- * @author …
- */
-public class ClientDao extends BaseDao<Clients> {
-// ✅ Construtor padrão (usa conexão do pool automaticamente)
+public class ClientDao {
 
-    public ClientDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
+    private final Class<Clients> entityClass = Clients.class;
 
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public ClientDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
-
-    // 🔹 Mapeia o resultado SQL → objeto Clients
-    private Clients map(ResultSet rs) {
+    // ====================================
+    // 🔹 CRUD Básico
+    // ====================================
+    public Optional<Clients> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            Clients obj = new Clients();
-            obj.setId(rs.getInt("id"));
-            obj.setNif(rs.getString("nif"));
-            obj.setName(rs.getString("company"));
-            obj.setEmail(rs.getString("email"));
-            obj.setPhone(rs.getString("phone"));
-            obj.setAddress(rs.getString("address"));
-            obj.setCity(rs.getString("city"));
-            obj.setState(rs.getString("state"));
-            obj.setZipCode(rs.getString("zip_code"));
-            obj.setStatus(rs.getInt("status"));
-            obj.setIsDefault(rs.getInt("isdefault"));
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear cliente: " + e.getMessage());
-            return null;
+            Clients entity = session.find(Clients.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Client por ID: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<Clients> findAll() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Clients> cq = cb.createQuery(Clients.class);
+            Root<Clients> root = cq.from(Clients.class);
+            cq.select(root);
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Clients: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Clients save(Clients client) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(client);
+            tx.commit();
+
+            System.out.println("✅ Client salvo: " + client.getName());
+            return client;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Client: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Client", e);
+        }
+    }
+
+    public Clients update(Clients client) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Clients merged = session.merge(client);
+            tx.commit();
+
+            System.out.println("✅ Client atualizado: " + client.getName());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Client: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Client", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Clients client = session.find(Clients.class, id);
+            if (client != null) {
+                session.remove(client);
+            }
+
+            tx.commit();
+            System.out.println("✅ Client removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Client: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Client", e);
         }
     }
 
     // ====================================
-    // 🔹 Implementações CRUD (GenericDao)
+    // 🔹 Métodos específicos
     // ====================================
-    @Override
-    public boolean add(Clients obj) {
-        String sql = """
-            INSERT INTO clients (company,nif,phone,email,address,zip_code,status,isdefault,city,state)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        """;
-        return executeUpdate(sql,
-                obj.getName(), obj.getNif(), obj.getPhone(), obj.getEmail(), obj.getAddress(),
-                obj.getZipCode(), obj.getStatus(), obj.getIsDefault(), obj.getCity(), obj.getState());
+    public Optional<Clients> findByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Clients> cq = cb.createQuery(Clients.class);
+            Root<Clients> root = cq.from(Clients.class);
+
+            cq.select(root).where(cb.equal(root.get("name"), name));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Client por nome: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean update(Clients obj) {
-        String sql = """
-            UPDATE clients SET company=?,nif=?,phone=?,email=?,address=?,city=?,state=?,zip_code=?,status=?,isdefault=? 
-            WHERE id=?
-        """;
-        return executeUpdate(sql,
-                obj.getName(), obj.getNif(), obj.getPhone(), obj.getEmail(),
-                obj.getAddress(), obj.getCity(), obj.getState(),
-                obj.getZipCode(), obj.getStatus(), obj.getIsDefault(), obj.getId());
+    public Optional<Clients> findByNif(String nif) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Clients> cq = cb.createQuery(Clients.class);
+            Root<Clients> root = cq.from(Clients.class);
+
+            cq.select(root).where(cb.equal(root.get("nif"), nif));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Client por NIF: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM clients WHERE id=?", id);
+    public Optional<Clients> getDefaultClient() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Clients> cq = cb.createQuery(Clients.class);
+            Root<Clients> root = cq.from(Clients.class);
+
+            cq.select(root).where(cb.equal(root.get("isDefault"), 1));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Client padrão: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public Clients findById(int id) {
-        return findOne("SELECT * FROM clients WHERE id=?", this::map, id);
+    public List<Clients> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Clients> cq = cb.createQuery(Clients.class);
+            Root<Clients> root = cq.from(Clients.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate nifPredicate = cb.like(root.get("nif"), likePattern);
+            Predicate cityPredicate = cb.like(root.get("city"), likePattern);
+
+            cq.select(root).where(cb.or(namePredicate, nifPredicate, cityPredicate));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Clients: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
-    @Override
-    public List<Clients> findAll() {
-        return executeQuery("SELECT * FROM clients", this::map);
-    }
-
-    // ====================================
-    // 🔹 Métodos específicos do módulo
-    // ====================================
     /**
-     * Busca cliente por nome exato
+     * Define um cliente como padrão e remove o padrão anterior
      */
-    public Clients findByName(String name) {
-        return findOne("SELECT * FROM clients WHERE company=?", this::map, name);
-    }
+    public boolean setDefaultClient(Integer clientId) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
 
-    /**
-     * Busca cliente por NIF
-     */
-    public Clients findByNif(String nif) {
-        return findOne("SELECT * FROM clients WHERE nif=?", this::map, nif);
-    }
+            // Remove padrão atual
+            session.createMutationQuery("UPDATE Clients SET isDefault = 0 WHERE isDefault = 1")
+                    .executeUpdate();
 
-    /**
-     * Retorna o cliente marcado como padrão (isdefault = 1)
-     */
-    public Clients getDefaultClient() {
-        return findOne("SELECT * FROM clients WHERE isdefault=1", this::map);
-    }
+            // Define novo padrão
+            session.createMutationQuery("UPDATE Clients SET isDefault = 1 WHERE id = :id")
+                    .setParameter("id", clientId)
+                    .executeUpdate();
 
-    /**
-     * Filtra clientes por nome, NIF ou cidade
-     */
-    public List<Clients> filter(String txt) {
-        String like = "%" + txt + "%";
-        String sql = "SELECT * FROM clients WHERE company LIKE ? OR nif LIKE ? OR city LIKE ?";
-        return executeQuery(sql, this::map, like, like, like);
+            tx.commit();
+            System.out.println("✅ Cliente padrão definido: " + clientId);
+            return true;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao definir cliente padrão: " + e.getMessage());
+            return false;
+        }
     }
 }

@@ -1,34 +1,70 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
-/**
- *
- * @author kenny
- */
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "clients")
 public class Clients {
 
-    private int id;
-    private String name;
-    private String email;
-    private String nif;
-    private String address;
-    private String phone;
-    private Countries country;
-    private String city;
-    private String zipCode;
-    private String state;
-    private int status;//ative/inative
-    private int isDefault;//yes/no
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    public int getId() {
+    @Column(name = "nif", length = 25)
+    private String nif;
+
+    @Column(name = "company", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "address", columnDefinition = "TEXT")
+    private String address;
+
+    @Column(name = "city", length = 50)
+    private String city;
+
+    @Column(name = "state", length = 50)
+    private String state;
+
+    @Column(name = "zip_code", length = 20)
+    private String zipCode;
+
+    @Column(name = "status")
+    private Integer status = 1;
+
+    @Column(name = "isdefault")
+    private Integer isDefault = 0;
+
+    // Construtores
+    public Clients() {
+    }
+
+    public Clients(String name, String nif, String email) {
+        this.name = name;
+        this.nif = nif;
+        this.email = email;
+    }
+
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getNif() {
+        return nif;
+    }
+
+    public void setNif(String nif) {
+        this.nif = nif;
     }
 
     public String getName() {
@@ -47,12 +83,12 @@ public class Clients {
         this.email = email;
     }
 
-    public String getNif() {
-        return nif;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setNif(String nif) {
-        this.nif = nif;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getAddress() {
@@ -63,36 +99,12 @@ public class Clients {
         this.address = address;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Countries getCountry() {
-        return country;
-    }
-
-    public void setCountry(Countries country) {
-        this.country = country;
-    }
-
     public String getCity() {
         return city;
     }
 
     public void setCity(String city) {
         this.city = city;
-    }
-
-    public String getZipCode() {
-        return zipCode;
-    }
-
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
     }
 
     public String getState() {
@@ -103,25 +115,32 @@ public class Clients {
         this.state = state;
     }
 
-    public int getStatus() {
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public int getIsDefault() {
+    public Integer getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(int isDefault) {
+    public void setIsDefault(Integer isDefault) {
         this.isDefault = isDefault;
     }
 
     @Override
     public String toString() {
-        return this.getName();
+        return "Clients{id=" + id + ", name='" + name + "', nif='" + nif + "'}";
     }
-
 }

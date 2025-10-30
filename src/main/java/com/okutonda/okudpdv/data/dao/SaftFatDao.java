@@ -1,486 +1,332 @@
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.data.connection.DatabaseProvider;
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.ExportSaftFat;
 import com.okutonda.okudpdv.data.entities.User;
-import java.sql.*;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pelo histórico e controlo de exportações SAF-T (AO).
- *
- * Usa DatabaseProvider (HikariCP) directamente, sem dependência do
- * ConnectionDatabase. Todas as conexões são obtidas via try-with-resources,
- * garantindo encerramento automático.
- *
- * ⚠️ Nenhuma regra de geração do XML deve ser feita aqui — apenas persistência
- * e consultas.
- *
- * @author Hulquene
- */
 public class SaftFatDao {
+
+    private final Class<ExportSaftFat> entityClass = ExportSaftFat.class;
 
     // ==========================================================
     // 🔹 INSERT
     // ==========================================================
-    public long insertExport(Date start, Date end, String path, String status, String notes) throws SQLException {
+    public ExportSaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes) {
         return insertExport(start, end, path, status, notes, null);
     }
 
-    public long insertExport(Date start, Date end, String path, String status, String notes, Integer exportedBy) throws SQLException {
-        String sql = """
-            INSERT INTO saft_exports (period_start, period_end, file_path, status, notes, exported_by)
-            VALUES (?,?,?,?,?,?)
-        """;
+    public ExportSaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes, User exportedBy) {
+        ExportSaftFat export = new ExportSaftFat(start, end, path, status);
+        export.setNotes(notes);
+        export.setUser(exportedBy);
 
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        return save(export);
+    }
 
-            ps.setDate(1, start);
-            ps.setDate(2, end);
-            ps.setString(3, path);
-            ps.setString(4, status);
-            ps.setString(5, notes);
-            if (exportedBy == null) {
-                ps.setNull(6, Types.INTEGER);
-            } else {
-                ps.setInt(6, exportedBy);
+    public ExportSaftFat save(ExportSaftFat export) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(export);
+            tx.commit();
+
+            System.out.println("✅ Export SAF-T salvo: " + export.getPeriodStart() + " to " + export.getPeriodEnd());
+            return export;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
             }
-
-            ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-            }
+            System.err.println("❌ Erro ao salvar export SAF-T: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar export SAF-T", e);
         }
-        return -1;
+    }
+
+    public ExportSaftFat update(ExportSaftFat export) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            ExportSaftFat merged = session.merge(export);
+            tx.commit();
+
+            System.out.println("✅ Export SAF-T atualizado: " + export.getId());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar export SAF-T: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar export SAF-T", e);
+        }
     }
 
     // ==========================================================
     // 🔹 SELECTS
     // ==========================================================
     public List<ExportSaftFat> getAll() {
-        String sql = """
-            SELECT id, period_start, period_end, file_path, status, notes,
-                   created_at, exported_by
-              FROM saft_exports
-          ORDER BY created_at DESC, id DESC
-        """;
-        List<ExportSaftFat> list = new ArrayList<>();
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            cq.select(root).orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                list.add(map(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao listar saft_exports: " + e.getMessage());
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os exports SAF-T: " + e.getMessage());
+            throw new RuntimeException(e);
         }
-        return list;
     }
 
-    public ExportSaftFat getId(long id) {
-        String sql = """
-            SELECT id, period_start, period_end, file_path, status, notes,
-                   created_at, exported_by
-              FROM saft_exports WHERE id=?
-        """;
-
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return map(rs);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao buscar saft_export: " + e.getMessage());
+    public Optional<ExportSaftFat> findById(Long id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            ExportSaftFat entity = session.find(ExportSaftFat.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ExportSaftFat por ID: " + e.getMessage());
+            return Optional.empty();
         }
-        return null;
     }
 
-    public List<ExportSaftFat> filter(String txt) {
-        List<ExportSaftFat> list = new ArrayList<>();
-        String like = "%" + (txt == null ? "" : txt.trim()) + "%";
+    public List<ExportSaftFat> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
 
-        String sql = """
-            SELECT se.id, se.period_start, se.period_end, se.file_path, se.status, se.notes,
-                   se.created_at, se.exported_by
-              FROM saft_exports se
-         LEFT JOIN users u ON u.id = se.exported_by
-             WHERE COALESCE(se.file_path,'') LIKE ?
-                OR COALESCE(se.status,'') LIKE ?
-                OR COALESCE(se.notes,'') LIKE ?
-                OR COALESCE(u.name,'') LIKE ?
-          ORDER BY se.created_at DESC, se.id DESC
-        """;
+            String likePattern = "%" + (text != null ? text.trim() : "") + "%";
 
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            Predicate filePathPredicate = cb.like(root.get("filePath"), likePattern);
+            Predicate statusPredicate = cb.like(root.get("status"), likePattern);
+            Predicate notesPredicate = cb.like(root.get("notes"), likePattern);
+            Predicate userPredicate = cb.like(root.get("user").get("name"), likePattern);
 
-            ps.setString(1, like);
-            ps.setString(2, like);
-            ps.setString(3, like);
-            ps.setString(4, like);
+            cq.select(root)
+                    .where(cb.or(filePathPredicate, statusPredicate, notesPredicate, userPredicate))
+                    .orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao filtrar saft_exports: " + e.getMessage());
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar exports SAF-T: " + e.getMessage());
+            return new ArrayList<>();
         }
-        return list;
     }
 
     public List<ExportSaftFat> filterByCreatedAt(LocalDate from, LocalDate to) {
-        String sql = """
-            SELECT id, period_start, period_end, file_path, status, notes,
-                   created_at, exported_by
-              FROM saft_exports
-             WHERE DATE(created_at) BETWEEN ? AND ?
-          ORDER BY created_at DESC, id DESC
-        """;
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
 
-        List<ExportSaftFat> list = new ArrayList<>();
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            cq.select(root)
+                    .where(cb.between(root.get("createdAt").as(LocalDate.class), from, to))
+                    .orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
-            ps.setDate(1, Date.valueOf(from));
-            ps.setDate(2, Date.valueOf(to));
+            return session.createQuery(cq).getResultList();
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao filtrar por created_at: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar exports SAF-T por created_at: " + e.getMessage());
+            return new ArrayList<>();
         }
-        return list;
     }
 
     public List<ExportSaftFat> filterByPeriod(LocalDate from, LocalDate to) {
-        String sql = """
-            SELECT id, period_start, period_end, file_path, status, notes,
-                   created_at, exported_by
-              FROM saft_exports
-             WHERE period_start <= ? AND period_end >= ?
-          ORDER BY period_start DESC, id DESC
-        """;
-        List<ExportSaftFat> list = new ArrayList<>();
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
 
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            // WHERE period_start <= ? AND period_end >= ?
+            Predicate startPredicate = cb.lessThanOrEqualTo(root.get("periodStart"), to);
+            Predicate endPredicate = cb.greaterThanOrEqualTo(root.get("periodEnd"), from);
 
-            ps.setDate(1, Date.valueOf(to));
-            ps.setDate(2, Date.valueOf(from));
+            cq.select(root)
+                    .where(cb.and(startPredicate, endPredicate))
+                    .orderBy(cb.desc(root.get("periodStart")), cb.desc(root.get("id")));
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao filtrar por período SAF-T: " + e.getMessage());
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar exports SAF-T por período: " + e.getMessage());
+            return new ArrayList<>();
         }
-        return list;
     }
 
-    public List<ExportSaftFat> filterByUser(Integer userId) {
-        String sql = """
-            SELECT id, period_start, period_end, file_path, status, notes,
-                   created_at, exported_by
-              FROM saft_exports
-             WHERE exported_by = ?
-          ORDER BY created_at DESC, id DESC
-        """;
-        List<ExportSaftFat> list = new ArrayList<>();
+    public List<ExportSaftFat> findByUserId(Long userId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
 
-        try (Connection conn = DatabaseProvider.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            cq.select(root)
+                    .where(cb.equal(root.get("user").get("id"), userId))
+                    .orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
-            if (userId == null) {
-                ps.setNull(1, Types.INTEGER);
-            } else {
-                ps.setInt(1, userId);
-            }
+            return session.createQuery(cq).getResultList();
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao filtrar por utilizador: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar exports SAF-T por usuário: " + e.getMessage());
+            return new ArrayList<>();
         }
-        return list;
+    }
+
+    public List<ExportSaftFat> findByStatus(String status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("status"), status))
+                    .orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar exports SAF-T por status: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     // ==========================================================
-    // 🔹 MAP ResultSet → Modelo
+    // 🔹 DELETE
     // ==========================================================
-    private ExportSaftFat map(ResultSet rs) throws SQLException {
-        ExportSaftFat m = new ExportSaftFat();
+    public void delete(Long id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
 
-        m.setId(rs.getLong("id"));
-        Date ps = rs.getDate("period_start");
-        Date pe = rs.getDate("period_end");
-        Timestamp ca = rs.getTimestamp("created_at");
-
-        m.setPeriodStart(ps != null ? ps.toLocalDate() : null);
-        m.setPeriodEnd(pe != null ? pe.toLocalDate() : null);
-        m.setFilePath(rs.getString("file_path"));
-        m.setStatus(rs.getString("status"));
-        m.setNotes(rs.getString("notes"));
-        m.setCreatedAt(ca != null ? ca.toLocalDateTime() : null);
-
-        int exportedBy = rs.getInt("exported_by");
-        if (!rs.wasNull()) {
-            try {
-                UserDao udao = new UserDao();
-                User u = udao.findById(exportedBy);
-                m.setUser(u);
-            } catch (Exception ignore) {
-                m.setUser(null);
+            ExportSaftFat export = session.find(ExportSaftFat.class, id);
+            if (export != null) {
+                session.remove(export);
             }
-        } else {
-            m.setUser(null);
-        }
 
-        return m;
+            tx.commit();
+            System.out.println("✅ Export SAF-T removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover export SAF-T: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover export SAF-T", e);
+        }
+    }
+
+    // ==========================================================
+    // 🔹 MÉTODOS UTILITÁRIOS
+    // ==========================================================
+    /**
+     * Verifica se já existe export para um período
+     */
+    public boolean existsForPeriod(LocalDate start, LocalDate end) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+
+            Predicate startPredicate = cb.equal(root.get("periodStart"), start);
+            Predicate endPredicate = cb.equal(root.get("periodEnd"), end);
+
+            cq.select(cb.count(root))
+                    .where(cb.and(startPredicate, endPredicate));
+
+            Long count = session.createQuery(cq).getSingleResult();
+            return count > 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar existência de export para período: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Busca o último export realizado
+     */
+    public Optional<ExportSaftFat> findLastExport() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+
+            cq.select(root).orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).setMaxResults(1).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar último export SAF-T: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Conta exports por status
+     */
+    public Long countByStatus(String status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+
+            cq.select(cb.count(root))
+                    .where(cb.equal(root.get("status"), status));
+
+            return session.createQuery(cq).getSingleResult();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao contar exports por status: " + e.getMessage());
+            return 0L;
+        }
+    }
+
+    /**
+     * Busca exports com período sobreposto
+     */
+    public List<ExportSaftFat> findOverlappingExports(LocalDate start, LocalDate end) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
+            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+
+            // WHERE (period_start <= end) AND (period_end >= start)
+            Predicate startOverlap = cb.lessThanOrEqualTo(root.get("periodStart"), end);
+            Predicate endOverlap = cb.greaterThanOrEqualTo(root.get("periodEnd"), start);
+
+            cq.select(root)
+                    .where(cb.and(startOverlap, endOverlap))
+                    .orderBy(cb.desc(root.get("periodStart")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar exports sobrepostos: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }
-
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-//import com.okutonda.okudpdv.data.entities.ExportSaftFat;
-//import com.okutonda.okudpdv.data.entities.User;
-//import java.sql.*;
-//import java.time.LocalDate;
-//import java.util.ArrayList;
-//import java.util.List;
-//import javax.swing.JOptionPane;
-//
-///**
-// *
-// * @author hr
-// */
-//public class SaftFatDao {
-//
-//    private final Connection conn;
-//
-//    public SaftFatDao() {
-//        this.conn = ConnectionDatabase.getConnect();
-//    }
-//
-//    // Mantém o método antigo: redireciona para o overload novo passando null em exported_by
-//    public long insertExport(Date start, Date end, String path, String status, String notes) throws SQLException {
-//        return insertExport(start, end, path, status, notes, null);
-//    }
-//
-//    // NOVO: overload com exported_by
-//    public long insertExport(Date start, Date end, String path, String status, String notes, Integer exportedBy) throws SQLException {
-//        String sql = "INSERT INTO saft_exports (period_start, period_end, file_path, status, notes, exported_by) "
-//                + "VALUES (?,?,?,?,?,?)";
-//        try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-//            ps.setDate(1, start);
-//            ps.setDate(2, end);
-//            ps.setString(3, path);
-//            ps.setString(4, status);
-//            ps.setString(5, notes);
-//            if (exportedBy == null) {
-//                ps.setNull(6, Types.INTEGER);
-//            } else {
-//                ps.setInt(6, exportedBy);
-//            }
-//            ps.executeUpdate();
-//            try (ResultSet rs = ps.getGeneratedKeys()) {
-//                if (rs.next()) {
-//                    return rs.getLong(1);
-//                }
-//            }
-//        }
-//        return -1;
-//    }
-//
-//    // ====== GET ALL ======
-//    public List<ExportSaftFat> getAll() {
-//        List<ExportSaftFat> list = new ArrayList<>();
-//        String sql = """
-//            SELECT id, period_start, period_end, file_path, status, notes,
-//                   created_at, exported_by
-//            FROM saft_exports
-//            ORDER BY created_at DESC, id DESC
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-//            while (rs.next()) {
-//                list.add(map(rs));
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao listar saft_exports: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    // ====== GET BY ID ======
-//    public ExportSaftFat getId(long id) {
-//        String sql = """
-//            SELECT id, period_start, period_end, file_path, status, notes,
-//                   created_at, exported_by
-//            FROM saft_exports WHERE id=?
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setLong(1, id);
-//            try (ResultSet rs = ps.executeQuery()) {
-//                if (rs.next()) {
-//                    return map(rs);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao buscar saft_export: " + e.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    // ====== FILTER por TEXTO (file_path, status, notes, e nome do utilizador via JOIN) ======
-//    public List<ExportSaftFat> filter(String txt) {
-//        List<ExportSaftFat> list = new ArrayList<>();
-//        String like = "%" + (txt == null ? "" : txt.trim()) + "%";
-//        String sql = """
-//            SELECT se.id, se.period_start, se.period_end, se.file_path, se.status, se.notes,
-//                   se.created_at, se.exported_by
-//            FROM saft_exports se
-//            LEFT JOIN users u ON u.id = se.exported_by
-//            WHERE COALESCE(se.file_path,'') LIKE ?
-//               OR COALESCE(se.status,'') LIKE ?
-//               OR COALESCE(se.notes,'') LIKE ?
-//               OR COALESCE(u.name,'') LIKE ?
-//            ORDER BY se.created_at DESC, se.id DESC
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setString(1, like);
-//            ps.setString(2, like);
-//            ps.setString(3, like);
-//            ps.setString(4, like);
-//            try (ResultSet rs = ps.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(map(rs));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar saft_exports: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    // ====== FILTER por CREATED_AT (intervalo do registo/log) ======
-//    public List<ExportSaftFat> filterByCreatedAt(LocalDate from, LocalDate to) {
-//        List<ExportSaftFat> list = new ArrayList<>();
-//        String sql = """
-//            SELECT id, period_start, period_end, file_path, status, notes,
-//                   created_at, exported_by
-//            FROM saft_exports
-//            WHERE DATE(created_at) BETWEEN ? AND ?
-//            ORDER BY created_at DESC, id DESC
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setDate(1, Date.valueOf(from));
-//            ps.setDate(2, Date.valueOf(to));
-//            try (ResultSet rs = ps.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(map(rs));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar por created_at: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    // ====== FILTER por PERÍODO SAF-T (interseção) ======
-//    public List<ExportSaftFat> filterByPeriod(LocalDate from, LocalDate to) {
-//        List<ExportSaftFat> list = new ArrayList<>();
-//        String sql = """
-//            SELECT id, period_start, period_end, file_path, status, notes,
-//                   created_at, exported_by
-//            FROM saft_exports
-//            WHERE period_start <= ? AND period_end >= ?
-//            ORDER BY period_start DESC, id DESC
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setDate(1, Date.valueOf(to));     // start <= to
-//            ps.setDate(2, Date.valueOf(from));   // end   >= from
-//            try (ResultSet rs = ps.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(map(rs));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar por período: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    /**
-//     * (Opcional) Filtrar por usuário específico
-//     */
-//    public List<ExportSaftFat> filterByUser(Integer userId) {
-//        List<ExportSaftFat> list = new ArrayList<>();
-//        String sql = """
-//            SELECT id, period_start, period_end, file_path, status, notes,
-//                   created_at, exported_by
-//            FROM saft_exports
-//            WHERE exported_by = ?
-//            ORDER BY created_at DESC, id DESC
-//        """;
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            if (userId == null) {
-//                ps.setNull(1, Types.INTEGER);
-//            } else {
-//                ps.setInt(1, userId);
-//            }
-//            try (ResultSet rs = ps.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(map(rs));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar por usuário: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//    // ====== MAP ResultSet → Model ======
-//
-//    private ExportSaftFat map(ResultSet rs) throws SQLException {
-//        ExportSaftFat m = new ExportSaftFat();
-//        m.setId(rs.getLong("id"));
-//
-//        Date ps = rs.getDate("period_start");
-//        Date pe = rs.getDate("period_end");
-//        Timestamp ca = rs.getTimestamp("created_at");
-//
-//        m.setPeriodStart(ps != null ? ps.toLocalDate() : null);
-//        m.setPeriodEnd(pe != null ? pe.toLocalDate() : null);
-//        m.setFilePath(rs.getString("file_path"));
-//        m.setStatus(rs.getString("status"));
-//        m.setNotes(rs.getString("notes"));
-//        m.setCreatedAt(ca != null ? ca.toLocalDateTime() : null);
-//
-//        int exportedBy = rs.getInt("exported_by");
-//        if (!rs.wasNull()) {
-//            // carrega o utilizador via UserDao
-//            UserDao udao = new UserDao();
-//            User u = udao.findById(exportedBy);
-//            m.setUser(u);
-//        } else {
-//            m.setUser(null);
-//        }
-//        return m;
-//    }
-//}

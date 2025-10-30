@@ -1,160 +1,235 @@
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável por manipular os itens (products_order) de cada pedido.
- *
- * Compatível com o novo BaseDao e conexões transacionais. Agora o orderId vem
- * de dentro do próprio objeto ProductOrder.
- *
- * @author …
- */
-public class ProductOrderDao extends BaseDao<ProductOrder> {
+public class ProductOrderDao {
 
-    // ✅ Construtor padrão (usa conexão do pool automaticamente)
-    public ProductOrderDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
-
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public ProductOrderDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
-
-    // ==========================================================
-    // 🔹 MAPEAMENTO RESULTSET → OBJETO
-    // ==========================================================
-    private ProductOrder map(ResultSet rs) {
-        try {
-            ProductOrder obj = new ProductOrder();
-            ProductDao productDao = new ProductDao();
-
-            obj.setId(rs.getInt("id"));
-            obj.setOrderId(rs.getInt("order_id"));
-            obj.setDate(rs.getString("date"));
-            obj.setDescription(rs.getString("description"));
-            obj.setQty(rs.getInt("qty"));
-            obj.setPrice(rs.getBigDecimal("price"));
-            obj.setUnit(rs.getString("unit"));
-            obj.setCode(rs.getString("prod_code"));
-            obj.setTaxeCode(rs.getString("taxe_code"));
-            obj.setTaxeName(rs.getString("taxe_name"));
-            obj.setTaxePercentage(rs.getBigDecimal("taxe_percentage"));
-            obj.setReasonTax(rs.getString("reason_tax"));
-            obj.setReasonCode(rs.getString("reason_code"));
-            obj.setProduct(productDao.findById(rs.getInt("product_id")));
-
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear ProductOrder: " + e.getMessage());
-            return null;
-        }
-    }
+    private final Class<ProductOrder> entityClass = ProductOrder.class;
 
     // ==========================================================
     // 🔹 CRUD
     // ==========================================================
-    @Override
-    public boolean add(ProductOrder obj) {
-        if (obj == null || obj.getOrderId() <= 0) {
-            System.err.println("[DB] orderId inválido em ProductOrder: " + obj);
-            return false;
+    
+    public Optional<ProductOrder> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            ProductOrder entity = session.find(ProductOrder.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ProductOrder por ID: " + e.getMessage());
+            return Optional.empty();
         }
-
-        String sql = """
-            INSERT INTO products_order (
-                order_id, product_id, description, qty, price, unit,
-                prod_code, taxe_code, taxe_name, taxe_percentage,
-                reason_tax, reason_code
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
-        return executeUpdate(sql,
-                obj.getOrderId(),
-                obj.getProduct().getId(),
-                obj.getDescription(),
-                obj.getQty(),
-                obj.getPrice(),
-                obj.getUnit(),
-                obj.getCode(),
-                obj.getTaxeCode(),
-                obj.getTaxeName(),
-                obj.getTaxePercentage(),
-                obj.getReasonTax(),
-                obj.getReasonCode()
-        );
     }
 
-    @Override
-    public boolean update(ProductOrder obj) {
-        String sql = """
-            UPDATE products_order
-               SET order_id=?, product_id=?, description=?, qty=?, price=?, unit=?,
-                   prod_code=?, taxe_code=?, taxe_name=?, taxe_percentage=?,
-                   reason_tax=?, reason_code=?
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                obj.getOrderId(),
-                obj.getProduct().getId(),
-                obj.getDescription(),
-                obj.getQty(),
-                obj.getPrice(),
-                obj.getUnit(),
-                obj.getCode(),
-                obj.getTaxeCode(),
-                obj.getTaxeName(),
-                obj.getTaxePercentage(),
-                obj.getReasonTax(),
-                obj.getReasonCode(),
-                obj.getId()
-        );
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM products_order WHERE id=?", id);
-    }
-
-    @Override
-    public ProductOrder findById(int id) {
-        return findOne("SELECT * FROM products_order WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<ProductOrder> findAll() {
-        return executeQuery("SELECT * FROM products_order", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
+            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            cq.select(root);
+            
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os ProductOrders: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ProductOrder save(ProductOrder productOrder) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(productOrder);
+            tx.commit();
+            
+            System.out.println("✅ ProductOrder salvo para order: " + productOrder.getOrderId());
+            return productOrder;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar ProductOrder: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar ProductOrder", e);
+        }
+    }
+
+    public ProductOrder update(ProductOrder productOrder) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            ProductOrder merged = session.merge(productOrder);
+            tx.commit();
+            
+            System.out.println("✅ ProductOrder atualizado: " + productOrder.getId());
+            return merged;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar ProductOrder: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar ProductOrder", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            ProductOrder productOrder = session.find(ProductOrder.class, id);
+            if (productOrder != null) {
+                session.remove(productOrder);
+            }
+            
+            tx.commit();
+            System.out.println("✅ ProductOrder removido ID: " + id);
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover ProductOrder: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover ProductOrder", e);
+        }
     }
 
     // ==========================================================
     // 🔹 CONSULTAS ESPECÍFICAS
     // ==========================================================
-    /**
-     * Lista todos os itens de um pedido
-     */
-    public List<ProductOrder> listProductFromOrderId(int orderId) {
-        String sql = "SELECT * FROM products_order WHERE order_id=?";
-        return executeQuery(sql, this::map, orderId);
+    
+    public List<ProductOrder> findByOrderId(Integer orderId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
+            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            
+            cq.select(root).where(cb.equal(root.get("orderId"), orderId));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ProductOrders por orderId: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ProductOrder> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
+            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            cq.select(root).where(cb.like(root.get("description"), likePattern));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar ProductOrders: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Lista com cláusula WHERE opcional
+     * Salva múltiplos ProductOrders em lote (para melhor performance)
      */
-    public List<ProductOrder> list(String where) {
-        String sql = "SELECT * FROM products_order " + (where != null ? where : "");
-        return executeQuery(sql, this::map);
+    public void saveBatch(List<ProductOrder> productOrders) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            for (int i = 0; i < productOrders.size(); i++) {
+                session.persist(productOrders.get(i));
+                
+                // Flush a cada 20 registros para evitar memory overflow
+                if (i % 20 == 0) {
+                    session.flush();
+                    session.clear();
+                }
+            }
+            
+            tx.commit();
+            System.out.println("✅ " + productOrders.size() + " ProductOrders salvos em lote");
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar ProductOrders em lote: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar ProductOrders em lote", e);
+        }
     }
 
     /**
-     * Filtro genérico por texto na descrição
+     * Remove todos os ProductOrders de um pedido
      */
-    public List<ProductOrder> filter(String txt) {
-        String sql = "SELECT * FROM products_order WHERE description LIKE ?";
-        return executeQuery(sql, this::map, "%" + txt + "%");
+    public boolean deleteByOrderId(Integer orderId) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            int deleted = session.createMutationQuery(
+                "DELETE FROM ProductOrder WHERE orderId = :orderId")
+                .setParameter("orderId", orderId)
+                .executeUpdate();
+            
+            tx.commit();
+            System.out.println("✅ " + deleted + " ProductOrders removidos do order: " + orderId);
+            return deleted > 0;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover ProductOrders por orderId: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Calcula o total de um pedido
+     */
+    public Double calculateOrderTotal(Integer orderId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            // Usando HQL para calcular o total
+            String hql = """
+                SELECT SUM(po.qty * po.price) 
+                FROM ProductOrder po 
+                WHERE po.orderId = :orderId
+            """;
+            
+            Double total = session.createQuery(hql, Double.class)
+                .setParameter("orderId", orderId)
+                .uniqueResult();
+            
+            return total != null ? total : 0.0;
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total do pedido: " + e.getMessage());
+            return 0.0;
+        }
     }
 }

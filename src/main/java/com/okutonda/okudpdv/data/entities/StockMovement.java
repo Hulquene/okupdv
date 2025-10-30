@@ -1,36 +1,68 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
-import java.util.Date;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
-/**
- *
- * @author hr
- */
+@Entity
+@Table(name = "stock_movements")
 public class StockMovement {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-    private Warehouse warehouse;  // novo campo
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    private int quantity;
-    private String type;       // ENTRADA, SAIDA, AJUSTE, TRANSFERENCIA
-    private String origin;     // COMPRA, VENDA, DEVOLUCAO, MANUAL...
+
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
+
+    @Column(name = "type", length = 20)
+    private String type; // ENTRADA, SAIDA, AJUSTE
+
+    @Column(name = "origin", length = 50)
+    private String origin = "MANUAL";
+
+    @Column(name = "reference_id")
     private Integer referenceId;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "reason", length = 100)
     private String reason;
-    private Date createdAt;
-    private Date updatedAt;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Construtores
+    public StockMovement() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public StockMovement(Product product, User user, Integer quantity, String type) {
+        this();
+        this.product = product;
+        this.user = user;
+        this.quantity = quantity;
+        this.type = type;
+    }
 
     // Getters e Setters
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -58,11 +90,11 @@ public class StockMovement {
         this.user = user;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
@@ -106,37 +138,17 @@ public class StockMovement {
         this.reason = reason;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     @Override
     public String toString() {
-        return "StockMovement{"
-                + "id=" + id
-                + ", product=" + (product != null ? product.getDescription() : "null")
-                + ", warehouse=" + (warehouse != null ? warehouse.getName() : "null")
-                + ", quantity=" + quantity
-                + ", type='" + type + '\''
-                + ", origin='" + origin + '\''
-                + ", reason='" + reason + '\''
-                + ", notes='" + notes + '\''
-                + ", referenceId=" + referenceId
-                + ", user=" + (user != null ? user.getName() : "null")
-                + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt
-                + '}';
+        return "StockMovement{id=" + id + ", product=" + (product != null ? product.getDescription() : "null")
+                + ", quantity=" + quantity + ", type='" + type + "'}";
     }
 }

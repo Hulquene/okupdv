@@ -1,86 +1,162 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão dos grupos de produtos.
- * 
- * Herda BaseDao<GroupsProduct> e usa o pool de conexões.
- * 
- * @author …
- */
-public class GroupsProductDao extends BaseDao<GroupsProduct> {
-// ✅ Construtor padrão (usa conexão do pool automaticamente)
+public class GroupsProductDao {
 
-    public GroupsProductDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
+    private final Class<GroupsProduct> entityClass = GroupsProduct.class;
 
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public GroupsProductDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
-    // 🔹 Função de mapeamento SQL → objeto
-    private GroupsProduct map(ResultSet rs) {
+    // ========================
+    // 🔹 CRUD
+    // ========================
+    
+    public Optional<GroupsProduct> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            GroupsProduct obj = new GroupsProduct();
-            obj.setId(rs.getInt("id"));
-            obj.setCode(rs.getString("code"));
-            obj.setName(rs.getString("name"));
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear GroupsProduct: " + e.getMessage());
-            return null;
+            GroupsProduct entity = session.find(GroupsProduct.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar GroupsProduct por ID: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
-    // ========================
-    // 🔹 CRUD (GenericDao)
-    // ========================
-
-    @Override
-    public boolean add(GroupsProduct obj) {
-        String sql = "INSERT INTO groups_product (name, code) VALUES (?, ?)";
-        return executeUpdate(sql, obj.getName(), obj.getCode());
-    }
-
-    @Override
-    public boolean update(GroupsProduct obj) {
-        String sql = "UPDATE groups_product SET name=?, code=? WHERE id=?";
-        return executeUpdate(sql, obj.getName(), obj.getCode(), obj.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM groups_product WHERE id=?", id);
-    }
-
-    @Override
-    public GroupsProduct findById(int id) {
-        return findOne("SELECT * FROM groups_product WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<GroupsProduct> findAll() {
-        return executeQuery("SELECT * FROM groups_product", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<GroupsProduct> cq = cb.createQuery(GroupsProduct.class);
+            Root<GroupsProduct> root = cq.from(GroupsProduct.class);
+            cq.select(root);
+            
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os GroupsProduct: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public GroupsProduct save(GroupsProduct group) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(group);
+            tx.commit();
+            
+            System.out.println("✅ GroupsProduct salvo: " + group.getName());
+            return group;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar GroupsProduct: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar GroupsProduct", e);
+        }
+    }
+
+    public GroupsProduct update(GroupsProduct group) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            GroupsProduct merged = session.merge(group);
+            tx.commit();
+            
+            System.out.println("✅ GroupsProduct atualizado: " + group.getName());
+            return merged;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar GroupsProduct: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar GroupsProduct", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            GroupsProduct group = session.find(GroupsProduct.class, id);
+            if (group != null) {
+                session.remove(group);
+            }
+            
+            tx.commit();
+            System.out.println("✅ GroupsProduct removido ID: " + id);
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover GroupsProduct: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover GroupsProduct", e);
+        }
     }
 
     // ========================
     // 🔹 Métodos específicos
     // ========================
-
-    /** Busca grupo pelo código */
-    public GroupsProduct findByCode(String code) {
-        return findOne("SELECT * FROM groups_product WHERE code=?", this::map, code);
+    
+    public Optional<GroupsProduct> findByCode(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<GroupsProduct> cq = cb.createQuery(GroupsProduct.class);
+            Root<GroupsProduct> root = cq.from(GroupsProduct.class);
+            
+            cq.select(root).where(cb.equal(root.get("code"), code));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar GroupsProduct por código: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    /** Filtra grupos pelo nome ou código */
-    public List<GroupsProduct> filter(String txt) {
-        String like = "%" + txt + "%";
-        String sql = "SELECT * FROM groups_product WHERE name LIKE ? OR code LIKE ?";
-        return executeQuery(sql, this::map, like, like);
+    public List<GroupsProduct> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<GroupsProduct> cq = cb.createQuery(GroupsProduct.class);
+            Root<GroupsProduct> root = cq.from(GroupsProduct.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+            
+            cq.select(root).where(cb.or(namePredicate, codePredicate));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar GroupsProduct: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * Verifica se um código já existe
+     */
+    public boolean codeExists(String code) {
+        return findByCode(code).isPresent();
     }
 }

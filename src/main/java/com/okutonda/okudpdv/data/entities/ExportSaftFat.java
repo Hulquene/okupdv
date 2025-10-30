@@ -1,36 +1,58 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- *
- * @author hr
- */
+@Entity
+@Table(name = "saft_exports")
 public class ExportSaftFat {
-    // Status convenientes
 
-    public static final String STATUS_SUCCESS = "SUCCESS";
-    public static final String STATUS_FAILED = "FAILED";
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private long id;
-    private LocalDate periodStart;     // saft_exports.period_start (DATE)
-    private LocalDate periodEnd;       // saft_exports.period_end (DATE)
-    private String filePath;           // saft_exports.file_path
-    private String status;             // saft_exports.status
-    private String notes;              // saft_exports.notes
-    private LocalDateTime createdAt;   // saft_exports.created_at (TIMESTAMP)
-    private User user;      // saft_exports.exported_by (FK opcional para User.id)
+    @Column(name = "period_start")
+    private LocalDate periodStart;
 
-    public long getId() {
+    @Column(name = "period_end")
+    private LocalDate periodEnd;
+
+    @Column(name = "file_path", length = 500)
+    private String filePath;
+
+    @Column(name = "status", length = 50)
+    private String status;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exported_by")
+    private User user;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Construtores
+    public ExportSaftFat() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public ExportSaftFat(LocalDate periodStart, LocalDate periodEnd, String filePath, String status) {
+        this();
+        this.periodStart = periodStart;
+        this.periodEnd = periodEnd;
+        this.filePath = filePath;
+        this.status = status;
+    }
+
+    // Getters e Setters
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -74,14 +96,6 @@ public class ExportSaftFat {
         this.notes = notes;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public User getUser() {
         return user;
     }
@@ -90,38 +104,16 @@ public class ExportSaftFat {
         this.user = user;
     }
 
-//    public String getExportedByName() {
-//        return exportedByName;
-//    }
-//    public void setExportedByName(String exportedByName) {
-//        this.exportedByName = exportedByName;
-//    }
-    // Helpers opcionais
-    public String getFileName() {
-        if (filePath == null) {
-            return "";
-        }
-        int i = filePath.lastIndexOf(java.io.File.separator);
-        return i >= 0 ? filePath.substring(i + 1) : filePath;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public String getPeriodLabel() {
-        String s = (periodStart == null ? "" : periodStart.toString());
-        String e = (periodEnd == null ? "" : periodEnd.toString());
-        return s + " a " + e;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override
     public String toString() {
-        return "ExportSaftFat{"
-                + "id=" + id
-                + ", periodStart=" + periodStart
-                + ", periodEnd=" + periodEnd
-                + ", filePath='" + filePath + '\''
-                + ", status='" + status + '\''
-                + ", notes='" + notes + '\''
-                + ", createdAt=" + createdAt
-                + 
-                '}';
+        return "ExportSaftFat{id=" + id + ", period=" + periodStart + " to " + periodEnd + ", status='" + status + "'}";
     }
 }

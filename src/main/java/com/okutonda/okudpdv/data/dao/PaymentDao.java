@@ -1,481 +1,259 @@
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.data.entities.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Date;
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.Payment;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.math.BigDecimal;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão de pagamentos.
- *
- * Herda BaseDao<Payment> e usa o pool de conexões. Compatível com transações
- * externas.
- *
- * @author …
- */
-public class PaymentDao extends BaseDao<Payment> {
-// ✅ Construtor padrão (usa conexão do pool automaticamente)
+public class PaymentDao {
 
-    public PaymentDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
-
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public PaymentDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
+    private final Class<Payment> entityClass = Payment.class;
 
     // ==========================================================
-    // 🔹 Mapeamento SQL → Objeto Payment
+    // 🔹 CRUD
     // ==========================================================
-    private Payment map(ResultSet rs) {
+    public Optional<Payment> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            Payment p = new Payment();
-
-            p.setId(rs.getInt("id"));
-            p.setDescription(rs.getString("description"));
-            p.setTotal(rs.getBigDecimal("total"));
-            p.setPrefix(rs.getString("prefix"));
-            p.setNumber(rs.getInt("number"));
-            p.setDate(rs.getString("date"));
-            p.setDateFinish(rs.getString("dateFinish"));
-            p.setInvoiceId(rs.getInt("order_id"));
-            p.setInvoiceType(rs.getString("order_type"));
-            p.setReference(rs.getString("reference"));
-            p.setCurrency(rs.getString("currency"));
-
-            // enums seguros
-            String modeStr = rs.getString("mode");
-            String statusStr = rs.getString("status");
-
-            if (modeStr != null) {
-                try {
-                    p.setPaymentMode(PaymentMode.valueOf(modeStr.toUpperCase()));
-                } catch (Exception ignored) {
-                }
-            }
-            if (statusStr != null) {
-                try {
-                    p.setStatus(PaymentStatus.valueOf(statusStr.toUpperCase()));
-                } catch (Exception ignored) {
-                }
-            }
-
-            // relações
-            try {
-                ClientDao cDao = new ClientDao();
-                UserDao uDao = new UserDao();
-                p.setClient(cDao.findById(rs.getInt("clientId")));
-                p.setUser(uDao.findById(rs.getInt("userId")));
-            } catch (Exception e) {
-                System.err.println("[DB] Aviso: falha ao carregar relações de Payment → " + e.getMessage());
-            }
-
-            return p;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear Payment: " + e.getMessage());
-            return null;
+            Payment entity = session.find(Payment.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Payment por ID: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
-    // ==========================================================
-    // 🔹 CRUD (GenericDao)
-    // ==========================================================
-    @Override
-    public boolean add(Payment p) {
-        String sql = """
-            INSERT INTO payments
-            (description,total,prefix,number,`date`,dateFinish,status,
-             clientId,userId,order_id,order_type,mode,reference,currency)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """;
-        return executeUpdate(sql,
-                safe(p.getDescription()),
-                safeBD(p.getTotal()),
-                safe(p.getPrefix()),
-                p.getNumber(),
-                safe(p.getDate()),
-                nullable(p.getDateFinish()),
-                safeEnum(p.getStatus(), PaymentStatus.SUCCESS),
-                (p.getClient() != null ? p.getClient().getId() : 0),
-                (p.getUser() != null ? p.getUser().getId() : 0),
-                (p.getInvoiceId() != 0 ? p.getInvoiceId() : 0),
-                safe(p.getInvoiceType(), "ORDER"),
-                safeEnum(p.getPaymentMode(), PaymentMode.NUMERARIO),
-                safe(p.getReference()),
-                safe(p.getCurrency(), "AOA"));
-    }
-
-    /**
-     * Permite adicionar pagamento vinculado a uma fatura específica
-     */
-    public boolean add(Payment p, int orderId) {
-        p.setInvoiceId(orderId);
-        return add(p);
-    }
-
-    @Override
-    public boolean update(Payment p) {
-        String sql = """
-            UPDATE payments 
-            SET dateFinish=?, status=?, reference=?, description=?, currency=? 
-            WHERE id=?
-        """;
-        return executeUpdate(sql,
-                nullable(p.getDateFinish()),
-                safeEnum(p.getStatus(), PaymentStatus.SUCCESS),
-                safe(p.getReference()),
-                safe(p.getDescription()),
-                safe(p.getCurrency()),
-                p.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM payments WHERE id=?", id);
-    }
-
-    @Override
-    public Payment findById(int id) {
-        return findOne("SELECT * FROM payments WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<Payment> findAll() {
-        return executeQuery("SELECT * FROM payments ORDER BY date DESC", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+            cq.select(root).orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Payments: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Payment save(Payment payment) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(payment);
+            tx.commit();
+
+            System.out.println("✅ Payment salvo: " + payment.getReference());
+            return payment;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Payment: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Payment", e);
+        }
+    }
+
+    public Payment update(Payment payment) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Payment merged = session.merge(payment);
+            tx.commit();
+
+            System.out.println("✅ Payment atualizado: " + payment.getReference());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Payment: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Payment", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Payment payment = session.find(Payment.class, id);
+            if (payment != null) {
+                session.remove(payment);
+            }
+
+            tx.commit();
+            System.out.println("✅ Payment removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Payment: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Payment", e);
+        }
     }
 
     // ==========================================================
     // 🔹 Métodos específicos
     // ==========================================================
-    /**
-     * Busca pagamento pela referência
-     */
-    public Payment findByReference(String ref) {
-        return findOne("SELECT * FROM payments WHERE reference=?", this::map, ref);
+    public Optional<Payment> findByReference(String reference) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            cq.select(root).where(cb.equal(root.get("reference"), reference));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Payment por referência: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<Payment> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate datePredicate = cb.like(root.get("date"), likePattern);
+            Predicate prefixPredicate = cb.like(root.get("prefix"), likePattern);
+            Predicate referencePredicate = cb.like(root.get("reference"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(descriptionPredicate, datePredicate, prefixPredicate, referencePredicate))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Payments: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Payment> filterByDate(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            cq.select(root)
+                    .where(cb.between(root.get("date"), from.toString(), to.toString()))
+                    .orderBy(cb.asc(root.get("date")), cb.asc(root.get("id")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Payments por data: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Payment> findByInvoiceId(Integer invoiceId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("invoiceId"), invoiceId))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Payments por invoiceId: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Payment> findByStatus(Payment.PaymentStatus status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("status"), status))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Payments por status: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Payment> findByPaymentMode(Payment.PaymentMode paymentMode) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Payment> cq = cb.createQuery(Payment.class);
+            Root<Payment> root = cq.from(Payment.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("paymentMode"), paymentMode))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Payments por modo de pagamento: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Lista pagamentos com condição customizada
+     * Calcula o total de pagamentos por período
      */
-    public List<Payment> list(String where) {
-        String sql = "SELECT * FROM payments " + (where != null ? where : "");
-        return executeQuery(sql, this::map);
-    }
+    public Double calculateTotalByPeriod(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Double> cq = cb.createQuery(Double.class);
+            Root<Payment> root = cq.from(Payment.class);
 
-    /**
-     * Filtra por texto (prefix, referência, data, descrição)
-     */
-    public List<Payment> filter(String txt) {
-        String like = "%" + txt + "%";
-        String sql = """
-            SELECT * FROM payments 
-            WHERE description LIKE ? OR `date` LIKE ? OR prefix LIKE ? OR reference LIKE ?
-        """;
-        return executeQuery(sql, this::map, like, like, like, like);
-    }
+            cq.select(cb.sum(root.get("total")))
+                    .where(cb.and(
+                            cb.between(root.get("date"), from.toString(), to.toString()),
+                            cb.equal(root.get("status"), Payment.PaymentStatus.SUCCESS)
+                    ));
 
-    /**
-     * Filtra pagamentos entre duas datas
-     */
-    public List<Payment> filterDate(LocalDate from, LocalDate to) {
-        String sql = """
-            SELECT * FROM payments 
-            WHERE DATE(`date`) BETWEEN ? AND ? 
-            ORDER BY `date` ASC, id ASC
-        """;
-        return executeQuery(sql, this::map, Date.valueOf(from), Date.valueOf(to));
-    }
+            Double total = session.createQuery(cq).getSingleResult();
+            return total != null ? total : 0.0;
 
-    // ==========================================================
-    // 🔹 Helpers seguros
-    // ==========================================================
-    private static String safe(String s) {
-        return (s == null) ? "" : s;
-    }
-
-    private static String safe(String s, String def) {
-        return (s == null || s.isEmpty()) ? def : s;
-    }
-
-    private static String safeEnum(Enum<?> e, Enum<?> def) {
-        return (e != null) ? e.name() : def.name();
-    }
-
-    private static BigDecimal safeBD(BigDecimal b) {
-        return (b == null) ? BigDecimal.ZERO : b;
-    }
-
-    private static Object nullable(String s) {
-        return (s == null || s.isEmpty()) ? null : s;
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total de pagamentos: " + e.getMessage());
+            return 0.0;
+        }
     }
 }
-
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-//import com.okutonda.okudpdv.data.entities.Clients;
-//import com.okutonda.okudpdv.data.entities.Payment;
-//import com.okutonda.okudpdv.data.entities.PaymentMode;
-//import com.okutonda.okudpdv.data.entities.PaymentStatus;
-//import com.okutonda.okudpdv.data.entities.User;
-//import java.sql.Connection;
-//import java.sql.PreparedStatement;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
-//import java.time.LocalDate;
-//import java.util.ArrayList;
-//import java.util.List;
-//import javax.swing.JOptionPane;
-//
-///**
-// *
-// * @author kenny
-// */
-//public class PaymentDao {
-//
-//    private final Connection conn;
-//    PreparedStatement pst = null;
-//    ResultSet rs = null;
-//
-//    public PaymentDao() {
-//        this.conn = ConnectionDatabase.getConnect();
-//    }
-//
-//    public PaymentDao(Connection externalConn) { // para transação
-//        this.conn = externalConn;
-//    }
-//
-//    public boolean add(Payment p, int orderId) {
-//        final String sql = """
-//        INSERT INTO payments
-//        (description,total,prefix,number,`date`,dateFinish,status,
-//         clientId,userId,order_id,order_type,mode,reference,currency)
-//        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-//    """;
-//
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            // 1) Campos básicos
-//            ps.setString(1, p.getDescription() != null ? p.getDescription() : "");
-//            ps.setBigDecimal(2, p.getTotal() != null ? p.getTotal() : java.math.BigDecimal.ZERO);
-//            ps.setString(3, p.getPrefix() != null ? p.getPrefix() : "");
-//            ps.setInt(4, p.getNumber());
-//            ps.setString(5, p.getDate()); // String ISO/datetime que já estás a usar
-//
-//            // 2) dateFinish pode ser nulo
-//            if (p.getDateFinish() != null && !p.getDateFinish().isEmpty()) {
-//                ps.setString(6, p.getDateFinish());
-//            } else {
-//                ps.setNull(6, java.sql.Types.TIMESTAMP);
-//            }
-//
-//            // 3) ENUMs no BD (guardar name() do enum em MAIÚSCULAS)
-//            ps.setString(7, p.getStatus() != null ? p.getStatus().name() : "SUCCESS");
-//
-//            // 4) relacionamentos / vínculo
-//            ps.setInt(8, (p.getClient() != null && p.getClient().getId() > 0) ? p.getClient().getId() : 0);
-//            ps.setInt(9, (p.getUser() != null && p.getUser().getId() > 0) ? p.getUser().getId() : 0);
-//            ps.setInt(10, orderId);
-//
-//            // 5) tipo do documento
-////            ps.setString(11, p.getInvoiceType() != null ? p.getInvoiceType() : "ORDER");
-//            ps.setString(11, "ORDER");
-//            // 6) modo de pagamento (ENUM)
-//            ps.setString(12, p.getPaymentMode() != null ? p.getPaymentMode().name() : "NUMERARIO");
-//
-//            // 7) extras
-//            ps.setString(13, p.getReference());
-//            ps.setString(14, p.getCurrency() != null ? p.getCurrency() : "AOA");
-//
-//            return ps.executeUpdate() == 1;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao salvar pagamento: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//
-//    public Boolean edit(Payment obj, int id) {
-//        String sql = "UPDATE payments SET dateFinish=?, status=?, reference=?, description=?, currency=? WHERE id=?";
-//        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
-//            pst.setString(1, obj.getDateFinish());
-//            pst.setString(2, obj.getStatus() != null ? obj.getStatus().name() : null); // enum -> STRING
-//            pst.setString(3, obj.getReference());
-//            pst.setString(4, obj.getDescription());
-//            pst.setString(5, obj.getCurrency());
-//            pst.setInt(6, id);
-//            return pst.executeUpdate() == 1;
-//        } catch (SQLException e) {
-//            System.out.println("Erro ao atualizar Payment: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//
-//    public boolean delete(int id) {
-//        String sql = "DELETE FROM payments WHERE id=?";
-//        try (PreparedStatement ptmt = conn.prepareStatement(sql)) {
-//            ptmt.setInt(1, id);
-//            return ptmt.executeUpdate() == 1;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao excluir payment: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//
-//    public List<Payment> filterDate(LocalDate from, LocalDate to) {
-//        List<Payment> list = new ArrayList<>();
-//        String sql
-//                = "SELECT * FROM payments "
-//                + "WHERE DATE(`date`) BETWEEN ? AND ? "
-//                + "ORDER BY `date` ASC, id ASC";
-//        try (PreparedStatement ptmt = this.conn.prepareStatement(sql)) {
-//            ptmt.setDate(1, java.sql.Date.valueOf(from));
-//            ptmt.setDate(2, java.sql.Date.valueOf(to));
-//            try (ResultSet rs = ptmt.executeQuery()) {
-//                while (rs.next()) {
-//                    Payment obj = formatObj(rs);
-//                    if (obj != null) {
-//                        list.add(obj);
-//                    }
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar payment por data: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-////    public List<Payment> filterDate(LocalDate from, LocalDate to) {
-////        List<Payment> list = new ArrayList<>();
-////        String sql
-////                = "SELECT * FROM payments "
-////                + "WHERE DATE(`date`) BETWEEN ? AND ? "
-////                + "ORDER BY `date` ASC, id ASC";
-////        try (PreparedStatement ptmt = this.conn.prepareStatement(sql)) {
-////            ptmt.setDate(1, java.sql.Date.valueOf(from));
-////            ptmt.setDate(2, java.sql.Date.valueOf(to));
-////            try (ResultSet rs = ptmt.executeQuery()) {
-////                while (rs.next()) {
-////                    Payment obj = formatObj(rs);
-////                    if (obj != null) {
-////                        list.add(obj);
-////                    }
-////                }
-////            }
-////        } catch (SQLException e) {
-////            JOptionPane.showMessageDialog(null, "Erro ao filtrar payment por data: " + e.getMessage());
-////        }
-////        return list;
-////    }
-//    public Payment getId(int id) {
-//        String sql = "SELECT * FROM payments WHERE id=?";
-//        try (PreparedStatement ptmt = conn.prepareStatement(sql)) {
-//            ptmt.setInt(1, id);
-//            try (ResultSet rs = ptmt.executeQuery()) {
-//                if (rs.next()) {
-//                    return formatObj(rs);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao consultar payment: " + e.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public Payment findByReference(String reference) {
-//        String sql = "SELECT * FROM payments WHERE reference=?";
-//        try (PreparedStatement ptmt = conn.prepareStatement(sql)) {
-//            ptmt.setString(1, reference);
-//            try (ResultSet rs = ptmt.executeQuery()) {
-//                if (rs.next()) {
-//                    return formatObj(rs);
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao consultar payment por referência: " + e.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public List<Payment> list(String where) {
-//        List<Payment> list = new ArrayList<>();
-//        String w = (where != null && !where.trim().isEmpty()) ? " " + where : "";
-//        String sql = "SELECT * FROM payments" + w;
-//        try (PreparedStatement ptmt = this.conn.prepareStatement(sql); ResultSet rs = ptmt.executeQuery()) {
-//            while (rs.next()) {
-//                list.add(formatObj(rs));
-//            }
-//            return list;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao listar payment: " + e.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    public List<Payment> filter(String txt) {
-//        List<Payment> list = new ArrayList<>();
-//        String sql = "SELECT * FROM payments WHERE description LIKE ? OR `date` LIKE ? OR prefix LIKE ? OR reference LIKE ?";
-//        try (PreparedStatement ptmt = this.conn.prepareStatement(sql)) {
-//            String like = "%" + txt + "%";
-//            ptmt.setString(1, like);
-//            ptmt.setString(2, like);
-//            ptmt.setString(3, like);
-//            ptmt.setString(4, like);
-//            try (ResultSet rs = ptmt.executeQuery()) {
-//                while (rs.next()) {
-//                    list.add(formatObj(rs));
-//                }
-//            }
-//            return list;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao filtrar payment: " + e.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    public Payment formatObj(ResultSet rs) {
-//        try {
-//            Payment obj = new Payment();
-//
-//            // relacionamentos (usa teus DAOs atuais)
-//            User user = new UserDao().findById(rs.getInt("userId"));
-//            Clients client = new ClientDao().findById(rs.getInt("clientId"));
-//
-//            // ENUMs
-//            String modeStr = rs.getString("mode");     // coluna VARCHAR("NUMERARIO", ...)
-//            String statusStr = rs.getString("status"); // coluna VARCHAR("SUCCESS", ...)
-//
-//            obj.setId(rs.getInt("id"));
-//            obj.setDescription(rs.getString("description"));
-//            obj.setTotal(rs.getBigDecimal("total"));          // BigDecimal
-//            obj.setPrefix(rs.getString("prefix"));
-//            obj.setNumber(rs.getInt("number"));
-//            obj.setDate(rs.getString("date"));
-//            obj.setDateFinish(rs.getString("dateFinish"));
-//            obj.setInvoiceId(rs.getInt("order_id"));
-//            obj.setReference(rs.getString("reference"));
-//            obj.setCurrency(rs.getString("currency"));
-//
-//            if (statusStr != null) {
-//                obj.setStatus(PaymentStatus.valueOf(statusStr));
-//            }
-//            if (modeStr != null) {
-//                obj.setPaymentMode(PaymentMode.valueOf(modeStr));
-//            }
-//
-//            obj.setUser(user);
-//            obj.setClient(client);
-//
-//            return obj;
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Erro ao formatar Payment: " + e.getMessage());
-//            return null;
-//        }
-//    }
-//}

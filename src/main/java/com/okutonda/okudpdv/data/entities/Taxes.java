@@ -1,45 +1,45 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
-/**
- *
- * @author kenny
- */
+@Entity
+@Table(name = "taxes")
 public class Taxes {
 
-    private int id;
-    private String name;
-    private BigDecimal percetage;
-    private String code;
-    private int isDefault;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    public int getId() {
+    @Column(name = "code", length = 20)
+    private String code;
+
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "percentage", precision = 5, scale = 2)
+    private BigDecimal percentage;
+
+    @Column(name = "isdefault")
+    private Integer isDefault = 0;
+
+    // Construtores
+    public Taxes() {
+    }
+
+    public Taxes(String name, String code, BigDecimal percentage) {
+        this.name = name;
+        this.code = code;
+        this.percentage = percentage;
+    }
+
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPercetage() {
-        return percetage;
-    }
-
-    public void setPercetage(BigDecimal percetage) {
-        this.percetage = percetage;
     }
 
     public String getCode() {
@@ -50,16 +50,41 @@ public class Taxes {
         this.code = code;
     }
 
-    public int getIsDefault() {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public BigDecimal getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(BigDecimal percentage) {
+        this.percentage = percentage;
+    }
+
+    public Integer getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(int isDefault) {
+    public void setIsDefault(Integer isDefault) {
         this.isDefault = isDefault;
+    }
+
+    // Método de conveniência para compatibilidade
+    public BigDecimal getPercetage() {
+        return percentage;
+    }
+
+    public void setPercetage(BigDecimal percentage) {
+        this.percentage = percentage;
     }
 
     @Override
     public String toString() {
-        return this.getName() + ": " + this.getPercetage();
+        return "Taxes{id=" + id + ", name='" + name + "', percentage=" + percentage + "}";
     }
 }

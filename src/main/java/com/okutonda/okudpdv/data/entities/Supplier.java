@@ -1,34 +1,61 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
-/**
- *
- * @author kenny
- */
-public class Supplier {
-    
-    private int id;
-    private String name;
-    private String email;
-    private String nif;
-    private String address;
-    private String phone;
-    private Countries country;
-    private String city;
-    private String zipCode;
-    private String state;
-    private int status;
-    private int groupId;
-    private int isDefault;
+import jakarta.persistence.*;
 
-    public int getId() {
+@Entity
+@Table(name = "suppliers")
+public class Supplier {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "company", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "nif", length = 25)
+    private String nif;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name = "address", columnDefinition = "TEXT")
+    private String address;
+
+    @Column(name = "city", length = 50)
+    private String city;
+
+    @Column(name = "zip_code", length = 20)
+    private String zipCode;
+
+    @Column(name = "group_id")
+    private Integer groupId;
+
+    @Column(name = "status")
+    private Integer status = 1;
+
+    @Column(name = "isdefault")
+    private Integer isDefault = 0;
+
+    // Construtores
+    public Supplier() {
+    }
+
+    public Supplier(String name, String nif, String email) {
+        this.name = name;
+        this.nif = nif;
+        this.email = email;
+    }
+
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -40,28 +67,12 @@ public class Supplier {
         this.name = name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getNif() {
         return nif;
     }
 
     public void setNif(String nif) {
         this.nif = nif;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getPhone() {
@@ -72,12 +83,20 @@ public class Supplier {
         this.phone = phone;
     }
 
-    public Countries getCountry() {
-        return country;
+    public String getEmail() {
+        return email;
     }
 
-    public void setCountry(Countries country) {
-        this.country = country;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getCity() {
@@ -96,42 +115,32 @@ public class Supplier {
         this.zipCode = zipCode;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public int getGroupId() {
+    public Integer getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(int groupId) {
+    public void setGroupId(Integer groupId) {
         this.groupId = groupId;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public int getIsDefault() {
+    public Integer getIsDefault() {
         return isDefault;
     }
 
-    public void setIsDefault(int isDefault) {
+    public void setIsDefault(Integer isDefault) {
         this.isDefault = isDefault;
     }
 
     @Override
     public String toString() {
-        return this.getName();
+        return "Supplier{id=" + id + ", name='" + name + "', nif='" + nif + "'}";
     }
-
-    
 }

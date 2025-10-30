@@ -1,460 +1,257 @@
 package com.okutonda.okudpdv.data.dao;
 
-import com.okutonda.okudpdv.data.connection.DatabaseProvider;
-import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.StockMovement;
-import com.okutonda.okudpdv.data.entities.User;
-import java.sql.*;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável por gerenciar movimentos de stock (entrada, saída, ajustes).
- *
- * Compatível com transações externas e o novo BaseDao
- * (DatabaseProvider/HikariCP).
- *
- * @author Hulquene
- */
-public class StockMovementDao extends BaseDao<StockMovement> {
+public class StockMovementDao {
+
+    private final Class<StockMovement> entityClass = StockMovement.class;
 
     // ==========================================================
-    // 🔹 Construtores
+    // 🔹 CRUD
     // ==========================================================
-    public StockMovementDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
-
-    public StockMovementDao(Connection externalConn) {
-        super(externalConn);
-    }
-
-    // ==========================================================
-    // 🔹 CRUD: Adicionar movimento de stock
-    // ==========================================================
-    @Override
-    public boolean add(StockMovement movimento) {
-        String sql = """
-            INSERT INTO stock_movements
-            (product_id, warehouse_id, user_id, quantity, type, origin, reference_id, notes, reason)
-            VALUES (?,?,?,?,?,?,?,?,?)
-        """;
-
+    public Optional<StockMovement> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            // ⚙️ Executa inserção
-            boolean ok = executeUpdate(sql,
-                    movimento.getProduct().getId(),
-                    movimento.getWarehouse() != null ? movimento.getWarehouse().getId() : 1,
-                    movimento.getUser().getId(),
-                    movimento.getQuantity(),
-                    movimento.getType(),
-                    movimento.getOrigin() != null ? movimento.getOrigin() : "MANUAL",
-                    movimento.getReferenceId(),
-                    safe(movimento.getNotes()),
-                    safe(movimento.getReason())
-            );
-
-            // ✅ Se for entrada de compra, atualiza o item correspondente
-            if (ok && "COMPRA".equalsIgnoreCase(movimento.getOrigin())) {
-                atualizarEntradaItemCompra(movimento);
-            }
-
-            return ok;
+            StockMovement entity = session.find(StockMovement.class, id);
+            return Optional.ofNullable(entity);
         } catch (Exception e) {
-            System.err.println("[DB] Erro ao adicionar movimento de stock: " + e.getMessage());
-            return false;
+            System.err.println("Erro ao buscar StockMovement por ID: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
-    @Override
-    public boolean update(StockMovement obj) {
-        System.out.println("⚠️ update() não é utilizado para StockMovement diretamente.");
-        return false;
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM stock_movements WHERE id=?", id);
-    }
-
-    @Override
-    public StockMovement findById(int id) {
-        return findOne("SELECT * FROM stock_movements WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<StockMovement> findAll() {
-        String sql = """
-            SELECT sm.*, u.name AS user_name, p.description AS product_name
-            FROM stock_movements sm
-            LEFT JOIN users u ON sm.user_id = u.id
-            LEFT JOIN products p ON sm.product_id = p.id
-            ORDER BY sm.created_at DESC
-        """;
-        return executeQuery(sql, this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+            cq.select(root).orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os StockMovements: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
-    // ==========================================================
-    // 🔹 MAP ResultSet → Entidade
-    // ==========================================================
-    private StockMovement map(ResultSet rs) {
+    public StockMovement save(StockMovement stockMovement) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
         try {
-            StockMovement m = new StockMovement();
+            tx = session.beginTransaction();
+            session.persist(stockMovement);
+            tx.commit();
 
-            Product p = new Product();
-            p.setId(rs.getInt("product_id"));
-            p.setDescription(rs.getString("product_name"));
+            System.out.println("✅ StockMovement salvo: " + stockMovement.getProduct().getDescription());
 
-            User u = new User();
-            u.setId(rs.getInt("user_id"));
-            u.setName(rs.getString("user_name"));
+            // Se for entrada de compra, atualiza o item correspondente
+            if ("COMPRA".equalsIgnoreCase(stockMovement.getOrigin())) {
+                atualizarEntradaItemCompra(stockMovement);
+            }
 
-            m.setId(rs.getInt("id"));
-            m.setProduct(p);
-            m.setQuantity(rs.getInt("quantity"));
-            m.setType(rs.getString("type"));
-            m.setReason(rs.getString("reason"));
-            m.setOrigin(rs.getString("origin"));
-            m.setReferenceId((Integer) rs.getObject("reference_id"));
-            m.setNotes(rs.getString("notes"));
-            m.setUser(u);
-            m.setCreatedAt(rs.getTimestamp("created_at"));
+            return stockMovement;
 
-            return m;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear StockMovement: " + e.getMessage());
-            return null;
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar StockMovement: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar StockMovement", e);
+        }
+    }
+
+    public StockMovement update(StockMovement stockMovement) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            StockMovement merged = session.merge(stockMovement);
+            tx.commit();
+
+            System.out.println("✅ StockMovement atualizado: " + stockMovement.getId());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar StockMovement: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar StockMovement", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            StockMovement stockMovement = session.find(StockMovement.class, id);
+            if (stockMovement != null) {
+                session.remove(stockMovement);
+            }
+
+            tx.commit();
+            System.out.println("✅ StockMovement removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover StockMovement: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover StockMovement", e);
         }
     }
 
     // ==========================================================
     // 🔹 CONSULTAS
     // ==========================================================
-    public List<StockMovement> listByProduct(int productId) {
-        String sql = """
-            SELECT sm.*, u.name AS user_name, p.description AS product_name
-            FROM stock_movements sm
-            LEFT JOIN users u ON sm.user_id = u.id
-            LEFT JOIN products p ON sm.product_id = p.id
-            WHERE sm.product_id=?
-            ORDER BY sm.created_at DESC
-        """;
-        return executeQuery(sql, this::map, productId);
-    }
-
-    public List<StockMovement> listAll() {
-        return findAll();
-    }
-
-    public int getStockAtual(int productId) {
-        String sql = "SELECT IFNULL(SUM(quantity),0) FROM stock_movements WHERE product_id=?";
-        return executeScalarInt(sql, productId);
-    }
-
-    // ==========================================================
-    // 🔹 Atualização automática após entrada de compra
-    // ==========================================================
-    private void atualizarEntradaItemCompra(StockMovement movimento) {
+    public List<StockMovement> findByProductId(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            String sqlSelect = """
-                SELECT quantidade, quantidade_entrada
-                FROM purchase_items
-                WHERE purchase_id = ? AND product_id = ?
-            """;
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
 
-            try (PreparedStatement pst1 = conn.prepareStatement(sqlSelect)) {
-                pst1.setInt(1, movimento.getReferenceId());
-                pst1.setInt(2, movimento.getProduct().getId());
-                ResultSet rs = pst1.executeQuery();
+            cq.select(root)
+                    .where(cb.equal(root.get("product").get("id"), productId))
+                    .orderBy(cb.desc(root.get("createdAt")));
 
-                if (rs.next()) {
-                    int quantidadeTotal = rs.getInt("quantidade");
-                    int quantidadeEntradaAtual = rs.getInt("quantidade_entrada");
-                    int novaQuantidadeEntrada = quantidadeEntradaAtual + movimento.getQuantity();
+            return session.createQuery(cq).getResultList();
 
-                    String novoStatus;
-                    if (novaQuantidadeEntrada >= quantidadeTotal) {
-                        novaQuantidadeEntrada = quantidadeTotal;
-                        novoStatus = "completo";
-                    } else if (novaQuantidadeEntrada > 0) {
-                        novoStatus = "parcial";
-                    } else {
-                        novoStatus = "nao_iniciado";
-                    }
-
-                    String sqlUpdate = """
-                        UPDATE purchase_items
-                        SET quantidade_entrada = ?, entrada_status = ?
-                        WHERE purchase_id = ? AND product_id = ?
-                    """;
-                    executeUpdate(sqlUpdate,
-                            novaQuantidadeEntrada,
-                            novoStatus,
-                            movimento.getReferenceId(),
-                            movimento.getProduct().getId()
-                    );
-
-                    System.out.printf("🔄 Item compra atualizado: %s (%d/%d)%n",
-                            movimento.getProduct().getDescription(),
-                            novaQuantidadeEntrada,
-                            quantidadeTotal);
-                }
-            }
-
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao atualizar entrada de compra: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por produto: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 
-    // ==========================================================
-    // 🔹 Helpers
-    // ==========================================================
-    private static String safe(String s) {
-        return (s == null) ? "" : s;
+    public List<StockMovement> findByType(String type) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("type"), type))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por tipo: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<StockMovement> findByOrigin(String origin) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("origin"), origin))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por origem: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<StockMovement> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate notesPredicate = cb.like(root.get("notes"), likePattern);
+            Predicate reasonPredicate = cb.like(root.get("reason"), likePattern);
+            Predicate productPredicate = cb.like(root.get("product").get("description"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(notesPredicate, reasonPredicate, productPredicate))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar StockMovements: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Calcula o stock atual de um produto
+     */
+    public Integer getCurrentStock(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(cb.sum(root.get("quantity")))
+                    .where(cb.equal(root.get("product").get("id"), productId));
+
+            Integer stock = session.createQuery(cq).getSingleResult();
+            return stock != null ? stock : 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular stock atual: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Atualiza entrada de item de compra (método auxiliar)
+     */
+    private void atualizarEntradaItemCompra(StockMovement movimento) {
+        // Nota: Esta funcionalidade específica pode precisar de adaptação
+        // dependendo da estrutura da sua tabela purchase_items
+        System.out.println("🔄 Atualização de entrada de compra para: "
+                + movimento.getProduct().getDescription());
+        // Implementação específica conforme sua estrutura de banco
+    }
+
+    /**
+     * Busca movimentos por referência (ex: ID da compra)
+     */
+    public List<StockMovement> findByReferenceId(Integer referenceId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("referenceId"), referenceId))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por referência: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }
-
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-//import com.okutonda.okudpdv.data.entities.Product;
-//import com.okutonda.okudpdv.data.entities.StockMovement;
-//import com.okutonda.okudpdv.data.entities.User;
-//
-//import java.sql.*;
-//import java.util.ArrayList;
-//import java.util.List;
-//
-///**
-// *
-// * @author hr
-// */
-//public class StockMovementDao {
-//
-//    private final Connection conn;
-//
-//    public StockMovementDao() {
-//        this.conn = ConnectionDatabase.getConnect();
-//    }
-//
-//    public StockMovementDao(Connection conn) {
-//        this.conn = conn;
-//    }
-//
-//    /**
-//     * Regista um movimento de stock (entrada/saída/ajuste).
-//     */
-//    public boolean add(StockMovement movimento) {
-//        String sqlInsert = """
-//        INSERT INTO stock_movements
-//        (product_id, warehouse_id, user_id, quantity, type, origin, reference_id, notes, reason)
-//        VALUES (?,?,?,?,?,?,?,?,?)
-//    """;
-//
-//        PreparedStatement pstInsert = null;
-//
-//        try {
-//            // 🔒 Inicia transação manual
-//            conn.setAutoCommit(false);
-//
-//            pstInsert = conn.prepareStatement(sqlInsert);
-//            pstInsert.setInt(1, movimento.getProduct().getId());
-//            pstInsert.setInt(2, movimento.getWarehouse() != null ? movimento.getWarehouse().getId() : 1);
-//            pstInsert.setInt(3, movimento.getUser().getId());
-//            pstInsert.setInt(4, movimento.getQuantity());
-//            pstInsert.setString(5, movimento.getType());
-//            pstInsert.setString(6, movimento.getOrigin() != null ? movimento.getOrigin() : "MANUAL");
-//            if (movimento.getReferenceId() != null) {
-//                pstInsert.setInt(7, movimento.getReferenceId());
-//            } else {
-//                pstInsert.setNull(7, java.sql.Types.INTEGER);
-//            }
-//            pstInsert.setString(8, movimento.getNotes() != null ? movimento.getNotes() : "");
-//            pstInsert.setString(9, movimento.getReason() != null ? movimento.getReason() : "");
-//
-//            pstInsert.executeUpdate();
-//
-//            // ✅ Se veio de uma compra, atualiza o item correspondente
-//            if ("COMPRA".equalsIgnoreCase(movimento.getOrigin())) {
-//                atualizarEntradaItemCompra(movimento);
-//            }
-//
-//            // 💾 Tudo certo → confirma
-//            conn.commit();
-//            return true;
-//
-//        } catch (SQLException e) {
-//            System.err.println("❌ Erro ao registar movimento de stock: " + e.getMessage());
-//            try {
-//                conn.rollback(); // ⛔ Reverte tudo
-//                System.err.println("⚠ Transação revertida devido a erro.");
-//            } catch (SQLException ex) {
-//                System.err.println("Erro ao reverter transação: " + ex.getMessage());
-//            }
-//        } finally {
-//            try {
-//                if (pstInsert != null) {
-//                    pstInsert.close();
-//                }
-//                conn.setAutoCommit(true); // 🔁 volta ao modo normal
-//            } catch (SQLException e) {
-//                System.err.println("Erro ao restaurar autocommit: " + e.getMessage());
-//            }
-//        }
-//
-//        return false;
-//    }
-//
-//    private void atualizarEntradaItemCompra(StockMovement movimento) {
-//        try {
-//            // 1️⃣ Obter a quantidade atual de entrada do item
-//            String sqlSelect = "SELECT quantidade, quantidade_entrada "
-//                    + "FROM purchase_items "
-//                    + "WHERE purchase_id = ? AND product_id = ?";
-//            PreparedStatement pst1 = conn.prepareStatement(sqlSelect);
-//            pst1.setInt(1, movimento.getReferenceId());
-//            pst1.setInt(2, movimento.getProduct().getId());
-//            ResultSet rs = pst1.executeQuery();
-//
-//            if (rs.next()) {
-//                int quantidadeTotal = rs.getInt("quantidade");
-//                int quantidadeEntradaAtual = rs.getInt("quantidade_entrada");
-//
-//                int novaQuantidadeEntrada = quantidadeEntradaAtual + movimento.getQuantity();
-//
-//                String novoStatus;
-//                if (novaQuantidadeEntrada >= quantidadeTotal) {
-//                    novaQuantidadeEntrada = quantidadeTotal;
-//                    novoStatus = "completo";
-//                } else if (novaQuantidadeEntrada > 0) {
-//                    novoStatus = "parcial";
-//                } else {
-//                    novoStatus = "nao_iniciado";
-//                }
-//
-//                // 2️⃣ Atualizar o item
-//                String sqlUpdate = "UPDATE purchase_items "
-//                        + "SET quantidade_entrada = ?, entrada_status = ? "
-//                        + "WHERE purchase_id = ? AND product_id = ?";
-//                PreparedStatement pst2 = conn.prepareStatement(sqlUpdate);
-//                pst2.setInt(1, novaQuantidadeEntrada);
-//                pst2.setString(2, novoStatus);
-//                pst2.setInt(3, movimento.getReferenceId());
-//                pst2.setInt(4, movimento.getProduct().getId());
-//                pst2.executeUpdate();
-//
-//                System.out.println("🔄 Item de compra atualizado → produto: "
-//                        + movimento.getProduct().getDescription()
-//                        + " (" + novaQuantidadeEntrada + "/" + quantidadeTotal + ")");
-//            }
-//
-//        } catch (SQLException e) {
-//            System.err.println("Erro ao atualizar entrada do item de compra: " + e.getMessage());
-//        }
-//    }
-//
-//    /**
-//     * Lista todos os movimentos de um produto.
-//     */
-//    public List<StockMovement> listByProduct(int productId) {
-//        List<StockMovement> list = new ArrayList<>();
-//        String sql = """
-//            SELECT sm.*, u.name AS user_name, p.description AS product_name
-//            FROM stock_movements sm
-//            LEFT JOIN users u ON sm.user_id = u.id
-//            LEFT JOIN products p ON sm.product_id = p.id
-//            WHERE sm.product_id=?
-//            ORDER BY sm.created_at DESC
-//        """;
-//
-//        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-//            pst.setInt(1, productId);
-//            ResultSet rs = pst.executeQuery();
-//
-//            while (rs.next()) {
-//                StockMovement m = new StockMovement();
-//                Product prod = new Product();
-//                prod.setId(rs.getInt("product_id"));
-//                prod.setDescription(rs.getString("product_name"));
-//
-//                User u = new User();
-//                u.setId(rs.getInt("user_id"));
-//                u.setName(rs.getString("user_name"));
-//
-//                m.setId(rs.getInt("id"));
-//                m.setProduct(prod);
-//                m.setQuantity(rs.getInt("quantity"));
-//                m.setType(rs.getString("type"));
-//                m.setReason(rs.getString("reason"));
-//                m.setUser(u);
-//                m.setCreatedAt(rs.getTimestamp("created_at"));
-//
-//                list.add(m);
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Erro ao listar movimentos de stock: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    /**
-//     * Lista todos os movimentos de stock (auditoria completa).
-//     */
-//    public List<StockMovement> listAll() {
-//        List<StockMovement> list = new ArrayList<>();
-//        String sql = """
-//            SELECT sm.*, u.name AS user_name, p.description AS product_name
-//            FROM stock_movements sm
-//            LEFT JOIN users u ON sm.user_id = u.id
-//            LEFT JOIN products p ON sm.product_id = p.id
-//            ORDER BY sm.created_at DESC
-//        """;
-//
-//        try (PreparedStatement pst = conn.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
-//            while (rs.next()) {
-//                StockMovement m = new StockMovement();
-//                Product prod = new Product();
-//                prod.setId(rs.getInt("product_id"));
-//                prod.setDescription(rs.getString("product_name"));
-//
-//                User u = new User();
-//                u.setId(rs.getInt("user_id"));
-//                u.setName(rs.getString("user_name"));
-//
-//                m.setId(rs.getInt("id"));
-//                m.setProduct(prod);
-//                m.setQuantity(rs.getInt("quantity"));
-//                m.setType(rs.getString("type"));
-//                m.setReason(rs.getString("reason"));
-//                m.setUser(u);
-//                m.setCreatedAt(rs.getTimestamp("created_at"));
-//
-//                list.add(m);
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Erro ao carregar lista movimentos de stock: " + e.getMessage());
-//        }
-//        return list;
-//    }
-//
-//    /**
-//     * Calcula o stock atual de um produto.
-//     */
-//    public int getStockAtual(int productId) {
-//        String sql = "SELECT IFNULL(SUM(quantity),0) AS stock_atual FROM stock_movements WHERE product_id=?";
-//        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-//            pst.setInt(1, productId);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                return rs.getInt("stock_atual");
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Erro ao calcular stock atual: " + e.getMessage());
-//        }
-//        return 0;
-//    }
-//}

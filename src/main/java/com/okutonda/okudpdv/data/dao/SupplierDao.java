@@ -1,143 +1,236 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Supplier;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão de Fornecedores (Suppliers).
- *
- * Compatível com BaseDao + HikariCP. Fornece CRUD completo e consultas
- * personalizadas (por NIF, nome, etc).
- *
- * @author Hulquene
- */
-public class SupplierDao extends BaseDao<Supplier> {
+public class SupplierDao {
 
-    public SupplierDao() {
-        super(); // Usa o pool de conexões via DatabaseProvider
-    }
-
-    public SupplierDao(java.sql.Connection externalConn) {
-        super(externalConn); // Suporte a transações externas
-    }
+    private final Class<Supplier> entityClass = Supplier.class;
 
     // ==========================================================
-    // 🔹 Mapeamento ResultSet → Entidade
+    // 🔹 CRUD Básico
     // ==========================================================
-    private Supplier map(ResultSet rs) {
+    
+    public Optional<Supplier> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
         try {
-            Supplier s = new Supplier();
-            s.setId(rs.getInt("id"));
-            s.setName(rs.getString("company"));
-            s.setNif(rs.getString("nif"));
-            s.setPhone(rs.getString("phone"));
-            s.setEmail(rs.getString("email"));
-            s.setAddress(rs.getString("address"));
-            s.setCity(rs.getString("city"));
-            s.setZipCode(rs.getString("zip_code"));
-            s.setGroupId(rs.getInt("group_id"));
-            s.setStatus(rs.getInt("status"));
-            s.setIsDefault(rs.getInt("isdefault"));
-            return s;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear Supplier: " + e.getMessage());
-            return null;
+            Supplier entity = session.find(Supplier.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Supplier por ID: " + e.getMessage());
+            return Optional.empty();
         }
     }
 
-    // ==========================================================
-    // 🔹 CRUD
-    // ==========================================================
-    @Override
-    public boolean add(Supplier s) {
-        String sql = """
-            INSERT INTO suppliers (company, nif, phone, email, address, city, zip_code, group_id, status, isdefault)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
-        return executeUpdate(sql,
-                s.getName(),
-                s.getNif(),
-                s.getPhone(),
-                s.getEmail(),
-                s.getAddress(),
-                s.getCity(),
-                s.getZipCode(),
-                s.getGroupId(),
-                s.getStatus(),
-                s.getIsDefault());
-    }
-
-    @Override
-    public boolean update(Supplier s) {
-        String sql = """
-            UPDATE suppliers
-               SET company=?, nif=?, phone=?, email=?, address=?, city=?, zip_code=?, group_id=?, status=?, isdefault=?
-             WHERE id=?
-        """;
-        return executeUpdate(sql,
-                s.getName(),
-                s.getNif(),
-                s.getPhone(),
-                s.getEmail(),
-                s.getAddress(),
-                s.getCity(),
-                s.getZipCode(),
-                s.getGroupId(),
-                s.getStatus(),
-                s.getIsDefault(),
-                s.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM suppliers WHERE id=?", id);
-    }
-
-    @Override
-    public Supplier findById(int id) {
-        String sql = "SELECT * FROM suppliers WHERE id=?";
-        return findOne(sql, this::map, id);
-    }
-
-    @Override
     public List<Supplier> findAll() {
-        String sql = "SELECT * FROM suppliers ORDER BY company ASC";
-        return executeQuery(sql, this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            cq.select(root).orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Suppliers: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Supplier save(Supplier supplier) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(supplier);
+            tx.commit();
+            
+            System.out.println("✅ Supplier salvo: " + supplier.getName());
+            return supplier;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Supplier: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Supplier", e);
+        }
+    }
+
+    public Supplier update(Supplier supplier) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Supplier merged = session.merge(supplier);
+            tx.commit();
+            
+            System.out.println("✅ Supplier atualizado: " + supplier.getName());
+            return merged;
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Supplier: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Supplier", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            
+            Supplier supplier = session.find(Supplier.class, id);
+            if (supplier != null) {
+                session.remove(supplier);
+            }
+            
+            tx.commit();
+            System.out.println("✅ Supplier removido ID: " + id);
+            
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Supplier: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Supplier", e);
+        }
     }
 
     // ==========================================================
     // 🔹 Consultas adicionais
     // ==========================================================
-    public Supplier findByName(String name) {
-        String sql = "SELECT * FROM suppliers WHERE company = ?";
-        return findOne(sql, this::map, name);
+    
+    public Optional<Supplier> findByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            cq.select(root).where(cb.equal(root.get("name"), name));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Supplier por nome: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    public Supplier findByNif(String nif) {
-        String sql = "SELECT * FROM suppliers WHERE nif = ?";
-        return findOne(sql, this::map, nif);
+    public Optional<Supplier> findByNif(String nif) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            cq.select(root).where(cb.equal(root.get("nif"), nif));
+            
+            return session.createQuery(cq).uniqueResultOptional();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Supplier por NIF: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
     public List<Supplier> filter(String text) {
-        String like = "%" + text + "%";
-        String sql = """
-            SELECT * FROM suppliers
-             WHERE company LIKE ? OR nif LIKE ? OR city LIKE ? OR email LIKE ?
-          ORDER BY company ASC
-        """;
-        return executeQuery(sql, this::map, like, like, like, like);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            String likePattern = "%" + text + "%";
+            
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate nifPredicate = cb.like(root.get("nif"), likePattern);
+            Predicate cityPredicate = cb.like(root.get("city"), likePattern);
+            Predicate emailPredicate = cb.like(root.get("email"), likePattern);
+            
+            cq.select(root)
+              .where(cb.or(namePredicate, nifPredicate, cityPredicate, emailPredicate))
+              .orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Suppliers: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     public boolean existsByNif(String nif) {
-        String sql = "SELECT COUNT(*) FROM suppliers WHERE nif = ?";
-        int count = executeScalarInt(sql, nif);
-        return count > 0;
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            cq.select(cb.count(root))
+              .where(cb.equal(root.get("nif"), nif));
+            
+            Long count = session.createQuery(cq).getSingleResult();
+            return count > 0;
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar NIF: " + e.getMessage());
+            return false;
+        }
     }
 
     public List<Supplier> findActive() {
-        String sql = "SELECT * FROM suppliers WHERE status = 1 ORDER BY company ASC";
-        return executeQuery(sql, this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            cq.select(root)
+              .where(cb.equal(root.get("status"), 1))
+              .orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Suppliers ativos: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
+     * Busca suppliers por grupo
+     */
+    public List<Supplier> findByGroup(Integer groupId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Supplier> cq = cb.createQuery(Supplier.class);
+            Root<Supplier> root = cq.from(Supplier.class);
+            
+            cq.select(root)
+              .where(cb.equal(root.get("groupId"), groupId))
+              .orderBy(cb.asc(root.get("name")));
+            
+            return session.createQuery(cq).getResultList();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Suppliers por grupo: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }

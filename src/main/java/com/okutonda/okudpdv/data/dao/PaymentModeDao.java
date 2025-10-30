@@ -1,120 +1,250 @@
 package com.okutonda.okudpdv.data.dao;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.PaymentModes;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-/**
- * DAO responsável pela gestão dos modos de pagamento.
- *
- * Segue o padrão BaseDao<PaymentModes> e usa o DatabaseProvider.
- *
- * @author …
- */
-public class PaymentModeDao extends BaseDao<PaymentModes> {
-    // ✅ Construtor padrão (usa conexão do pool automaticamente)
+public class PaymentModeDao {
 
-    public PaymentModeDao() {
-        // não precisa chamar super(), ele já existe por padrão
-    }
-
-    // ✅ Construtor alternativo (usa conexão externa — transação)
-    public PaymentModeDao(java.sql.Connection externalConn) {
-        super(externalConn);
-    }
-
-    // ==========================================================
-    // 🔹 Mapeamento SQL → Objeto
-    // ==========================================================
-    private PaymentModes map(ResultSet rs) {
-        try {
-            PaymentModes obj = new PaymentModes();
-            obj.setId(rs.getInt("id"));
-            obj.setName(rs.getString("name"));
-            obj.setDescription(rs.getString("description"));
-            obj.setCode(rs.getString("code"));
-            obj.setStatus(rs.getInt("status"));
-            obj.setIsDefault(rs.getInt("isDefault"));
-            return obj;
-        } catch (SQLException e) {
-            System.err.println("[DB] Erro ao mapear PaymentModes: " + e.getMessage());
-            return null;
-        }
-    }
+    private final Class<PaymentModes> entityClass = PaymentModes.class;
 
     // ==========================================================
     // 🔹 CRUD
     // ==========================================================
-    @Override
-    public boolean add(PaymentModes obj) {
-        String sql = """
-            INSERT INTO payment_modes (name, description, code, status, isDefault)
-            VALUES (?, ?, ?, ?, ?)
-        """;
-        return executeUpdate(sql, obj.getName(), obj.getDescription(), obj.getCode(),
-                obj.getStatus(), obj.getIsDefault());
+    public Optional<PaymentModes> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            PaymentModes entity = session.find(PaymentModes.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar PaymentModes por ID: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    @Override
-    public boolean update(PaymentModes obj) {
-        String sql = """
-            UPDATE payment_modes
-            SET name=?, description=?, code=?, status=?, isDefault=?
-            WHERE id=?
-        """;
-        return executeUpdate(sql, obj.getName(), obj.getDescription(),
-                obj.getCode(), obj.getStatus(), obj.getIsDefault(), obj.getId());
-    }
-
-    @Override
-    public boolean delete(int id) {
-        return executeUpdate("DELETE FROM payment_modes WHERE id=?", id);
-    }
-
-    @Override
-    public PaymentModes findById(int id) {
-        return findOne("SELECT * FROM payment_modes WHERE id=?", this::map, id);
-    }
-
-    @Override
     public List<PaymentModes> findAll() {
-        return executeQuery("SELECT * FROM payment_modes", this::map);
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+            cq.select(root);
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os PaymentModes: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public PaymentModes save(PaymentModes paymentMode) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(paymentMode);
+            tx.commit();
+
+            System.out.println("✅ PaymentMode salvo: " + paymentMode.getName());
+            return paymentMode;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar PaymentMode: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar PaymentMode", e);
+        }
+    }
+
+    public PaymentModes update(PaymentModes paymentMode) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            PaymentModes merged = session.merge(paymentMode);
+            tx.commit();
+
+            System.out.println("✅ PaymentMode atualizado: " + paymentMode.getName());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar PaymentMode: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar PaymentMode", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            PaymentModes paymentMode = session.find(PaymentModes.class, id);
+            if (paymentMode != null) {
+                session.remove(paymentMode);
+            }
+
+            tx.commit();
+            System.out.println("✅ PaymentMode removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover PaymentMode: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover PaymentMode", e);
+        }
     }
 
     // ==========================================================
     // 🔹 MÉTODOS ESPECÍFICOS
     // ==========================================================
-    /**
-     * Busca modo de pagamento pelo nome
-     */
-    public PaymentModes findByName(String name) {
-        return findOne("SELECT * FROM payment_modes WHERE name=?", this::map, name);
+    public Optional<PaymentModes> findByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+
+            cq.select(root).where(cb.equal(root.get("name"), name));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar PaymentMode por nome: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<PaymentModes> findByCode(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+
+            cq.select(root).where(cb.equal(root.get("code"), code));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar PaymentMode por código: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<PaymentModes> findDefault() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+
+            cq.select(root).where(cb.equal(root.get("isDefault"), 1));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar PaymentMode padrão: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<PaymentModes> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+
+            cq.select(root).where(cb.or(namePredicate, codePredicate, descriptionPredicate));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar PaymentModes: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<PaymentModes> findActive() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<PaymentModes> cq = cb.createQuery(PaymentModes.class);
+            Root<PaymentModes> root = cq.from(PaymentModes.class);
+
+            cq.select(root).where(cb.equal(root.get("status"), 1));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar PaymentModes ativos: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Busca modo de pagamento pelo código
+     * Define um modo de pagamento como padrão e remove o padrão anterior
      */
-    public PaymentModes findByCode(String code) {
-        return findOne("SELECT * FROM payment_modes WHERE code=?", this::map, code);
+    public boolean setDefaultPaymentMode(Integer paymentModeId) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // Remove padrão atual
+            session.createMutationQuery("UPDATE PaymentModes SET isDefault = 0 WHERE isDefault = 1")
+                    .executeUpdate();
+
+            // Define novo padrão
+            session.createMutationQuery("UPDATE PaymentModes SET isDefault = 1 WHERE id = :id")
+                    .setParameter("id", paymentModeId)
+                    .executeUpdate();
+
+            tx.commit();
+            System.out.println("✅ PaymentMode padrão definido: " + paymentModeId);
+            return true;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao definir PaymentMode padrão: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
-     * Retorna o modo de pagamento padrão (isDefault = 1)
+     * Verifica se nome já existe
      */
-    public PaymentModes findDefault() {
-        return findOne("SELECT * FROM payment_modes WHERE isDefault=1", this::map);
+    public boolean nameExists(String name) {
+        return findByName(name).isPresent();
     }
 
     /**
-     * Filtra modos de pagamento por nome, código ou descrição
+     * Verifica se código já existe
      */
-    public List<PaymentModes> filter(String txt) {
-        String like = "%" + txt + "%";
-        String sql = """
-            SELECT * FROM payment_modes
-            WHERE name LIKE ? OR code LIKE ? OR description LIKE ?
-        """;
-        return executeQuery(sql, this::map, like, like, like);
+    public boolean codeExists(String code) {
+        return findByCode(code).isPresent();
     }
 }
