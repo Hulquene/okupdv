@@ -5,6 +5,7 @@ package com.okutonda.okudpdv;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.okutonda.okudpdv.data.config.HibernateConfig;
+import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import javax.swing.JOptionPane;
@@ -14,6 +15,7 @@ import com.okutonda.okudpdv.data.dao.OptionsDao;
 import com.okutonda.okudpdv.data.dao.TaxeDao;
 import com.okutonda.okudpdv.data.dao.TaxeReasonDao;
 import com.okutonda.okudpdv.data.dao.UserDao;
+import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Countries;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Options;
@@ -21,6 +23,7 @@ import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.data.entities.User;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class Okudpdv {
 
@@ -93,6 +96,9 @@ public class Okudpdv {
             // 2. Inicializar outras tabelas essenciais
             boolean usersInitialized = initializeUsers();
             boolean taxesInitialized = initializeTaxes();
+
+            boolean clientInitialized = initializeDefaultClients();
+
             boolean reasonTaxesInitialized = initializeReasonTaxes(); // 🔥 NOVO
             boolean groupsInitialized = initializeProductGroups();
             boolean optionsInitialized = initializeSystemOptions();
@@ -103,6 +109,7 @@ public class Okudpdv {
             System.out.println("   - Reason Taxes: " + (reasonTaxesInitialized ? "✅" : "⚠️")); // 🔥 NOVO
             System.out.println("   - Product Groups: " + (groupsInitialized ? "✅" : "⚠️"));
             System.out.println("   - System Options: " + (optionsInitialized ? "✅" : "⚠️"));
+              System.out.println("   - System Options: " + (clientInitialized ? "✅" : "⚠️"));
 
             // Considera sucesso se os dados mais críticos foram inicializados
             return usersInitialized && taxesInitialized && optionsInitialized;
@@ -139,6 +146,46 @@ public class Okudpdv {
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao criar usuário admin: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean initializeDefaultClients() {
+        try {
+            ClientDao clientDao = new ClientDao();
+
+            // 🔹 CLIENTE CONSUMIDOR FINAL
+            Optional<Clients> consumidorFinal = clientDao.findByName("Consumidor Final");
+            if (consumidorFinal.isEmpty()) {
+                System.out.println("👤 Criando cliente Consumidor Final...");
+
+                Clients cliente = new Clients();
+                cliente.setName("Consumidor Final");
+//                cliente.setCompany("Consumidor Final");
+                cliente.setNif("999999999"); // NIF genérico para consumidor final
+                cliente.setAddress("Não especificado");
+                cliente.setCity("Não especificado");
+                cliente.setPhone("Não especificado");
+                cliente.setEmail("consumidor@final.com");
+                cliente.setIsDefault(1); // 🔥 Cliente padrão
+                cliente.setStatus(1);
+
+                clientDao.save(cliente);
+                System.out.println("✅ Cliente 'Consumidor Final' criado como padrão");
+            } else {
+                System.out.println("✅ Cliente 'Consumidor Final' já existe");
+
+                // Garante que é o cliente padrão
+                if (consumidorFinal.get().getIsDefault() != 1) {
+                    clientDao.setDefaultClient(consumidorFinal.get().getId());
+                    System.out.println("✅ Cliente 'Consumidor Final' definido como padrão");
+                }
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao inicializar cliente padrão: " + e.getMessage());
             return false;
         }
     }
