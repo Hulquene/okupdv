@@ -137,17 +137,65 @@ public class CountryDao {
     /**
      * Popula a tabela com países padrão
      */
+    /**
+     * Popula a tabela com países padrão - CORRIGIDO
+     */
     private List<Countries> populateDefaultCountries(Session session) {
-        List<Countries> defaultCountries = createDefaultCountries();
+        try {
+            // 🔹 CORREÇÃO: Usar SQL nativo para evitar problemas com entidades detached
+            insertBasicCountriesWithSQL(session);
 
-        for (Countries country : defaultCountries) {
-            session.persist(country);
+            // 🔹 CORREÇÃO: Buscar os países recém-inseridos do banco
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+            cq.select(root).orderBy(cb.asc(root.get("long_name")));
+
+            List<Countries> savedCountries = session.createQuery(cq).getResultList();
+
+            System.out.println("✅ " + savedCountries.size() + " países inseridos na tabela");
+            return savedCountries;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao popular países: " + e.getMessage());
+            throw new RuntimeException("Erro ao popular países", e);
+        }
+    }
+
+    /**
+     * Insere países usando SQL nativo - CORRIGIDO
+     */
+    private void insertBasicCountriesWithSQL(Session session) {
+        // 🔹 CORREÇÃO: Usar SQL nativo para inserção inicial
+        String[] sqlStatements = {
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('AO', 'AGO', 'Angola', 'República de Angola', '+244', '.ao', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('PT', 'PRT', 'Portugal', 'República Portuguesa', '+351', '.pt', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('BR', 'BRA', 'Brasil', 'República Federativa do Brasil', '+55', '.br', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('US', 'USA', 'EUA', 'Estados Unidos da América', '+1', '.us', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('GB', 'GBR', 'Reino Unido', 'Reino Unido da Grã-Bretanha', '+44', '.uk', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('FR', 'FRA', 'França', 'República Francesa', '+33', '.fr', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('ES', 'ESP', 'Espanha', 'Reino de Espanha', '+34', '.es', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('ZA', 'ZAF', 'África do Sul', 'República da África do Sul', '+27', '.za', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('CN', 'CHN', 'China', 'República Popular da China', '+86', '.cn', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('MZ', 'MOZ', 'Moçambique', 'República de Moçambique', '+258', '.mz', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('CV', 'CPV', 'Cabo Verde', 'República de Cabo Verde', '+238', '.cv', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('ST', 'STP', 'São Tomé', 'República Democrática de São Tomé e Príncipe', '+239', '.st', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('GW', 'GNB', 'Guiné-Bissau', 'República da Guiné-Bissau', '+245', '.gw', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('GQ', 'GNQ', 'Guiné Equatorial', 'República da Guiné Equatorial', '+240', '.gq', 'yes')",
+            "INSERT IGNORE INTO countries (iso2, iso3, short_name, long_name, calling_code, cctld, un_member) VALUES ('NA', 'NAM', 'Namíbia', 'República da Namíbia', '+264', '.na', 'yes')"
+        };
+
+        for (String sql : sqlStatements) {
+            try {
+                session.createNativeQuery(sql).executeUpdate();
+            } catch (Exception e) {
+                System.err.println("⚠️  Erro ao inserir país (pode já existir): " + e.getMessage());
+                // Continua com os próximos países
+            }
         }
 
-        session.flush(); // Garante que os dados são persistidos
-        System.out.println("✅ " + defaultCountries.size() + " países inseridos na tabela");
-
-        return defaultCountries;
+        // 🔹 CORREÇÃO: Fazer flush para garantir que os dados são persistidos
+        session.flush();
     }
 
     /**
@@ -213,17 +261,41 @@ public class CountryDao {
     /**
      * Força a repopulação da tabela (útil para testes)
      */
+//    public void forceRepopulation() {
+//        Session session = HibernateUtil.getCurrentSession();
+//        Transaction tx = null;
+//        try {
+//            tx = session.beginTransaction();
+//
+//            // Limpa a tabela
+//            session.createMutationQuery("DELETE FROM Countries").executeUpdate();
+//
+//            // Popula novamente
+//            populateDefaultCountries(session);
+//
+//            tx.commit();
+//            isPopulated = true;
+//            System.out.println("✅ Tabela countries repovoada com sucesso");
+//
+//        } catch (Exception e) {
+//            if (tx != null && tx.isActive()) {
+//                tx.rollback();
+//            }
+//            System.err.println("❌ Erro ao repopular countries: " + e.getMessage());
+//        }
+//    }
+    /**
+     * Força a repopulação da tabela (útil para testes) - CORRIGIDO
+     */
     public void forceRepopulation() {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
 
-            // Limpa a tabela
-            session.createMutationQuery("DELETE FROM Countries").executeUpdate();
-
-            // Popula novamente
-            populateDefaultCountries(session);
+            // 🔹 CORREÇÃO: Limpar e repopular usando SQL
+            session.createNativeQuery("DELETE FROM countries").executeUpdate();
+            insertBasicCountriesWithSQL(session);
 
             tx.commit();
             isPopulated = true;

@@ -5,7 +5,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import java.util.Map;
 
 public class HibernateConfig {
 
@@ -61,6 +60,12 @@ public class HibernateConfig {
         // Estratégia DDL - validate para produção
 //        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
         configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+
+        // 🔥 CORREÇÃO: Timeouts aumentados
+        configuration.setProperty("hibernate.connection.pool_size", "5");
+        configuration.setProperty("hibernate.c3p0.timeout", "300");
+        configuration.setProperty("hibernate.c3p0.idle_test_period", "300");
+        configuration.setProperty("hibernate.jdbc.time_zone", "UTC");
 
         // Codificação
         configuration.setProperty("hibernate.connection.characterEncoding", "UTF-8");

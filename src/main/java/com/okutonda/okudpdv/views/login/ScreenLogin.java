@@ -231,7 +231,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         jPasswordFieldPassword.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jPasswordFieldPassword.setForeground(new java.awt.Color(0, 0, 102));
-        jPasswordFieldPassword.setText("12345678");
+        jPasswordFieldPassword.setText("admin123");
         jPasswordFieldPassword.setToolTipText("Senha");
         jPasswordFieldPassword.setCaretColor(new java.awt.Color(0, 0, 102));
         jPasswordFieldPassword.addActionListener(new java.awt.event.ActionListener() {
@@ -246,7 +246,7 @@ public class ScreenLogin extends javax.swing.JFrame {
 
         jTextFieldEmail.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jTextFieldEmail.setForeground(new java.awt.Color(0, 0, 102));
-        jTextFieldEmail.setText("admin@admin.com");
+        jTextFieldEmail.setText("admin@empresa.com");
         jTextFieldEmail.setToolTipText("Email");
         jTextFieldEmail.setCaretColor(new java.awt.Color(0, 0, 102));
         jTextFieldEmail.setFocusTraversalPolicyProvider(true);
