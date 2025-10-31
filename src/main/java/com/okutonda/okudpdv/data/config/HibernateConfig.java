@@ -85,6 +85,8 @@ public class HibernateConfig {
 
             // 🔹 ENTIDADE CRÍTICA - ADICIONE ESTA LINHA
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Order.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.PurchaseItem.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.PurchasePayment.class);
 
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ProductOrder.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Taxes.class);
