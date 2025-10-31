@@ -179,7 +179,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
                 return;
             }
 
-            StockMovementController controller = new StockMovementController();
+            StockMovementController controllerStockMovement = new StockMovementController();
 
             for (int i = 0; i < totalRows; i++) {
                 // === Ler dados da linha da tabela ===
@@ -217,7 +217,9 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
                 movimento.setUser(UserSession.getInstance().getUser());
 
                 // === Enviar para controller ===
-                response = controller.registrar(movimento);
+                StockMovement movimentoSalvo = controllerStockMovement.registrar(movimento);
+                response = (movimentoSalvo != null);
+//                response = controllerStockMovement.registrar(movimento);
             }
 
             if (response) {
@@ -315,7 +317,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
             int warehouseId = jComboBoxWarehouse.getSelectedIndex() + 1; // exemplo simples
 
             // Tipo e origem
-            String tipo =  "ENTRADA";
+            String tipo = "ENTRADA";
 //            String tipo = jComboBoxType.getSelectedItem().toString();
 //            String origem = jComboBoxOrigin.getSelectedItem().toString();
 

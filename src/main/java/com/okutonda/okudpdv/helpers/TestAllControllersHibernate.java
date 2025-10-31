@@ -25,7 +25,7 @@ public class TestAllControllersHibernate {
     
     private static void testGroupsProductController() {
         System.out.println("\n📦 Testando GroupsProductControllerHibernate...");
-        GroupsProductControllerHibernate controller = new GroupsProductControllerHibernate();
+        GroupsProductController controller = new GroupsProductController();
         
         var allGroups = controller.getAll();
         System.out.println("✅ Grupos encontrados: " + allGroups.size());
@@ -33,7 +33,7 @@ public class TestAllControllersHibernate {
     
     private static void testProductController() {
         System.out.println("\n🛍️ Testando ProductControllerHibernate...");
-        ProductControllerHibernate controller = new ProductControllerHibernate();
+        ProductController controller = new ProductController();
         
         var allProducts = controller.listAll();
         System.out.println("✅ Produtos encontrados: " + allProducts.size());
@@ -44,7 +44,7 @@ public class TestAllControllersHibernate {
     
     private static void testProductOrderController() {
         System.out.println("\n📋 Testando ProductOrderControllerHibernate...");
-        ProductOrderControllerHibernate controller = new ProductOrderControllerHibernate();
+        ProductOrderController controller = new ProductOrderController();
         
         var allItems = controller.getAll();
         System.out.println("✅ Itens de pedido encontrados: " + allItems.size());
@@ -52,7 +52,7 @@ public class TestAllControllersHibernate {
     
     private static void testTaxeController() {
         System.out.println("\n💰 Testando TaxeControllerHibernate...");
-        TaxeControllerHibernate controller = new TaxeControllerHibernate();
+        TaxeController controller = new TaxeController();
         
         var allTaxes = controller.listarTodas();
         System.out.println("✅ Impostos encontrados: " + allTaxes.size());
@@ -63,7 +63,7 @@ public class TestAllControllersHibernate {
     
     private static void testTaxeReasonController() {
         System.out.println("\n📄 Testando TaxeReasonControllerHibernate...");
-        TaxeReasonControllerHibernate controller = new TaxeReasonControllerHibernate();
+        TaxeReasonController controller = new TaxeReasonController();
         
         var allReasons = controller.listarTodas();
         System.out.println("✅ Razões fiscais encontradas: " + allReasons.size());
@@ -71,7 +71,7 @@ public class TestAllControllersHibernate {
     
     private static void testWarehouseController() {
         System.out.println("\n🏭 Testando WarehouseControllerHibernate...");
-        WarehouseControllerHibernate controller = new WarehouseControllerHibernate();
+        WarehouseController controller = new WarehouseController();
         
         var allWarehouses = controller.listarTodos();
         System.out.println("✅ Armazéns encontrados: " + allWarehouses.size());

@@ -1,8 +1,7 @@
 package com.okutonda.okudpdv.helpers;
 
-import com.okutonda.okudpdv.data.dao.PaymentDaoHibernate;
-import com.okutonda.okudpdv.data.dao.PaymentModeDaoHibernate;
-import com.okutonda.okudpdv.data.dao.StockMovementDaoHibernate;
+import com.okutonda.okudpdv.data.dao.PaymentDao;
+import com.okutonda.okudpdv.data.dao.StockMovementDao;
 
 public class TestPaymentStockDAOs {
 
@@ -11,7 +10,6 @@ public class TestPaymentStockDAOs {
             System.out.println("🧪 Testando DAOs de Payment e Stock...");
 
             testPaymentDao();
-            testPaymentModeDao();
             testStockMovementDao();
 
             System.out.println("✅ Todos os testes passaram!");
@@ -26,7 +24,7 @@ public class TestPaymentStockDAOs {
 
     private static void testPaymentDao() {
         System.out.println("\n💰 Testando PaymentDaoHibernate...");
-        PaymentDaoHibernate dao = new PaymentDaoHibernate();
+        PaymentDao dao = new PaymentDao();
 
         var allPayments = dao.findAll();
         System.out.println("✅ Payments encontrados: " + allPayments.size());
@@ -37,23 +35,10 @@ public class TestPaymentStockDAOs {
         }
     }
 
-    private static void testPaymentModeDao() {
-        System.out.println("\n💳 Testando PaymentModeDaoHibernate...");
-        PaymentModeDaoHibernate dao = new PaymentModeDaoHibernate();
-
-        var allModes = dao.findAll();
-        System.out.println("✅ PaymentModes encontrados: " + allModes.size());
-
-        var defaultMode = dao.findDefault();
-        defaultMode.ifPresentOrElse(
-                mode -> System.out.println("✅ PaymentMode padrão: " + mode.getName()),
-                () -> System.out.println("⚠️ Nenhum PaymentMode padrão definido")
-        );
-    }
 
     private static void testStockMovementDao() {
         System.out.println("\n📦 Testando StockMovementDaoHibernate...");
-        StockMovementDaoHibernate dao = new StockMovementDaoHibernate();
+        StockMovementDao dao = new StockMovementDao();
 
         var allMovements = dao.findAll();
         System.out.println("✅ StockMovements encontrados: " + allMovements.size());

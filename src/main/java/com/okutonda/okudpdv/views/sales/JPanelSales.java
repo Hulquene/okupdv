@@ -102,12 +102,12 @@ public final class JPanelSales extends javax.swing.JPanel {
 
     public void filterListOrder(String txt) {
 //        List<Order> list = orderController.filter(txt);
-        List<Order> list = orderController.filterDate(LocalDate.MIN, LocalDate.MIN);
+        List<Order> list = orderController.filterByDate(LocalDate.MIN, LocalDate.MIN);
         listTable(list);
     }
 
     public void filterListOrderFromDate(LocalDate dateFrom, LocalDate dateTo) {
-        List<Order> list = orderController.filterDate(dateFrom, dateTo);
+        List<Order> list = orderController.filterByDate(dateFrom, dateTo);
         listTable(list);
     }
 

@@ -7,7 +7,6 @@ package com.okutonda.okudpdv.views.finance;
 import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.FinanceController;
 import com.okutonda.okudpdv.controllers.PaymentController;
-import com.okutonda.okudpdv.controllers.PaymentModeController;
 import com.okutonda.okudpdv.controllers.ProductOrderController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.controllers.ReportController;
@@ -38,17 +37,10 @@ import javax.swing.table.DefaultTableModel;
 public final class JPanelFinance extends javax.swing.JPanel {
 
     FinanceController financeController = new FinanceController();
-
-    ReportController reportController = new ReportController();
     ShiftController shiftController = new ShiftController();
-    PurchaseController purchaseController = new PurchaseController();
-//    ProductController productController = new ProductController();
     ProductOrderController productOrderController = new ProductOrderController();
-//    OrderController orderController = new OrderController();
-    SupplierController supplierController = new SupplierController();
     ClientController clientController = new ClientController();
     UserController userController = new UserController();
-    PaymentModeController paymenModetController = new PaymentModeController();
     PaymentController paymentController = new PaymentController();
 
     /**
@@ -232,7 +224,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
         LocalDate hoje = LocalDate.now();
 
         for (Purchase p : list) {
-            double pago = p.getPayTotal() != null ? p.getPayTotal().doubleValue() : 0d;
+            double pago = p.getTotal_pago() != null ? p.getTotal_pago().doubleValue() : 0d;
             double emAberto = p.getTotal() != null ? p.getTotal().doubleValue() - pago : 0d;
 
             // status
@@ -360,7 +352,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listPayments() {
-        List<Payment> list = paymentController.get("");
+        List<Payment> list = paymentController.getAll();
         loadListPayments(list);
     }
 
@@ -385,12 +377,12 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listShifts() {
-        List<Shift> list = shiftController.findAll();
+        List<Shift> list = shiftController.listarTodos();
         loadListShifts(list);
     }
 
     public void filterListShifts(String txt) {
-        List<Shift> list = shiftController.filter(txt);
+        List<Shift> list = shiftController.filtrar(txt);
         loadListShifts(list);
     }
 
@@ -414,7 +406,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.list("");
+        List<ProductOrder> list = productOrderController.getAll();
         loadListSalesProducts(list);
     }
 

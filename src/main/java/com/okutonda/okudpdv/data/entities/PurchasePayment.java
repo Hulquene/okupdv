@@ -1,27 +1,52 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- *
- * @author rog
- */
+@Entity
+@Table(name = "purchase_payments")
 public class PurchasePayment {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer purchaseId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_id", nullable = false)
+    private Purchase purchase;
+
+    @Column(name = "valor_pago", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorPago;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "data_pagamento", nullable = false)
     private Date dataPagamento;
-    private String metodo; // dinheiro, transferencia, cartao, cheque, outro
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metodo", length = 50)
+    private PaymentMode metodo;
+
+    @Column(name = "referencia", length = 100)
     private String referencia;
+
+    @Column(name = "observacao", columnDefinition = "TEXT")
     private String observacao;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
+
+    // Construtores
+    public PurchasePayment() {
+        this.dataPagamento = new Date();
+    }
+
+    public PurchasePayment(BigDecimal valorPago, PaymentMode metodo) {
+        this();
+        this.valorPago = valorPago;
+        this.metodo = metodo;
+    }
 
     // Getters e Setters
     public Integer getId() {
@@ -32,12 +57,20 @@ public class PurchasePayment {
         this.id = id;
     }
 
+    public Purchase getPurchase() {
+        return purchase;
+    }
+
+    public void setPurchase(Purchase purchase) {
+        this.purchase = purchase;
+    }
+
     public Integer getPurchaseId() {
-        return purchaseId;
+        return purchase != null ? purchase.getId() : null;
     }
 
     public void setPurchaseId(Integer purchaseId) {
-        this.purchaseId = purchaseId;
+        // Método auxiliar para DAO
     }
 
     public BigDecimal getValorPago() {
@@ -56,11 +89,11 @@ public class PurchasePayment {
         this.dataPagamento = dataPagamento;
     }
 
-    public String getMetodo() {
+    public PaymentMode getMetodo() {
         return metodo;
     }
 
-    public void setMetodo(String metodo) {
+    public void setMetodo(PaymentMode metodo) {
         this.metodo = metodo;
     }
 
@@ -86,5 +119,10 @@ public class PurchasePayment {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "PurchasePayment{id=" + id + ", valor=" + valorPago + ", data=" + dataPagamento + "}";
     }
 }

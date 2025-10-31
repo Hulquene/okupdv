@@ -428,7 +428,7 @@ public class JDialogFormClient extends javax.swing.JDialog {
             Clients cModel;
             // cModel = new Clients();
             ClientDao cDao = new ClientDao();
-            cModel = cDao.findByName(name);
+            cModel = cDao.findByName(name).orElse(null);
             if (cModel.getName() != null) {
                 jTextFieldIdClient.setText(Integer.toString(cModel.getId()));
                 jTextFieldNifClient.setText(cModel.getNif());

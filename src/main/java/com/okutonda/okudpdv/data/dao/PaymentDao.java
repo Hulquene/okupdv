@@ -2,6 +2,7 @@ package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -213,7 +214,8 @@ public class PaymentDao {
         }
     }
 
-    public List<Payment> findByPaymentMode(Payment.PaymentMode paymentMode) {
+    // ATUALIZADO: Usando PaymentMode em vez de Payment.PaymentMode
+    public List<Payment> findByPaymentMode(PaymentMode paymentMode) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();

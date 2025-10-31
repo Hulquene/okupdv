@@ -4,15 +4,14 @@
  */
 package com.okutonda.okudpdv.views.setting;
 
-import com.okutonda.okudpdv.controllers.BoxController;
 import com.okutonda.okudpdv.views.products.JDialogReasonTaxes;
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.OptionController;
-import com.okutonda.okudpdv.controllers.PaymentModeController;
+import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.TaxeController;
-import com.okutonda.okudpdv.data.entities.Box;
 import com.okutonda.okudpdv.data.entities.Options;
-import com.okutonda.okudpdv.data.entities.PaymentModes;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
+import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.helpers.Utilities;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.helpers.CompanySession;
@@ -33,8 +32,6 @@ public final class JDialogSetting extends javax.swing.JDialog {
     OptionController optionController = new OptionController();
     CountryController countryController = new CountryController();
     TaxeController taxesController = new TaxeController();
-    BoxController boxController = new BoxController();
-    PaymentModeController paymentModes = new PaymentModeController();
 
     /**
      * Creates new form JDialogSetting
@@ -47,39 +44,128 @@ public final class JDialogSetting extends javax.swing.JDialog {
     }
 
     public void listPaymentModes() {
-//        ClientDao cDao = new ClientDao();
-        List<PaymentModes> list = paymentModes.getAll();
-//        jTableClients.setModel(new DefaultTableModel);
+////        ClientDao cDao = new ClientDao();
+////        List<PaymentModes> list = paymentModes.getAll();
+//        PaymentMode[] list = PaymentMode.getActiveModes();
+//        // ou
+////PaymentMode[] list = PaymentMode.values();
+//
+////        jTableClients.setModel(new DefaultTableModel);
+//        DefaultTableModel data = (DefaultTableModel) jTablePaymentModes.getModel();
+////        data.setM
+//        data.setNumRows(0);
+//        for (PaymentMode c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getName(),
+//                c.getDescription(),
+//                c.getCode(),
+//                c.getStatus(),
+//                c.getIsDefault()
+//            });
+//        }
+        PaymentMode[] list = PaymentMode.getActiveModes();
+// ou
+// PaymentMode[] list = PaymentMode.values();
+
         DefaultTableModel data = (DefaultTableModel) jTablePaymentModes.getModel();
-//        data.setM
         data.setNumRows(0);
-        for (PaymentModes c : list) {
+
+        for (PaymentMode mode : list) {
             data.addRow(new Object[]{
-                c.getId(),
-                c.getName(),
-                c.getDescription(),
-                c.getCode(),
-                c.getStatus(),
-                c.getIsDefault()
+                mode.ordinal() + 1, // ID sequencial (ou use algo mais significativo)
+                mode.getDescricao(), // Nome/descrição
+                mode.getCodigo(), // Código (CC, CD, NU, etc.)
+                mode.toString(), // Descrição completa
+                "Ativo", // Status (fixo para enum)
+                mode == PaymentMode.NU ? "Sim" : "Não" // Padrão (Numerário como default)
             });
         }
+
+//        // Definir colunas do table model
+//        String[] columnNames = {"ID", "Descrição", "Código", "Tipo", "Status", "Padrão"};
+//        DefaultTableModel data = new DefaultTableModel(columnNames, 0);
+//        jTablePaymentModes.setModel(data);
+//
+//// Preencher dados
+//        PaymentMode[] list = PaymentMode.getActiveModes();
+//        for (PaymentMode mode : list) {
+//            data.addRow(new Object[]{
+//                mode.ordinal() + 1,
+//                mode.getDescricao(),
+//                mode.getCodigo(),
+//                "Sistema",
+//                "Ativo",
+//                mode == PaymentMode.NU ? "Sim" : "Não"
+//            });
+//        }
     }
 
     public void listBox() {
-//        ClientDao cDao = new ClientDao();
-        List<Box> list = boxController.findAll();
-//        jTableClients.setModel(new DefaultTableModel);
+////        ClientDao cDao = new ClientDao();
+//        List<Box> list = boxController.findAll();
+////        jTableClients.setModel(new DefaultTableModel);
+//        DefaultTableModel data = (DefaultTableModel) jTableBox.getModel();
+////        data.setM
+//        data.setNumRows(0);
+//        for (Box c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getName(),
+//                c.getStatus(),
+//                ""
+//            });
+//        }
+// Substitua o BoxController pelo ShiftController
+        ShiftController shiftController = new ShiftController();
+        List<Shift> list = shiftController.listarTodos();
+
         DefaultTableModel data = (DefaultTableModel) jTableBox.getModel();
-//        data.setM
         data.setNumRows(0);
-        for (Box c : list) {
+
+        for (Shift shift : list) {
             data.addRow(new Object[]{
-                c.getId(),
-                c.getName(),
-                c.getStatus(),
-                ""
+                shift.getId(),
+                shift.getCode(), // Código do turno
+                shift.getUser().getName(), // Nome do usuário
+                formatarValor(shift.getGrantedAmount()), // Valor abertura
+                formatarValor(shift.getIncurredAmount()), // Valor vendas
+                formatarValor(shift.getCurrentBalance()), // Saldo atual
+                shift.getStatus(), // Status (open/closed)
+                shift.getDateOpen(), // Data abertura
+                shift.getDateClose() // Data fechamento (pode ser null)
             });
         }
+
+//        ShiftController shiftController = new ShiftController();
+//        List<Shift> list = shiftController.listarTodos();
+//
+//        DefaultTableModel data = (DefaultTableModel) jTableBox.getModel();
+//        data.setNumRows(0);
+//
+//        for (Shift shift : list) {
+//            data.addRow(new Object[]{
+//                shift.getId(),
+//                shift.getCode() != null ? shift.getCode() : "N/A",
+//                shift.getUser() != null ? shift.getUser().getName() : "N/A",
+//                formatarValor(shift.getGrantedAmount()),
+//                formatarValor(shift.getIncurredAmount()),
+//                formatarValor(shift.getCurrentBalance()),
+//                shift.getStatus() != null ? shift.getStatus() : "N/A",
+//                shift.getDateOpen() != null ? shift.getDateOpen() : "N/A",
+//                shift.getDateClose() != null ? shift.getDateClose() : "Em aberto"
+//            });
+//        }
+    }
+
+    /**
+     * Formata valores monetários
+     */
+    private String formatarValor(Double valor) {
+        if (valor == null) {
+            return "0.00 AOA";
+        }
+        return String.format("%.2f AOA", valor);
     }
 
     public void listTaxes() {
@@ -112,6 +198,127 @@ public final class JDialogSetting extends javax.swing.JDialog {
                 c.getCode(),
                 c.getIsDefault()
             });
+        }
+    }
+
+    /**
+     * Função para abrir/fechar turno Centraliza a lógica de gestão de turnos
+     */
+    private void salvarTurno() {
+        // Validação básica
+        if (jTextFieldBoxName.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Campo nome do turno inválido!!");
+            return;
+        }
+
+        // Obtém ID (0 para novo turno, >0 para fechar turno)
+        int id = jTextFieldBoxId.getText().isEmpty() ? 0 : Integer.parseInt(jTextFieldBoxId.getText());
+
+        // Determina ação: abrir ou fechar turno
+        boolean sucesso;
+        if (id == 0) {
+            sucesso = abrirTurno();
+        } else {
+            sucesso = fecharTurno(id);
+        }
+
+        if (sucesso) {
+            // Limpa formulário e atualiza lista
+            new Utilities().clearScreen(jPanelBoxForm);
+            listBox(); // Ou listShifts() se renomeou o método
+        }
+    }
+
+    /**
+     * Abre um novo turno
+     *
+     * @return true se o turno foi aberto com sucesso
+     */
+    private boolean abrirTurno() {
+        try {
+            // Obtém valor de abertura
+            Double valorAbertura = 0.0;
+            try {
+                if (!jTextFieldBoxName.getText().isEmpty()) {
+                    valorAbertura = Double.parseDouble(jTextFieldBoxName.getText());
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Valor de abertura inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            // Abre o turno
+            ShiftController shiftController = new ShiftController();
+            Shift turnoAberto = shiftController.abrirTurno(valorAbertura);
+
+            if (turnoAberto != null) {
+                JOptionPane.showMessageDialog(null,
+                        "Turno aberto com sucesso!\nCódigo: " + turnoAberto.getCode(),
+                        "Turno Aberto", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao abrir turno: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao abrir turno: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    /**
+     * Fecha um turno existente
+     *
+     * @param id ID do turno a ser fechado
+     * @return true se o turno foi fechado com sucesso
+     */
+    private boolean fecharTurno(int id) {
+        try {
+            // Obtém valor de fechamento
+            Double valorFechamento = 0.0;
+            try {
+                if (!jTextFieldBoxName.getText().isEmpty()) {
+                    valorFechamento = Double.parseDouble(jTextFieldBoxName.getText());
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Valor de fechamento inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            // Busca o turno
+            ShiftController shiftController = new ShiftController();
+            Shift turno = shiftController.buscarPorId(id);
+
+            if (turno == null) {
+                JOptionPane.showMessageDialog(null, "Turno não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
+            // Fecha o turno
+            Shift turnoFechado = shiftController.fecharTurno(valorFechamento);
+
+            if (turnoFechado != null) {
+                // Calcula diferença para mensagem
+                Double diferenca = turnoFechado.getDifference();
+                String mensagem = diferenca >= 0
+                        ? "Sobra: " + diferenca + " AOA"
+                        : "Falta: " + Math.abs(diferenca) + " AOA";
+
+                JOptionPane.showMessageDialog(null,
+                        "Turno fechado com sucesso!\n" + mensagem,
+                        "Turno Fechado", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao fechar turno: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Erro ao fechar turno: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
     }
 
@@ -1148,16 +1355,18 @@ public final class JDialogSetting extends javax.swing.JDialog {
             int id = jTextFieldTaxeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldTaxeId.getText());
             boolean response;
             if (id == 0) {
-                response = taxesController.save(cModel);
+                Taxes taxSalva = taxesController.save(cModel);
+                response = (taxSalva != null);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Taxes salvo com Sucesso!!");
                     listTaxes();
                 }
             } else {
                 cModel.setId(id);
-                response = taxesController.save(cModel);
+                Taxes taxSalva = taxesController.save(cModel);
+                response = (taxSalva != null);
                 if (response) {
-                    JOptionPane.showMessageDialog(null, "taxes Atualizado com Sucesso!!");
+                    JOptionPane.showMessageDialog(null, "Taxes Atualizado com Sucesso!!");
                     listTaxes();
                 }
             }
@@ -1293,20 +1502,20 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
     private void jButtonFormPaymentDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPaymentDeleteActionPerformed
         // TODO add your handling code here:
-//         jTextFieldTaxeId.setText(jTableTaxes.getValueAt(jTableTaxes.getSelectedRow(), 0).toString());
-
-        int id = Integer.parseInt(jTablePaymentModes.getValueAt(jTablePaymentModes.getSelectedRow(), 0).toString());
-//        Taxes tax = taxesController.getId(id);
-        PaymentModes paymentMode = paymentModes.getById(id);
-//        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
-        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + paymentMode.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-        if (sair == JOptionPane.YES_OPTION) {
-            if (paymentModes.delete(id)) {
-                JOptionPane.showMessageDialog(null, "payment Mode excluido com Sucesso!!");
-//                listTaxes();
-                listPaymentModes();
-            }
-        }
+////         jTextFieldTaxeId.setText(jTableTaxes.getValueAt(jTableTaxes.getSelectedRow(), 0).toString());
+//
+//        int id = Integer.parseInt(jTablePaymentModes.getValueAt(jTablePaymentModes.getSelectedRow(), 0).toString());
+////        Taxes tax = taxesController.getId(id);
+//        PaymentModes paymentMode = paymentModes.getById(id);
+////        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
+//        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + paymentMode.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
+//        if (sair == JOptionPane.YES_OPTION) {
+//            if (paymentModes.delete(id)) {
+//                JOptionPane.showMessageDialog(null, "payment Mode excluido com Sucesso!!");
+////                listTaxes();
+//                listPaymentModes();
+//            }
+//        }
     }//GEN-LAST:event_jButtonFormPaymentDeleteActionPerformed
 
     private void jButtonFormPAymentEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPAymentEditActionPerformed
@@ -1332,85 +1541,86 @@ public final class JDialogSetting extends javax.swing.JDialog {
     private void jButtonFormPaymentAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFormPaymentAddActionPerformed
         // TODO add your handling code here:
 
-        PaymentModes cModel = new PaymentModes();
-        if (jTextFieldPaymentModesName.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Campo Nome invalido!!");
-        } else if (jTextFieldPaymentModesDescription.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Campo Descrição invalido!!");
-        } else if (jTextFieldPaymentModeCode.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Campo Codigo invalido!!");
-        } else {
-            cModel.setName(jTextFieldPaymentModesName.getText());
-            cModel.setDescription(jTextFieldPaymentModesDescription.getText());
-            cModel.setCode(jTextFieldPaymentModeCode.getText());
-
-//            cModel.setStatus((String) jComboBoxPaymentModesStatus.getSelectedItem());
-//            cModel.setIsDefault((String) jComboBoxPaymentModesDefault.getSelectedItem());
-            String statusPayment = (String) jComboBoxPaymentModesStatus.getSelectedItem();
-            String defaultPayment = (String) jComboBoxPaymentModesDefault.getSelectedItem();
-
-            if ("ativo".equals(statusPayment)) {
-                cModel.setStatus(1);
-            } else {
-                cModel.setStatus(0);
-            }
-            if ("sim".equals(defaultPayment)) {
-                cModel.setIsDefault(1);
-            } else {
-                cModel.setIsDefault(0);
-            }
-
-            if (cModel != null) {
-                int id = jTextFieldPaymentModeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldPaymentModeId.getText());
-                boolean response;
-                if (id == 0) {
-                    response = paymentModes.save(cModel);
-                    if (response) {
-                        JOptionPane.showMessageDialog(null, "Taxes salvo com Sucesso!!");
-                        listTaxes();
-                    }
-                } else {
-                    response = paymentModes.save(cModel);
-                    if (response) {
-                        JOptionPane.showMessageDialog(null, "taxes Atualizado com Sucesso!!");
-                        listTaxes();
-                    }
-                }
-                new Utilities().clearScreen(jPanelPaymentModesForm);
-            }
-        }
+//        PaymentModes cModel = new PaymentModes();
+//        if (jTextFieldPaymentModesName.getText().isEmpty()) {
+//            JOptionPane.showMessageDialog(null, "Campo Nome invalido!!");
+//        } else if (jTextFieldPaymentModesDescription.getText().isEmpty()) {
+//            JOptionPane.showMessageDialog(null, "Campo Descrição invalido!!");
+//        } else if (jTextFieldPaymentModeCode.getText().isEmpty()) {
+//            JOptionPane.showMessageDialog(null, "Campo Codigo invalido!!");
+//        } else {
+//            cModel.setName(jTextFieldPaymentModesName.getText());
+//            cModel.setDescription(jTextFieldPaymentModesDescription.getText());
+//            cModel.setCode(jTextFieldPaymentModeCode.getText());
+//
+////            cModel.setStatus((String) jComboBoxPaymentModesStatus.getSelectedItem());
+////            cModel.setIsDefault((String) jComboBoxPaymentModesDefault.getSelectedItem());
+//            String statusPayment = (String) jComboBoxPaymentModesStatus.getSelectedItem();
+//            String defaultPayment = (String) jComboBoxPaymentModesDefault.getSelectedItem();
+//
+//            if ("ativo".equals(statusPayment)) {
+//                cModel.setStatus(1);
+//            } else {
+//                cModel.setStatus(0);
+//            }
+//            if ("sim".equals(defaultPayment)) {
+//                cModel.setIsDefault(1);
+//            } else {
+//                cModel.setIsDefault(0);
+//            }
+//
+//            if (cModel != null) {
+//                int id = jTextFieldPaymentModeId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldPaymentModeId.getText());
+//                boolean response;
+//                if (id == 0) {
+//                    response = paymentModes.save(cModel);
+//                    if (response) {
+//                        JOptionPane.showMessageDialog(null, "Taxes salvo com Sucesso!!");
+//                        listTaxes();
+//                    }
+//                } else {
+//                    response = paymentModes.save(cModel);
+//                    if (response) {
+//                        JOptionPane.showMessageDialog(null, "taxes Atualizado com Sucesso!!");
+//                        listTaxes();
+//                    }
+//                }
+//                new Utilities().clearScreen(jPanelPaymentModesForm);
+//            }
+//        }
     }//GEN-LAST:event_jButtonFormPaymentAddActionPerformed
 
     private void jButtonSaveBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveBoxActionPerformed
         // TODO add your handling code here:
-        Box cModel = new Box();
-        if (jTextFieldBoxName.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Campo Nome do caixa invalido!!");
-        } else {
-            cModel.setName(jTextFieldBoxName.getText());
-//            cModel.setCode(jTextFieldTaxeCode.getText());
-//            cModel.setPercetage(Util.convertToDouble(jTextFieldTaxePerc.getText()));
-//            cModel.setIsDefault(jComboBoxTaxeIsDefault.getSelectedIndex());
-            if (cModel != null) {
-                int id = jTextFieldBoxId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldBoxId.getText());
-                boolean response;
-                if (id == 0) {
-                    response = boxController.save(cModel);
-                    if (response) {
-                        JOptionPane.showMessageDialog(null, "Caixa salvo com Sucesso!!");
-                        listBox();
-                    }
-                } else {
-                    cModel.setId(id);
-                    response = boxController.save(cModel);
-                    if (response) {
-                        JOptionPane.showMessageDialog(null, "Caixa Atualizado com Sucesso!!");
-                        listBox();
-                    }
-                }
-                new Utilities().clearScreen(jPanelBoxForm);
-            }
-        }
+        salvarTurno();
+//        Box cModel = new Box();
+//        if (jTextFieldBoxName.getText().isEmpty()) {
+//            JOptionPane.showMessageDialog(null, "Campo Nome do caixa invalido!!");
+//        } else {
+//            cModel.setName(jTextFieldBoxName.getText());
+////            cModel.setCode(jTextFieldTaxeCode.getText());
+////            cModel.setPercetage(Util.convertToDouble(jTextFieldTaxePerc.getText()));
+////            cModel.setIsDefault(jComboBoxTaxeIsDefault.getSelectedIndex());
+//            if (cModel != null) {
+//                int id = jTextFieldBoxId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldBoxId.getText());
+//                boolean response;
+//                if (id == 0) {
+//                    response = boxController.save(cModel);
+//                    if (response) {
+//                        JOptionPane.showMessageDialog(null, "Caixa salvo com Sucesso!!");
+//                        listBox();
+//                    }
+//                } else {
+//                    cModel.setId(id);
+//                    response = boxController.save(cModel);
+//                    if (response) {
+//                        JOptionPane.showMessageDialog(null, "Caixa Atualizado com Sucesso!!");
+//                        listBox();
+//                    }
+//                }
+//                new Utilities().clearScreen(jPanelBoxForm);
+//            }
+//        }
 
     }//GEN-LAST:event_jButtonSaveBoxActionPerformed
 

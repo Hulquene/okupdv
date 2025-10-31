@@ -1,42 +1,67 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
-/**
- *
- * @author kenny
- */
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "shift")
 public class Shift {
 
-    private int id;
-    private User user;
-    private String code;
-    private String hash;
-    private Double grantedAmount;
-    private Double incurredAmount;
-    private Double closingAmount;
-    private String status;
-    private String dateClose;
-    private String dateOpen;
-    private Box box;
-    private User manager;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    public int getId() {
+    @Column(name = "code", unique = true, length = 50)
+    private String code;
+
+    @Column(name = "hash", length = 255)
+    private String hash;
+
+    @Column(name = "granted_amount", precision = 10, scale = 2)
+    private Double grantedAmount = 0.0;
+
+    @Column(name = "incurred_amount", precision = 10, scale = 2)
+    private Double incurredAmount = 0.0;
+
+    @Column(name = "closing_amount", precision = 10, scale = 2)
+    private Double closingAmount = 0.0;
+
+    @Column(name = "status", length = 20)
+    private String status = "open"; // open, closed, cancelled
+
+    @Column(name = "dateOpen", length = 20)
+    private String dateOpen;
+
+    @Column(name = "dateClose", length = 20)
+    private String dateClose;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Construtores
+    public Shift() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Shift(User user, Double grantedAmount) {
+        this();
+        this.user = user;
+        this.grantedAmount = grantedAmount;
+        this.status = "open";
+        this.dateOpen = java.time.LocalDateTime.now().toString();
+    }
+
+    // Getters e Setters
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getCode() {
@@ -87,14 +112,6 @@ public class Shift {
         this.status = status;
     }
 
-    public String getDateClose() {
-        return dateClose;
-    }
-
-    public void setDateClose(String dateClose) {
-        this.dateClose = dateClose;
-    }
-
     public String getDateOpen() {
         return dateOpen;
     }
@@ -103,20 +120,53 @@ public class Shift {
         this.dateOpen = dateOpen;
     }
 
-    public Box getBox() {
-        return box;
+    public String getDateClose() {
+        return dateClose;
     }
 
-    public void setBox(Box box) {
-        this.box = box;
+    public void setDateClose(String dateClose) {
+        this.dateClose = dateClose;
     }
 
-    public User getManager() {
-        return manager;
+    public User getUser() {
+        return user;
     }
 
-    public void setManager(User manager) {
-        this.manager = manager;
+    public void setUser(User user) {
+        this.user = user;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    // Métodos utilitários
+    public Double getCurrentBalance() {
+        return grantedAmount + incurredAmount;
+    }
+
+    public Double getDifference() {
+        if (closingAmount != null && getCurrentBalance() != null) {
+            return closingAmount - getCurrentBalance();
+        }
+        return 0.0;
+    }
+
+    public boolean isOpen() {
+        return "open".equals(status);
+    }
+
+    public boolean isClosed() {
+        return "closed".equals(status);
+    }
+
+    @Override
+    public String toString() {
+        return "Shift{id=" + id + ", code='" + code + "', status='" + status + "', user="
+                + (user != null ? user.getName() : "null") + "}";
+    }
 }

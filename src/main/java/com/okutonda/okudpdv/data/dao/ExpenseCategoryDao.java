@@ -1,81 +1,196 @@
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.data.entities.ExpenseCategory;
-//import java.sql.*;
-//import java.util.List;
-//
-///**
-// * DAO responsável pelas categorias de despesas.
-// *
-// * Totalmente compatível com BaseDao e HikariCP (DatabaseProvider). Fecha
-// * automaticamente conexões após uso.
-// *
-// * @author Hulquene
-// */
-//public class ExpenseCategoryDao extends BaseDao<ExpenseCategory> {
-//
-//    public ExpenseCategoryDao() {
-//        super(); // usa o pool de conexões automaticamente
-//    }
-//
-//    public ExpenseCategoryDao(Connection externalConn) {
-//        super(externalConn); // permite uso transacional externo
-//    }
-//
-//    // ==========================================================
-//    // 🔹 Mapeamento ResultSet → Entidade
-//    // ==========================================================
-//    private ExpenseCategory map(ResultSet rs) {
-//        try {
-//            ExpenseCategory c = new ExpenseCategory();
-//            c.setId(rs.getInt("id"));
-//            c.setName(rs.getString("name"));
-//            c.setDescription(rs.getString("description"));
-//            return c;
-//        } catch (SQLException e) {
-//            System.err.println("[DB] Erro ao mapear ExpenseCategory: " + e.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    // ==========================================================
-//    // 🔹 CRUD
-//    // ==========================================================
-//    @Override
-//    public boolean add(ExpenseCategory category) {
-//        String sql = "INSERT INTO expense_categories (name, description) VALUES (?, ?)";
-//        return executeUpdate(sql, category.getName(), category.getDescription());
-//    }
-//
-//    @Override
-//    public boolean update(ExpenseCategory category) {
-//        String sql = "UPDATE expense_categories SET name=?, description=? WHERE id=?";
-//        return executeUpdate(sql, category.getName(), category.getDescription(), category.getId());
-//    }
-//
-//    @Override
-//    public boolean delete(int id) {
-//        String sql = "DELETE FROM expense_categories WHERE id=?";
-//        return executeUpdate(sql, id);
-//    }
-//
-//    @Override
-//    public ExpenseCategory findById(int id) {
-//        String sql = "SELECT * FROM expense_categories WHERE id=?";
-//        return findOne(sql, this::map, id);
-//    }
-//
-//    @Override
-//    public List<ExpenseCategory> findAll() {
-//        String sql = "SELECT * FROM expense_categories ORDER BY name ASC";
-//        return executeQuery(sql, this::map);
-//    }
-//
-//    // ==========================================================
-//    // 🔹 Consultas adicionais
-//    // ==========================================================
-//    public List<ExpenseCategory> filterByName(String namePart) {
-//        String sql = "SELECT * FROM expense_categories WHERE name LIKE ? ORDER BY name ASC";
-//        return executeQuery(sql, this::map, "%" + namePart + "%");
-//    }
-//}
+package com.okutonda.okudpdv.data.dao;
+
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.ExpenseCategory;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class ExpenseCategoryDao {
+
+    private final Class<ExpenseCategory> entityClass = ExpenseCategory.class;
+
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public Optional<ExpenseCategory> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            ExpenseCategory entity = session.find(ExpenseCategory.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ExpenseCategory por ID: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<ExpenseCategory> findAll() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExpenseCategory> cq = cb.createQuery(ExpenseCategory.class);
+            Root<ExpenseCategory> root = cq.from(ExpenseCategory.class);
+            cq.select(root).orderBy(cb.asc(root.get("name")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os ExpenseCategory: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ExpenseCategory save(ExpenseCategory category) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(category);
+            tx.commit();
+
+            System.out.println("✅ ExpenseCategory salvo: " + category.getName());
+            return category;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar ExpenseCategory: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar ExpenseCategory", e);
+        }
+    }
+
+    public ExpenseCategory update(ExpenseCategory category) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            ExpenseCategory merged = session.merge(category);
+            tx.commit();
+
+            System.out.println("✅ ExpenseCategory atualizado: " + category.getName());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar ExpenseCategory: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar ExpenseCategory", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            ExpenseCategory category = session.find(ExpenseCategory.class, id);
+            if (category != null) {
+                session.remove(category);
+            }
+
+            tx.commit();
+            System.out.println("✅ ExpenseCategory removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover ExpenseCategory: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover ExpenseCategory", e);
+        }
+    }
+
+    // ==========================================================
+    // 🔹 Métodos específicos
+    // ==========================================================
+    public Optional<ExpenseCategory> findByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExpenseCategory> cq = cb.createQuery(ExpenseCategory.class);
+            Root<ExpenseCategory> root = cq.from(ExpenseCategory.class);
+
+            cq.select(root).where(cb.equal(root.get("name"), name));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ExpenseCategory por nome: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<ExpenseCategory> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExpenseCategory> cq = cb.createQuery(ExpenseCategory.class);
+            Root<ExpenseCategory> root = cq.from(ExpenseCategory.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate namePredicate = cb.like(root.get("name"), likePattern);
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(namePredicate, descriptionPredicate))
+                    .orderBy(cb.asc(root.get("name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar ExpenseCategory: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ExpenseCategory> findByStatus(Integer status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<ExpenseCategory> cq = cb.createQuery(ExpenseCategory.class);
+            Root<ExpenseCategory> root = cq.from(ExpenseCategory.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("status"), status))
+                    .orderBy(cb.asc(root.get("name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar ExpenseCategory por status: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Verifica se já existe uma categoria com o mesmo nome
+     */
+    public boolean existsByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<ExpenseCategory> root = cq.from(ExpenseCategory.class);
+
+            cq.select(cb.count(root))
+                    .where(cb.equal(root.get("name"), name));
+
+            Long count = session.createQuery(cq).getSingleResult();
+            return count > 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao verificar existência de ExpenseCategory: " + e.getMessage());
+            return false;
+        }
+    }
+}

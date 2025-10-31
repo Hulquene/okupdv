@@ -31,6 +31,10 @@ public class Supplier {
     @Column(name = "zip_code", length = 20)
     private String zipCode;
 
+    // 🔹 NOVO CAMPO: País do fornecedor
+    @Column(name = "country", length = 50)
+    private String country;
+
     @Column(name = "group_id")
     private Integer groupId;
 
@@ -48,6 +52,13 @@ public class Supplier {
         this.name = name;
         this.nif = nif;
         this.email = email;
+    }
+
+    public Supplier(String name, String nif, String email, String country) {
+        this.name = name;
+        this.nif = nif;
+        this.email = email;
+        this.country = country;
     }
 
     // Getters e Setters
@@ -115,6 +126,15 @@ public class Supplier {
         this.zipCode = zipCode;
     }
 
+    // 🔹 NOVO GETTER/SETTER para country
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
     public Integer getGroupId() {
         return groupId;
     }
@@ -141,6 +161,6 @@ public class Supplier {
 
     @Override
     public String toString() {
-        return "Supplier{id=" + id + ", name='" + name + "', nif='" + nif + "'}";
+        return "Supplier{id=" + id + ", name='" + name + "', nif='" + nif + "', country='" + country + "'}";
     }
 }

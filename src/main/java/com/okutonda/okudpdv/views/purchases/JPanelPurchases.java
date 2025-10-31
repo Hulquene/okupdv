@@ -65,7 +65,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
         data.setNumRows(0);
 
         for (Purchase p : list) {
-            double pago = p.getPayTotal() != null ? p.getPayTotal().doubleValue() : 0d;
+            double pago = p.getTotal_pago()!= null ? p.getTotal_pago().doubleValue() : 0d;
             double emAberto = p.getTotal() != null ? p.getTotal().doubleValue() - pago : 0d;
 
             data.addRow(new Object[]{

@@ -2,6 +2,8 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -172,13 +174,26 @@ public class PaymentController {
     }
 
     /**
-     * Busca pagamentos por modo de pagamento
+     * Busca pagamentos por modo de pagamento (ATUALIZADO)
      */
-    public List<Payment> getByPaymentMode(Payment.PaymentMode paymentMode) {
+    public List<Payment> getByPaymentMode(PaymentMode paymentMode) {
         try {
             return dao.findByPaymentMode(paymentMode);
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar pagamentos por modo: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Busca pagamentos por código do modo de pagamento (NOVO MÉTODO)
+     */
+    public List<Payment> getByPaymentMode(String codigoModo) {
+        try {
+            PaymentMode paymentMode = PaymentMode.fromCodigo(codigoModo);
+            return dao.findByPaymentMode(paymentMode);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar pagamentos por código do modo: " + e.getMessage());
             return List.of();
         }
     }
@@ -191,6 +206,24 @@ public class PaymentController {
             return dao.calculateTotalByPeriod(from, to);
         } catch (Exception e) {
             System.err.println("❌ Erro ao calcular total de pagamentos: " + e.getMessage());
+            return 0.0;
+        }
+    }
+
+    /**
+     * Calcula o total de pagamentos por modo de pagamento em um período (NOVO
+     * MÉTODO)
+     */
+    public Double calcularTotalPorModoEPeriodo(PaymentMode paymentMode, LocalDate from, LocalDate to) {
+        try {
+            List<Payment> pagamentos = dao.findByPaymentMode(paymentMode);
+            return pagamentos.stream()
+                    .filter(p -> isDataNoPeriodo(p.getDate(), from, to))
+                    .filter(p -> p.getStatus() == Payment.PaymentStatus.SUCCESS)
+                    .mapToDouble(p -> p.getTotal().doubleValue())
+                    .sum();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao calcular total por modo e período: " + e.getMessage());
             return 0.0;
         }
     }
@@ -211,6 +244,26 @@ public class PaymentController {
             return false;
         } catch (Exception e) {
             System.err.println("❌ Erro ao alterar status do pagamento: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Altera o modo de pagamento (NOVO MÉTODO)
+     */
+    public boolean alterarModoPagamento(Integer paymentId, PaymentMode novoModo) {
+        try {
+            Optional<Payment> paymentOpt = dao.findById(paymentId);
+            if (paymentOpt.isPresent()) {
+                Payment payment = paymentOpt.get();
+                payment.setPaymentMode(novoModo);
+                dao.update(payment);
+                System.out.println("✅ Modo de pagamento atualizado: " + paymentId + " -> " + novoModo);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao alterar modo de pagamento: " + e.getMessage());
             return false;
         }
     }
@@ -271,5 +324,84 @@ public class PaymentController {
         }
 
         return referencia;
+    }
+
+    /**
+     * Valida se um código de modo de pagamento é válido (NOVO MÉTODO)
+     */
+    public boolean validarCodigoModoPagamento(String codigo) {
+        return PaymentMode.isValidCodigo(codigo);
+    }
+
+    /**
+     * Obtém todos os modos de pagamento ativos (NOVO MÉTODO)
+     */
+    public PaymentMode[] getModosPagamentoAtivos() {
+        return PaymentMode.getActiveModes();
+    }
+
+    /**
+     * Obtém os modos de pagamento mais comuns (NOVO MÉTODO)
+     */
+    public PaymentMode[] getModosPagamentoComuns() {
+        return PaymentMode.getCommonModes();
+    }
+
+    /**
+     * Converte string para PaymentMode (NOVO MÉTODO)
+     */
+    public PaymentMode converterParaPaymentMode(String valor) {
+        return PaymentMode.fromString(valor);
+    }
+
+    /**
+     * Converte código para PaymentMode (NOVO MÉTODO)
+     */
+    public PaymentMode converterCodigoParaPaymentMode(String codigo) {
+        return PaymentMode.fromCodigo(codigo);
+    }
+
+    // ==========================================================
+    // 🔹 Utilitários
+    // ==========================================================
+    private boolean isDataNoPeriodo(String dataString, LocalDate from, LocalDate to) {
+        try {
+            if (dataString == null || dataString.trim().isEmpty()) {
+                return false;
+            }
+            LocalDate data = LocalDate.parse(dataString.substring(0, 10));
+            return !data.isBefore(from) && !data.isAfter(to);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Cria um pagamento rápido com validação (NOVO MÉTODO)
+     */
+    public Payment criarPagamentoRapido(String descricao, BigDecimal total, String referencia, PaymentMode modo) {
+        Payment payment = new Payment();
+        payment.setDescription(descricao);
+        payment.setTotal(total);
+        payment.setReference(referencia);
+        payment.setPaymentMode(modo);
+        payment.setDate(java.time.LocalDate.now().toString());
+        payment.setStatus(Payment.PaymentStatus.SUCCESS);
+
+        return add(payment);
+    }
+
+    /**
+     * Obtém estatísticas de pagamentos por modo (NOVO MÉTODO)
+     */
+    public java.util.Map<PaymentMode, Double> getEstatisticasPorModo(LocalDate from, LocalDate to) {
+        java.util.Map<PaymentMode, Double> estatisticas = new java.util.HashMap<>();
+
+        for (PaymentMode modo : PaymentMode.getActiveModes()) {
+            Double total = calcularTotalPorModoEPeriodo(modo, from, to);
+            estatisticas.put(modo, total);
+        }
+
+        return estatisticas;
     }
 }

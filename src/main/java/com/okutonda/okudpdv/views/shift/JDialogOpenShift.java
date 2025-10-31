@@ -6,7 +6,6 @@ package com.okutonda.okudpdv.views.shift;
 
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.data.entities.Shift;
-import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.Util;
 import javax.swing.JOptionPane;
@@ -108,11 +107,13 @@ public class JDialogOpenShift extends javax.swing.JDialog {
             shift.setGrantedAmount(Double.valueOf(value));
             shift.setIncurredAmount(0.0);
             shift.setClosingAmount(0.0);
-            
+
             shift.setUser(session.getUser());
-            Boolean resp = shiftController.openShift(shift);
-            if (resp == true) {
+            Shift turnoAberto = shiftController.abrirTurno(shift.getGrantedAmount());
+            if (turnoAberto != null) {
                 dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Erro ao abrir turno!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(null, "Valor invalido!", "Atencao", JOptionPane.ERROR_MESSAGE);

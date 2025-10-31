@@ -10,7 +10,6 @@ public class TestFinalControllers {
 
             testStockMovementController();
             testPaymentController();
-            testPaymentModeController();
 
             System.out.println("✅ Todos os controllers finais testados com sucesso!");
 
@@ -44,17 +43,4 @@ public class TestFinalControllers {
         System.out.println("✅ Referência única gerada: " + referenciaUnica);
     }
 
-    private static void testPaymentModeController() {
-        System.out.println("\n💳 Testando PaymentModeControllerHibernate...");
-        PaymentModeController controller = new PaymentModeController();
-
-        var allModes = controller.getAll();
-        System.out.println("✅ Modos de pagamento encontrados: " + allModes.size());
-
-        var defaultMode = controller.getDefault();
-        System.out.println("✅ Modo padrão: " + (defaultMode != null ? defaultMode.getName() : "Nenhum"));
-
-        var activeModes = controller.getActiveModes();
-        System.out.println("✅ Modos ativos: " + activeModes.size());
-    }
 }

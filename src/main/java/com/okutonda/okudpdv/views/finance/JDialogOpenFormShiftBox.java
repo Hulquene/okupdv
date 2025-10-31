@@ -4,10 +4,8 @@
  */
 package com.okutonda.okudpdv.views.finance;
 
-import com.okutonda.okudpdv.controllers.BoxController;
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
-import com.okutonda.okudpdv.data.entities.Box;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
@@ -21,7 +19,7 @@ import javax.swing.JOptionPane;
  */
 public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
 
-    BoxController boxController = new BoxController();
+//    BoxController boxController = new BoxController();
     ShiftController shiftController = new ShiftController();
     //UserSession session = UserSession.getInstance();
     UserController userController = new UserController();
@@ -52,34 +50,75 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
 //            jComboBoxStatus.setSelectedIndex(Integer.parseInt(prod.getStatus()));
 //        }
 //    }
+//    public Boolean getResponse() {
+//        return status;
+//    }
+//
+//
+//    public Boolean ValidateManager() {
+//
+//        String codeManager = new String(jPasswordFieldManagerPassword.getPassword());
+//        String nameManager = (String) jComboBoxSelectedManager.getSelectedItem();
+//        return !codeManager.isEmpty() && !nameManager.isEmpty();
+//    }
+//
+//    public Shift validateShift() {
+//        Shift cModel = new Shift();
+//
+//        if (jTextFieldShiftValueOpen.getText().isEmpty() && Util.isDouble(jTextFieldShiftValueOpen.getText())) {
+//            JOptionPane.showMessageDialog(null, "Valor invalido!", "Atencao", JOptionPane.ERROR_MESSAGE);
+//        } else if (jComboBoxSelectedUser.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(null, "Campo User invalido!! Selecione");
+//        } else if (jComboBoxSeletecBox.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(null, "Campo Caixa invalido!! Selecione");
+//        } else if (jComboBoxSelectedManager.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(null, "Campo Gestor invalido!! Selecione");
+//        } else {
+//            if (ValidateManager() == false) {
+//                JOptionPane.showMessageDialog(null, "Prencha o formulario para continuar...", "Atenção", JOptionPane.ERROR_MESSAGE);
+//            } else {
+//
+//                cModel.setBox((Box) jComboBoxSeletecBox.getSelectedItem());
+//                cModel.setGrantedAmount(Double.valueOf(jTextFieldShiftValueOpen.getText()));
+//                cModel.setIncurredAmount(0.0);
+//                cModel.setClosingAmount(0.0);
+//                cModel.setUser((User) jComboBoxSelectedUser.getSelectedItem());
+//                cModel.setManager((User) jComboBoxSelectedManager.getSelectedItem());
+//                return cModel;
+////                Boolean resp = shiftController.add(cModel, 0);
+////                if (resp == true) {
+////                    this.dispose();
+////                }
+//            }
+//        }
+//        return null;
+//    }
+//
+//    public void loadCombobox() {
+//        List<Box> listS = boxController.findAll();
+//        jComboBoxSeletecBox.removeAllItems();
+//        for (Box item : listS) {
+//            jComboBoxSeletecBox.addItem(item.getName());
+//        }
+//
+//        List<User> listW = userController.getAll();
+//        jComboBoxSelectedUser.removeAllItems();
+//        jComboBoxSelectedManager.removeAllItems();
+//        for (User item : listW) {
+//            jComboBoxSelectedUser.addItem(item.getName());
+//            jComboBoxSelectedManager.addItem(item.getName());
+//        }
+////        List<ReasonTaxes> listR = reasonTaxeController.get("");
+////        jComboBoxReasonTaxeId.removeAllItems();
+////        for (ReasonTaxes item : listR) {
+////            jComboBoxReasonTaxeId.addItem(item);
+////        }
+//    }
     public Boolean getResponse() {
         return status;
     }
 
-//    public void setProduct(int id) {
-//        Product prod = productController.getId(id);
-//        setFormProduct(prod);
-//    }
-//    public void changeValueTextFildForm(Product cModel) {
-//        jTextFieldId.setText(Integer.toString(cModel.getId()));
-//        jTextFieldCode.setText(cModel.getCode());
-//        jTextFieldBarCode.setText(cModel.getBarcode());
-//        jTextFieldDescription.setText(cModel.getDescription());
-//        jComboBoxTaxeId.setSelectedItem(cModel.getTaxe());
-//        jComboBoxReasonTaxeId.setSelectedItem(cModel.getReasonTaxe());
-//        jComboBoxSupplier.setSelectedItem(cModel.getSupplier());
-//        jComboBoxType.setSelectedItem(cModel.getType());
-//        jTextFieldBarCode.setText(cModel.getBarcode());
-//        jTextFieldPrice.setText(cModel.getPrice().toString());
-//        jTextFieldPurchasePrice.setText(cModel.getPurchasePrice().toString());
-////        jComboBoxGroupId.setSelectedIndex(cModel.getGroupId());
-////        jComboBoxSubGroupId.setSelectedIndex(cModel.getSubGroupId());
-//        jComboBoxSupplier.setSelectedItem(cModel.getSupplier());
-//        jComboBoxStatus.setSelectedItem(cModel.getStatus());
-//        jTextFieldStockTotal.setText(Double.toString(cModel.getStockTotal()));
-//    }
     public Boolean ValidateManager() {
-
         String codeManager = new String(jPasswordFieldManagerPassword.getPassword());
         String nameManager = (String) jComboBoxSelectedManager.getSelectedItem();
         return !codeManager.isEmpty() && !nameManager.isEmpty();
@@ -88,54 +127,142 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
     public Shift validateShift() {
         Shift cModel = new Shift();
 
-        if (jTextFieldShiftValueOpen.getText().isEmpty() && Util.isDouble(jTextFieldShiftValueOpen.getText())) {
-            JOptionPane.showMessageDialog(null, "Valor invalido!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } else if (jComboBoxSelectedUser.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo User invalido!! Selecione");
-        } else if (jComboBoxSeletecBox.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo Caixa invalido!! Selecione");
-        } else if (jComboBoxSelectedManager.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo Gestor invalido!! Selecione");
+        // Validação do valor de abertura
+        if (jTextFieldShiftValueOpen.getText().isEmpty() || !Util.isDouble(jTextFieldShiftValueOpen.getText())) {
+            JOptionPane.showMessageDialog(null, "Valor de abertura inválido!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } // Validação do usuário
+        else if (jComboBoxSelectedUser.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "Selecione um usuário!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } // Validação do gestor
+        else if (jComboBoxSelectedManager.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "Selecione um gestor!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } // Validação das credenciais do gestor
+        else if (!validarSenhaGestor()) {
+            JOptionPane.showMessageDialog(null, "Senha do gestor incorreta!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return null;
         } else {
-            if (ValidateManager() == false) {
-                JOptionPane.showMessageDialog(null, "Prencha o formulario para continuar...", "Atenção", JOptionPane.ERROR_MESSAGE);
-            } else {
+            try {
+                // Configura o turno
+                Double valorAbertura = Double.valueOf(jTextFieldShiftValueOpen.getText());
 
-                cModel.setBox((Box) jComboBoxSeletecBox.getSelectedItem());
-                cModel.setGrantedAmount(Double.valueOf(jTextFieldShiftValueOpen.getText()));
+                cModel.setGrantedAmount(valorAbertura);
                 cModel.setIncurredAmount(0.0);
                 cModel.setClosingAmount(0.0);
-                cModel.setUser((User) jComboBoxSelectedUser.getSelectedItem());
-                cModel.setManager((User) jComboBoxSelectedManager.getSelectedItem());
+                cModel.setStatus("open");
+
+                // Obtém usuário selecionado
+                User usuarioSelecionado = (User) jComboBoxSelectedUser.getSelectedItem();
+                cModel.setUser(usuarioSelecionado);
+
+                // Gera código e hash do turno
+                cModel.setCode(gerarCodigoTurno());
+                cModel.setHash(gerarHashTurno());
+                cModel.setDateOpen(java.time.LocalDateTime.now().toString());
+
                 return cModel;
-//                Boolean resp = shiftController.add(cModel, 0);
-//                if (resp == true) {
-//                    this.dispose();
-//                }
+
+            } catch (Exception e) {
+                System.err.println("❌ Erro ao validar turno: " + e.getMessage());
+                JOptionPane.showMessageDialog(null, "Erro ao configurar turno: " + e.getMessage(),
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return null;
             }
         }
-        return null;
+    }
+
+    /**
+     * Valida a senha do gestor selecionado
+     */
+    private boolean validarSenhaGestor() {
+        try {
+            String senhaInserida = new String(jPasswordFieldManagerPassword.getPassword());
+            User gestorSelecionado = (User) jComboBoxSelectedManager.getSelectedItem();
+
+            if (gestorSelecionado == null || senhaInserida.isEmpty()) {
+                return false;
+            }
+
+            // Usa o UserController para validar a senha
+            UserController userController = new UserController();
+            return userController.validarSenha(gestorSelecionado.getId(), senhaInserida);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao validar senha do gestor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Gera um código único para o turno
+     */
+    private String gerarCodigoTurno() {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        return "SHIFT_" + timestamp.substring(timestamp.length() - 6);
+    }
+
+    /**
+     * Gera hash único para o turno
+     */
+    private String gerarHashTurno() {
+        User usuario = (User) jComboBoxSelectedUser.getSelectedItem();
+        String userInfo = usuario != null ? usuario.getId().toString() : "unknown";
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        return "shift_" + userInfo + "_" + timestamp;
     }
 
     public void loadCombobox() {
-        List<Box> listS = boxController.findAll();
-        jComboBoxSeletecBox.removeAllItems();
-        for (Box item : listS) {
-            jComboBoxSeletecBox.addItem(item.getName());
-        }
-
-        List<User> listW = userController.getAll();
+        // Carrega usuários para seleção
+        List<User> listUsers = userController.getAll();
         jComboBoxSelectedUser.removeAllItems();
         jComboBoxSelectedManager.removeAllItems();
-        for (User item : listW) {
-            jComboBoxSelectedUser.addItem(item.getName());
-            jComboBoxSelectedManager.addItem(item.getName());
+
+        for (User user : listUsers) {
+            jComboBoxSelectedUser.addItem(user);
+            jComboBoxSelectedManager.addItem(user);
         }
-//        List<ReasonTaxes> listR = reasonTaxeController.get("");
-//        jComboBoxReasonTaxeId.removeAllItems();
-//        for (ReasonTaxes item : listR) {
-//            jComboBoxReasonTaxeId.addItem(item);
-//        }
+
+        System.out.println("✅ Combobox carregados: " + listUsers.size() + " usuários");
+    }
+
+    /**
+     * Método para abrir o turno validado
+     */
+    public boolean abrirTurnoValidado() {
+        try {
+            Shift turnoValidado = validateShift();
+
+            if (turnoValidado == null) {
+                return false; // Validação falhou
+            }
+
+            // Usa o ShiftController para abrir o turno
+            ShiftController shiftController = new ShiftController();
+            Shift turnoAberto = shiftController.abrirTurno(turnoValidado.getGrantedAmount());
+
+            if (turnoAberto != null) {
+                JOptionPane.showMessageDialog(null,
+                        "✅ Turno aberto com sucesso!\n"
+                        + "Código: " + turnoAberto.getCode() + "\n"
+                        + "Usuário: " + turnoAberto.getUser().getName() + "\n"
+                        + "Valor abertura: " + turnoAberto.getGrantedAmount() + " AOA",
+                        "Turno Aberto", JOptionPane.INFORMATION_MESSAGE);
+
+                this.status = true;
+                return true;
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao abrir turno: " + e.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao abrir turno: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
     }
 
     /**
@@ -272,15 +399,19 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
 
     private void jButtonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveActionPerformed
         // TODO add your handling code here:
-        Shift shift = validateShift();
-        if (shift != null) {
-//            shift.setUser(session.getUser());
-            Boolean resp = shiftController.openShift(shift);
-            if (resp == true) {
-                dispose();
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Valor invalido!", "Atencao", JOptionPane.ERROR_MESSAGE);
+//        Shift shift = validateShift();
+//        if (shift != null) {
+////            shift.setUser(session.getUser());
+//            Boolean resp = shiftController.openShift(shift);
+//            if (resp == true) {
+//                dispose();
+//            }
+//        } else {
+//            JOptionPane.showMessageDialog(null, "Valor invalido!", "Atencao", JOptionPane.ERROR_MESSAGE);
+//        }
+        boolean sucesso = abrirTurnoValidado();
+        if (sucesso) {
+            this.dispose();
         }
     }//GEN-LAST:event_jButtonSaveActionPerformed
 

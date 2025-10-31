@@ -4,7 +4,6 @@
  */
 package com.okutonda.okudpdv.views.install;
 
-import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.dao.UserDao;
@@ -49,7 +48,7 @@ public class JDialogInstallInsertUser extends javax.swing.JDialog {
 //    }
     public Boolean insertUser(User cUser) {
         if (cUser != null) {
-            new UserDao().add(cUser);
+            new UserDao().save(cUser);
 //             status = dao.add(user);
 //            userController.add(cUser, 0);
             return true;

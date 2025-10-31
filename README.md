@@ -261,6 +261,13 @@ paymentModes
 stockMoviment
 order
 exportSaft
+expesnse
+expenseCategoria
+purchase
+purchaseItem
+purchasePayment
+shift
+
 
 
 dao
@@ -279,6 +286,14 @@ paymentModes
 stockMoviment
 order
 exportSaft
+expesnse
+expenseCategoria
+purchase
+purchaseItem
+purchasePayment
+shift
+financa
+
 
 
 
@@ -298,3 +313,10 @@ paymentModes
 stockMoviment
 order
 exportSaft
+expesnse
+expenseCategoria
+purchase
+purchaseItem
+purchasePayment
+shift
+financa

@@ -1,7 +1,7 @@
 package com.okutonda.okudpdv.helpers;
 
-import com.okutonda.okudpdv.controllers.ClientControllerHibernate;
-import com.okutonda.okudpdv.controllers.SupplierControllerHibernate;
+import com.okutonda.okudpdv.controllers.ClientController;
+import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Supplier;
 
@@ -24,7 +24,7 @@ public class TestClientSupplierControllers {
     
     private static void testClientController() {
         System.out.println("\n👥 Testando ClientControllerHibernate...");
-        ClientControllerHibernate controller = new ClientControllerHibernate();
+        ClientController controller = new ClientController();
         
         // Buscar todos os clientes
         var allClients = controller.getAll();
@@ -56,7 +56,7 @@ public class TestClientSupplierControllers {
     
     private static void testSupplierController() {
         System.out.println("\n🏭 Testando SupplierControllerHibernate...");
-        SupplierControllerHibernate controller = new SupplierControllerHibernate();
+        SupplierController controller = new SupplierController();
         
         // Buscar todos os fornecedores
         var allSuppliers = controller.listarTodos();

@@ -1,15 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import com.okutonda.okudpdv.data.dao.CountryDao;
+import java.util.*;
+
 /**
- *
- * @author kenny
+ * Countries como "enum virtual" com cache estático
  */
 public class Countries {
 
+    private static List<Countries> CACHE = null;
+    private static final Object LOCK = new Object();
+
+    // ... campos existentes (id, iso2, iso3, etc.)
     private int id;
     private String iso2;
     private String iso3;
@@ -20,6 +22,123 @@ public class Countries {
     private String calling_code;
     private String cctld;
 
+    // ==========================================================
+    // 🔹 CACHE ESTÁTICO - Funciona como Enum
+    // ==========================================================
+    /**
+     * Carrega todos os países em cache (uma vez por execução)
+     */
+    public static void loadCache() {
+        synchronized (LOCK) {
+            if (CACHE == null) {
+                CountryDao dao = new CountryDao();
+                CACHE = dao.findAll();
+                System.out.println("✅ Cache de países carregado: " + CACHE.size() + " países");
+            }
+        }
+    }
+
+    /**
+     * Limpa o cache (útil para testes ou atualizações)
+     */
+    public static void clearCache() {
+        synchronized (LOCK) {
+            CACHE = null;
+        }
+    }
+
+    /**
+     * Retorna todos os países (como se fosse enum.values())
+     */
+    public static List<Countries> getAll() {
+        if (CACHE == null) {
+            loadCache();
+        }
+        return Collections.unmodifiableList(CACHE);
+    }
+
+    /**
+     * Busca por ISO2 (como se fosse enum.valueOf())
+     */
+    public static Countries getByIso2(String iso2) {
+        if (CACHE == null) {
+            loadCache();
+        }
+        return CACHE.stream()
+                .filter(c -> c.getIso2().equalsIgnoreCase(iso2))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Busca por ISO3
+     */
+    public static Countries getByIso3(String iso3) {
+        if (CACHE == null) {
+            loadCache();
+        }
+        return CACHE.stream()
+                .filter(c -> c.getIso3().equalsIgnoreCase(iso3))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Busca por nome (fuzzy match)
+     */
+    public static Countries getByName(String name) {
+        if (CACHE == null) {
+            loadCache();
+        }
+        String nameLower = name.toLowerCase();
+        return CACHE.stream()
+                .filter(c -> c.getLong_name().toLowerCase().contains(nameLower)
+                || c.getShort_name().toLowerCase().contains(nameLower))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Países mais comuns (para dropdowns)
+     */
+    public static List<Countries> getCommonCountries() {
+        if (CACHE == null) {
+            loadCache();
+        }
+
+        // Países mais usados em Angola
+        String[] commonCodes = {"AO", "PT", "BR", "US", "GB", "FR", "ES", "ZA", "CN"};
+
+        return Arrays.stream(commonCodes)
+                .map(Countries::getByIso2)
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
+     * Filtra países por nome
+     */
+    public static List<Countries> filter(String search) {
+        if (CACHE == null) {
+            loadCache();
+        }
+
+        if (search == null || search.trim().isEmpty()) {
+            return getAll();
+        }
+
+        String searchLower = search.toLowerCase();
+        return CACHE.stream()
+                .filter(c -> c.getLong_name().toLowerCase().contains(searchLower)
+                || c.getShort_name().toLowerCase().contains(searchLower)
+                || c.getIso2().toLowerCase().contains(searchLower)
+                || c.getIso3().toLowerCase().contains(searchLower))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    // ==========================================================
+    // 🔹 GETTERS/SETTERS (mantenha os existentes)
+    // ==========================================================
     public int getId() {
         return id;
     }
@@ -94,7 +213,23 @@ public class Countries {
 
     @Override
     public String toString() {
-        return this.getShort_name();
+        return long_name + " (" + iso2 + ")";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Countries country = (Countries) obj;
+        return id == country.id || iso2.equals(country.iso2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, iso2);
+    }
 }

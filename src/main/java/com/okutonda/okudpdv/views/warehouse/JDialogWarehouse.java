@@ -308,17 +308,17 @@ public class JDialogWarehouse extends javax.swing.JDialog {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
             boolean response;
             if (id == 0) {
-                response = warehouseController.save(cModel);
+                Warehouse warehouseSalvo = warehouseController.save(cModel);
+                response = (warehouseSalvo != null);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Warehouse salvo com Sucesso!!");
-
                 }
             } else {
-                     cModel.setId(id);
-                response = warehouseController.save(cModel);
+                cModel.setId(id);
+                Warehouse warehouseSalvo = warehouseController.save(cModel);
+                response = (warehouseSalvo != null);
                 if (response) {
                     JOptionPane.showMessageDialog(null, "Warehouse Atualizado com Sucesso!!");
-
                 }
             }
             listWarehouse();

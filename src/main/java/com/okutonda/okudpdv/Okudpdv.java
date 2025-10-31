@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import com.okutonda.okudpdv.data.connection.DatabaseBootProbe;
 import com.okutonda.okudpdv.data.connection.DatabaseProvider;
+import com.okutonda.okudpdv.data.entities.Countries;
 
 /**
  *
@@ -20,7 +21,7 @@ public class Okudpdv {
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
-
+        Countries.loadCache();
         // 1) Look & Feel (FlatLaf)
         try {
             FlatLightLaf.setup();

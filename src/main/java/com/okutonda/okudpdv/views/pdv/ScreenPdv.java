@@ -76,7 +76,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         productController = new ProductController();
         listProductOrder = new ArrayList<>();
         clientSelected = null;//new Clients();
-        shiftController.loadActiveShift();
+        shiftController.buscarTurnoAtual();
         userController = new UserController();
 
         // Atalhos globais
@@ -157,7 +157,7 @@ public class ScreenPdv extends javax.swing.JFrame {
             // 1) Cliente padrão (se não selecionado)
             if (clientSelected == null) {
                 ClientDao clientDao = new ClientDao();
-                clientSelected = clientDao.getDefaultClient();
+                clientSelected = clientDao.getDefaultClient().orElse(null);
                 if (clientSelected == null) {
                     JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
                     return;
@@ -646,7 +646,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     public void clearClient() {
         ClientDao clientDao = new ClientDao();
-        clientSelected = clientDao.getDefaultClient();
+        clientSelected = clientDao.getDefaultClient().orElse(null);
         jTextFieldNifClient.setText(clientSelected.getNif());
         jLabelNameClienteSelected.setText(clientSelected.getName());
     }
@@ -1608,7 +1608,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         // TODO add your handling code here:
         String nif = jTextFieldNifClient.getText();
         ClientDao cDao = new ClientDao();
-        clientSelected = cDao.findByNif(nif);
+        clientSelected = cDao.findByNif(nif).orElse(null);
         if (clientSelected.getName() != null) {
             jTextFieldNifClient.setText(clientSelected.getNif());
             jLabelNameClienteSelected.setText(clientSelected.getName());

@@ -1,36 +1,72 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.data.entities;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author kenny
- */
+@Entity
+@Table(name = "purchases")
 public class Purchase {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
+
+    @Column(name = "invoice_number", nullable = false, length = 50)
     private String invoiceNumber;
-    private InvoiceType invoiceType; // FT, FR, NC, ND
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invoice_type", length = 20)
+    private InvoiceType invoiceType;
+
+    @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
+
+    @Column(name = "total", nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
-    private BigDecimal ivaTotal;
+
+    @Column(name = "iva_total", precision = 10, scale = 2)
+    private BigDecimal ivaTotal = BigDecimal.ZERO;
+
+    @Column(name = "total_pago", precision = 10, scale = 2)
+    private BigDecimal total_pago = BigDecimal.ZERO;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "data_compra")
     private Date dataCompra;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "data_vencimento")
     private Date dataVencimento;
-    private String status; // aberto, parcial, pago, atrasado
+
+    @Column(name = "status", length = 20)
+    private String status = "PENDENTE";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    private List<PurchaseItem> items;
-    private List<PurchasePayment> payments;
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PurchaseItem> items = new ArrayList<>();
 
-    private BigDecimal total_pago;
-    private String note;
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PurchasePayment> payments = new ArrayList<>();
+
+    // Construtores
+    public Purchase() {
+    }
+
+    public Purchase(Supplier supplier, String invoiceNumber) {
+        this.supplier = supplier;
+        this.invoiceNumber = invoiceNumber;
+        this.dataCompra = new Date();
+    }
 
     // Getters e Setters
     public Integer getId() {
@@ -89,19 +125,11 @@ public class Purchase {
         this.ivaTotal = ivaTotal;
     }
 
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public BigDecimal getPayTotal() {
+    public BigDecimal getTotal_pago() {
         return total_pago;
     }
 
-    public void setPayTotal(BigDecimal total_pago) {
+    public void setTotal_pago(BigDecimal total_pago) {
         this.total_pago = total_pago;
     }
 
@@ -129,6 +157,14 @@ public class Purchase {
         this.status = status;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public List<PurchaseItem> getItems() {
         return items;
     }
@@ -145,25 +181,29 @@ public class Purchase {
         this.payments = payments;
     }
 
-    public User getUser() {
-        return user;
+    // Métodos utilitários
+    public void addItem(PurchaseItem item) {
+        items.add(item);
+        item.setPurchase(this);
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void removeItem(PurchaseItem item) {
+        items.remove(item);
+        item.setPurchase(null);
     }
 
-    public BigDecimal getTotal_pago() {
-        return total_pago;
+    public void addPayment(PurchasePayment payment) {
+        payments.add(payment);
+        payment.setPurchase(this);
     }
 
-    public void setTotal_pago(BigDecimal total_pago) {
-        this.total_pago = total_pago;
+    public void removePayment(PurchasePayment payment) {
+        payments.remove(payment);
+        payment.setPurchase(null);
     }
 
     @Override
     public String toString() {
-        return "Purchase{" + "id=" + id + ", supplier=" + supplier + ", invoiceNumber=" + invoiceNumber + ", invoiceType=" + invoiceType + ", descricao=" + descricao + ", total=" + total + ", ivaTotal=" + ivaTotal + ", dataCompra=" + dataCompra + ", dataVencimento=" + dataVencimento + ", status=" + status + ", user=" + user + ", items=" + items + ", payments=" + payments + ", total_pago=" + total_pago + ", note=" + note + '}';
+        return "Purchase{id=" + id + ", invoice='" + invoiceNumber + "', total=" + total + "}";
     }
-
 }

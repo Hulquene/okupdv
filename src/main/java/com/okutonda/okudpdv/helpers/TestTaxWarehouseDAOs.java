@@ -1,8 +1,8 @@
 package com.okutonda.okudpdv.helpers;
 
-import com.okutonda.okudpdv.data.dao.TaxeDaoHibernate;
-import com.okutonda.okudpdv.data.dao.TaxeReasonDaoHibernate;
-import com.okutonda.okudpdv.data.dao.WarehouseDaoHibernate;
+import com.okutonda.okudpdv.data.dao.TaxeDao;
+import com.okutonda.okudpdv.data.dao.TaxeReasonDao;
+import com.okutonda.okudpdv.data.dao.WarehouseDao;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Warehouse;
@@ -29,7 +29,7 @@ public class TestTaxWarehouseDAOs {
     
     private static void testTaxeDao() {
         System.out.println("\n💰 Testando TaxeDaoHibernate...");
-        TaxeDaoHibernate dao = new TaxeDaoHibernate();
+        TaxeDao dao = new TaxeDao();
         
         // Buscar todos
         var allTaxes = dao.findAll();
@@ -54,7 +54,7 @@ public class TestTaxWarehouseDAOs {
     
     private static void testTaxeReasonDao() {
         System.out.println("\n📋 Testando TaxeReasonDaoHibernate...");
-        TaxeReasonDaoHibernate dao = new TaxeReasonDaoHibernate();
+        TaxeReasonDao dao = new TaxeReasonDao();
         
         // Buscar todos
         var allReasons = dao.findAll();
@@ -72,7 +72,7 @@ public class TestTaxWarehouseDAOs {
     
     private static void testWarehouseDao() {
         System.out.println("\n🏭 Testando WarehouseDaoHibernate...");
-        WarehouseDaoHibernate dao = new WarehouseDaoHibernate();
+        WarehouseDao dao = new WarehouseDao();
         
         // Buscar todos
         var allWarehouses = dao.findAll();

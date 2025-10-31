@@ -1,126 +1,304 @@
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.data.entities.Countries;
-//import java.sql.ResultSet;
-//import java.sql.SQLException;
-//import java.util.List;
-//
-///**
-// * DAO responsável pela gestão de países (Countries).
-// *
-// * Compatível com BaseDao e HikariCP. Fornece operações CRUD básicas e consultas
-// * filtradas.
-// *
-// * @author Hulquene
-// */
-//public class CountryDao extends BaseDao<Countries> {
-//
-//    public CountryDao() {
-//        super(); // utiliza o pool de conexões via DatabaseProvider
-//    }
-//
-//    public CountryDao(java.sql.Connection externalConn) {
-//        super(externalConn); // permite uso transacional externo
-//    }
-//
-//    // ==========================================================
-//    // 🔹 Mapeamento ResultSet → Entidade
-//    // ==========================================================
-//    private Countries map(ResultSet rs) {
-//        try {
-//            Countries c = new Countries();
-//            c.setId(rs.getInt("id"));
-//            c.setIso2(rs.getString("iso2"));
-//            c.setIso3(rs.getString("iso3"));
-//            c.setShort_name(rs.getString("short_name"));
-//            c.setLong_name(rs.getString("long_name"));
-//            c.setUn_member(rs.getString("un_member"));
-//            c.setNumcode(rs.getString("numcode"));
-//            c.setCalling_code(rs.getString("calling_code"));
-//            c.setCctld(rs.getString("cctld"));
-//            return c;
-//        } catch (SQLException e) {
-//            System.err.println("[DB] Erro ao mapear Countries: " + e.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    // ==========================================================
-//    // 🔹 CRUD
-//    // ==========================================================
-//    @Override
-//    public boolean add(Countries c) {
-//        String sql = """
-//            INSERT INTO countries (iso2, iso3, short_name, long_name, un_member, numcode, calling_code, cctld)
-//            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-//        """;
-//        return executeUpdate(sql,
-//                c.getIso2(),
-//                c.getIso3(),
-//                c.getShort_name(),
-//                c.getLong_name(),
-//                c.getUn_member(),
-//                c.getNumcode(),
-//                c.getCalling_code(),
-//                c.getCctld());
-//    }
-//
-//    @Override
-//    public boolean update(Countries c) {
-//        String sql = """
-//            UPDATE countries
-//               SET iso2=?, iso3=?, short_name=?, long_name=?, un_member=?, numcode=?, calling_code=?, cctld=?
-//             WHERE id=?
-//        """;
-//        return executeUpdate(sql,
-//                c.getIso2(),
-//                c.getIso3(),
-//                c.getShort_name(),
-//                c.getLong_name(),
-//                c.getUn_member(),
-//                c.getNumcode(),
-//                c.getCalling_code(),
-//                c.getCctld(),
-//                c.getId());
-//    }
-//
-//    @Override
-//    public boolean delete(int id) {
-//        return executeUpdate("DELETE FROM countries WHERE id=?", id);
-//    }
-//
-//    @Override
-//    public Countries findById(int id) {
-//        String sql = "SELECT * FROM countries WHERE id=?";
-//        return findOne(sql, this::map, id);
-//    }
-//
-//    @Override
-//    public List<Countries> findAll() {
-//        String sql = "SELECT * FROM countries ORDER BY long_name ASC";
-//        return executeQuery(sql, this::map);
-//    }
-//
-//    // ==========================================================
-//    // 🔹 Consultas adicionais
-//    // ==========================================================
-//    public List<Countries> filter(String txt) {
-//        String like = "%" + txt + "%";
-//        String sql = """
-//            SELECT * FROM countries
-//             WHERE short_name LIKE ? OR long_name LIKE ? OR iso2 LIKE ? OR iso3 LIKE ?
-//          ORDER BY long_name ASC
-//        """;
-//        return executeQuery(sql, this::map, like, like, like, like);
-//    }
-//
-//    public Countries findByIso2(String iso2) {
-//        String sql = "SELECT * FROM countries WHERE iso2=?";
-//        return findOne(sql, this::map, iso2);
-//    }
-//
-//    public Countries findByName(String name) {
-//        String sql = "SELECT * FROM countries WHERE long_name LIKE ? LIMIT 1";
-//        return findOne(sql, this::map, "%" + name + "%");
-//    }
-//}
+package com.okutonda.okudpdv.data.dao;
+
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.Countries;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class CountryDao {
+
+    private final Class<Countries> entityClass = Countries.class;
+
+    // ==========================================================
+    // 🔹 CRUD Básico
+    // ==========================================================
+    public Optional<Countries> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            Countries entity = session.find(Countries.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Country por ID: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<Countries> findAll() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+            cq.select(root).orderBy(cb.asc(root.get("long_name")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Countries: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Countries save(Countries country) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(country);
+            tx.commit();
+
+            System.out.println("✅ Country salvo: " + country.getLong_name());
+            return country;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Country: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Country", e);
+        }
+    }
+
+    public Countries update(Countries country) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Countries merged = session.merge(country);
+            tx.commit();
+
+            System.out.println("✅ Country atualizado: " + country.getLong_name());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Country: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Country", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Countries country = session.find(Countries.class, id);
+            if (country != null) {
+                session.remove(country);
+            }
+
+            tx.commit();
+            System.out.println("✅ Country removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Country: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Country", e);
+        }
+    }
+
+    // ==========================================================
+    // 🔹 Métodos Específicos
+    // ==========================================================
+    public Optional<Countries> findByIso2(String iso2) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            cq.select(root).where(cb.equal(root.get("iso2"), iso2));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Country por ISO2: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Countries> findByIso3(String iso3) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            cq.select(root).where(cb.equal(root.get("iso3"), iso3));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Country por ISO3: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Countries> findByName(String name) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            String likePattern = "%" + name + "%";
+            Predicate namePredicate = cb.like(root.get("long_name"), likePattern);
+            Predicate shortNamePredicate = cb.like(root.get("short_name"), likePattern);
+
+            cq.select(root).where(cb.or(namePredicate, shortNamePredicate));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Country por nome: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<Countries> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate iso2Predicate = cb.like(root.get("iso2"), likePattern);
+            Predicate iso3Predicate = cb.like(root.get("iso3"), likePattern);
+            Predicate longNamePredicate = cb.like(root.get("long_name"), likePattern);
+            Predicate shortNamePredicate = cb.like(root.get("short_name"), likePattern);
+            Predicate callingCodePredicate = cb.like(root.get("calling_code"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(iso2Predicate, iso3Predicate, longNamePredicate, shortNamePredicate, callingCodePredicate))
+                    .orderBy(cb.asc(root.get("long_name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Countries: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Busca países por código de chamada
+     */
+    public List<Countries> findByCallingCode(String callingCode) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("calling_code"), callingCode))
+                    .orderBy(cb.asc(root.get("long_name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Countries por código de chamada: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Retorna países membros da ONU
+     */
+    public List<Countries> findUnMemberCountries() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("un_member"), "yes"))
+                    .orderBy(cb.asc(root.get("long_name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar países membros da ONU: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Busca países por domínio de topo (ccTLD)
+     */
+    public Optional<Countries> findByCcTld(String cctld) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            cq.select(root).where(cb.equal(root.get("cctld"), cctld));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Country por ccTLD: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Retorna países mais comuns (para dropdowns)
+     */
+    public List<Countries> findCommonCountries() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
+            Root<Countries> root = cq.from(Countries.class);
+
+            // Países mais comuns no contexto angolano
+            String[] commonCodes = {"AO", "PT", "BR", "US", "GB", "FR", "ES", "ZA", "CN"};
+
+            List<Predicate> predicates = new ArrayList<>();
+            for (String code : commonCodes) {
+                predicates.add(cb.equal(root.get("iso2"), code));
+            }
+
+            cq.select(root)
+                    .where(cb.or(predicates.toArray(new Predicate[0])))
+                    .orderBy(cb.asc(root.get("long_name")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar países comuns: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Verifica se um código ISO2 já existe
+     */
+    public boolean existsByIso2(String iso2) {
+        return findByIso2(iso2).isPresent();
+    }
+
+    /**
+     * Verifica se um código ISO3 já existe
+     */
+    public boolean existsByIso3(String iso3) {
+        return findByIso3(iso3).isPresent();
+    }
+}

@@ -5,7 +5,6 @@
 package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.controllers.ProductController;
-import com.okutonda.okudpdv.data.dao.ProductDao;
 import com.okutonda.okudpdv.data.entities.Product;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -29,7 +28,7 @@ public class JDialogProductSearch extends javax.swing.JDialog {
     }
 
     public void listProducts() {
-        List<Product> list = productController.list("WHERE stock_total>0 and status='1'");
+        List<Product> list = productController.listForInventory();
 //        List<Product> list = productController.get("");
         loadListProducts(list);
     }

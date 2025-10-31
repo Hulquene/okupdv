@@ -5,6 +5,7 @@
 package com.okutonda.okudpdv.views.shift;
 
 import com.okutonda.okudpdv.controllers.ShiftController;
+import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
@@ -290,11 +291,13 @@ public class JDialogCloseShift extends javax.swing.JDialog {
         // TODO add your handling code here:
         int yes = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja fazer o fecho??", "Atenção", JOptionPane.YES_NO_OPTION);
         if (yes == JOptionPane.YES_OPTION) {
-            Boolean resp = shiftController.closeShift(shiftSession.getShift());
-            if (resp == true) {
+            Shift turnoFechado = shiftController.fecharTurno(shiftSession.getShift().getClosingAmount());
+            if (turnoFechado != null) {
                 shiftSession.clearSession();
                 JOptionPane.showMessageDialog(null, "Fecho com Sucesso!!");
                 this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Erro ao fechar turno!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
 //            this.dispose();
 //                listProducts();

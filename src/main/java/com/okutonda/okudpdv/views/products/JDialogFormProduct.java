@@ -603,19 +603,27 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         if (cModel != null) {
             int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
 //            boolean response;
+
             if (id == 0) {
-                status = productController.save(cModel);
-//                if (response) {
-//                    JOptionPane.showMessageDialog(null, "products salvo com Sucesso!!");
-//                    screanListProducts();
-//                }
+                Product prod = productController.save(cModel);
+                status = (prod != null); // Converte para boolean
             } else {
-                status = productController.save(cModel);
-//                if (response) {
-//                    JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
-//                    screanListProducts();
-//                }
+                Product prod = productController.save(cModel);
+                status = (prod != null); // Converte para boolean
             }
+//            if (id == 0) {
+//                status = productController.save(cModel);
+////                if (response) {
+////                    JOptionPane.showMessageDialog(null, "products salvo com Sucesso!!");
+////                    screanListProducts();
+////                }
+//            } else {
+//                status = productController.save(cModel);
+////                if (response) {
+////                    JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
+////                    screanListProducts();
+////                }
+//        }
 //            if (status == true) {
 //                JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
             this.dispose();

@@ -1,184 +1,279 @@
-//package com.okutonda.okudpdv.data.dao;
-//
-//import com.okutonda.okudpdv.data.entities.Expense;
-//import com.okutonda.okudpdv.data.entities.Supplier;
-//import com.okutonda.okudpdv.data.entities.User;
-//
-//import java.sql.*;
-//import java.util.List;
-//
-///**
-// * DAO responsável pela gestão das despesas.
-// * 
-// * Compatível com o padrão BaseDao e HikariCP (DatabaseProvider).
-// * Todas as conexões são automaticamente devolvidas ao pool.
-// * 
-// * @author Hulquene
-// */
-//public class ExpenseDao extends BaseDao<Expense> {
-//
-//    public ExpenseDao() {
-//        super(); // usa conexão automática via pool
-//    }
-//
-//    public ExpenseDao(Connection externalConn) {
-//        super(externalConn); // para uso em transações externas
-//    }
-//
-//    // ==========================================================
-//    // 🔹 Mapeamento ResultSet → Entidade Expense
-//    // ==========================================================
-//    private Expense map(ResultSet rs) {
-//        try {
-//            Expense e = new Expense();
-//            e.setId(rs.getInt("id"));
-//            e.setDescription(rs.getString("description"));
-//            e.setTotal(rs.getBigDecimal("total"));
-//            e.setPrefix(rs.getString("prefix"));
-//            e.setNumber(rs.getInt("number"));
-//            e.setDate(rs.getString("date"));
-//            e.setMode(rs.getString("mode"));
-//            e.setReference(rs.getString("reference"));
-//            e.setNotes(rs.getString("notes"));
-//            e.setCurrency(rs.getString("currency"));
-//
-//            // 🔹 Relacionamentos
-//            int supplierId = rs.getInt("supplier_id");
-//            if (supplierId > 0) {
-//                Supplier s = new Supplier();
-//                s.setId(supplierId);
-//                s.setName(rs.getString("supplier_name"));
-//                e.setSupplier(s);
-//            }
-//
-//            int userId = rs.getInt("user_id");
-//            if (userId > 0) {
-//                User u = new User();
-//                u.setId(userId);
-//                u.setName(rs.getString("user_name"));
-//                e.setUser(u);
-//            }
-//
-//            return e;
-//        } catch (SQLException ex) {
-//            System.err.println("[DB] Erro ao mapear Expense: " + ex.getMessage());
-//            return null;
-//        }
-//    }
-//
-//    // ==========================================================
-//    // 🔹 CRUD BÁSICO
-//    // ==========================================================
-//    @Override
-//    public boolean add(Expense e) {
-//        String sql = """
-//            INSERT INTO expenses
-//            (description, total, prefix, number, date, mode, reference, notes, currency, supplier_id, user_id)
-//            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-//        """;
-//        return executeUpdate(sql,
-//                e.getDescription(),
-//                e.getTotal(),
-//                e.getPrefix(),
-//                e.getNumber(),
-//                e.getDate(),
-//                e.getMode(),
-//                e.getReference(),
-//                e.getNotes(),
-//                e.getCurrency(),
-//                e.getSupplier() != null ? e.getSupplier().getId() : 0,
-//                e.getUser() != null ? e.getUser().getId() : 0
-//        );
-//    }
-//
-//    @Override
-//    public boolean update(Expense e) {
-//        String sql = """
-//            UPDATE expenses
-//               SET description=?, total=?, mode=?, reference=?, notes=?, currency=?, supplier_id=?, user_id=?
-//             WHERE id=?
-//        """;
-//        return executeUpdate(sql,
-//                e.getDescription(),
-//                e.getTotal(),
-//                e.getMode(),
-//                e.getReference(),
-//                e.getNotes(),
-//                e.getCurrency(),
-//                e.getSupplier() != null ? e.getSupplier().getId() : 0,
-//                e.getUser() != null ? e.getUser().getId() : 0,
-//                e.getId()
-//        );
-//    }
-//
-//    @Override
-//    public boolean delete(int id) {
-//        return executeUpdate("DELETE FROM expenses WHERE id=?", id);
-//    }
-//
-//    @Override
-//    public Expense findById(int id) {
-//        String sql = """
-//            SELECT e.*, 
-//                   s.id AS supplier_id, s.name AS supplier_name,
-//                   u.id AS user_id, u.name AS user_name
-//              FROM expenses e
-//         LEFT JOIN suppliers s ON e.supplier_id = s.id
-//         LEFT JOIN users u ON e.user_id = u.id
-//             WHERE e.id=?
-//        """;
-//        return findOne(sql, this::map, id);
-//    }
-//
-//    @Override
-//    public List<Expense> findAll() {
-//        String sql = """
-//            SELECT e.*, 
-//                   s.id AS supplier_id, s.name AS supplier_name,
-//                   u.id AS user_id, u.name AS user_name
-//              FROM expenses e
-//         LEFT JOIN suppliers s ON e.supplier_id = s.id
-//         LEFT JOIN users u ON e.user_id = u.id
-//          ORDER BY e.date DESC
-//        """;
-//        return executeQuery(sql, this::map);
-//    }
-//
-//    // ==========================================================
-//    // 🔹 CONSULTAS PERSONALIZADAS
-//    // ==========================================================
-//    /**
-//     * Lista despesas entre duas datas específicas.
-//     */
-//    public List<Expense> listDespesas(String dateFrom, String dateTo) {
-//        String sql = """
-//            SELECT e.*, 
-//                   s.id AS supplier_id, s.name AS supplier_name,
-//                   u.id AS user_id, u.name AS user_name
-//              FROM expenses e
-//         LEFT JOIN suppliers s ON e.supplier_id = s.id
-//         LEFT JOIN users u ON e.user_id = u.id
-//             WHERE DATE(e.date) BETWEEN ? AND ?
-//          ORDER BY e.date ASC
-//        """;
-//        return executeQuery(sql, this::map, dateFrom, dateTo);
-//    }
-//
-//    /**
-//     * Busca despesas com filtro textual (descrição ou referência).
-//     */
-//    public List<Expense> filter(String text) {
-//        String like = "%" + text + "%";
-//        String sql = """
-//            SELECT e.*, 
-//                   s.id AS supplier_id, s.name AS supplier_name,
-//                   u.id AS user_id, u.name AS user_name
-//              FROM expenses e
-//         LEFT JOIN suppliers s ON e.supplier_id = s.id
-//         LEFT JOIN users u ON e.user_id = u.id
-//             WHERE e.description LIKE ? OR e.reference LIKE ?
-//          ORDER BY e.date DESC
-//        """;
-//        return executeQuery(sql, this::map, like, like);
-//    }
-//}
+package com.okutonda.okudpdv.data.dao;
+
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.Expense;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class ExpenseDao {
+
+    private final Class<Expense> entityClass = Expense.class;
+
+    // ==========================================================
+    // 🔹 CRUD
+    // ==========================================================
+    public Optional<Expense> findById(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            Expense entity = session.find(Expense.class, id);
+            return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Expense por ID: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<Expense> findAll() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+            cq.select(root).orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar todos os Expenses: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Expense save(Expense expense) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            session.persist(expense);
+            tx.commit();
+
+            System.out.println("✅ Expense salvo: " + expense.getDescription());
+            return expense;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao salvar Expense: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar Expense", e);
+        }
+    }
+
+    public Expense update(Expense expense) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+            Expense merged = session.merge(expense);
+            tx.commit();
+
+            System.out.println("✅ Expense atualizado: " + expense.getDescription());
+            return merged;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar Expense: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar Expense", e);
+        }
+    }
+
+    public void delete(Integer id) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            Expense expense = session.find(Expense.class, id);
+            if (expense != null) {
+                session.remove(expense);
+            }
+
+            tx.commit();
+            System.out.println("✅ Expense removido ID: " + id);
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao remover Expense: " + e.getMessage());
+            throw new RuntimeException("Erro ao remover Expense", e);
+        }
+    }
+
+    // ==========================================================
+    // 🔹 Métodos específicos
+    // ==========================================================
+    public List<Expense> filter(String text) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            String likePattern = "%" + text + "%";
+
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate datePredicate = cb.like(root.get("date"), likePattern);
+            Predicate referencePredicate = cb.like(root.get("reference"), likePattern);
+
+            cq.select(root)
+                    .where(cb.or(descriptionPredicate, datePredicate, referencePredicate))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Expenses: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Expense> filterByDate(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(root)
+                    .where(cb.between(root.get("date"), from.toString(), to.toString()))
+                    .orderBy(cb.asc(root.get("date")), cb.asc(root.get("id")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao filtrar Expenses por data: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Expense> findByCategory(Integer categoryId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("category").get("id"), categoryId))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Expenses por categoria: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Expense> findBySupplier(Integer supplierId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("supplier").get("id"), supplierId))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Expenses por fornecedor: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Expense> findByStatus(Integer status) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("status"), status))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Expenses por status: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Expense> findByPaymentMode(PaymentMode paymentMode) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Expense> cq = cb.createQuery(Expense.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("mode"), paymentMode))
+                    .orderBy(cb.desc(root.get("date")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Expenses por modo de pagamento: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Obtém o próximo número para despesa
+     */
+    public Integer getNextNumber() {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(cb.coalesce(cb.max(root.get("number")), 0));
+
+            Integer maxNumber = session.createQuery(cq).getSingleResult();
+            return maxNumber + 1;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao obter próximo número de despesa: " + e.getMessage());
+            return 1;
+        }
+    }
+
+    /**
+     * Calcula o total de despesas por período
+     */
+    public Double calculateTotalByPeriod(LocalDate from, LocalDate to) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Double> cq = cb.createQuery(Double.class);
+            Root<Expense> root = cq.from(Expense.class);
+
+            cq.select(cb.sum(root.get("total")))
+                    .where(cb.between(root.get("date"), from.toString(), to.toString()));
+
+            Double total = session.createQuery(cq).getSingleResult();
+            return total != null ? total : 0.0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total de despesas: " + e.getMessage());
+            return 0.0;
+        }
+    }
+}

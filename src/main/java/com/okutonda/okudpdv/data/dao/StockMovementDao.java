@@ -116,7 +116,97 @@ public class StockMovementDao {
     }
 
     // ==========================================================
-    // 🔹 CONSULTAS
+    // 🔹 CONSULTAS DE STOCK
+    // ==========================================================
+    /**
+     * 🔹 MÉTODO ADICIONADO: Calcula o stock atual de um produto
+     */
+    public Integer getStockAtual(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(cb.sum(root.get("quantity")))
+                    .where(cb.equal(root.get("product").get("id"), productId));
+
+            Integer stock = session.createQuery(cq).getSingleResult();
+            return stock != null ? stock : 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular stock atual: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Método alternativo em inglês
+     */
+    public Integer getCurrentStock(Integer productId) {
+        return getStockAtual(productId);
+    }
+
+    /**
+     * Calcula apenas as entradas de stock
+     */
+    public Integer getTotalEntradas(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(cb.sum(root.get("quantity")))
+                    .where(cb.and(
+                            cb.equal(root.get("product").get("id"), productId),
+                            cb.gt(root.get("quantity"), 0)
+                    ));
+
+            Integer entradas = session.createQuery(cq).getSingleResult();
+            return entradas != null ? entradas : 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total de entradas: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Calcula apenas as saídas de stock
+     */
+    public Integer getTotalSaidas(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(cb.sum(root.get("quantity")))
+                    .where(cb.and(
+                            cb.equal(root.get("product").get("id"), productId),
+                            cb.lt(root.get("quantity"), 0)
+                    ));
+
+            Integer saidas = session.createQuery(cq).getSingleResult();
+            return saidas != null ? saidas : 0;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao calcular total de saídas: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Verifica se há stock suficiente
+     */
+    public boolean hasStockSuficiente(Integer productId, Integer quantidadeRequerida) {
+        Integer stockAtual = getStockAtual(productId);
+        return stockAtual >= quantidadeRequerida;
+    }
+
+    // ==========================================================
+    // 🔹 OUTRAS CONSULTAS
     // ==========================================================
     public List<StockMovement> findByProductId(Integer productId) {
         Session session = HibernateUtil.getCurrentSession();
@@ -200,42 +290,6 @@ public class StockMovementDao {
         }
     }
 
-    /**
-     * Calcula o stock atual de um produto
-     */
-    public Integer getCurrentStock(Integer productId) {
-        Session session = HibernateUtil.getCurrentSession();
-        try {
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<Integer> cq = cb.createQuery(Integer.class);
-            Root<StockMovement> root = cq.from(StockMovement.class);
-
-            cq.select(cb.sum(root.get("quantity")))
-                    .where(cb.equal(root.get("product").get("id"), productId));
-
-            Integer stock = session.createQuery(cq).getSingleResult();
-            return stock != null ? stock : 0;
-
-        } catch (Exception e) {
-            System.err.println("Erro ao calcular stock atual: " + e.getMessage());
-            return 0;
-        }
-    }
-
-    /**
-     * Atualiza entrada de item de compra (método auxiliar)
-     */
-    private void atualizarEntradaItemCompra(StockMovement movimento) {
-        // Nota: Esta funcionalidade específica pode precisar de adaptação
-        // dependendo da estrutura da sua tabela purchase_items
-        System.out.println("🔄 Atualização de entrada de compra para: "
-                + movimento.getProduct().getDescription());
-        // Implementação específica conforme sua estrutura de banco
-    }
-
-    /**
-     * Busca movimentos por referência (ex: ID da compra)
-     */
     public List<StockMovement> findByReferenceId(Integer referenceId) {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -253,5 +307,14 @@ public class StockMovementDao {
             System.err.println("Erro ao buscar StockMovements por referência: " + e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    /**
+     * Atualiza entrada de item de compra (método auxiliar)
+     */
+    private void atualizarEntradaItemCompra(StockMovement movimento) {
+        System.out.println("🔄 Atualização de entrada de compra para: "
+                + movimento.getProduct().getDescription());
+        // Implementação específica conforme sua estrutura de banco
     }
 }

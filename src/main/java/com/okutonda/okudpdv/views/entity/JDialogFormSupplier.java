@@ -20,7 +20,7 @@ import javax.swing.JOptionPane;
  * @author kenny
  */
 public class JDialogFormSupplier extends javax.swing.JDialog {
-
+    
     SupplierController supplierController = new SupplierController();
     CountryController countryController = new CountryController();
     UserSession session;
@@ -36,20 +36,20 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
         session = UserSession.getInstance();
         status = false;
     }
-
+    
     public Boolean getResponse() {
         return status;
     }
-
+    
     public void listComboCountries() {
-
-        List<Countries> list = countryController.listarTodos();
+        
+        List<Countries> list = countryController.getAll();
         jComboBoxCountry.removeAllItems();
         for (Countries item : list) {
             jComboBoxCountry.addItem(item.getLong_name());
         }
     }
-
+    
     public void setFormSupplier() {
 //        User user = userController.getId(id);
         if (supplier != null) {
@@ -64,16 +64,16 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             jComboBoxStatus.setSelectedItem(supplier.getStatus());
 //            jTextFieldState.setText(supplier.getState());
             jTextFieldZipCode.setText(supplier.getZipCode());
-        } 
+        }        
     }
-
+    
     public void setSupplier(int id) {
         this.supplier = supplierController.getById(id);
 //        setFormUser(user);
     }
-
+    
     public Supplier validateSupllier() {
-
+        
         if (jTextFieldNif.getText().isEmpty() || jTextFieldNif.getText().length() < 9 || jTextFieldNif.getText().length() > 15) {
             JOptionPane.showMessageDialog(null, "Campo NIF invalido!! no minimo 9 e no maximo 15 caracteres");
         } else if (jTextFieldName.getText().isEmpty() || jTextFieldName.getText().length() < 3) {
@@ -97,7 +97,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             cModel.setZipCode(jTextFieldZipCode.getText());
 //            cModel.setStatus((String) jComboBoxStatus.getSelectedItem());
             cModel.setIsDefault(0);
-
+            
             String statusSupp = (String) jComboBoxStatus.getSelectedItem();
 //            String defaultSupp = (String) jComboBoxDefaultClient.getSelectedItem();
 
@@ -404,7 +404,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             String name = jTextFieldName.getText();
             Supplier cModel;
             SupplierDao cDao = new SupplierDao();
-            cModel = cDao.findByName(name);
+            cModel = cDao.findByName(name).orElse(null);
             if (cModel.getName() != null) {
                 jTextFieldId.setText(Integer.toString(cModel.getId()));
                 jTextFieldNif.setText(cModel.getNif());
@@ -419,7 +419,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             } else {
                 JOptionPane.showMessageDialog(null, "Cliente nao encontrado!");
             }
-
+            
         }
     }//GEN-LAST:event_jTextFieldNameKeyPressed
 
@@ -445,7 +445,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 //            Utilities helpUtil = new Utilities();
 //            helpUtil.clearScreen(jPanelFormUser);
         }
-
+        
 
     }//GEN-LAST:event_jButtonAddActionPerformed
 

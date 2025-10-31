@@ -26,7 +26,7 @@ public class UtilSales {
     public static String FormatedNumberPrefix(int id, String type) {
         String format = "";
         OrderDao dao = new OrderDao();
-        Order obj = dao.findById(id);
+        Order obj = dao.findById(id).orElse(null);
         if (obj != null) {
             format = obj.getPrefix() + " " + obj.getYear() + "/" + obj.getNumber();
         }

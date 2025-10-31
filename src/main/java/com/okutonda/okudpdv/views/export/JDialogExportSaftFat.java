@@ -49,8 +49,8 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
 // formato para createdAt
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         for (ExportSaftFat c : list) {
-            String period = c.getPeriodLabel(); // "YYYY-MM-DD a YYYY-MM-DD"
-            String file = c.getFileName();    // só o nome, sem path
+            String period = c.getPeriodStart() + " a " + c.getPeriodEnd(); // "YYYY-MM-DD a YYYY-MM-DD"
+            String file = c.getNotes();    // só o nome, sem path
             String user = c.getUser() != null ? c.getUser().getName() : "";
             String created = c.getCreatedAt() != null ? c.getCreatedAt().format(dtf) : "";
             String status = c.getStatus() != null ? c.getStatus() : "";

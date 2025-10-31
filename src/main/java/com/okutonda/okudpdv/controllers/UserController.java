@@ -208,6 +208,25 @@ public class UserController {
         List<User> users = filter(email);
         return users.stream().anyMatch(user -> email.equals(user.getEmail()));
     }
+
+    /**
+     * Valida a senha de um usuário
+     */
+    public boolean validarSenha(Integer userId, String senha) {
+        try {
+            Optional<User> userOpt = dao.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                // Verifica se a senha fornecida corresponde à senha do usuário
+                // Você pode adicionar criptografia aqui se necessário
+                return senha.equals(user.getPassword());
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao validar senha: " + e.getMessage());
+            return false;
+        }
+    }
 }
 
 //package com.okutonda.okudpdv.controllers;

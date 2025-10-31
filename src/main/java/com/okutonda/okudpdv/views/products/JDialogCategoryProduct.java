@@ -257,9 +257,11 @@ public class JDialogCategoryProduct extends javax.swing.JDialog {
                 int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
 //            boolean response;
                 if (id == 0) {
-                    status = groupController.save(cModel, 0);
+                    GroupsProduct savedGroup = groupController.save(cModel, 0);
+                    status = (savedGroup != null); // Converte para boolean
                 } else {
-                    status = groupController.save(cModel, id);
+                    GroupsProduct savedGroup = groupController.save(cModel, id);
+                    status = (savedGroup != null); // Converte para boolean
                 }
 
                 if (status == true) {

@@ -6,7 +6,6 @@ package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.PaymentController;
-import com.okutonda.okudpdv.controllers.PaymentModeController;
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.Order;
@@ -43,7 +42,6 @@ public class JDialogOrder extends javax.swing.JDialog {
     Order order;
     OrderController orderController;
     PaymentController paymentController;
-    PaymentModeController paymentModeController;
     UserController userController;
     ShiftController shiftController;
     ShiftSession shiftSession;
@@ -63,7 +61,6 @@ public class JDialogOrder extends javax.swing.JDialog {
         initComponents();
         orderController = new OrderController();
         paymentController = new PaymentController();
-        paymentModeController = new PaymentModeController();
         listPayment = new ArrayList<>();
         userController = new UserController();
         shiftController = new ShiftController();
@@ -228,8 +225,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             BigDecimal v = parse(jTextFieldPayNumerario.getText()).setScale(2, RoundingMode.HALF_UP);
             if (v.signum() > 0) {
                 Payment p = new Payment();
-                p.setPaymentMode(PaymentMode.NUMERARIO);
-                p.setStatus(PaymentStatus.SUCCESS);
+                p.setPaymentMode(PaymentMode.NU); // ✅ CORRETO: NU em vez de NUMERARIO
+                p.setStatus(Payment.PaymentStatus.SUCCESS); // ✅ CORRETO: Payment.PaymentStatus
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 nova.add(p);
@@ -239,8 +236,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             BigDecimal v = parse(jTextFieldPayMulticaixa.getText()).setScale(2, RoundingMode.HALF_UP);
             if (v.signum() > 0) {
                 Payment p = new Payment();
-                p.setPaymentMode(PaymentMode.MULTICAIXA);
-                p.setStatus(PaymentStatus.SUCCESS);
+                p.setPaymentMode(PaymentMode.MB); // ✅ CORRETO: MB em vez de MULTICAIXA
+                p.setStatus(Payment.PaymentStatus.SUCCESS);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 // p.setReference(jTextFieldNSU.getText()); // se tiver
@@ -251,8 +248,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             BigDecimal v = parse(jTextFieldPayTransferencia.getText()).setScale(2, RoundingMode.HALF_UP);
             if (v.signum() > 0) {
                 Payment p = new Payment();
-                p.setPaymentMode(PaymentMode.TRANSFERENCIA);
-                p.setStatus(PaymentStatus.SUCCESS);
+                p.setPaymentMode(PaymentMode.TB); // ✅ CORRETO: TB em vez de TRANSFERENCIA
+                p.setStatus(Payment.PaymentStatus.SUCCESS);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 // p.setReference(jTextFieldRefBancaria.getText());
@@ -263,8 +260,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             BigDecimal v = parse(jTextFieldPayOutros.getText()).setScale(2, RoundingMode.HALF_UP);
             if (v.signum() > 0) {
                 Payment p = new Payment();
-                p.setPaymentMode(PaymentMode.OUTROS);
-                p.setStatus(PaymentStatus.SUCCESS);
+                p.setPaymentMode(PaymentMode.OU); // ✅ CORRETO: OU em vez de OUTROS
+                p.setStatus(Payment.PaymentStatus.SUCCESS);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 nova.add(p);

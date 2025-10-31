@@ -53,7 +53,7 @@ public class JDialogListOrder extends javax.swing.JDialog {
 
     public void filterListOrder(String txt) {
 //        List<Order> list = orderController.filter(txt);
-        List<Order> list = orderController.filterDate(LocalDate.MIN, LocalDate.MIN);
+        List<Order> list = orderController.filterByDate(LocalDate.MIN, LocalDate.MIN);
         listTable(list);
     }
 

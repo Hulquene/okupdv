@@ -65,7 +65,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.list("");
+        List<ProductOrder> list = productOrderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
         for (ProductOrder c : list) {
@@ -101,7 +101,7 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listButSalesProducts() {
-        List<ProductOrder> list = productOrderController.list("");
+        List<ProductOrder> list = productOrderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportButSalesProduct.getModel();
         data.setNumRows(0);
 
