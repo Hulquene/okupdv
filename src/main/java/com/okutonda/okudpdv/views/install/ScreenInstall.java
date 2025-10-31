@@ -234,44 +234,29 @@ public final class ScreenInstall extends javax.swing.JFrame {
 
     private void jButtonInstallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonInstallActionPerformed
         // TODO add your handling code here:
-//        User cModel = validatetUser();
 
-//        if (cModel != null) {
-        int sair = JOptionPane.showConfirmDialog(null, "Clique sim para instalar.", "Atenção", JOptionPane.YES_NO_OPTION);
-        if (sair == JOptionPane.YES_OPTION) {
-            int status = install.installDatabase();
-            if (status == 1) {
-//                    insertUser(cModel);
-//                    inserDataCompany();
-                JOptionPane.showMessageDialog(null, "Instalacao do banco de Dados...");
-
-                JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
-//                    jdInstallUser.setOrder(order);
-                jdInstallUser.setVisible(true);
-
-                Boolean respo = jdInstallUser.getResponse();
-
-                ScreenLogin frame = new ScreenLogin();
-                this.dispose();
-                frame.setVisible(true);
-            } else if (status == 0) {
-                JOptionPane.showMessageDialog(null, "Erro ao instalar Banco de Dados!!", "Atenºão", JOptionPane.ERROR_MESSAGE);
-            } else if (status == 2) {
-                JOptionPane.showMessageDialog(null, "Erro na cricao das tabelas  Banco de Dados!!", "Atenção", JOptionPane.ERROR_MESSAGE);
-            }
-//                if (MySQLServiceManager.createDatabaseMySQL()) {
-//                    Connection conn = ConnectionDatabase.getConnect();
-//                    if (MySQLServiceManager.executeSqlFile(conn)) {
-//                        insertUser(cModel);
-//                        JOptionPane.showMessageDialog(null, "Base de Dados instalado com Sucesso!!");
-//                    }
-//                    ScreenLogin frame = new ScreenLogin();
-//                    this.dispose();
-//                    frame.setVisible(true);
-//                } else {
-//                    JOptionPane.showMessageDialog(null, "Erro ao instalar Banco de Dados!!");
-//                }
-        }
+//        int sair = JOptionPane.showConfirmDialog(null, "Clique sim para instalar.", "Atenção", JOptionPane.YES_NO_OPTION);
+//        if (sair == JOptionPane.YES_OPTION) {
+//            int status = install.installDatabase();
+//            if (status == 1) {
+////                    insertUser(cModel);
+////                    inserDataCompany();
+//                JOptionPane.showMessageDialog(null, "Instalacao do banco de Dados...");
+//
+//                JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
+////                    jdInstallUser.setOrder(order);
+//                jdInstallUser.setVisible(true);
+//
+//                Boolean respo = jdInstallUser.getResponse();
+//
+//                ScreenLogin frame = new ScreenLogin();
+//                this.dispose();
+//                frame.setVisible(true);
+//            } else if (status == 0) {
+//                JOptionPane.showMessageDialog(null, "Erro ao instalar Banco de Dados!!", "Atenºão", JOptionPane.ERROR_MESSAGE);
+//            } else if (status == 2) {
+//                JOptionPane.showMessageDialog(null, "Erro na cricao das tabelas  Banco de Dados!!", "Atenção", JOptionPane.ERROR_MESSAGE);
+//            }
 //        }
     }//GEN-LAST:event_jButtonInstallActionPerformed
 

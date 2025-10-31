@@ -12,7 +12,6 @@ import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.dao.ProductDao;
 import com.okutonda.okudpdv.data.dao.ProductOrderDao;
-import com.okutonda.okudpdv.data.dao.SettingsDao;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.dao.OrderDao;
@@ -26,7 +25,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,15 +41,16 @@ import java.util.Locale;
  */
 public class SaftFatController {
 
+    // 🔹 Instância global do OptionController
+    private final OptionController optionController = new OptionController();
     // DAOs
     private final SaftFatDao saftDao = new SaftFatDao();
-    private final SettingsDao settingsDao = new SettingsDao();
     private final OrderDao orderDao = new OrderDao();
     private final ProductOrderDao productOrderDao = new ProductOrderDao();
     private final ProductDao productDao = new ProductDao();
     private final ClientDao clientDao = new ClientDao();
     private final PaymentDao paymentDao = new PaymentDao();
-    
+
     private final UserSession session = UserSession.getInstance();
 
     // ==========================================================
@@ -60,46 +59,46 @@ public class SaftFatController {
     public List<ExportSaftFat> get() {
         return saftDao.getAll();
     }
-    
+
     public ExportSaftFat getId(long id) {
         return saftDao.findById(id).orElse(null);
     }
-    
+
     public List<ExportSaftFat> filter(String txt) {
         return saftDao.filter(txt);
     }
-    
+
     public List<ExportSaftFat> filterCreatedBetween(LocalDate from, LocalDate to) {
         return saftDao.filterByCreatedAt(from, to);
     }
-    
+
     public List<ExportSaftFat> filterPeriodOverlap(LocalDate from, LocalDate to) {
         return saftDao.filterByPeriod(from, to);
     }
-    
+
     public List<ExportSaftFat> filterByUser(Integer userId) {
         if (userId == null) {
             return new ArrayList<>();
         }
         return saftDao.findByUserId(userId.longValue());
     }
-    
+
     public List<ExportSaftFat> findByStatus(String status) {
         return saftDao.findByStatus(status);
     }
-    
+
     public boolean existsForPeriod(LocalDate start, LocalDate end) {
         return saftDao.existsForPeriod(start, end);
     }
-    
+
     public ExportSaftFat findLastExport() {
         return saftDao.findLastExport().orElse(null);
     }
-    
+
     public List<ExportSaftFat> findOverlappingExports(LocalDate start, LocalDate end) {
         return saftDao.findOverlappingExports(start, end);
     }
-    
+
     public void delete(long id) {
         saftDao.delete(id);
     }
@@ -114,7 +113,7 @@ public class SaftFatController {
         String status = "SUCCESS";
         String notes = null;
         ExportSaftFat export;
-        
+
         try {
             // Verifica se já existe export para este período
             if (saftDao.existsForPeriod(start, end)) {
@@ -128,10 +127,10 @@ public class SaftFatController {
             Integer exportedBy = (session != null && session.getUser() != null) ? session.getUser().getId() : null;
             export = saftDao.insertExport(start, end, output.toString(), status, notes,
                     exportedBy != null ? session.getUser() : null);
-            
+
             System.out.println("✅ Export SAF-T criado com ID: " + export.getId());
             return export.getId();
-            
+
         } catch (Exception e) {
             // Tenta registar a falha no banco de dados
             try {
@@ -150,10 +149,10 @@ public class SaftFatController {
      */
     private void generateSaftXml(LocalDate start, LocalDate end, Path output) throws Exception {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
-        
+
         try (OutputStream os = Files.newOutputStream(output)) {
             XMLStreamWriter w = xof.createXMLStreamWriter(os, "UTF-8");
-            
+
             w.writeStartDocument("UTF-8", "1.0");
             w.writeStartElement("AuditFile");
             // Adiciona namespace se necessário
@@ -162,7 +161,7 @@ public class SaftFatController {
             writeHeader(w, start, end);
             writeMasterFiles(w, start, end);
             writeSourceDocuments(w, start, end);
-            
+
             w.writeEndElement(); // </AuditFile>
             w.writeEndDocument();
             w.flush();
@@ -174,33 +173,33 @@ public class SaftFatController {
     private void writeHeader(XMLStreamWriter w, LocalDate start, LocalDate end) throws Exception {
         w.writeStartElement("Header");
         writeTag(w, "AuditFileVersion", "1.01");
-        writeTag(w, "CompanyID", settingsDao.getValue("company_nif"));
-        writeTag(w, "TaxRegistrationNumber", settingsDao.getValue("company_nif"));
-        writeTag(w, "TaxAccountingBasis", settingsDao.getValue("tax_accounting_basis", "F")); // F=Faturação
-        writeTag(w, "CompanyName", nz(settingsDao.getValue("company_name")));
-        writeTag(w, "BusinessName", nz(settingsDao.getValue("company_name")));
+        writeTag(w, "CompanyID", optionController.getOptionValue("company_nif"));
+        writeTag(w, "TaxRegistrationNumber", optionController.getOptionValue("company_nif"));
+        writeTag(w, "TaxAccountingBasis", optionController.getOptionValue("tax_accounting_basis", "F")); // F=Faturação
+        writeTag(w, "CompanyName", nz(optionController.getOptionValue("company_name")));
+        writeTag(w, "BusinessName", nz(optionController.getOptionValue("company_name")));
 
-        // CompanyAddress
+// CompanyAddress
         w.writeStartElement("CompanyAddress");
-        writeTag(w, "AddressDetail", nz(settingsDao.getValue("company_address_detail", settingsDao.getValue("company_address"))));
-        writeTag(w, "City", nz(settingsDao.getValue("company_city")));
-        writeTag(w, "PostalCode", nz(settingsDao.getValue("company_postal_code")));
-        writeTag(w, "Province", nz(settingsDao.getValue("company_province", settingsDao.getValue("company_state"))));
-        writeTag(w, "Country", nz(settingsDao.getValue("company_country_code", "AO")));
+        writeTag(w, "AddressDetail", nz(optionController.getOptionValue("company_address_detail", optionController.getOptionValue("company_address"))));
+        writeTag(w, "City", nz(optionController.getOptionValue("company_city")));
+        writeTag(w, "PostalCode", nz(optionController.getOptionValue("company_postal_code")));
+        writeTag(w, "Province", nz(optionController.getOptionValue("company_province", optionController.getOptionValue("company_state"))));
+        writeTag(w, "Country", nz(optionController.getOptionValue("company_country_code", "AO")));
         w.writeEndElement(); // </CompanyAddress>
 
         writeTag(w, "FiscalYear", String.valueOf(start.getYear()));
         writeTag(w, "StartDate", start.toString());
         writeTag(w, "EndDate", end.toString());
-        writeTag(w, "CurrencyCode", nz(settingsDao.getValue("currency_code", "AOA")));
+        writeTag(w, "CurrencyCode", nz(optionController.getOptionValue("currency_code", "AOA")));
         writeTag(w, "DateCreated", java.time.LocalDate.now().toString());
-        writeTag(w, "TaxEntity", nz(settingsDao.getValue("tax_entity", "AO")));
-        writeTag(w, "ProductCompanyTaxID", nz(settingsDao.getValue("company_nif")));
-        writeTag(w, "SoftwareValidationNumber", nz(settingsDao.getValue("software_validation_number")));
-        writeTag(w, "ProductID", nz(settingsDao.getValue("product_id", "Okudpdv/Okutonda")));
-        writeTag(w, "ProductVersion", nz(settingsDao.getValue("product_version", "1.0.0")));
-        writeTag(w, "Telephone", nz(settingsDao.getValue("company_phone")));
-        writeTag(w, "FileType", nz(settingsDao.getValue("file_type", "N"))); // N=Normal
+        writeTag(w, "TaxEntity", nz(optionController.getOptionValue("tax_entity", "AO")));
+        writeTag(w, "ProductCompanyTaxID", nz(optionController.getOptionValue("company_nif")));
+        writeTag(w, "SoftwareValidationNumber", nz(optionController.getOptionValue("software_validation_number")));
+        writeTag(w, "ProductID", nz(optionController.getOptionValue("product_id", "Okudpdv/Okutonda")));
+        writeTag(w, "ProductVersion", nz(optionController.getOptionValue("product_version", "1.0.0")));
+        writeTag(w, "Telephone", nz(optionController.getOptionValue("company_phone")));
+        writeTag(w, "FileType", nz(optionController.getOptionValue("file_type", "N"))); // N=Normal
         w.writeEndElement();
     }
 
@@ -216,13 +215,13 @@ public class SaftFatController {
                 .map(o -> o.getClient() != null ? o.getClient().getId() : null)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        
+
         for (Integer cid : customerIds) {
             Clients c = clientDao.findById(cid).orElse(null);
             if (c == null) {
                 continue;
             }
-            
+
             w.writeStartElement("Customer");
             writeTag(w, "CustomerID", String.valueOf(c.getId()));
             writeTag(w, "AccountID", nz(c.getName(), "Desconhecido"));
@@ -235,7 +234,7 @@ public class SaftFatController {
             writeTag(w, "City", nz(c.getCity(), "Desconhecido"));
             writeTag(w, "PostalCode", nz(c.getZipCode()));
             writeTag(w, "Province", nz(c.getState()));
-            writeTag(w, "Country", nz(settingsDao.getValue("company_country_code", "AO")));
+            writeTag(w, "Country", nz(optionController.getOptionValue("company_country_code", "AO")));
             w.writeEndElement();
 
             // ShipToAddress (opcional – replico billing)
@@ -243,9 +242,9 @@ public class SaftFatController {
             writeTag(w, "AddressDetail", nz(c.getAddress(), "Desconhecido"));
             writeTag(w, "City", nz(c.getCity(), "Desconhecido"));
             writeTag(w, "PostalCode", nz(c.getZipCode()));
-            writeTag(w, "Country", nz(settingsDao.getValue("company_country_code", "AO")));
+            writeTag(w, "Country", nz(optionController.getOptionValue("company_country_code", "AO")));
             w.writeEndElement();
-            
+
             writeTag(w, "SelfBillingIndicator", "0");
             w.writeEndElement();
         }
@@ -268,7 +267,7 @@ public class SaftFatController {
             if (p == null) {
                 continue;
             }
-            
+
             w.writeStartElement("Product");
             writeTag(w, "ProductType", "P");
             writeTag(w, "ProductCode", nz(p.getCode(), String.valueOf(p.getId())));
@@ -280,7 +279,7 @@ public class SaftFatController {
 
         // TABELA DE IMPOSTOS
         writeTaxTable(w);
-        
+
         w.writeEndElement(); // </MasterFiles>
     }
 
@@ -295,7 +294,7 @@ public class SaftFatController {
         writeTaxEntry(w, "IVA", "AO", "OUT", "Outros", "0.00");
         w.writeEndElement();
     }
-    
+
     private void writeTaxEntry(XMLStreamWriter w, String type, String region, String code, String desc, String perc) throws Exception {
         w.writeStartElement("TaxTableEntry");
         writeTag(w, "TaxType", type);
@@ -309,7 +308,7 @@ public class SaftFatController {
     // ===================== SOURCE DOCUMENTS =====================
     private void writeSourceDocuments(XMLStreamWriter w, LocalDate start, LocalDate end) throws Exception {
         w.writeStartElement("SourceDocuments");
-        
+
         writeSalesInvoices(w, start, end);     // Faturas
         writePayments(w, start, end);          // Recibos
 
@@ -319,7 +318,7 @@ public class SaftFatController {
     // -------- SalesInvoices --------
     private void writeSalesInvoices(XMLStreamWriter w, LocalDate start, LocalDate end) throws Exception {
         w.writeStartElement("SalesInvoices");
-        
+
         BigDecimal totalCredit = BigDecimal.ZERO; // FT/FR/ND
         BigDecimal totalDebit = BigDecimal.ZERO; // NC
 
@@ -330,10 +329,10 @@ public class SaftFatController {
             String periodMM = month2(invoiceDate);
             String invoiceType = inferInvoiceType(o.getPrefix()); // FT/FR/NC/ND
             String sourceId = o.getSeller() != null ? nz(o.getSeller().getName(), "Desconhecido") : "Desconhecido";
-            
+
             w.writeStartElement("Invoice");
             writeTag(w, "InvoiceNo", nz(invoiceNo));
-            writeTag(w, "ATCUD", nz(settingsDao.getValue("atcud")));
+            writeTag(w, "ATCUD", nz(optionController.getOptionValue("atcud")));
 
             // DocumentStatus
             w.writeStartElement("DocumentStatus");
@@ -343,7 +342,7 @@ public class SaftFatController {
             writeTag(w, "SourceID", sourceId);
             writeTag(w, "SourceBilling", "P");
             w.writeEndElement();
-            
+
             writeTag(w, "Hash", nz(o.getHash()));
             writeTag(w, "HashControl", "1");
             writeTag(w, "Period", stripLeadingZero(periodMM));
@@ -356,7 +355,7 @@ public class SaftFatController {
             writeTag(w, "CashVATSchemeIndicator", "0");
             writeTag(w, "ThirdPartiesBillingIndicator", "0");
             w.writeEndElement();
-            
+
             writeTag(w, "SourceID", sourceId);
             writeTag(w, "SystemEntryDate", dateTimeFrom(o.getDatecreate()));
             writeTag(w, "CustomerID", String.valueOf(o.getClient() != null ? o.getClient().getId() : 0));
@@ -380,7 +379,7 @@ public class SaftFatController {
             BigDecimal gross = bd(o.getTotal());
             BigDecimal net = bd(o.getSubTotal());
             BigDecimal tax = gross.subtract(net).max(BigDecimal.ZERO);
-            
+
             w.writeStartElement("DocumentTotals");
             writeTag(w, "TaxPayable", tax.toString());
             writeTag(w, "NetTotal", net.toString());
@@ -392,7 +391,7 @@ public class SaftFatController {
             writeTag(w, "PaymentAmount", "0");
             writeTag(w, "PaymentDate", "");
             w.writeEndElement();
-            
+
             w.writeEndElement(); // </DocumentTotals>
 
             w.writeEndElement(); // </Invoice>
@@ -403,24 +402,24 @@ public class SaftFatController {
                 totalCredit = totalCredit.add(gross);
             }
         }
-        
+
         writeTag(w, "NumberOfEntries", String.valueOf(orders.size()));
         writeTag(w, "TotalDebit", totalDebit.toString());
         writeTag(w, "TotalCredit", totalCredit.toString());
-        
+
         w.writeEndElement(); // </SalesInvoices>
     }
-    
+
     private void writeInvoiceLines(XMLStreamWriter w, List<ProductOrder> lines, String invoiceDate) throws Exception {
         if (lines == null) {
             return;
         }
         int lineNo = 0;
-        
+
         for (ProductOrder line : lines) {
             lineNo++;
             w.writeStartElement("Line");
-            
+
             writeTag(w, "LineNumber", String.valueOf(lineNo));
             int pid = (line.getProduct() != null ? line.getProduct().getId() : 0);
             writeTag(w, "ProductCode", String.valueOf(pid));
@@ -428,11 +427,11 @@ public class SaftFatController {
             writeTag(w, "Quantity", decimal(line.getQty()));
             writeTag(w, "UnitOfMeasure", nz(line.getUnit(), "Unid"));
             writeTag(w, "UnitPrice", decimal(nzD(line.getPrice())));
-            
+
             BigDecimal credit = BigDecimal.valueOf(nzD(line.getPrice()))
                     .multiply(BigDecimal.valueOf(line.getQty()));
             writeTag(w, "CreditAmount", credit.toString());
-            
+
             writeTag(w, "TaxPointDate", invoiceDate);
 
             // Tax
@@ -450,7 +449,7 @@ public class SaftFatController {
     // -------- Payments --------
     private void writePayments(XMLStreamWriter w, LocalDate start, LocalDate end) throws Exception {
         w.writeStartElement("Payments");
-        
+
         var payments = paymentDao.filterByDate(end, end); // se adicionares filterDate, usa-o aqui
         // filtra por período (date: "YYYY-MM-DD[...]")
         payments.removeIf(p -> {
@@ -461,14 +460,14 @@ public class SaftFatController {
             LocalDate ld = LocalDate.parse(d.substring(0, 10));
             return ld.isBefore(start) || ld.isAfter(end);
         });
-        
+
         BigDecimal totalCredit = BigDecimal.ZERO;
         BigDecimal totalDebit = BigDecimal.ZERO;
         int entries = 0;
-        
+
         for (Payment p : payments) {
             entries++;
-            
+
             String ref = (p.getPrefix() == null ? "" : p.getPrefix() + " ") + p.getNumber();
             String pDate = safeDate10(p.getDate());
             String periodMM = stripLeadingZero(month2(pDate));
@@ -487,7 +486,7 @@ public class SaftFatController {
                     }
                 }
             }
-            
+
             w.writeStartElement("Payment");
             writeTag(w, "PaymentRefNo", ref);
             writeTag(w, "Period", periodMM);
@@ -502,7 +501,7 @@ public class SaftFatController {
             // Linha do recibo
             w.writeStartElement("Line");
             writeTag(w, "LineNumber", "1");
-            
+
             w.writeStartElement("SourceDocumentID");
             writeTag(w, "OriginatingON", originNo);
             writeTag(w, "InvoiceType", inferInvoiceType(invType));
@@ -511,7 +510,7 @@ public class SaftFatController {
 
             BigDecimal amt = p.getTotal();
             writeTag(w, "CreditAmount", amt.toString());
-            
+
             w.writeStartElement("Tax"); // pagamentos não têm IVA
             writeTag(w, "TaxType", "IVA");
             writeTag(w, "TaxCountryRegion", "AO");
@@ -526,7 +525,7 @@ public class SaftFatController {
             writeTag(w, "TaxPayable", "0.00");
             writeTag(w, "NetTotal", amt.toString());
             writeTag(w, "GrossTotal", amt.toString());
-            
+
             w.writeStartElement("PaymentMethod");
             writeTag(w, "PaymentMechanism", mech);
             writeTag(w, "PaymentAmount", amt.toString());
@@ -539,11 +538,11 @@ public class SaftFatController {
 
             totalCredit = totalCredit.add(amt);
         }
-        
+
         writeTag(w, "NumberOfEntries", String.valueOf(entries));
         writeTag(w, "TotalDebit", totalDebit.toString());
         writeTag(w, "TotalCredit", totalCredit.toString());
-        
+
         w.writeEndElement(); // </Payments>
     }
 
@@ -553,11 +552,11 @@ public class SaftFatController {
         w.writeCharacters(value == null ? "" : value);
         w.writeEndElement();
     }
-    
+
     private static String nz(String s) {
         return s == null ? "" : s;
     }
-    
+
     private static String nz(String s, String def) {
         return (s == null || s.isEmpty()) ? def : s;
     }
@@ -571,7 +570,7 @@ public class SaftFatController {
     private static double nzD(BigDecimal d) {
         return d == null ? 0.0 : d.doubleValue();
     }
-    
+
     private static BigDecimal bd(Object o) {
         if (o == null) {
             return BigDecimal.ZERO;
@@ -582,14 +581,14 @@ public class SaftFatController {
             return BigDecimal.ZERO;
         }
     }
-    
+
     private static String safeDate10(String s) {
         if (s == null) {
             return "";
         }
         return s.length() >= 10 ? s.substring(0, 10) : s; // "YYYY-MM-DD"
     }
-    
+
     private static String dateTimeFrom(String s) {
         if (s == null || s.isEmpty()) {
             return java.time.LocalDateTime.now().toString();
@@ -600,25 +599,25 @@ public class SaftFatController {
         }
         return base;
     }
-    
+
     private static String month2(String yyyyMMdd) {
         if (yyyyMMdd == null || yyyyMMdd.length() < 7) {
             return "01";
         }
         return yyyyMMdd.substring(5, 7);
     }
-    
+
     private static String stripLeadingZero(String mm) {
         if (mm == null) {
             return "";
         }
         return mm.startsWith("0") ? mm.substring(1) : mm;
     }
-    
+
     private static String decimal(int v) {
         return String.format(Locale.US, "%d.00", v);
     }
-    
+
     private static String decimal(double v) {
         return String.format(Locale.US, "%.2f", v);
     }
@@ -687,13 +686,13 @@ public class SaftFatController {
         }
         return "OUT";
     }
-    
+
     private static boolean approx(BigDecimal a, double b) {
         if (a == null) {
             a = BigDecimal.ZERO;
         }
         BigDecimal bdB = BigDecimal.valueOf(b);
-        
+
         BigDecimal diff = a.subtract(bdB).abs();
         return diff.compareTo(new BigDecimal("0.001")) < 0;
     }

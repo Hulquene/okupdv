@@ -4,6 +4,7 @@ import com.okutonda.okudpdv.data.dao.ShiftDao;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.ShiftSession;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,21 +17,59 @@ import javax.swing.JOptionPane;
 public class ShiftController {
 
     private final ShiftDao dao;
-    private final UserSession session = UserSession.getInstance();
+    private final UserSession userSession = UserSession.getInstance();
+    private final ShiftSession shiftSession = ShiftSession.getInstance();
 
     public ShiftController() {
         this.dao = new ShiftDao();
+        // 🔹 Verifica se já existe turno aberto ao inicializar
+        verificarTurnoAbertoAoIniciar();
     }
 
     // ==========================================================
-    // 🔹 OPERAÇÕES PRINCIPAIS
+    // 🔹 MÉTODOS DE ATUALIZAÇÃO DA SESSÃO
+    // ==========================================================
+    /**
+     * Verifica se o usuário tem turno aberto ao inicializar o controller
+     */
+    private void verificarTurnoAbertoAoIniciar() {
+        User usuarioLogado = userSession.getUser();
+        if (usuarioLogado != null) {
+            Optional<Shift> turnoAberto = dao.findLastOpenShiftByUser(usuarioLogado.getId());
+            if (turnoAberto.isPresent()) {
+                atualizarSessaoTurno(turnoAberto.get(), usuarioLogado);
+            } else {
+                limparSessaoTurno();
+            }
+        }
+    }
+
+    /**
+     * Atualiza a sessão com o turno e usuário atual
+     */
+    private void atualizarSessaoTurno(Shift turno, User usuario) {
+        shiftSession.setShift(turno);
+        shiftSession.setSeller(usuario);
+        System.out.println("🔹 Sessão atualizada - Turno: " + turno.getCode() + ", Vendedor: " + usuario.getName());
+    }
+
+    /**
+     * Limpa a sessão do turno
+     */
+    private void limparSessaoTurno() {
+        shiftSession.clearSession();
+        System.out.println("🔹 Sessão do turno limpa");
+    }
+
+    // ==========================================================
+    // 🔹 OPERAÇÕES PRINCIPAIS (ATUALIZADAS)
     // ==========================================================
     /**
      * Abre um novo turno para o usuário logado
      */
     public Shift abrirTurno(BigDecimal valorAbertura) {
         try {
-            User usuarioLogado = session.getUser();
+            User usuarioLogado = userSession.getUser();
             if (usuarioLogado == null) {
                 throw new IllegalStateException("Nenhum usuário logado");
             }
@@ -48,6 +87,9 @@ public class ShiftController {
             turno.setDateOpen(LocalDateTime.now());
 
             Shift turnoSalvo = dao.save(turno);
+
+            // 🔹 ATUALIZA A SESSÃO COM O TURNO ABERTO
+            atualizarSessaoTurno(turnoSalvo, usuarioLogado);
 
             JOptionPane.showMessageDialog(null,
                     "✅ Turno aberto com sucesso!\nCódigo: " + turnoSalvo.getCode()
@@ -70,7 +112,7 @@ public class ShiftController {
      */
     public Shift fecharTurno(BigDecimal valorFechamento) {
         try {
-            User usuarioLogado = session.getUser();
+            User usuarioLogado = userSession.getUser();
             if (usuarioLogado == null) {
                 throw new IllegalStateException("Nenhum usuário logado");
             }
@@ -89,6 +131,9 @@ public class ShiftController {
             turno.setDateClose(LocalDateTime.now());
 
             Shift turnoFechado = dao.update(turno);
+
+            // 🔹 LIMPA A SESSÃO DO TURNO
+            limparSessaoTurno();
 
             // Calcula diferença
             BigDecimal diferenca = turnoFechado.getDifference();
@@ -119,7 +164,7 @@ public class ShiftController {
      */
     public void adicionarValorTurno(BigDecimal valor) {
         try {
-            User usuarioLogado = session.getUser();
+            User usuarioLogado = userSession.getUser();
             if (usuarioLogado == null) {
                 throw new IllegalStateException("Nenhum usuário logado");
             }
@@ -130,11 +175,13 @@ public class ShiftController {
             }
 
             Shift turno = turnoAberto.get();
-//            BigDecimal novoValor = turno.getIncurredAmount() + valor;
             BigDecimal novoValor = turno.getIncurredAmount().add(valor);
             turno.setIncurredAmount(novoValor);
 
-            dao.update(turno);
+            Shift turnoAtualizado = dao.update(turno);
+
+            // 🔹 ATUALIZA A SESSÃO COM O TURNO ATUALIZADO
+            atualizarSessaoTurno(turnoAtualizado, usuarioLogado);
 
         } catch (Exception e) {
             System.err.println("Erro ao adicionar valor ao turno: " + e.getMessage());
@@ -143,26 +190,94 @@ public class ShiftController {
     }
 
     // ==========================================================
-    // 🔹 CONSULTAS
+    // 🔹 CONSULTAS (ATUALIZADAS)
     // ==========================================================
     public Shift buscarTurnoAtual() {
-        User usuarioLogado = session.getUser();
+        User usuarioLogado = userSession.getUser();
         if (usuarioLogado == null) {
             return null;
         }
 
-        return dao.findLastOpenShiftByUser(usuarioLogado.getId()).orElse(null);
+        Optional<Shift> turnoAberto = dao.findLastOpenShiftByUser(usuarioLogado.getId());
+
+        // 🔹 ATUALIZA A SESSÃO SE ENCONTRAR TURNO ABERTO
+        if (turnoAberto.isPresent()) {
+            atualizarSessaoTurno(turnoAberto.get(), usuarioLogado);
+            return turnoAberto.get();
+        } else {
+            limparSessaoTurno();
+            return null;
+        }
     }
 
     public boolean temTurnoAberto() {
-        User usuarioLogado = session.getUser();
-        if (usuarioLogado == null) {
-            return false;
-        }
-
-        return dao.findLastOpenShiftByUser(usuarioLogado.getId()).isPresent();
+        Shift turnoAtual = buscarTurnoAtual();
+        return turnoAtual != null;
     }
 
+    /**
+     * Cancela o turno atual (em caso de erro)
+     */
+    public void cancelarTurnoAtual() {
+        try {
+            User usuarioLogado = userSession.getUser();
+            if (usuarioLogado == null) {
+                return;
+            }
+
+            Optional<Shift> turnoAberto = dao.findLastOpenShiftByUser(usuarioLogado.getId());
+            if (turnoAberto.isPresent()) {
+                Shift turno = turnoAberto.get();
+                turno.setStatus("cancelled");
+                turno.setDateClose(LocalDateTime.now());
+                dao.update(turno);
+
+                // 🔹 LIMPA A SESSÃO DO TURNO
+                limparSessaoTurno();
+
+                System.out.println("Turno cancelado: " + turno.getCode());
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao cancelar turno: " + e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // 🔹 MÉTODOS UTILITÁRIOS (MANTIDOS)
+    // ==========================================================
+    private String gerarHashTurno() {
+        User usuarioLogado = userSession.getUser();
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String userInfo = usuarioLogado != null ? usuarioLogado.getId().toString() : "unknown";
+        return "shift_" + userInfo + "_" + timestamp;
+    }
+
+    public BigDecimal obterSaldoAtual() {
+        Shift turnoAtual = buscarTurnoAtual();
+        if (turnoAtual == null) {
+            return BigDecimal.ZERO;
+        }
+        return turnoAtual.getCurrentBalance();
+    }
+
+    public BigDecimal obterValorAbertura() {
+        Shift turnoAtual = buscarTurnoAtual();
+        if (turnoAtual == null) {
+            return BigDecimal.ZERO;
+        }
+        return turnoAtual.getGrantedAmount();
+    }
+
+    public BigDecimal obterValorVendas() {
+        Shift turnoAtual = buscarTurnoAtual();
+        if (turnoAtual == null) {
+            return BigDecimal.ZERO;
+        }
+        return turnoAtual.getIncurredAmount();
+    }
+
+    // 🔹 MÉTODOS DE CONSULTA (MANTIDOS SEM ALTERAÇÕES)
     public Shift buscarPorId(Integer id) {
         if (id == null || id <= 0) {
             return null;
@@ -193,64 +308,5 @@ public class ShiftController {
             throw new IllegalArgumentException("Status é obrigatório");
         }
         return dao.findByStatus(status.trim());
-    }
-
-    // ==========================================================
-    // 🔹 MÉTODOS UTILITÁRIOS
-    // ==========================================================
-    private String gerarHashTurno() {
-        User usuarioLogado = session.getUser();
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String userInfo = usuarioLogado != null ? usuarioLogado.getId().toString() : "unknown";
-        return "shift_" + userInfo + "_" + timestamp;
-    }
-
-    public BigDecimal obterSaldoAtual() {
-        Shift turnoAtual = buscarTurnoAtual();
-        if (turnoAtual == null) {
-            return BigDecimal.ZERO;
-        }
-        return turnoAtual.getCurrentBalance();
-    }
-
-    public BigDecimal obterValorAbertura() {
-        Shift turnoAtual = buscarTurnoAtual();
-        if (turnoAtual == null) {
-            return BigDecimal.ZERO;
-        }
-        return turnoAtual.getGrantedAmount();
-    }
-
-    public BigDecimal obterValorVendas() {
-        Shift turnoAtual = buscarTurnoAtual();
-        if (turnoAtual == null) {
-            return BigDecimal.ZERO;
-        }
-        return turnoAtual.getIncurredAmount();
-    }
-
-    /**
-     * Cancela o turno atual (em caso de erro)
-     */
-    public void cancelarTurnoAtual() {
-        try {
-            User usuarioLogado = session.getUser();
-            if (usuarioLogado == null) {
-                return;
-            }
-
-            Optional<Shift> turnoAberto = dao.findLastOpenShiftByUser(usuarioLogado.getId());
-            if (turnoAberto.isPresent()) {
-                Shift turno = turnoAberto.get();
-                turno.setStatus("cancelled");
-                turno.setDateClose(LocalDateTime.now());
-                dao.update(turno);
-
-                System.out.println("Turno cancelado: " + turno.getCode());
-            }
-
-        } catch (Exception e) {
-            System.err.println("Erro ao cancelar turno: " + e.getMessage());
-        }
     }
 }

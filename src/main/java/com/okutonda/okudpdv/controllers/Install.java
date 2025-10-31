@@ -1,72 +1,109 @@
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.data.connection.DatabaseProvider;
-import com.okutonda.okudpdv.jdbc.MySQLServiceManager;
-import java.sql.Connection;
+// ❌ REMOVER ESTE IMPORT
+// import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
+
+// ✅ ADICIONAR ESTES IMPORTS
+import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.dao.OptionsDao;
+import com.okutonda.okudpdv.data.entities.Options;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
- * Classe responsável pela instalação e inicialização do banco de dados do
- * sistema Okudpdv.
- *
- * Substitui o uso de ConnectionDatabase por DatabaseProvider (pool HikariCP).
- *
- * @author Hulquene
+ * Controlador de Instalação do Sistema
+ * 
+ * @author kenny
  */
 public class Install {
-
+    
+    private final OptionController optionController;
+    
+    public Install() {
+        this.optionController = new OptionController();
+    }
+    
     /**
-     * Executa o processo de instalação do banco de dados.
-     *
-     * Fluxo: 1️⃣ Cria a base de dados (via MySQLServiceManager) 2️⃣ Executa o
-     * ficheiro .sql com estrutura inicial 3️⃣ Retorna código de status: - 1 =
-     * sucesso total - 2 = erro ao executar script SQL - 0 = erro ao criar base
-     * de dados
+     * Executa a instalação inicial do sistema
      */
-    public int installDatabase() {
+    public boolean runInitialInstallation() {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        
         try {
-            if (MySQLServiceManager.createDatabaseMySQL()) {
-                try (Connection conn = DatabaseProvider.getConnection()) {
-                    boolean ok = MySQLServiceManager.executeSqlFile(conn);
-                    return ok ? 1 : 2;
-                } catch (Exception e) {
-                    System.err.println("[INSTALL] Erro ao executar SQL: " + e.getMessage());
-                    return 2;
-                }
-            }
+            tx = session.beginTransaction();
+            
+            // 🔹 Configurações básicas da empresa
+            saveDefaultOption("company_name", "Minha Empresa", "active");
+            saveDefaultOption("company_nif", "999999999", "active");
+            saveDefaultOption("company_address", "Endereço da Empresa", "active");
+            saveDefaultOption("company_city", "Cidade", "active");
+            saveDefaultOption("company_postal_code", "0000-000", "active");
+            saveDefaultOption("company_country", "Angola", "active");
+            saveDefaultOption("company_phone", "+244 900 000 000", "active");
+            saveDefaultOption("company_email", "empresa@exemplo.com", "active");
+            saveDefaultOption("company_website", "www.empresa.com", "active");
+            
+            // 🔹 Configurações do sistema
+            saveDefaultOption("currency_code", "AOA", "active");
+            saveDefaultOption("tax_accounting_basis", "F", "active"); // F=Faturação
+            saveDefaultOption("tax_entity", "AO", "active");
+            saveDefaultOption("product_id", "Okudpdv/Okutonda", "active");
+            saveDefaultOption("product_version", "1.0.0", "active");
+            saveDefaultOption("file_type", "N", "active"); // N=Normal
+            
+            // 🔹 Marcar instalação como completa
+            saveDefaultOption("install_complete", "true", "active");
+            
+            tx.commit();
+            System.out.println("✅ Instalação concluída com sucesso!");
+            return true;
+            
         } catch (Exception e) {
-            System.err.println("[INSTALL] Erro ao criar base de dados: " + e.getMessage());
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro durante a instalação: " + e.getMessage());
+            return false;
         }
-        return 0;
+    }
+    
+    /**
+     * Salva uma opção padrão apenas se não existir
+     */
+    private void saveDefaultOption(String name, String value, String status) {
+        // Verifica se a opção já existe
+        String existingValue = optionController.getOptionValue(name);
+        if (existingValue.isEmpty()) {
+            // Só salva se não existir
+            optionController.saveOption(name, value, status);
+            System.out.println("🔹 Opção criada: " + name);
+        } else {
+            System.out.println("🔹 Opção já existe: " + name);
+        }
+    }
+    
+    /**
+     * Verifica se o sistema já foi instalado
+     */
+    public boolean isSystemInstalled() {
+        return optionController.isInstallationComplete();
+    }
+    
+    /**
+     * Executa migrações ou atualizações do sistema
+     */
+    public boolean runSystemUpdates() {
+        // Aqui você pode adicionar lógica para migrações futuras
+        System.out.println("🔹 Verificando atualizações do sistema...");
+        
+        // Exemplo: Adicionar novas opções em versões futuras
+        saveDefaultOption("software_validation_number", "", "active");
+        saveDefaultOption("company_country_code", "AO", "active");
+        saveDefaultOption("company_province", "", "active");
+        saveDefaultOption("company_state", "", "active");
+        saveDefaultOption("company_address_detail", "", "active");
+        
+        return true;
     }
 }
-
-///*
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-// */
-//package com.okutonda.okudpdv.controllers;
-//
-//import com.okutonda.okudpdv.jdbc.ConnectionDatabase;
-//import com.okutonda.okudpdv.jdbc.MySQLServiceManager;
-//import java.sql.Connection;
-//
-///**
-// *
-// * @author kenny
-// */
-//public class Install {
-////    private final Connection connection = ConnectionDatabase.getConnect();
-//
-//    public int installDatabase() {
-//        if (MySQLServiceManager.createDatabaseMySQL()) {
-//            Connection connection = ConnectionDatabase.getConnect();
-//            if (MySQLServiceManager.executeSqlFile(connection)) {
-//                return 1;
-//            }
-//            //executeSqlFile
-//            return 2;
-//        }
-//        //installDatabase
-//        return 0;
-//    }
-//}

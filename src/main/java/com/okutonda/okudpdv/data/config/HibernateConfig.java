@@ -1,6 +1,5 @@
 package com.okutonda.okudpdv.data.config;
 
-import com.okutonda.okudpdv.data.connection.ConnectionConfig;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.boot.registry.StandardServiceRegistry;

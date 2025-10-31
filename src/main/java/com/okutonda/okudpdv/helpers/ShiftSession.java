@@ -12,7 +12,7 @@ import com.okutonda.okudpdv.data.entities.User;
  * @author kenny
  */
 public class ShiftSession {
-
+// Obter instância
     private static ShiftSession instance;
     private Shift shift;
     private User seller;
