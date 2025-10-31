@@ -1,6 +1,7 @@
 package com.okutonda.okudpdv.data.entities;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,13 +19,13 @@ public class Shift {
     private String hash;
 
     @Column(name = "granted_amount", precision = 10, scale = 2)
-    private Double grantedAmount = 0.0;
+    private BigDecimal grantedAmount;
 
     @Column(name = "incurred_amount", precision = 10, scale = 2)
-    private Double incurredAmount = 0.0;
+    private BigDecimal incurredAmount;
 
     @Column(name = "closing_amount", precision = 10, scale = 2)
-    private Double closingAmount = 0.0;
+    private BigDecimal closingAmount;
 
     @Column(name = "status", length = 20)
     private String status = "open"; // open, closed, cancelled
@@ -47,7 +48,7 @@ public class Shift {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Shift(User user, Double grantedAmount) {
+    public Shift(User user, BigDecimal grantedAmount) {
         this();
         this.user = user;
         this.grantedAmount = grantedAmount;
@@ -80,27 +81,27 @@ public class Shift {
         this.hash = hash;
     }
 
-    public Double getGrantedAmount() {
+    public BigDecimal getGrantedAmount() {
         return grantedAmount;
     }
 
-    public void setGrantedAmount(Double grantedAmount) {
+    public void setGrantedAmount(BigDecimal grantedAmount) {
         this.grantedAmount = grantedAmount;
     }
 
-    public Double getIncurredAmount() {
+    public BigDecimal getIncurredAmount() {
         return incurredAmount;
     }
 
-    public void setIncurredAmount(Double incurredAmount) {
+    public void setIncurredAmount(BigDecimal incurredAmount) {
         this.incurredAmount = incurredAmount;
     }
 
-    public Double getClosingAmount() {
+    public BigDecimal getClosingAmount() {
         return closingAmount;
     }
 
-    public void setClosingAmount(Double closingAmount) {
+    public void setClosingAmount(BigDecimal closingAmount) {
         this.closingAmount = closingAmount;
     }
 
@@ -145,15 +146,19 @@ public class Shift {
     }
 
     // Métodos utilitários
-    public Double getCurrentBalance() {
-        return grantedAmount + incurredAmount;
+    public BigDecimal getCurrentBalance() {
+//        return grantedAmount + incurredAmount;
+        BigDecimal total = grantedAmount.add(incurredAmount);
+        return total;
     }
 
-    public Double getDifference() {
+    public BigDecimal getDifference() {
         if (closingAmount != null && getCurrentBalance() != null) {
-            return closingAmount - getCurrentBalance();
+//            return closingAmount - getCurrentBalance();
+            BigDecimal total = closingAmount.subtract(getCurrentBalance());
+            return total;
         }
-        return 0.0;
+        return BigDecimal.ZERO;
     }
 
     public boolean isOpen() {

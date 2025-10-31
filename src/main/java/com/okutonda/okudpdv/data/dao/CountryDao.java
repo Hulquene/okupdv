@@ -16,6 +16,7 @@ import java.util.Optional;
 public class CountryDao {
 
     private final Class<Countries> entityClass = Countries.class;
+    private static boolean isPopulated = false;
 
     // ==========================================================
     // 🔹 CRUD Básico
@@ -33,16 +34,37 @@ public class CountryDao {
 
     public List<Countries> findAll() {
         Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
         try {
+            tx = session.beginTransaction();
+
+            // Primeiro verifica se existem países
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
             Root<Countries> root = cq.from(Countries.class);
             cq.select(root).orderBy(cb.asc(root.get("long_name")));
 
-            return session.createQuery(cq).getResultList();
+            List<Countries> countries = session.createQuery(cq).getResultList();
+
+            // Se não houver países, popula a tabela
+            if (countries.isEmpty() && !isPopulated) {
+                System.out.println("🔄 Tabela countries vazia. Populando com dados padrão...");
+                countries = populateDefaultCountries(session);
+                isPopulated = true;
+            }
+
+            tx.commit();
+            System.out.println("✅ Countries carregados: " + countries.size());
+            return countries;
+
         } catch (Exception e) {
-            System.err.println("Erro ao buscar todos os Countries: " + e.getMessage());
-            throw new RuntimeException(e);
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao buscar todos os Countries: " + e.getMessage());
+
+            // Fallback para dados estáticos
+            return getStaticCountries();
         }
     }
 
@@ -110,7 +132,113 @@ public class CountryDao {
     }
 
     // ==========================================================
-    // 🔹 Métodos Específicos
+    // 🔹 População Automática de Dados
+    // ==========================================================
+    /**
+     * Popula a tabela com países padrão
+     */
+    private List<Countries> populateDefaultCountries(Session session) {
+        List<Countries> defaultCountries = createDefaultCountries();
+
+        for (Countries country : defaultCountries) {
+            session.persist(country);
+        }
+
+        session.flush(); // Garante que os dados são persistidos
+        System.out.println("✅ " + defaultCountries.size() + " países inseridos na tabela");
+
+        return defaultCountries;
+    }
+
+    /**
+     * Cria lista de países padrão
+     */
+    private List<Countries> createDefaultCountries() {
+        List<Countries> countries = new ArrayList<>();
+
+        String[][] countryData = {
+            // ISO2, ISO3, Nome Curto, Nome Longo, Código Chamada, ccTLD
+            {"AO", "AGO", "Angola", "República de Angola", "+244", ".ao"},
+            {"PT", "PRT", "Portugal", "República Portuguesa", "+351", ".pt"},
+            {"BR", "BRA", "Brasil", "República Federativa do Brasil", "+55", ".br"},
+            {"US", "USA", "EUA", "Estados Unidos da América", "+1", ".us"},
+            {"GB", "GBR", "Reino Unido", "Reino Unido da Grã-Bretanha", "+44", ".uk"},
+            {"FR", "FRA", "França", "República Francesa", "+33", ".fr"},
+            {"ES", "ESP", "Espanha", "Reino de Espanha", "+34", ".es"},
+            {"ZA", "ZAF", "África do Sul", "República da África do Sul", "+27", ".za"},
+            {"CN", "CHN", "China", "República Popular da China", "+86", ".cn"},
+            {"MZ", "MOZ", "Moçambique", "República de Moçambique", "+258", ".mz"},
+            {"CV", "CPV", "Cabo Verde", "República de Cabo Verde", "+238", ".cv"},
+            {"ST", "STP", "São Tomé", "República Democrática de São Tomé e Príncipe", "+239", ".st"},
+            {"GW", "GNB", "Guiné-Bissau", "República da Guiné-Bissau", "+245", ".gw"},
+            {"GQ", "GNQ", "Guiné Equatorial", "República da Guiné Equatorial", "+240", ".gq"},
+            {"NA", "NAM", "Namíbia", "República da Namíbia", "+264", ".na"},
+            {"ZW", "ZWE", "Zimbábue", "República do Zimbábue", "+263", ".zw"},
+            {"BW", "BWA", "Botswana", "República do Botswana", "+267", ".bw"},
+            {"CD", "COD", "Congo", "República Democrática do Congo", "+243", ".cd"},
+            {"CG", "COG", "Congo", "República do Congo", "+242", ".cg"},
+            {"GH", "GHA", "Gana", "República do Gana", "+233", ".gh"},
+            {"KE", "KEN", "Quénia", "República do Quénia", "+254", ".ke"},
+            {"NG", "NGA", "Nigéria", "República Federal da Nigéria", "+234", ".ng"},
+            {"SN", "SEN", "Senegal", "República do Senegal", "+221", ".sn"},
+            {"TZ", "TZA", "Tanzânia", "República Unida da Tanzânia", "+255", ".tz"},
+            {"UG", "UGA", "Uganda", "República do Uganda", "+256", ".ug"}
+        };
+
+        int id = 1;
+        for (String[] data : countryData) {
+            Countries country = new Countries();
+            country.setId(id++);
+            country.setIso2(data[0]);
+            country.setIso3(data[1]);
+            country.setShort_name(data[2]);
+            country.setLong_name(data[3]);
+            country.setCalling_code(data[4]);
+            country.setCctld(data[5]);
+            country.setUn_member("yes"); // Assume que são membros da ONU
+            countries.add(country);
+        }
+
+        return countries;
+    }
+
+    /**
+     * Fallback para dados estáticos (sem banco)
+     */
+    private List<Countries> getStaticCountries() {
+        System.out.println("⚠️  Usando dados estáticos de países");
+        return createDefaultCountries();
+    }
+
+    /**
+     * Força a repopulação da tabela (útil para testes)
+     */
+    public void forceRepopulation() {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+        try {
+            tx = session.beginTransaction();
+
+            // Limpa a tabela
+            session.createMutationQuery("DELETE FROM Countries").executeUpdate();
+
+            // Popula novamente
+            populateDefaultCountries(session);
+
+            tx.commit();
+            isPopulated = true;
+            System.out.println("✅ Tabela countries repovoada com sucesso");
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao repopular countries: " + e.getMessage());
+        }
+    }
+
+    // ==========================================================
+    // 🔹 Métodos Específicos (mantidos da versão anterior)
     // ==========================================================
     public Optional<Countries> findByIso2(String iso2) {
         Session session = HibernateUtil.getCurrentSession();
@@ -194,9 +322,6 @@ public class CountryDao {
         }
     }
 
-    /**
-     * Busca países por código de chamada
-     */
     public List<Countries> findByCallingCode(String callingCode) {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -216,9 +341,6 @@ public class CountryDao {
         }
     }
 
-    /**
-     * Retorna países membros da ONU
-     */
     public List<Countries> findUnMemberCountries() {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -238,9 +360,6 @@ public class CountryDao {
         }
     }
 
-    /**
-     * Busca países por domínio de topo (ccTLD)
-     */
     public Optional<Countries> findByCcTld(String cctld) {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -258,9 +377,6 @@ public class CountryDao {
         }
     }
 
-    /**
-     * Retorna países mais comuns (para dropdowns)
-     */
     public List<Countries> findCommonCountries() {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -268,7 +384,6 @@ public class CountryDao {
             CriteriaQuery<Countries> cq = cb.createQuery(Countries.class);
             Root<Countries> root = cq.from(Countries.class);
 
-            // Países mais comuns no contexto angolano
             String[] commonCodes = {"AO", "PT", "BR", "US", "GB", "FR", "ES", "ZA", "CN"};
 
             List<Predicate> predicates = new ArrayList<>();
@@ -288,16 +403,10 @@ public class CountryDao {
         }
     }
 
-    /**
-     * Verifica se um código ISO2 já existe
-     */
     public boolean existsByIso2(String iso2) {
         return findByIso2(iso2).isPresent();
     }
 
-    /**
-     * Verifica se um código ISO3 já existe
-     */
     public boolean existsByIso3(String iso3) {
         return findByIso3(iso3).isPresent();
     }

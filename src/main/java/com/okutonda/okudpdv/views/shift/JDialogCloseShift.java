@@ -9,6 +9,7 @@ import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
+import java.math.BigDecimal;
 import javax.swing.JOptionPane;
 
 /**
@@ -27,7 +28,7 @@ public class JDialogCloseShift extends javax.swing.JDialog {
     public JDialogCloseShift(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        Double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
         session = UserSession.getInstance();
         shiftSession = ShiftSession.getInstance();
 
@@ -43,8 +44,9 @@ public class JDialogCloseShift extends javax.swing.JDialog {
         jLabelValueIncurred.setText(shiftSession.getShift().getIncurredAmount().toString());
 //        total = shiftSession.getShift().getGrantedAmount();
 //        System.out.println("tot:" + total);
-        total = shiftSession.getShift().getGrantedAmount() + shiftSession.getShift().getIncurredAmount();
-
+//        total = shiftSession.getShift().getGrantedAmount() + shiftSession.getShift().getIncurredAmount();
+        total = shiftSession.getShift().getGrantedAmount().add(shiftSession.getShift().getIncurredAmount());
+        
         jLabelValueClose.setText(total.toString());
     }
 

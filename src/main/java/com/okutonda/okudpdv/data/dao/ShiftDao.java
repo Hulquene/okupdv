@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.math.BigDecimal;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -254,7 +255,7 @@ public class ShiftDao {
     /**
      * Atualiza apenas o valor incorrido (incurred_amount)
      */
-    public boolean updateIncurredAmount(Double newValue, Integer id) {
+    public boolean updateIncurredAmount(BigDecimal newValue, Integer id) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
@@ -281,7 +282,7 @@ public class ShiftDao {
     /**
      * Fecha o turno com dados de fechamento
      */
-    public boolean closeShift(Double closingAmount, String status, String dateClose, Integer id) {
+    public boolean closeShift(BigDecimal closingAmount, String status, String dateClose, Integer id) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {

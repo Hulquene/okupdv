@@ -17,6 +17,7 @@ import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.helpers.Util;
 import com.okutonda.okudpdv.helpers.ExportHelper;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -161,7 +162,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
     /**
      * Formata valores monetários
      */
-    private String formatarValor(Double valor) {
+    private String formatarValor(BigDecimal valor) {
         if (valor == null) {
             return "0.00 AOA";
         }
@@ -237,10 +238,10 @@ public final class JDialogSetting extends javax.swing.JDialog {
     private boolean abrirTurno() {
         try {
             // Obtém valor de abertura
-            Double valorAbertura = 0.0;
+            BigDecimal valorAbertura = BigDecimal.ZERO;
             try {
                 if (!jTextFieldBoxName.getText().isEmpty()) {
-                    valorAbertura = Double.parseDouble(jTextFieldBoxName.getText());
+                    valorAbertura = new BigDecimal(jTextFieldBoxName.getText());
                 }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Valor de abertura inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -277,10 +278,10 @@ public final class JDialogSetting extends javax.swing.JDialog {
     private boolean fecharTurno(int id) {
         try {
             // Obtém valor de fechamento
-            Double valorFechamento = 0.0;
+            BigDecimal valorFechamento = BigDecimal.ZERO;
             try {
                 if (!jTextFieldBoxName.getText().isEmpty()) {
-                    valorFechamento = Double.parseDouble(jTextFieldBoxName.getText());
+                    valorFechamento = new BigDecimal(jTextFieldBoxName.getText());
                 }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Valor de fechamento inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -301,10 +302,10 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
             if (turnoFechado != null) {
                 // Calcula diferença para mensagem
-                Double diferenca = turnoFechado.getDifference();
-                String mensagem = diferenca >= 0
+                BigDecimal diferenca = turnoFechado.getDifference();
+                String mensagem = diferenca.compareTo(BigDecimal.ZERO) >= 0
                         ? "Sobra: " + diferenca + " AOA"
-                        : "Falta: " + Math.abs(diferenca) + " AOA";
+                        : "Falta: " + diferenca.abs() + " AOA";
 
                 JOptionPane.showMessageDialog(null,
                         "Turno fechado com sucesso!\n" + mensagem,

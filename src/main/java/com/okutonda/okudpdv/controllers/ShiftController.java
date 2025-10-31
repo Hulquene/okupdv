@@ -4,6 +4,7 @@ import com.okutonda.okudpdv.data.dao.ShiftDao;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class ShiftController {
     /**
      * Abre um novo turno para o usuário logado
      */
-    public Shift abrirTurno(Double valorAbertura) {
+    public Shift abrirTurno(BigDecimal valorAbertura) {
         try {
             User usuarioLogado = session.getUser();
             if (usuarioLogado == null) {
@@ -67,7 +68,7 @@ public class ShiftController {
     /**
      * Fecha o turno atual do usuário logado
      */
-    public Shift fecharTurno(Double valorFechamento) {
+    public Shift fecharTurno(BigDecimal valorFechamento) {
         try {
             User usuarioLogado = session.getUser();
             if (usuarioLogado == null) {
@@ -90,10 +91,10 @@ public class ShiftController {
             Shift turnoFechado = dao.update(turno);
 
             // Calcula diferença
-            Double diferenca = turnoFechado.getDifference();
-            String mensagemDiferenca = diferenca >= 0
+            BigDecimal diferenca = turnoFechado.getDifference();
+            String mensagemDiferenca = diferenca.compareTo(BigDecimal.ZERO) >= 0
                     ? "✅ Sobra: " + diferenca + " AOA"
-                    : "❌ Falta: " + Math.abs(diferenca) + " AOA";
+                    : "❌ Falta: " + diferenca.abs() + " AOA";
 
             JOptionPane.showMessageDialog(null,
                     "✅ Turno fechado com sucesso!\nCódigo: " + turnoFechado.getCode()
@@ -116,7 +117,7 @@ public class ShiftController {
     /**
      * Adiciona valor ao incurred_amount do turno atual (vendas, etc)
      */
-    public void adicionarValorTurno(Double valor) {
+    public void adicionarValorTurno(BigDecimal valor) {
         try {
             User usuarioLogado = session.getUser();
             if (usuarioLogado == null) {
@@ -129,7 +130,8 @@ public class ShiftController {
             }
 
             Shift turno = turnoAberto.get();
-            Double novoValor = turno.getIncurredAmount() + valor;
+//            BigDecimal novoValor = turno.getIncurredAmount() + valor;
+            BigDecimal novoValor = turno.getIncurredAmount().add(valor);
             turno.setIncurredAmount(novoValor);
 
             dao.update(turno);
@@ -203,26 +205,26 @@ public class ShiftController {
         return "shift_" + userInfo + "_" + timestamp;
     }
 
-    public Double obterSaldoAtual() {
+    public BigDecimal obterSaldoAtual() {
         Shift turnoAtual = buscarTurnoAtual();
         if (turnoAtual == null) {
-            return 0.0;
+            return BigDecimal.ZERO;
         }
         return turnoAtual.getCurrentBalance();
     }
 
-    public Double obterValorAbertura() {
+    public BigDecimal obterValorAbertura() {
         Shift turnoAtual = buscarTurnoAtual();
         if (turnoAtual == null) {
-            return 0.0;
+            return BigDecimal.ZERO;
         }
         return turnoAtual.getGrantedAmount();
     }
 
-    public Double obterValorVendas() {
+    public BigDecimal obterValorVendas() {
         Shift turnoAtual = buscarTurnoAtual();
         if (turnoAtual == null) {
-            return 0.0;
+            return BigDecimal.ZERO;
         }
         return turnoAtual.getIncurredAmount();
     }

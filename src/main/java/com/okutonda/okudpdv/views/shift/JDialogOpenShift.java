@@ -8,6 +8,7 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.Util;
+import java.math.BigDecimal;
 import javax.swing.JOptionPane;
 
 /**
@@ -104,9 +105,9 @@ public class JDialogOpenShift extends javax.swing.JDialog {
         String value = jTextFieldValueOpenShift.getText();
         if (!value.isEmpty() && Util.isDouble(value)) {
             Shift shift = new Shift();
-            shift.setGrantedAmount(Double.valueOf(value));
-            shift.setIncurredAmount(0.0);
-            shift.setClosingAmount(0.0);
+            shift.setGrantedAmount(new BigDecimal(value));
+            shift.setIncurredAmount(BigDecimal.ZERO);
+            shift.setClosingAmount(BigDecimal.ZERO);
 
             shift.setUser(session.getUser());
             Shift turnoAberto = shiftController.abrirTurno(shift.getGrantedAmount());

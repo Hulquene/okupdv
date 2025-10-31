@@ -1,25 +1,45 @@
 package com.okutonda.okudpdv.data.entities;
 
 import com.okutonda.okudpdv.data.dao.CountryDao;
+import jakarta.persistence.*;
 import java.util.*;
 
 /**
  * Countries como "enum virtual" com cache estático
  */
+@Entity
+@Table(name = "countries") // Nome da tabela no banco
 public class Countries {
 
     private static List<Countries> CACHE = null;
     private static final Object LOCK = new Object();
 
-    // ... campos existentes (id, iso2, iso3, etc.)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "iso2", length = 2, unique = true)
     private String iso2;
+
+    @Column(name = "iso3", length = 3, unique = true)
     private String iso3;
+
+    @Column(name = "short_name", length = 100)
     private String short_name;
+
+    @Column(name = "long_name", length = 100)
     private String long_name;
+
+    @Column(name = "un_member", length = 3)
     private String un_member;
+
+    @Column(name = "numcode", length = 10)
     private String numcode;
+
+    @Column(name = "calling_code", length = 10)
     private String calling_code;
+
+    @Column(name = "cctld", length = 10)
     private String cctld;
 
     // ==========================================================
@@ -65,7 +85,7 @@ public class Countries {
             loadCache();
         }
         return CACHE.stream()
-                .filter(c -> c.getIso2().equalsIgnoreCase(iso2))
+                .filter(c -> c.getIso2() != null && c.getIso2().equalsIgnoreCase(iso2))
                 .findFirst()
                 .orElse(null);
     }
@@ -78,7 +98,7 @@ public class Countries {
             loadCache();
         }
         return CACHE.stream()
-                .filter(c -> c.getIso3().equalsIgnoreCase(iso3))
+                .filter(c -> c.getIso3() != null && c.getIso3().equalsIgnoreCase(iso3))
                 .findFirst()
                 .orElse(null);
     }
@@ -90,10 +110,15 @@ public class Countries {
         if (CACHE == null) {
             loadCache();
         }
+        if (name == null) {
+            return null;
+        }
+
         String nameLower = name.toLowerCase();
         return CACHE.stream()
-                .filter(c -> c.getLong_name().toLowerCase().contains(nameLower)
-                || c.getShort_name().toLowerCase().contains(nameLower))
+                .filter(c -> c.getLong_name() != null
+                && (c.getLong_name().toLowerCase().contains(nameLower)
+                || (c.getShort_name() != null && c.getShort_name().toLowerCase().contains(nameLower))))
                 .findFirst()
                 .orElse(null);
     }
@@ -129,15 +154,15 @@ public class Countries {
 
         String searchLower = search.toLowerCase();
         return CACHE.stream()
-                .filter(c -> c.getLong_name().toLowerCase().contains(searchLower)
-                || c.getShort_name().toLowerCase().contains(searchLower)
-                || c.getIso2().toLowerCase().contains(searchLower)
-                || c.getIso3().toLowerCase().contains(searchLower))
+                .filter(c -> (c.getLong_name() != null && c.getLong_name().toLowerCase().contains(searchLower))
+                || (c.getShort_name() != null && c.getShort_name().toLowerCase().contains(searchLower))
+                || (c.getIso2() != null && c.getIso2().toLowerCase().contains(searchLower))
+                || (c.getIso3() != null && c.getIso3().toLowerCase().contains(searchLower)))
                 .collect(java.util.stream.Collectors.toList());
     }
 
     // ==========================================================
-    // 🔹 GETTERS/SETTERS (mantenha os existentes)
+    // 🔹 GETTERS/SETTERS
     // ==========================================================
     public int getId() {
         return id;
@@ -225,7 +250,7 @@ public class Countries {
             return false;
         }
         Countries country = (Countries) obj;
-        return id == country.id || iso2.equals(country.iso2);
+        return id == country.id || (iso2 != null && iso2.equals(country.iso2));
     }
 
     @Override

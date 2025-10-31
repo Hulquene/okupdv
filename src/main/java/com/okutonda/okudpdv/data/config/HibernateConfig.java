@@ -59,7 +59,8 @@ public class HibernateConfig {
         configuration.setProperty("hibernate.format_sql", "true");
 
         // Estratégia DDL - validate para produção
-        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
+//        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
 
         // Codificação
         configuration.setProperty("hibernate.connection.characterEncoding", "UTF-8");
@@ -102,6 +103,7 @@ public class HibernateConfig {
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Expense.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ExpenseCategory.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Purchase.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Countries.class);
 
             System.out.println("✅ [Hibernate] Entidades registradas com sucesso");
 

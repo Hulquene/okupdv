@@ -10,6 +10,7 @@ import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.Util;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -146,11 +147,12 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
         } else {
             try {
                 // Configura o turno
-                Double valorAbertura = Double.valueOf(jTextFieldShiftValueOpen.getText());
+//                BigDecimal valorAbertura = Double.valueOf(jTextFieldShiftValueOpen.getText());
+                BigDecimal valorAbertura = new BigDecimal(jTextFieldShiftValueOpen.getText());
 
                 cModel.setGrantedAmount(valorAbertura);
-                cModel.setIncurredAmount(0.0);
-                cModel.setClosingAmount(0.0);
+                cModel.setIncurredAmount(BigDecimal.ZERO);
+                cModel.setClosingAmount(BigDecimal.ZERO);
                 cModel.setStatus("open");
 
                 // Obtém usuário selecionado
