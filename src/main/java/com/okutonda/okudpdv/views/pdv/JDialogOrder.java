@@ -115,8 +115,8 @@ public class JDialogOrder extends javax.swing.JDialog {
             }
 
             // 5) Preencher order com valores de pagamento
-            order.setPayTotal(somaPag.doubleValue());
-            order.setAmountReturned(troco.doubleValue());
+            order.setPayTotal(somaPag);
+            order.setAmountReturned(troco);
             order.setNote(jTextPaneNote.getText()); // se tiver observação
 
             // 6) Completar metadados opcionais dos pagamentos (cliente, operador, datas)
@@ -182,9 +182,9 @@ public class JDialogOrder extends javax.swing.JDialog {
         totalPedido = (order.getTotal() == null) ? BigDecimal.ZERO : new BigDecimal(order.getTotal().toString());
 
 //        DecimalFormat df = new DecimalFormat("#,##0.00");
-        Double sub = order.getSubTotal();
-        Double tax = order.getTotalTaxe();
-        Double tot = order.getTotal();
+        BigDecimal sub = order.getSubTotal();
+        BigDecimal tax = order.getTotalTaxe();
+        BigDecimal tot = order.getTotal();
 
         jTextFieldSubTotal.setText(sub != null ? df.format(sub) : "0,00");
         jTextFieldImposto.setText(tax != null ? df.format(tax) : "0,00");

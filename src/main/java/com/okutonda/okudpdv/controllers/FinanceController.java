@@ -42,7 +42,12 @@ public class FinanceController {
         try {
             List<Order> contas = getContasAReceber();
             return contas.stream()
-                    .map(order -> BigDecimal.valueOf(order.getTotal() - order.getPayTotal()))
+                    .map(order -> {
+                        // Agora getTotal() retorna BigDecimal, não precisa converter
+                        BigDecimal total = order.getTotal();
+                        BigDecimal pago = order.getPayTotal();
+                        return total.subtract(pago);
+                    })
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         } catch (Exception e) {
             System.err.println("❌ Erro ao calcular total de contas a receber: " + e.getMessage());
@@ -127,7 +132,7 @@ public class FinanceController {
         try {
             List<Order> vendasPeriodo = getHistoricoVendasPorPeriodo(dataInicio, dataFim);
             return vendasPeriodo.stream()
-                    .map(venda -> BigDecimal.valueOf(venda.getTotal()))
+                    .map(venda -> venda.getTotal() != null ? venda.getTotal() : BigDecimal.ZERO)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         } catch (Exception e) {
             System.err.println("❌ Erro ao calcular total de vendas do período: " + e.getMessage());

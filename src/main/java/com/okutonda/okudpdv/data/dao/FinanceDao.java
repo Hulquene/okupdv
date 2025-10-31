@@ -155,10 +155,10 @@ public class FinanceDao extends DatabaseProvider {
                 o.setId(rs.getInt("id"));
                 o.setNumber(rs.getInt("number"));
                 o.setPrefix(rs.getString("prefix"));
-                o.setTotal(rs.getDouble("total"));
+                o.setTotal(rs.getBigDecimal("total"));
                 o.setDatecreate(rs.getString("datecreate"));
                 o.setDuedate(rs.getString("duedate"));
-                o.setPayTotal(rs.getDouble("total_pago"));
+                o.setPayTotal(rs.getBigDecimal("total_pago"));
 
                 Clients c = new Clients();
                 c.setId(rs.getInt("client_id"));
@@ -244,11 +244,11 @@ public class FinanceDao extends DatabaseProvider {
                 o.setId(rs.getInt("id"));
                 o.setNumber(rs.getInt("number"));
                 o.setPrefix(rs.getString("prefix"));
-                o.setTotal(rs.getDouble("total"));
+                o.setTotal(rs.getBigDecimal("total"));
                 o.setDatecreate(rs.getString("datecreate"));
                 o.setDuedate(rs.getString("duedate"));
                 o.setNote(rs.getString("note"));
-                o.setPayTotal(rs.getDouble("total_pago"));
+                o.setPayTotal(rs.getBigDecimal("total_pago"));
 
                 Clients c = new Clients();
                 c.setId(rs.getInt("client_id"));
@@ -309,11 +309,11 @@ public class FinanceDao extends DatabaseProvider {
                     o.setId(rs.getInt("id"));
                     o.setNumber(rs.getInt("number"));
                     o.setPrefix(rs.getString("prefix"));
-                    o.setTotal(rs.getDouble("total"));
+                    o.setTotal(rs.getBigDecimal("total"));
                     o.setDatecreate(rs.getString("datecreate"));
                     o.setDuedate(rs.getString("duedate"));
                     o.setNote(rs.getString("note"));
-                    o.setPayTotal(rs.getDouble("total_pago"));
+                    o.setPayTotal(rs.getBigDecimal("total_pago"));
 
                     Clients c = new Clients();
                     c.setId(rs.getInt("client_id"));

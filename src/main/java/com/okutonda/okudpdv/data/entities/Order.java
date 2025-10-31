@@ -1,6 +1,7 @@
 package com.okutonda.okudpdv.data.entities;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,20 +29,20 @@ public class Order {
     @Column(name = "prefix", length = 10)
     private String prefix;
 
-    @Column(name = "total")
-    private Double total = 0.0;
+    @Column(name = "total", precision = 10, scale = 2)
+    private BigDecimal total;
 
-    @Column(name = "sub_total")
-    private Double subTotal = 0.0;
+    @Column(name = "sub_total", precision = 10, scale = 2)
+    private BigDecimal subTotal;
 
-    @Column(name = "total_taxe")
-    private Double totalTaxe = 0.0;
+    @Column(name = "total_taxe", precision = 10, scale = 2)
+    private BigDecimal totalTaxe;
 
-    @Column(name = "pay_total")
-    private Double payTotal = 0.0;
+    @Column(name = "pay_total", precision = 10, scale = 2)
+    private BigDecimal payTotal ;
 
-    @Column(name = "amount_returned")
-    private Double amountReturned = 0.0;
+    @Column(name = "amount_returned", precision = 10, scale = 2)
+    private BigDecimal amountReturned;
 
     @Column(name = "hash", length = 255)
     private String hash;
@@ -129,43 +130,43 @@ public class Order {
         this.prefix = prefix;
     }
 
-    public Double getTotal() {
+    public BigDecimal getTotal() {
         return total;
     }
 
-    public void setTotal(Double total) {
+    public void setTotal(BigDecimal total) {
         this.total = total;
     }
 
-    public Double getSubTotal() {
+    public BigDecimal getSubTotal() {
         return subTotal;
     }
 
-    public void setSubTotal(Double subTotal) {
+    public void setSubTotal(BigDecimal subTotal) {
         this.subTotal = subTotal;
     }
 
-    public Double getTotalTaxe() {
+    public BigDecimal getTotalTaxe() {
         return totalTaxe;
     }
 
-    public void setTotalTaxe(Double totalTaxe) {
+    public void setTotalTaxe(BigDecimal totalTaxe) {
         this.totalTaxe = totalTaxe;
     }
 
-    public Double getPayTotal() {
+    public BigDecimal getPayTotal() {
         return payTotal;
     }
 
-    public void setPayTotal(Double payTotal) {
+    public void setPayTotal(BigDecimal payTotal) {
         this.payTotal = payTotal;
     }
 
-    public Double getAmountReturned() {
+    public BigDecimal getAmountReturned() {
         return amountReturned;
     }
 
-    public void setAmountReturned(Double amountReturned) {
+    public void setAmountReturned(BigDecimal amountReturned) {
         this.amountReturned = amountReturned;
     }
 

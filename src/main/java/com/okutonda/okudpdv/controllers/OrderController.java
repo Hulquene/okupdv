@@ -112,9 +112,9 @@ public class OrderController {
         try {
             // Calcular totais com IVA
             Totais t = calcularTotaisComIva(order.getProducts());
-            order.setSubTotal(t.subTotal.doubleValue());
-            order.setTotalTaxe(t.tax.doubleValue());
-            order.setTotal(t.total.doubleValue());
+            order.setSubTotal(t.subTotal);
+            order.setTotalTaxe(t.tax);
+            order.setTotal(t.total);
 
             // Numerar e gerar hash
             String prefix = UtilSales.getPrefix("order");

@@ -25,7 +25,6 @@ import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
@@ -56,7 +55,6 @@ public class ScreenPdv extends javax.swing.JFrame {
     CompanySession companySession;
     UserController userController;
     ShiftSession shiftSession;
-    OrderController orderController;
     ProductController productController;
     List<ProductOrder> listProductOrder;
     Clients clientSelected;
@@ -182,9 +180,9 @@ public class ScreenPdv extends javax.swing.JFrame {
 // (o controller recalcula novamente ao salvar)
             // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO (preço COM IVA embutido)
             Totais t = calcularTotaisLocalComIVA(listProductOrder);
-            order.setSubTotal(t.subtotal.doubleValue()); // líquido
-            order.setTotalTaxe(t.tax.doubleValue());     // IVA
-            order.setTotal(t.total.doubleValue());       // bruto
+            order.setSubTotal(t.subtotal); // líquido
+            order.setTotalTaxe(t.tax);     // IVA
+            order.setTotal(t.total);       // bruto
 
 //            System.out.println(order);
             // 4) Abre diálogo de pagamento (o diálogo calcula payTotal, troco, métodos, observações, etc.)

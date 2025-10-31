@@ -8,10 +8,7 @@ import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.FinanceController;
 import com.okutonda.okudpdv.controllers.PaymentController;
 import com.okutonda.okudpdv.controllers.ProductOrderController;
-import com.okutonda.okudpdv.controllers.PurchaseController;
-import com.okutonda.okudpdv.controllers.ReportController;
 import com.okutonda.okudpdv.controllers.ShiftController;
-import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Expense;
@@ -25,9 +22,7 @@ import com.okutonda.okudpdv.helpers.UtilSales;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -177,9 +172,9 @@ public final class JPanelFinance extends javax.swing.JPanel {
         LocalDate hoje = LocalDate.now();
 
         for (Order o : list) {
-            double total = o.getTotal() != null ? o.getTotal() : 0d;
-            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
-            double emAberto = total - pago;
+            BigDecimal total = o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO;
+            BigDecimal pago = o.getPayTotal() != null ? o.getPayTotal() : BigDecimal.ZERO;
+            BigDecimal emAberto = total.subtract(pago);
 
             LocalDate emissao = LocalDate.parse(o.getDatecreate().substring(0, 10));
             LocalDate vencimento = emissao.plusDays(30); // simulação
@@ -188,9 +183,9 @@ public final class JPanelFinance extends javax.swing.JPanel {
                     : 0;
 
             String status;
-            if (emAberto <= 0) {
+            if (emAberto.compareTo(BigDecimal.ZERO) <= 0) {
                 status = "Pago";
-            } else if (pago > 0 && emAberto > 0) {
+            } else if (pago.compareTo(BigDecimal.ZERO) > 0 && emAberto.compareTo(BigDecimal.ZERO) > 0) {
                 status = "Parcialmente paga";
             } else if (diasAtraso > 0) {
                 status = "Vencida";
@@ -271,10 +266,14 @@ public final class JPanelFinance extends javax.swing.JPanel {
         data.setNumRows(0);
 
         for (Order o : list) {
-            double total = o.getTotal() != null ? o.getTotal() : 0d;
-            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
 
-            String status = (pago >= total) ? "Liquidada" : "Em aberto";
+            BigDecimal total = o.getTotal() != null ? o.getTotal() : BigDecimal.ZERO;
+            BigDecimal pago = o.getPayTotal() != null ? o.getPayTotal() : BigDecimal.ZERO;
+
+//            double total = o.getTotal() != null ? o.getTotal() : 0d;
+//            double pago = o.getPayTotal() != null ? o.getPayTotal() : 0d;
+//            String status = (pago >= total) ? "Liquidada" : "Em aberto";
+            String status = (pago.compareTo(total) >= 0) ? "Liquidada" : "Em aberto";
 
             data.addRow(new Object[]{
                 (o.getClient() != null ? o.getClient().getName() : ""),
