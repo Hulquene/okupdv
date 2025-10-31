@@ -1,14 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.GroupsProductDao;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import java.util.List;
+import java.util.Optional;
 
 /**
+ * Controller de Grupos de Produtos com Hibernate.
  *
  * @author kenny
  */
@@ -24,36 +22,71 @@ public class GroupsProductController {
     // 🔹 CRUD
     // ======================
     /**
-     * Cria ou atualiza grupo (id = 0 → cria, id > 0 → atualiza).
+     * Cria ou atualiza grupo (id = null/0 → cria, id > 0 → atualiza).
      */
-    public boolean save(GroupsProduct group, int id) {
-        if (id == 0) {
-            return dao.add(group);
-        } else {
-            group.setId(id);
-            return dao.update(group);
+    public GroupsProduct save(GroupsProduct group, Integer id) {
+        try {
+            GroupsProduct savedGroup;
+
+            if (id == null || id == 0) {
+                // Validar código duplicado antes de criar
+                if (group.getCode() != null && !group.getCode().trim().isEmpty()) {
+                    Optional<GroupsProduct> existing = dao.findByCode(group.getCode());
+                    if (existing.isPresent()) {
+                        System.err.println("❌ Já existe um grupo com este código: " + group.getCode());
+                        return null;
+                    }
+                }
+
+                // Criar novo grupo
+                savedGroup = dao.save(group);
+            } else {
+                // Atualizar grupo existente
+                group.setId(id);
+                savedGroup = dao.update(group);
+            }
+
+            System.out.println("✅ Grupo salvo: " + savedGroup.getName());
+            return savedGroup;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao salvar grupo: " + e.getMessage());
+            return null;
         }
     }
 
     /**
      * Exclui grupo pelo ID.
      */
-    public boolean deleteById(int id) {
-        return dao.delete(id);
+    public boolean deleteById(Integer id) {
+        try {
+            dao.delete(id);
+            System.out.println("✅ Grupo removido ID: " + id);
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao remover grupo: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
      * Busca grupo pelo ID.
      */
-    public GroupsProduct getById(int id) {
-        return dao.findById(id);
+    public GroupsProduct getById(Integer id) {
+        Optional<GroupsProduct> groupOpt = dao.findById(id);
+        return groupOpt.orElse(null);
     }
 
     /**
      * Lista todos os grupos.
      */
     public List<GroupsProduct> getAll() {
-        return dao.findAll();
+        try {
+            return dao.findAll();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar grupos: " + e.getMessage());
+            return List.of();
+        }
     }
 
     // ======================
@@ -63,13 +96,47 @@ public class GroupsProductController {
      * Busca grupo pelo código.
      */
     public GroupsProduct getByCode(String code) {
-        return dao.findByCode(code);
+        Optional<GroupsProduct> groupOpt = dao.findByCode(code);
+        return groupOpt.orElse(null);
     }
 
     /**
      * Filtra grupos por nome ou código.
      */
     public List<GroupsProduct> filter(String text) {
-        return dao.filter(text);
+        try {
+            return dao.filter(text);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao filtrar grupos: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Verifica se um código já existe.
+     */
+    public boolean codeExists(String code) {
+        return dao.findByCode(code).isPresent();
+    }
+
+    /**
+     * Valida dados do grupo antes de salvar.
+     */
+    public boolean validateGroup(GroupsProduct group) {
+        if (group == null) {
+            return false;
+        }
+
+        if (group.getName() == null || group.getName().trim().isEmpty()) {
+            System.err.println("❌ Nome do grupo é obrigatório");
+            return false;
+        }
+
+        if (group.getCode() != null && group.getCode().length() > 50) {
+            System.err.println("❌ Código muito longo (máximo 50 caracteres)");
+            return false;
+        }
+
+        return true;
     }
 }
