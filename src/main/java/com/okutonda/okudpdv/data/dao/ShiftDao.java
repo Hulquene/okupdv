@@ -11,6 +11,8 @@ import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -292,7 +294,12 @@ public class ShiftDao {
             if (shift != null) {
                 shift.setClosingAmount(closingAmount);
                 shift.setStatus(status);
-                shift.setDateClose(dateClose);
+
+                // Se dateClose é String no formato "yyyy-MM-dd HH:mm:ss"
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime dateCloseLocal = LocalDateTime.parse(dateClose, formatter);
+                shift.setDateClose(dateCloseLocal);
+                
                 session.merge(shift);
             }
 

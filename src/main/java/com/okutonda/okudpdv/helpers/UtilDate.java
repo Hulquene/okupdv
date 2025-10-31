@@ -17,6 +17,16 @@ import java.util.Date;
  */
 public class UtilDate {
 
+    // Método existente (mantenha para compatibilidade)
+    public static String getDateTimeNow() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    // 🔹 NOVO MÉTODO: Retorna LocalDateTime
+    public static LocalDateTime getLocalDateTimeNow() {
+        return LocalDateTime.now();
+    }
+
     public static String getDateNow() {
 //        String dateFormated = "";
         Date now = new Date();
@@ -33,14 +43,13 @@ public class UtilDate {
 //        return dateFormated;
     }
 
-    public static String getDateTimeNow() {
-//        String dateFormated = "";
-        Date now = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("dd/M/yyy HH:mmm:ss");
-        return format.format(now);
-//        return dateFormated;
-    }
-    
+//    public static String getDateTimeNow() {
+////        String dateFormated = "";
+//        Date now = new Date();
+//        SimpleDateFormat format = new SimpleDateFormat("dd/M/yyy HH:mmm:ss");
+//        return format.format(now);
+////        return dateFormated;
+//    }
     public static String getDateTime(Date now) {
 //        String dateFormated = "";
 //        Date now = new Date();

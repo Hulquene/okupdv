@@ -30,11 +30,11 @@ public class Shift {
     @Column(name = "status", length = 20)
     private String status = "open"; // open, closed, cancelled
 
-    @Column(name = "dateOpen", length = 20)
-    private String dateOpen;
+    @Column(name = "dateOpen")
+    private LocalDateTime dateOpen;
 
-    @Column(name = "dateClose", length = 20)
-    private String dateClose;
+    @Column(name = "dateClose")
+    private LocalDateTime dateClose;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -53,7 +53,7 @@ public class Shift {
         this.user = user;
         this.grantedAmount = grantedAmount;
         this.status = "open";
-        this.dateOpen = java.time.LocalDateTime.now().toString();
+        this.dateOpen = java.time.LocalDateTime.now();
     }
 
     // Getters e Setters
@@ -113,19 +113,19 @@ public class Shift {
         this.status = status;
     }
 
-    public String getDateOpen() {
+    public LocalDateTime getDateOpen() {
         return dateOpen;
     }
 
-    public void setDateOpen(String dateOpen) {
+    public void setDateOpen(LocalDateTime  dateOpen) {
         this.dateOpen = dateOpen;
     }
 
-    public String getDateClose() {
+    public LocalDateTime  getDateClose() {
         return dateClose;
     }
 
-    public void setDateClose(String dateClose) {
+    public void setDateClose(LocalDateTime dateClose) {
         this.dateClose = dateClose;
     }
 

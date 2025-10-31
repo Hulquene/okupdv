@@ -36,9 +36,10 @@ public class JDialogCloseShift extends javax.swing.JDialog {
         jLabelCodeSeller.setText(String.valueOf(session.getUser().getId()));
         jLabelCodeShift.setText(shiftSession.getShift().getCode());
 
-        jLabelDateOpen.setText(shiftSession.getShift().getDateOpen());
-        shiftSession.getShift().setDateClose(UtilDate.getDateTimeNow());
-        jLabelDateClose.setText(shiftSession.getShift().getDateClose());
+        jLabelDateOpen.setText(shiftSession.getShift().getDateOpen().toString());
+//        shiftSession.getShift().setDateClose(UtilDate.getDateTimeNow());
+        shiftSession.getShift().setDateClose(UtilDate.getLocalDateTimeNow());
+        jLabelDateClose.setText(shiftSession.getShift().getDateClose().toString());
 
         jLabelValueOpen.setText(shiftSession.getShift().getGrantedAmount().toString());
         jLabelValueIncurred.setText(shiftSession.getShift().getIncurredAmount().toString());
@@ -46,7 +47,7 @@ public class JDialogCloseShift extends javax.swing.JDialog {
 //        System.out.println("tot:" + total);
 //        total = shiftSession.getShift().getGrantedAmount() + shiftSession.getShift().getIncurredAmount();
         total = shiftSession.getShift().getGrantedAmount().add(shiftSession.getShift().getIncurredAmount());
-        
+
         jLabelValueClose.setText(total.toString());
     }
 

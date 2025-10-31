@@ -162,7 +162,7 @@ public class JDialogOpenFormShiftBox extends javax.swing.JDialog {
                 // Gera código e hash do turno
                 cModel.setCode(gerarCodigoTurno());
                 cModel.setHash(gerarHashTurno());
-                cModel.setDateOpen(java.time.LocalDateTime.now().toString());
+                cModel.setDateOpen(java.time.LocalDateTime.now());
 
                 return cModel;
 

@@ -45,7 +45,7 @@ public class ShiftController {
             Shift turno = new Shift(usuarioLogado, valorAbertura);
             turno.setCode(dao.generateShiftCode());
             turno.setHash(gerarHashTurno());
-            turno.setDateOpen(LocalDateTime.now().toString());
+            turno.setDateOpen(LocalDateTime.now());
 
             Shift turnoSalvo = dao.save(turno);
 
@@ -86,7 +86,7 @@ public class ShiftController {
             // Atualiza dados de fechamento
             turno.setClosingAmount(valorFechamento);
             turno.setStatus("closed");
-            turno.setDateClose(LocalDateTime.now().toString());
+            turno.setDateClose(LocalDateTime.now());
 
             Shift turnoFechado = dao.update(turno);
 
@@ -243,7 +243,7 @@ public class ShiftController {
             if (turnoAberto.isPresent()) {
                 Shift turno = turnoAberto.get();
                 turno.setStatus("cancelled");
-                turno.setDateClose(LocalDateTime.now().toString());
+                turno.setDateClose(LocalDateTime.now());
                 dao.update(turno);
 
                 System.out.println("Turno cancelado: " + turno.getCode());
