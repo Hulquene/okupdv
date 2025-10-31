@@ -29,7 +29,7 @@ public class Purchase {
     private String descricao;
 
     @Column(name = "total", nullable = false, precision = 10, scale = 2)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "iva_total", precision = 10, scale = 2)
     private BigDecimal ivaTotal = BigDecimal.ZERO;

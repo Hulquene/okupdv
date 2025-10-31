@@ -18,7 +18,7 @@ public class Taxes {
     private String name;
 
     @Column(name = "percentage", precision = 5, scale = 2)
-    private BigDecimal percentage;
+    private BigDecimal percentage = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "isdefault")
     private Integer isDefault = 0;

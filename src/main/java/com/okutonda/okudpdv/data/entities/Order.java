@@ -30,19 +30,19 @@ public class Order {
     private String prefix;
 
     @Column(name = "total", precision = 10, scale = 2)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "sub_total", precision = 10, scale = 2)
-    private BigDecimal subTotal;
+    private BigDecimal subTotal = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "total_taxe", precision = 10, scale = 2)
-    private BigDecimal totalTaxe;
+    private BigDecimal totalTaxe = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "pay_total", precision = 10, scale = 2)
-    private BigDecimal payTotal ;
+    private BigDecimal payTotal = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "amount_returned", precision = 10, scale = 2)
-    private BigDecimal amountReturned;
+    private BigDecimal amountReturned = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "hash", length = 255)
     private String hash;

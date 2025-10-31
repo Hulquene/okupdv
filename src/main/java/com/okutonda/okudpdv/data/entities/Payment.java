@@ -16,7 +16,7 @@ public class Payment {
     private String description;
 
     @Column(name = "total", precision = 10, scale = 2)
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "prefix", length = 10)
     private String prefix;

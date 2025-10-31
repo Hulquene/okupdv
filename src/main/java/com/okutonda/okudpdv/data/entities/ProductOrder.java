@@ -24,7 +24,7 @@ public class ProductOrder {
     private Integer qty;
 
     @Column(name = "price", precision = 10, scale = 2)
-    private BigDecimal price;
+    private BigDecimal price = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "unit", length = 20)
     private String unit;
@@ -39,7 +39,7 @@ public class ProductOrder {
     private String taxeName;
 
     @Column(name = "taxe_percentage", precision = 5, scale = 2)
-    private BigDecimal taxePercentage;
+    private BigDecimal taxePercentage = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "reason_tax", length = 100)
     private String reasonTax;

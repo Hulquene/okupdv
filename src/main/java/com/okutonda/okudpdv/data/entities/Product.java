@@ -24,10 +24,10 @@ public class Product {
     private String description;
 
     @Column(name = "price", precision = 10, scale = 2)
-    private BigDecimal price;
+    private BigDecimal price = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "purchase_price", precision = 10, scale = 2)
-    private BigDecimal purchasePrice;
+    private BigDecimal purchasePrice = BigDecimal.ZERO; // Valor padrão
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")

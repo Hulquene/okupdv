@@ -19,13 +19,13 @@ public class Shift {
     private String hash;
 
     @Column(name = "granted_amount", precision = 10, scale = 2)
-    private BigDecimal grantedAmount;
+    private BigDecimal grantedAmount = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "incurred_amount", precision = 10, scale = 2)
-    private BigDecimal incurredAmount;
+    private BigDecimal incurredAmount = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "closing_amount", precision = 10, scale = 2)
-    private BigDecimal closingAmount;
+    private BigDecimal closingAmount = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "status", length = 20)
     private String status = "open"; // open, closed, cancelled

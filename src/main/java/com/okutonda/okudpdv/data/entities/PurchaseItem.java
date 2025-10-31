@@ -23,13 +23,13 @@ public class PurchaseItem {
     private Integer quantidade;
 
     @Column(name = "preco_custo", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precoCusto;
+    private BigDecimal precoCusto = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "iva", precision = 10, scale = 2)
     private BigDecimal iva = BigDecimal.ZERO;
 
     @Column(name = "subtotal", precision = 10, scale = 2)
-    private BigDecimal subtotal;
+    private BigDecimal subtotal = BigDecimal.ZERO; // Valor padrão
 
     @Column(name = "quantidade_entrada")
     private Integer quantidadeEntrada = 0;

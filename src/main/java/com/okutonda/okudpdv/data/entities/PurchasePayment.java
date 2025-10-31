@@ -17,7 +17,7 @@ public class PurchasePayment {
     private Purchase purchase;
 
     @Column(name = "valor_pago", nullable = false, precision = 10, scale = 2)
-    private BigDecimal valorPago;
+    private BigDecimal valorPago = BigDecimal.ZERO; // Valor padrão
 
     @Temporal(TemporalType.DATE)
     @Column(name = "data_pagamento", nullable = false)
