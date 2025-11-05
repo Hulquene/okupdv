@@ -1,57 +1,68 @@
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.data.dao.ProductDao;
 import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.dtos.ProductStockReport;
+import com.okutonda.okudpdv.services.ProductService;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+import javax.swing.JOptionPane;
 
 /**
- * Controller responsável pela lógica de alto nível dos produtos com Hibernate.
- *
- * Intermedia o acesso entre UI e ProductDaoHibernate (CRUD, filtros, PDV,
- * inventário).
- *
- * @author …
+ * Controller atualizado usando ProductService Mantém compatibilidade com código
+ * existente
  */
 public class ProductController {
 
-    private final ProductDao dao;
+    private final ProductService productService;
 
     public ProductController() {
-        this.dao = new ProductDao();
+        this.productService = new ProductService();
     }
 
     // ==========================================================
-    // 🔹 CONSULTAS
+    // 🔹 MÉTODOS DE CONSULTA (Compatibilidade)
     // ==========================================================
     public Product getById(Integer id) {
-        Optional<Product> productOpt = dao.findById(id);
-        return productOpt.orElse(null);
+        try {
+            return productService.buscarPorId(id);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produto por ID: " + e.getMessage());
+            showError("Erro ao buscar produto: " + e.getMessage());
+            return null;
+        }
     }
 
     public Product getByBarcode(String barcode) {
-        Optional<Product> productOpt = dao.findByBarcode(barcode);
-        return productOpt.orElse(null);
+        try {
+            return productService.buscarPorCodigoBarras(barcode);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produto por código de barras: " + e.getMessage());
+            return null;
+        }
     }
 
     public Product getByDescription(String description) {
-        Optional<Product> productOpt = dao.findByDescription(description);
-        return productOpt.orElse(null);
+        try {
+            return productService.buscarPorDescricao(description);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produto por descrição: " + e.getMessage());
+            return null;
+        }
     }
 
     public List<Product> listAll() {
         try {
-            return dao.findAll();
+            return productService.listarTodos();
         } catch (Exception e) {
-            System.err.println("❌ Erro ao buscar produtos: " + e.getMessage());
+            System.err.println("❌ Erro ao buscar todos os produtos: " + e.getMessage());
+            showError("Erro ao buscar produtos: " + e.getMessage());
             return List.of();
         }
     }
 
     public List<Product> listProducts() {
         try {
-            return dao.findByType("product");
+            return productService.listarProdutos();
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar produtos: " + e.getMessage());
             return List.of();
@@ -60,7 +71,7 @@ public class ProductController {
 
     public List<Product> listServices() {
         try {
-            return dao.findByType("service");
+            return productService.listarServicos();
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar serviços: " + e.getMessage());
             return List.of();
@@ -69,8 +80,7 @@ public class ProductController {
 
     public List<Product> listForInventory() {
         try {
-            // Nota: Implementação simplificada - você pode adaptar conforme necessidade
-            return dao.findActive();
+            return productService.listarParaInventario();
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar produtos para inventário: " + e.getMessage());
             return List.of();
@@ -79,7 +89,7 @@ public class ProductController {
 
     public List<Product> listForPDV(String filtro) {
         try {
-            return dao.findForPDV(filtro);
+            return productService.listarParaPDV(filtro);
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar produtos para PDV: " + e.getMessage());
             return List.of();
@@ -87,126 +97,177 @@ public class ProductController {
     }
 
     // ==========================================================
-    // 🔹 CRUD
+    // 🔹 NOVOS MÉTODOS PARA STOCK
     // ==========================================================
-    public Product save(Product product) {
-        if (product == null) {
-            System.err.println("❌ Produto inválido.");
-            return null;
-        }
-
+    /**
+     * Lista produtos com stock abaixo do mínimo
+     */
+    public List<Product> listarProdutosComStockMinimo() {
         try {
-            Product savedProduct;
+            return productService.listarProdutosComStockMinimo();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produtos com stock mínimo: " + e.getMessage());
+            showError("Erro ao buscar alertas de stock: " + e.getMessage());
+            return List.of();
+        }
+    }
 
-            if (product.getId() == null || product.getId() <= 0) {
-                // Validar duplicados antes de criar
-                if (product.getBarcode() != null && !product.getBarcode().trim().isEmpty()) {
-                    if (dao.barcodeExists(product.getBarcode())) {
-                        System.err.println("❌ Já existe um produto com este código de barras: " + product.getBarcode());
-                        return null;
-                    }
-                }
+    /**
+     * Lista produtos com stock crítico
+     */
+    public List<Product> listarProdutosComStockCritico() {
+        try {
+            return productService.listarProdutosComStockCritico();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produtos com stock crítico: " + e.getMessage());
+            return List.of();
+        }
+    }
 
-                if (product.getCode() != null && !product.getCode().trim().isEmpty()) {
-                    if (dao.codeExists(product.getCode())) {
-                        System.err.println("❌ Já existe um produto com este código: " + product.getCode());
-                        return null;
-                    }
-                }
+    /**
+     * Lista produtos sem stock
+     */
+    public List<Product> listarProdutosSemStock() {
+        try {
+            return productService.listarProdutosSemStock();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produtos sem stock: " + e.getMessage());
+            return List.of();
+        }
+    }
 
-                savedProduct = dao.save(product);
-            } else {
-                savedProduct = dao.update(product);
-            }
-
-            System.out.println("✅ Produto salvo: " + savedProduct.getDescription());
-            return savedProduct;
-
+    // ==========================================================
+    // 🔹 OPERAÇÕES CRUD
+    // ==========================================================
+    // No ProductController - JÁ ESTÁ CORRETO assim:
+    public Product save(Product product) {
+        try {
+            return productService.salvar(product);
+        } catch (IllegalArgumentException e) {
+            // ✅ Erro de validação de negócio - mostrar para usuário
+            showError(e.getMessage());
+            return null;
         } catch (Exception e) {
             System.err.println("❌ Erro ao salvar produto: " + e.getMessage());
+            showError("Erro ao salvar produto: " + e.getMessage());
             return null;
         }
     }
 
     public boolean delete(Integer id) {
         try {
-            dao.delete(id);
-            System.out.println("✅ Produto removido ID: " + id);
-            return true;
+            return productService.excluir(id);
         } catch (Exception e) {
             System.err.println("❌ Erro ao remover produto: " + e.getMessage());
+            showError("Erro ao remover produto: " + e.getMessage());
             return false;
         }
     }
 
     // ==========================================================
-    // 🔹 UTILITÁRIOS
+    // 🔹 MÉTODOS UTILITÁRIOS
     // ==========================================================
-    /**
-     * Calcula total de produto × quantidade
-     */
     public BigDecimal calculateTotal(Product prod, Integer qty) {
-        if (prod == null || prod.getPrice() == null || qty == null) {
+        try {
+            return productService.calcularTotal(prod, qty);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao calcular total: " + e.getMessage());
             return BigDecimal.ZERO;
         }
-        return prod.getPrice().multiply(BigDecimal.valueOf(qty));
     }
 
-    /**
-     * Ativa/desativa um produto
-     */
     public boolean toggleProductStatus(Integer id) {
         try {
-            Optional<Product> productOpt = dao.findById(id);
-            if (productOpt.isPresent()) {
-                Product product = productOpt.get();
-                product.setStatus(product.getStatus() == 1 ? 0 : 1);
-                dao.update(product);
-                System.out.println("✅ Status do produto atualizado: " + product.getDescription());
-                return true;
-            }
-            return false;
+            return productService.alternarStatusProduto(id);
         } catch (Exception e) {
             System.err.println("❌ Erro ao alterar status do produto: " + e.getMessage());
+            showError("Erro ao alterar status do produto: " + e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Filtra produtos por texto
-     */
     public List<Product> filter(String text) {
         try {
-            return dao.filter(text);
+            return productService.filtrar(text);
         } catch (Exception e) {
             System.err.println("❌ Erro ao filtrar produtos: " + e.getMessage());
             return List.of();
         }
     }
 
-    /**
-     * Busca produtos ativos
-     */
     public List<Product> findActive() {
         try {
-            return dao.findActive();
+            return productService.listarAtivos();
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar produtos ativos: " + e.getMessage());
             return List.of();
         }
     }
 
-    /**
-     * Verifica se código de barras já existe
-     */
     public boolean barcodeExists(String barcode) {
-        return dao.findByBarcode(barcode).isPresent();
+        try {
+            return productService.verificarCodigoBarrasExiste(barcode);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao verificar código de barras: " + e.getMessage());
+            return false;
+        }
     }
 
-    /**
-     * Verifica se código de produto já existe
-     */
     public boolean codeExists(String code) {
-        return dao.codeExists(code);
+        try {
+            return productService.verificarCodigoExiste(code);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao verificar código: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ==========================================================
+    // 🔹 RELATÓRIOS (Novos métodos)
+    // ==========================================================
+    public Long contarProdutosAtivos() {
+        try {
+            return productService.contarProdutosAtivos();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao contar produtos ativos: " + e.getMessage());
+            return 0L;
+        }
+    }
+
+    public Long contarProdutosComStockMinimo() {
+        try {
+            return productService.contarProdutosComStockMinimo();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao contar produtos com stock mínimo: " + e.getMessage());
+            return 0L;
+        }
+    }
+
+    // ==========================================================
+    // 🔹 HELPERS DE UI
+    // ==========================================================
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(null, message, "Erro", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(null, message, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // NO ProductController
+    /**
+     * Lista produtos para inventário com relatório completo de stock
+     */
+    public List<ProductStockReport> listForInventoryWithStockReport() {
+        try {
+            StockMovementController stockController = new StockMovementController();
+            List<Product> produtos = productService.listarParaInventario();
+
+            return stockController.gerarRelatorioParaProdutos(produtos);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar relatório de inventário: " + e.getMessage());
+            return List.of();
+        }
     }
 }

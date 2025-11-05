@@ -9,8 +9,13 @@ import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
+import java.awt.Color;
+import java.awt.Component;
+import java.math.BigDecimal;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -26,16 +31,337 @@ public final class JPanelProduct extends javax.swing.JPanel {
      */
     public JPanelProduct() {
         initComponents();
-        listProducts();
-//        listProductsInventory();
+
+        // Inicializar componentes de produtos
+        inicializarComponentesProdutos();
+
+//        listProducts();
 //        loadCombobox();
     }
 
-    public void screanListProducts() {
-        jTabbedPaneProduct.setSelectedIndex(0);
-        listProducts();
+    /**
+     * Inicializa a tabela de produtos com colunas e configurações Cada função é
+     * totalmente responsável pela sua tabela
+     */
+    private void inicializarTabelaProdutos() {
+        jTableProducts.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "ID", "Tipo", "Código", "Descrição", "Preço Venda",
+                    "Taxa", "Reason Tax", "Status", "Grupo"
+                }
+        ) {
+            Class[] types = new Class[]{
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class,
+                java.lang.String.class, java.lang.Double.class, java.lang.Object.class,
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean[]{
+                false, false, false, false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        // Configurar largura das colunas para melhor visualização
+        jTableProducts.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
+        jTableProducts.getColumnModel().getColumn(1).setPreferredWidth(80);   // Tipo
+        jTableProducts.getColumnModel().getColumn(2).setPreferredWidth(100);  // Código
+        jTableProducts.getColumnModel().getColumn(3).setPreferredWidth(250);  // Descrição
+        jTableProducts.getColumnModel().getColumn(4).setPreferredWidth(90);   // Preço Venda
+        jTableProducts.getColumnModel().getColumn(5).setPreferredWidth(120);  // Taxa
+        jTableProducts.getColumnModel().getColumn(6).setPreferredWidth(120);  // Reason Tax
+        jTableProducts.getColumnModel().getColumn(7).setPreferredWidth(70);   // Status
+        jTableProducts.getColumnModel().getColumn(8).setPreferredWidth(150);  // Grupo
+
+        // Configurar renderizador para preços (opcional)
+        jTableProducts.getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (value instanceof BigDecimal) {
+                    setText(String.format("%.2f MT", ((BigDecimal) value).doubleValue()));
+                }
+                return c;
+            }
+        });
+
+        // Configurar renderizador para status (opcional)
+        jTableProducts.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (value instanceof Integer) {
+                    int status = (Integer) value;
+                    setText(status == 1 ? "Ativo" : "Inativo");
+                    setForeground(status == 1 ? Color.BLUE : Color.RED);
+                }
+                return c;
+            }
+        });
     }
 
+    /**
+     * Carrega dados na tabela de produtos Cada função é totalmente responsável
+     * pelo carregamento da sua tabela
+     */
+    public void loadListProducts(List<Product> list) {
+        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
+        data.setNumRows(0); // Limpar tabela completamente
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("ℹ️ Nenhum produto encontrado para carregar na tabela");
+            return;
+        }
+
+        for (Product produto : list) {
+            data.addRow(new Object[]{
+                produto.getId(),
+                produto.getType(),
+                produto.getCode(),
+                produto.getDescription(),
+                produto.getPrice(),
+                // Mostrar nome da taxa em vez do objeto completo
+                (produto.getTaxe() != null ? produto.getTaxe().getName() : ""),
+                // Mostrar nome da reason tax em vez do objeto completo
+                (produto.getReasonTaxe() != null ? produto.getReasonTaxe().getCode() : ""),
+                produto.getStatus(), // Será formatado pelo renderizador
+                // Mostrar nome do grupo em vez do objeto completo
+                (produto.getGroup() != null ? produto.getGroup().getName() : "")
+            });
+        }
+
+        System.out.println("✅ Tabela de produtos carregada: " + list.size() + " registros");
+    }
+
+    /**
+     * Lista todos os produtos na tabela Cada função é totalmente responsável
+     * pelo seu carregamento
+     */
+    public void listProducts() {
+        try {
+            List<Product> list = productController.listAll();
+            loadListProducts(list);
+
+            // Opcional: Mostrar estatísticas
+            Long totalAtivos = productController.contarProdutosAtivos();
+            System.out.println("📊 Estatísticas: " + list.size() + " produtos totais, "
+                    + totalAtivos + " ativos");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao listar produtos: " + e.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao carregar produtos: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Filtra produtos por texto e carrega na tabela Cada função é totalmente
+     * responsável pelo seu filtro
+     */
+    public void filterListProduct(String txt) {
+        try {
+            if (txt == null || txt.trim().isEmpty()) {
+                // Se texto vazio, carrega todos os produtos
+                listProducts();
+                return;
+            }
+
+            String textoFiltro = txt.trim();
+            List<Product> list;
+
+            // Decide qual método de filtro usar baseado no contexto
+            if (textoFiltro.length() >= 3) {
+                // Filtro avançado para PDV (mais performático)
+                list = productController.listForPDV(textoFiltro);
+            } else {
+                // Filtro geral para textos curtos
+                list = productController.filter(textoFiltro);
+            }
+
+            loadListProducts(list);
+
+            // Feedback visual do filtro
+            if (list.isEmpty()) {
+                System.out.println("🔍 Nenhum produto encontrado para: '" + textoFiltro + "'");
+            } else {
+                System.out.println("🔍 Filtro aplicado: " + list.size()
+                        + " produtos encontrados para '" + textoFiltro + "'");
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao filtrar produtos: " + e.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao filtrar produtos: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Filtro avançado por tipo de produto
+     */
+    public void filterByProductType(String tipo) {
+        try {
+            List<Product> list;
+
+            if ("product".equalsIgnoreCase(tipo)) {
+                list = productController.listProducts();
+            } else if ("service".equalsIgnoreCase(tipo)) {
+                list = productController.listServices();
+            } else {
+                list = productController.listAll();
+            }
+
+            loadListProducts(list);
+            System.out.println("✅ Filtro por tipo '" + tipo + "': " + list.size() + " produtos");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao filtrar por tipo: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Filtro por status (ativos/inativos)
+     */
+    public void filterByStatus(boolean apenasAtivos) {
+        try {
+            List<Product> list;
+
+            if (apenasAtivos) {
+                list = productController.findActive();
+            } else {
+                list = productController.listAll();
+            }
+
+            loadListProducts(list);
+            System.out.println("✅ Filtro por status '" + (apenasAtivos ? "ativos" : "todos")
+                    + "': " + list.size() + " produtos");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao filtrar por status: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Inicializa todos os componentes da tela de produtos Esta função deve ser
+     * chamada no construtor
+     */
+    private void inicializarComponentesProdutos() {
+        // 1. Inicializar tabela
+        inicializarTabelaProdutos();
+
+        // 2. Carregar dados iniciais
+        carregarDadosIniciais();
+
+        // 3. Configurar listeners (se necessário)
+        configurarListeners();
+    }
+
+    /**
+     * Carrega dados iniciais na interface
+     */
+    private void carregarDadosIniciais() {
+        // Carregar produtos na tabela
+        listProducts();
+
+        // Opcional: Carregar estatísticas em labels
+        carregarEstatisticas();
+    }
+
+    /**
+     * Carrega estatísticas dos produtos
+     */
+    private void carregarEstatisticas() {
+        try {
+            Long totalProdutos = productController.contarProdutosAtivos();
+            Long comStockMinimo = productController.contarProdutosComStockMinimo();
+
+            // Se tiver labels para mostrar estatísticas:
+            // jLabelTotalProdutos.setText(totalProdutos.toString());
+            // jLabelAlertaStock.setText(comStockMinimo.toString());
+            System.out.println("📊 Estatísticas carregadas: " + totalProdutos
+                    + " produtos ativos, " + comStockMinimo + " com stock mínimo");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao carregar estatísticas: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Configura listeners para eventos
+     */
+    private void configurarListeners() {
+        // Exemplo: Double-click para editar produto
+        jTableProducts.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    // Editar produto no double-click
+                    editarProdutoSelecionado();
+                }
+            }
+        });
+    }
+
+    /**
+     * Edita produto selecionado na tabela
+     */
+    private void editarProdutoSelecionado() {
+        int selectedRow = jTableProducts.getSelectedRow();
+        if (selectedRow < 0) {
+            JOptionPane.showMessageDialog(null,
+                    "Selecione um produto na tabela!!",
+                    "Atenção",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            Integer productId = (Integer) jTableProducts.getValueAt(selectedRow, 0);
+            abrirDialogoEdicaoProduto(productId);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao selecionar o produto!",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void abrirDialogoEdicaoProduto(int productId) {
+        if (productId <= 0) {
+            JOptionPane.showMessageDialog(null,
+                    "ID do produto inválido!",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JDialogFormProduct formProd = new JDialogFormProduct(null, true);
+        formProd.setProduct(productId);
+        formProd.setVisible(true);
+
+        Boolean resp = formProd.getResponse();
+        if (Boolean.TRUE.equals(resp)) {
+            JOptionPane.showMessageDialog(null,
+                    "Produto salvo com sucesso!!",
+                    "Sucesso",
+                    JOptionPane.INFORMATION_MESSAGE);
+            listProducts(); // Atualiza a lista
+        }
+    }
+
+//    public void screanListProducts() {
+//        jTabbedPaneProduct.setSelectedIndex(0);
+//        listProducts();
+//    }
 //    public void loadCombobox() {
 //        List<Supplier> listS = supplierController.get("");
 //        jComboBoxSunpplierHistoryInput.removeAllItems();
@@ -49,42 +375,40 @@ public final class JPanelProduct extends javax.swing.JPanel {
 ////            jComboBoxReasonTaxeId.addItem(item);
 ////        }
 //    }
-
-    public void loadListProducts(List<Product> list) {
-        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
-        data.setNumRows(0);
-        for (Product c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getType(),
-                c.getCode(),
-                //                c.getBarcode(),
-                c.getDescription(),
-                c.getPrice(),
-                //                c.getPurchasePrice(),
-                //                c.getStockTotal(),
-                c.getTaxe(),
-                c.getReasonTaxe(),
-                //                c.getGroupId(),
-                //                c.getSubGroupId(),
-                //                c.getSupplier().getName(),
-                c.getStatus(),
-                c.getGroup()
-            });
-        }
-    }
-
-    public void listProducts() {
-        List<Product> list = productController.listAll();
-        loadListProducts(list);
-    }
-
-    public void filterListProduct(String txt) {
-//        ProductDao cDao = new ProductDao();
-        List<Product> list = productController.listForPDV(txt);
-        loadListProducts(list);
-    }
-
+//    public void loadListProducts(List<Product> list) {
+//        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
+//        data.setNumRows(0);
+//        for (Product c : list) {
+//            data.addRow(new Object[]{
+//                c.getId(),
+//                c.getType(),
+//                c.getCode(),
+//                //                c.getBarcode(),
+//                c.getDescription(),
+//                c.getPrice(),
+//                //                c.getPurchasePrice(),
+//                //                c.getStockTotal(),
+//                c.getTaxe(),
+//                c.getReasonTaxe(),
+//                //                c.getGroupId(),
+//                //                c.getSubGroupId(),
+//                //                c.getSupplier().getName(),
+//                c.getStatus(),
+//                c.getGroup()
+//            });
+//        }
+//    }
+//
+//    public void listProducts() {
+//        List<Product> list = productController.listAll();
+//        loadListProducts(list);
+//    }
+//
+//    public void filterListProduct(String txt) {
+////        ProductDao cDao = new ProductDao();
+//        List<Product> list = productController.listForPDV(txt);
+//        loadListProducts(list);
+//    }
 //    public void loadListProductsInventory(List<Product> list) {
 //        if (list == null) {
 //            list = productController.getForPDV(null);
@@ -105,19 +429,16 @@ public final class JPanelProduct extends javax.swing.JPanel {
 //            });
 //        }
 //    }
-
 //    public void listProductsInventory() {
 ////        List<Product> list = productController.getProducts();
 //        List<Product> list = productController.get(null);
 //        loadListProductsInventory(list);
 //    }
-
 //    public void filterListProductInventory(String txt) {
 ////        ProductDao cDao = new ProductDao();
 //        List<Product> list = productController.get(txt);
 //        loadListProductsInventory(list);
 //    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -397,23 +718,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     private void jButtonAlterSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterSeletedActionPerformed
         // TODO add your handling code here:
-        int value = 0;
-        try {
-            value = (int) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (value > 0) {
-                JDialogFormProduct formProd = new JDialogFormProduct(null, true);
-                formProd.setProduct(value);
-                formProd.setVisible(true);
-                Boolean resp = formProd.getResponse();
-                if (resp == true) {
-                    JOptionPane.showMessageDialog(null, "FormProduct salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    listProducts();
-                }
-            }
-        }
+        editarProdutoSelecionado();
     }//GEN-LAST:event_jButtonAlterSeletedActionPerformed
 
     private void jTextFieldFilterNameTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldFilterNameTableKeyReleased

@@ -4,6 +4,7 @@
 package com.okutonda.okudpdv;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.config.HibernateConfig;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
@@ -20,6 +21,7 @@ import com.okutonda.okudpdv.data.entities.Countries;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Options;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
+import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.data.entities.User;
 import java.time.LocalDateTime;
@@ -98,6 +100,7 @@ public class Okudpdv {
             boolean taxesInitialized = initializeTaxes();
 
             boolean clientInitialized = initializeDefaultClients();
+            boolean suppliersInitialized = initializeDefaultSuppliers();
 
             boolean reasonTaxesInitialized = initializeReasonTaxes(); // 🔥 NOVO
             boolean groupsInitialized = initializeProductGroups();
@@ -109,7 +112,8 @@ public class Okudpdv {
             System.out.println("   - Reason Taxes: " + (reasonTaxesInitialized ? "✅" : "⚠️")); // 🔥 NOVO
             System.out.println("   - Product Groups: " + (groupsInitialized ? "✅" : "⚠️"));
             System.out.println("   - System Options: " + (optionsInitialized ? "✅" : "⚠️"));
-              System.out.println("   - System Options: " + (clientInitialized ? "✅" : "⚠️"));
+            System.out.println("   - System Clients: " + (clientInitialized ? "✅" : "⚠️"));
+            System.out.println("   - System Suppliers: " + (suppliersInitialized ? "✅" : "⚠️"));
 
             // Considera sucesso se os dados mais críticos foram inicializados
             return usersInitialized && taxesInitialized && optionsInitialized;
@@ -186,6 +190,53 @@ public class Okudpdv {
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao inicializar cliente padrão: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean initializeDefaultSuppliers() {
+        try {
+            SupplierController supplierController = new SupplierController();
+
+            // 🔹 FORNECEDOR PADRÃO - SEM FORNECEDOR
+            Supplier semFornecedor = supplierController.getByName("Sem Fornecedor");
+            if (semFornecedor == null) {
+                System.out.println("🏭 Criando fornecedor 'Sem Fornecedor'...");
+
+                Supplier supplier = new Supplier();
+                supplier.setName("Sem Fornecedor");
+                supplier.setNif("000000000"); // NIF genérico
+                supplier.setAddress("Não especificado");
+                supplier.setCity("Não especificado");
+                supplier.setPhone("Não especificado");
+                supplier.setEmail("sem@fornecedor.com");
+                supplier.setStatus(1);
+                supplier.setIsDefault(1); // 🔥 Fornecedor padrão
+
+                // Valida antes de salvar
+                if (supplierController.validarSupplier(supplier)) {
+                    supplierController.save(supplier);
+                    System.out.println("✅ Fornecedor 'Sem Fornecedor' criado como padrão");
+                } else {
+                    System.err.println("❌ Validação falhou para fornecedor padrão");
+                    return false;
+                }
+            } else {
+                System.out.println("✅ Fornecedor 'Sem Fornecedor' já existe");
+
+                // Garante que é o fornecedor padrão
+                if (semFornecedor.getIsDefault() != 1) {
+                    semFornecedor.setIsDefault(1);
+                    supplierController.save(semFornecedor);
+                    System.out.println("✅ Fornecedor 'Sem Fornecedor' definido como padrão");
+                }
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao inicializar fornecedor padrão: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

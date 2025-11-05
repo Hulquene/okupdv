@@ -36,7 +36,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
     ProductController productController = new ProductController();
     SupplierController supplierController = new SupplierController();
-    WarehouseController warehouseController = new WarehouseController();
+//    WarehouseController warehouseController = new WarehouseController();
     Boolean response = false;
 
     /**
@@ -166,6 +166,130 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
         jTextFieldTotal.setText(total.toString());
         jTextFieldIvaTotal.setText(ivaTotal.toString());
+    }
+
+    private void criacaoItem() {
+        // Validar produto e quantidade
+        if (jComboBoxListProduto.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto!");
+            return;
+        }
+
+        int qtd;
+        try {
+            qtd = Integer.parseInt(jTextFieldQtdProduct.getText());
+            if (qtd <= 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Quantidade inválida!");
+            return;
+        }
+
+        // Produto selecionado
+        Product prod = (Product) jComboBoxListProduto.getSelectedItem();
+
+        // Criar item
+        PurchaseItem item = new PurchaseItem();
+        item.setProduct(prod);
+        item.setQuantidade(qtd);
+        item.setPrecoCusto(prod.getPrice());
+
+        // 🔹 CALCULAR SUBTOTAL CORRETAMENTE
+        BigDecimal subtotal = prod.getPrice().multiply(BigDecimal.valueOf(qtd));
+        item.setSubtotal(subtotal);
+
+        // 🔹 VERIFICAR SE JÁ EXISTE
+        boolean jaExiste = false;
+        for (PurchaseItem it : itensCompra) {
+            if (it.getProduct().getId().equals(prod.getId())) {
+                // Já existe → soma quantidade e recalcula subtotal
+                int novaQuantidade = it.getQuantidade() + qtd;
+                it.setQuantidade(novaQuantidade);
+                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(novaQuantidade)));
+                jaExiste = true;
+                break;
+            }
+        }
+
+        // 🔹 SE NÃO EXISTIR, ADICIONA
+        if (!jaExiste) {
+            itensCompra.add(item);
+        }
+
+        // Atualizar tabela e totais
+        loadItemsTable();
+        atualizarTotais();
+
+        // 🔹 LIMPAR CAMPOS APÓS ADICIONAR
+        jTextFieldQtdProduct.setText("1");
+
+    }
+
+    private void finalizarCompra() {
+        // Validações
+        if (jComboBoxListFornecedor.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Selecione um fornecedor!");
+            return;
+        }
+        if (itensCompra.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Adicione ao menos 1 item!");
+            return;
+        }
+
+        try {
+            Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
+
+            Purchase purchase = new Purchase();
+            purchase.setSupplier(fornecedor);
+            purchase.setDescricao(jTextAreaNote.getText());
+
+            // 🔹 CORREÇÃO CRÍTICA: Associar a Purchase aos itens ANTES de definir a lista
+            for (PurchaseItem item : itensCompra) {
+                item.setPurchase(purchase); // 🔹 IMPORTANTE: definir a relação bidirecional
+            }
+
+            purchase.setItems(new ArrayList<>(itensCompra));
+
+            // 🔹 CALCULAR TOTAIS
+            BigDecimal total = new BigDecimal(jTextFieldTotal.getText());
+            BigDecimal ivaTotal = new BigDecimal(jTextFieldIvaTotal.getText());
+            purchase.setTotal(total);
+            purchase.setIvaTotal(ivaTotal);
+
+            // Datas
+            java.sql.Date dataCompra = java.sql.Date.valueOf(jFormattedTextFieldDataCompra.getText());
+            java.sql.Date dataVenc = java.sql.Date.valueOf(jFormattedTextFieldDataVencimento.getText());
+            purchase.setDataCompra(dataCompra);
+            purchase.setDataVencimento(dataVenc);
+
+            // Status inicial
+            purchase.setStatus("ABERTO");
+
+            // 🔹 DEBUG: Verificar se os itens estão associados
+            System.out.println("=== DEBUG FINALIZAR COMPRA ===");
+            System.out.println("Fornecedor: " + purchase.getSupplier().getName());
+            System.out.println("Total Itens: " + purchase.getItems().size());
+            for (PurchaseItem item : purchase.getItems()) {
+                System.out.println("Item: " + item.getProduct().getDescription()
+                        + " - Purchase: " + (item.getPurchase() != null ? "ASSOCIADO" : "NULO"));
+            }
+
+            // 🔹 SALVAR USANDO O NOVO SERVICE
+//            System.out.println(purchase);
+            response = new PurchaseController().add(purchase);
+
+            if (response) {
+                JOptionPane.showMessageDialog(this, "✅ Compra registrada com sucesso!");
+                dispose(); // Fecha o dialog
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar compra!");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -444,96 +568,98 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
     private void jButtonAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductActionPerformed
         // TODO add your handling code here:
-        // validar produto e quantidade
-        if (jComboBoxListProduto.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto!");
-            return;
-        }
-        int qtd;
-        try {
-            qtd = Integer.parseInt(jTextFieldQtdProduct.getText());
-            if (qtd <= 0) {
-                throw new NumberFormatException();
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Quantidade inválida!");
-            return;
-        }
-
-        // produto selecionado
-        Product prod = (Product) jComboBoxListProduto.getSelectedItem();
-
-        // criar item
-        PurchaseItem item = new PurchaseItem();
-        item.setProduct(prod);
-        item.setQuantidade(qtd);
-        item.setPrecoCusto(prod.getPrice());
-        item.setSubtotal(prod.getPrice().multiply(BigDecimal.valueOf(qtd)));
-
-// 🔹 Verificar se já existe esse produto na lista
-        boolean jaExiste = false;
-        for (PurchaseItem it : itensCompra) {
-            if (it.getProduct().getId() == prod.getId()) {
-                // já existe → soma quantidade e recalcula subtotal
-                it.setQuantidade(it.getQuantidade() + qtd);
-                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(it.getQuantidade())));
-                jaExiste = true;
-                break;
-            }
-        }
-
-// 🔹 Se não existir, adiciona normalmente
-        if (!jaExiste) {
-            itensCompra.add(item);
-        }
-
-// atualizar tabela
-        loadItemsTable();
-        atualizarTotais();
+        criacaoItem();
+//        // validar produto e quantidade
+//        if (jComboBoxListProduto.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(this, "Selecione um produto!");
+//            return;
+//        }
+//        int qtd;
+//        try {
+//            qtd = Integer.parseInt(jTextFieldQtdProduct.getText());
+//            if (qtd <= 0) {
+//                throw new NumberFormatException();
+//            }
+//        } catch (NumberFormatException e) {
+//            JOptionPane.showMessageDialog(this, "Quantidade inválida!");
+//            return;
+//        }
+//
+//        // produto selecionado
+//        Product prod = (Product) jComboBoxListProduto.getSelectedItem();
+//
+//        // criar item
+//        PurchaseItem item = new PurchaseItem();
+//        item.setProduct(prod);
+//        item.setQuantidade(qtd);
+//        item.setPrecoCusto(prod.getPrice());
+//        item.setSubtotal(prod.getPrice().multiply(BigDecimal.valueOf(qtd)));
+//
+//// 🔹 Verificar se já existe esse produto na lista
+//        boolean jaExiste = false;
+//        for (PurchaseItem it : itensCompra) {
+//            if (it.getProduct().getId() == prod.getId()) {
+//                // já existe → soma quantidade e recalcula subtotal
+//                it.setQuantidade(it.getQuantidade() + qtd);
+//                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(it.getQuantidade())));
+//                jaExiste = true;
+//                break;
+//            }
+//        }
+//
+//// 🔹 Se não existir, adiciona normalmente
+//        if (!jaExiste) {
+//            itensCompra.add(item);
+//        }
+//
+//// atualizar tabela
+//        loadItemsTable();
+//        atualizarTotais();
     }//GEN-LAST:event_jButtonAddProductActionPerformed
 
     private void jButtonFinishPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishPurchaseActionPerformed
         // TODO add your handling code here:
-        // validações
-        if (jComboBoxListFornecedor.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Selecione um fornecedor!");
-            return;
-        }
-        if (itensCompra.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Adicione ao menos 1 item!");
-            return;
-        }
-
-        Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
-
-        Purchase purchase = new Purchase();
-        purchase.setSupplier(fornecedor);
-        purchase.setDescricao(jTextAreaNote.getText());
-        purchase.setTotal(new BigDecimal(jTextFieldTotal.getText()));
-        purchase.setIvaTotal(new BigDecimal(jTextFieldIvaTotal.getText()));
-        purchase.setItems(itensCompra);
-
-        try {
-            java.sql.Date dataCompra = java.sql.Date.valueOf(jFormattedTextFieldDataCompra.getText());
-            java.sql.Date dataVenc = java.sql.Date.valueOf(jFormattedTextFieldDataVencimento.getText());
-            purchase.setDataCompra(dataCompra);
-            purchase.setDataVencimento(dataVenc);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Datas inválidas!");
-            return;
-        }
-
-        // status inicial
-        purchase.setStatus("aberto");
-
-        // salvar na BD via controller
-        response = new PurchaseController().add(purchase);
-        if (response) {
-//            JOptionPane.showMessageDialog(this, "Compra salva com sucesso!");
-            dispose(); // fecha o dialog
-        } else {
-            JOptionPane.showMessageDialog(this, "Erro ao salvar compra!");
-        }
+        finalizarCompra();
+//        // validações
+//        if (jComboBoxListFornecedor.getSelectedItem() == null) {
+//            JOptionPane.showMessageDialog(this, "Selecione um fornecedor!");
+//            return;
+//        }
+//        if (itensCompra.isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Adicione ao menos 1 item!");
+//            return;
+//        }
+//
+//        Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
+//
+//        Purchase purchase = new Purchase();
+//        purchase.setSupplier(fornecedor);
+//        purchase.setDescricao(jTextAreaNote.getText());
+//        purchase.setTotal(new BigDecimal(jTextFieldTotal.getText()));
+//        purchase.setIvaTotal(new BigDecimal(jTextFieldIvaTotal.getText()));
+//        purchase.setItems(itensCompra);
+//
+//        try {
+//            java.sql.Date dataCompra = java.sql.Date.valueOf(jFormattedTextFieldDataCompra.getText());
+//            java.sql.Date dataVenc = java.sql.Date.valueOf(jFormattedTextFieldDataVencimento.getText());
+//            purchase.setDataCompra(dataCompra);
+//            purchase.setDataVencimento(dataVenc);
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(this, "Datas inválidas!");
+//            return;
+//        }
+//
+//        // status inicial
+//        purchase.setStatus("aberto");
+//
+//        // salvar na BD via controller
+//        response = new PurchaseController().add(purchase);
+//        if (response) {
+////            JOptionPane.showMessageDialog(this, "Compra salva com sucesso!");
+//            dispose(); // fecha o dialog
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Erro ao salvar compra!");
+//        }
     }//GEN-LAST:event_jButtonFinishPurchaseActionPerformed
 
     /**

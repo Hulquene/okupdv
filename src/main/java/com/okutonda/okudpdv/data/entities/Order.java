@@ -50,8 +50,8 @@ public class Order {
     @Column(name = "year")
     private Integer year;
 
-    @Column(name = "key", length = 100)
-    private String key;
+//    @Column(name = "key", length = 100)
+//    private String key;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
@@ -186,13 +186,13 @@ public class Order {
         this.year = year;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
+//    public String getKey() {
+//        return key;
+//    }
+//
+//    public void setKey(String key) {
+//        this.key = key;
+//    }
 
     public String getNote() {
         return note;

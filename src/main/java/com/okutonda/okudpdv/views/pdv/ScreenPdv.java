@@ -17,10 +17,12 @@ import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductStatus;
 import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.Util;
+import com.okutonda.okudpdv.services.PdvService;
 import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
@@ -61,11 +63,24 @@ public class ScreenPdv extends javax.swing.JFrame {
     ShiftController shiftController = new ShiftController();
     double subTotal, total;
 
+    // 🔹 Services e Estado
+    private final PdvService pdvService;
+    private List<ProductOrder> carrinho;
+    private Clients clienteSelecionado;
+
     /**
      * Creates new form ScreenPdv
      */
     public ScreenPdv() {
         initComponents();
+
+        // Inicializar services e estado
+        this.pdvService = new PdvService();
+        this.carrinho = new ArrayList<>();
+        this.clienteSelecionado = null;
+
+        inicializarUI();
+
         this.setExtendedState(ScreenPdv.MAXIMIZED_BOTH);
         session = UserSession.getInstance();
         shiftSession = ShiftSession.getInstance();
@@ -77,11 +92,32 @@ public class ScreenPdv extends javax.swing.JFrame {
         shiftController.buscarTurnoAtual();
         userController = new UserController();
 
-        // Atalhos globais
+        configurarAtalhos();
+    }
+
+    private void inicializarUI() {
+        try {
+            // Verificar se sistema está pronto
+            pdvService.sistemaProntoParaVendas();
+
+            // Carregar dados iniciais
+            carregarClientePadrao();
+            carregarProdutos();
+            atualizarInformacoesTurno();
+            atualizarCarrinhoUI();
+
+            System.out.println("inicializarUI");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Atenção", JOptionPane.WARNING_MESSAGE);
+            // Em produção, você pode redirecionar para abertura de turno
+        }
+    }
+
+    private void configurarAtalhos() {
         InputMap im = getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = getRootPane().getActionMap();
 
-        // F2 → Ajuda
+        // F1 → Ajuda
         im.put(KeyStroke.getKeyStroke("F1"), "ajuda");
         am.put("ajuda", new AbstractAction() {
             @Override
@@ -89,6 +125,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 ajuda();
             }
         });
+
         // F2 → Novo Cliente
         im.put(KeyStroke.getKeyStroke("F2"), "novoCliente");
         am.put("novoCliente", new AbstractAction() {
@@ -126,7 +163,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         });
     }
 
-    // ================== FUNÇÕES DO PDV ==================
+    // ================== FUNÇÕES PRINCIPAIS DO PDV ==================
     private void ajuda() {
         JDialogHelpers jdHelp = new JDialogHelpers(this, true);
         jdHelp.setVisible(true);
@@ -139,6 +176,111 @@ public class ScreenPdv extends javax.swing.JFrame {
     private void procurarProduto() {
         JDialogProductSearch jdP = new JDialogProductSearch(this, true);
         jdP.setVisible(true);
+    }
+
+    // 🔹 MÉTODOS AUXILIARES
+    private void carregarClientePadrao() {
+        try {
+            clienteSelecionado = pdvService.obterClientePadrao();
+            if (clienteSelecionado != null) {
+                jTextFieldNifClient.setText(clienteSelecionado.getNif());
+                jLabelNameClienteSelected.setText(clienteSelecionado.getName());
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Atenção", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void buscarClientePorNif() {
+        try {
+            String nif = jTextFieldNifClient.getText().trim();
+            if (!nif.isEmpty()) {
+                Clients cliente = pdvService.buscarClientePorNif(nif);
+                if (cliente != null) {
+                    clienteSelecionado = cliente;
+                    jLabelNameClienteSelected.setText(cliente.getName());
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cliente não encontrado", "Atenção", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        System.out.println("buscarClientePorNif");
+    }
+
+    private void carregarProdutos() {
+        try {
+            List<Product> produtos = pdvService.listarProdutosPDV(null);
+            System.out.println(produtos);
+            atualizarTabelaProdutos(produtos);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void filtrarProdutos() {
+        try {
+            String filtro = jTextFieldSearchProducts.getText().trim();
+            List<Product> produtos = pdvService.listarProdutosPDV(filtro);
+            atualizarTabelaProdutos(produtos);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+        System.out.println("filtrarProdutos");
+    }
+
+    private void atualizarTabelaProdutos(List<Product> produtos) {
+        DefaultTableModel model = (DefaultTableModel) jTableProducts.getModel();
+        model.setNumRows(0);
+
+        for (Product produto : produtos) {
+            model.addRow(new Object[]{
+                produto.getId(),
+                produto.getBarcode(),
+                produto.getDescription(),
+                produto.getPrice(),
+                produto.getTaxe() != null ? produto.getTaxe().getPercetage() : BigDecimal.ZERO,
+                produto.getCurrentStock()
+            });
+        }
+    }
+
+    private void atualizarCarrinhoUI() {
+        // Atualizar tabela do carrinho
+        DefaultTableModel model = (DefaultTableModel) jTableProductsInvoice.getModel();
+        model.setNumRows(0);
+
+        for (ProductOrder item : carrinho) {
+            BigDecimal totalItem = item.getPrice().multiply(BigDecimal.valueOf(item.getQty()));
+            model.addRow(new Object[]{
+                item.getProduct().getId(),
+                item.getCode(),
+                item.getDescription(),
+                item.getPrice(),
+                item.getQty(),
+                totalItem
+            });
+        }
+
+        // Calcular totais usando service
+        PdvService.Totais totais = pdvService.calcularTotaisComIVA(carrinho);
+        jTextFieldTotalInvoice.setText(totais.getTotal().toString());
+    }
+
+    private void atualizarInformacoesTurno() {
+        try {
+            PdvService.InformacoesTurno info = pdvService.obterInformacoesTurno();
+            if (info.isTurnoAberto()) {
+                // Aqui você pode atualizar UI com informações do turno se necessário
+                System.out.println("Turno aberto - Saldo: " + info.getSaldoAtual());
+            } else {
+                System.out.println("Turno Sem turno ");
+            }
+        } catch (Exception e) {
+            // Log do erro, mas não interrompe o funcionamento
+            System.err.println("Erro ao obter informações do turno: " + e.getMessage());
+        }
     }
 
     private void finalizarVenda() {
@@ -368,7 +510,7 @@ public class ScreenPdv extends javax.swing.JFrame {
         }
 
         // (Opcional) bloquear produto inativo
-        if (prod.getStatus() == 0) {
+        if (prod.getStatus() == ProductStatus.INACTIVE) {
             JOptionPane.showMessageDialog(this, "Produto inativo. PRODUTO NAO DISPONIVEL", "Atenção", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -1313,20 +1455,21 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         // TODO add your handling code here:
-        System.out.println("hhh" + shiftSession.getShift());
+//        System.out.println("hhh" + shiftSession.getShift());
+        iniciarRelogio(); // inicia o relógio
+        jLabelNameCompany.setText(companySession.getName());
         if (shiftSession.getShift() == null) {
             new JDialogOpenShift(this, rootPaneCheckingEnabled).setVisible(true);
             if (shiftSession.getShift() == null) {
                 backDashboard();
             }
         } else {
-            listProduts(null);
+//            listProduts(null);
 //            listClients();
-            iniciarRelogio(); // inicia o relógio
+//            iniciarRelogio(); // inicia o relógio
 //            String date = UtilDate.getDateNow();
 //            jLabelDateTime.setText(date);
             jLabelNameUserSeller.setText(shiftSession.getSeller().getName());
-            jLabelNameCompany.setText(companySession.getName());
 
             int itemCount = jComboBoxOptions.getItemCount();
             String itemValue = jComboBoxOptions.getItemAt(itemCount - 1);
@@ -1568,8 +1711,8 @@ public class ScreenPdv extends javax.swing.JFrame {
 
         // 🔹 4️⃣ Atualiza o campo com o valor ajustado (só se for válido)
         jTextFieldQtdProductsSelected.setText(String.valueOf(quantidade));
-        
-        
+
+
     }//GEN-LAST:event_jTextFieldQtdProductsSelectedKeyReleased
 
     private void jTextFieldBarCodeProductSelectKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldBarCodeProductSelectKeyPressed
@@ -1594,25 +1737,27 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jTextFieldSearchProductsKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldSearchProductsKeyReleased
         // TODO add your handling code here:
-        String txt = jTextFieldSearchProducts.getText();
-        if (!txt.isEmpty()) {
-            filterListProducts(txt);
-        } else {
-            listProduts(null);
-        }
+        filtrarProdutos();
+//        String txt = jTextFieldSearchProducts.getText();
+//        if (!txt.isEmpty()) {
+//            filterListProducts(txt);
+//        } else {
+//            listProduts(null);
+//        }
     }//GEN-LAST:event_jTextFieldSearchProductsKeyReleased
 
     private void jButtonPesquisarCompanyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPesquisarCompanyActionPerformed
         // TODO add your handling code here:
-        String nif = jTextFieldNifClient.getText();
-        ClientDao cDao = new ClientDao();
-        clientSelected = cDao.findByNif(nif).orElse(null);
-        if (clientSelected.getName() != null) {
-            jTextFieldNifClient.setText(clientSelected.getNif());
-            jLabelNameClienteSelected.setText(clientSelected.getName());
-        } else {
-            JOptionPane.showMessageDialog(null, "Cliente nao encontrado!");
-        }
+        buscarClientePorNif();
+//        String nif = jTextFieldNifClient.getText();
+//        ClientDao cDao = new ClientDao();
+//        clientSelected = cDao.findByNif(nif).orElse(null);
+//        if (clientSelected.getName() != null) {
+//            jTextFieldNifClient.setText(clientSelected.getNif());
+//            jLabelNameClienteSelected.setText(clientSelected.getName());
+//        } else {
+//            JOptionPane.showMessageDialog(null, "Cliente nao encontrado!");
+//        }
     }//GEN-LAST:event_jButtonPesquisarCompanyActionPerformed
 
     private void jButtonHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonHelpActionPerformed

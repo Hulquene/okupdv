@@ -286,4 +286,24 @@ public class PurchaseDao {
             return 0.0;
         }
     }
+
+    // No PurchaseDao - adicione este método
+    public Purchase findByIdWithItems(Integer compraId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            // Usando JOIN FETCH para carregar os itens junto com a compra
+            String hql = "SELECT DISTINCT p FROM Purchase p "
+                    + "LEFT JOIN FETCH p.items i "
+                    + "LEFT JOIN FETCH i.product "
+                    + "WHERE p.id = :compraId";
+
+            return session.createQuery(hql, Purchase.class)
+                    .setParameter("compraId", compraId)
+                    .uniqueResult();
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar compra com itens: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar compra com itens", e);
+        }
+    }
 }

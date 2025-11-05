@@ -5,9 +5,12 @@
 package com.okutonda.okudpdv.views.purchases;
 
 import com.okutonda.okudpdv.controllers.PurchaseController;
+import com.okutonda.okudpdv.controllers.StockMovementController;
+import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.views.pdv.JDialogDetailPurchase;
 import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -65,7 +68,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
         data.setNumRows(0);
 
         for (Purchase p : list) {
-            double pago = p.getTotal_pago()!= null ? p.getTotal_pago().doubleValue() : 0d;
+            double pago = p.getTotal_pago() != null ? p.getTotal_pago().doubleValue() : 0d;
             double emAberto = p.getTotal() != null ? p.getTotal().doubleValue() - pago : 0d;
 
             data.addRow(new Object[]{
@@ -81,6 +84,136 @@ public class JPanelPurchases extends javax.swing.JPanel {
                 (p.getDataVencimento() != null ? p.getDataVencimento().toString() : ""),
                 p.getStatus()
             });
+        }
+    }
+
+    private void processarEntradaStock(Integer compraId) {
+        StockMovementController stockController = new StockMovementController();
+        PurchaseController purchaseController = new PurchaseController();
+
+        try {
+            // Obtém detalhes da compra usando o PurchaseController
+            Purchase compra = purchaseController.buscarPorId(compraId);
+
+            if (compra == null) {
+                JOptionPane.showMessageDialog(null, "Compra não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Valida se a compra já não foi processada
+            if (compra.getStatus() != null && "PROCESSADA".equals(compra.getStatus())) {
+                int resposta = JOptionPane.showConfirmDialog(
+                        null,
+                        "Esta compra já foi processada anteriormente. Deseja processar novamente?",
+                        "Compra Já Processada",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (resposta != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            // Prepara mensagem de confirmação
+            StringBuilder mensagem = new StringBuilder();
+            mensagem.append("Confirmar entrada de stock para:\n")
+                    .append("Compra #").append(compraId).append(" - ").append(compra.getInvoiceNumber())
+                    .append("\nFornecedor: ").append(compra.getSupplier().getName())
+                    .append("\n\nItens a processar:\n");
+
+            for (var item : compra.getItems()) {
+                Product produto = item.getProduct();
+                Integer quantidade = item.getQuantidade();
+                Integer stockAtual = stockController.getStockAtual(produto.getId());
+
+                mensagem.append("• ").append(produto.getDescription())
+                        .append(" - ").append(quantidade).append(" unidades")
+                        .append(" (Stock atual: ").append(stockAtual).append(")\n");
+            }
+
+            int confirmacao = JOptionPane.showConfirmDialog(
+                    null,
+                    mensagem.toString(),
+                    "Confirmar Entrada de Stock",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (confirmacao == JOptionPane.YES_OPTION) {
+                // Processa a entrada de stock para cada item
+                boolean todosProcessados = true;
+                List<String> erros = new ArrayList<>();
+
+                for (var item : compra.getItems()) {
+                    try {
+                        boolean sucesso = stockController.registrarEntradaCompra(
+                                item.getProduct(),
+                                item.getQuantidade(),
+                                compraId
+                        );
+
+                        if (!sucesso) {
+                            todosProcessados = false;
+                            erros.add("Falha ao processar: " + item.getProduct().getDescription());
+                        }
+
+                    } catch (Exception e) {
+                        todosProcessados = false;
+                        erros.add("Erro em " + item.getProduct().getDescription() + ": " + e.getMessage());
+                        System.err.println("❌ Erro ao processar item: " + e.getMessage());
+                    }
+                }
+
+                if (todosProcessados) {
+                    // Atualiza o status da compra para processada
+                    atualizarStatusCompraProcessada(compraId);
+
+                    JOptionPane.showMessageDialog(null,
+                            "Entrada de stock processada com sucesso!",
+                            "Sucesso",
+                            JOptionPane.INFORMATION_MESSAGE);
+
+                    listPurchases(); // Atualiza a tabela de compras
+
+                } else {
+                    StringBuilder erroMsg = new StringBuilder();
+                    erroMsg.append("Alguns itens não foram processados:\n");
+                    for (String erro : erros) {
+                        erroMsg.append("• ").append(erro).append("\n");
+                    }
+
+                    JOptionPane.showMessageDialog(null,
+                            erroMsg.toString(),
+                            "Atenção",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao processar entrada de stock: " + e.getMessage());
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao processar entrada de stock: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+// Método auxiliar para atualizar o status da compra usando o controller
+    private void atualizarStatusCompraProcessada(Integer compraId) {
+        try {
+            PurchaseController purchaseController = new PurchaseController();
+            Purchase compra = purchaseController.buscarPorId(compraId);
+
+            if (compra != null) {
+                compra.setStatus("PROCESSADA");
+                purchaseController.atualizarCompra(compra);
+                System.out.println("✅ Status da compra #" + compraId + " atualizado para: PROCESSADA");
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao atualizar status da compra: " + e.getMessage());
+            // Não mostra erro ao usuário pois o stock já foi processado
         }
     }
 
@@ -135,6 +268,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
         jLabel2.setText("Fornecedor");
 
         jButton1.setText("Entrada de Stock");
+        jButton1.setEnabled(false);
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -281,15 +415,16 @@ public class JPanelPurchases extends javax.swing.JPanel {
 
     private void jButtonEntradaStockCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonEntradaStockCompraActionPerformed
         // TODO add your handling code here:
-        int id = 0;
+        int compraId = 0;
         try {
-            id = (int) jTablePurchases.getValueAt(jTablePurchases.getSelectedRow(), 0);
+            compraId = (int) jTablePurchases.getValueAt(jTablePurchases.getSelectedRow(), 0);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Venda na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (id > 0) {
-//               entrada de stock da compra
-            }
+            JOptionPane.showMessageDialog(null, "Selecione uma Compra na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (compraId > 0) {
+            processarEntradaStock(compraId);
         }
     }//GEN-LAST:event_jButtonEntradaStockCompraActionPerformed
 

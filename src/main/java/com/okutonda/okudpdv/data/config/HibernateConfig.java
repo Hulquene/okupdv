@@ -53,12 +53,13 @@ public class HibernateConfig {
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
 
         // SQL logging (desenvolvimento)
-        configuration.setProperty("hibernate.show_sql", "true");
-        configuration.setProperty("hibernate.format_sql", "true");
-
+//        configuration.setProperty("hibernate.show_sql", "true");
+//        configuration.setProperty("hibernate.format_sql", "true");
+        
         // Estratégia DDL - validate para produção
-//        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
-        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
+//        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+//        configuration.setProperty("hibernate.hbm2ddl.auto", "create-drop");
 
         // 🔥 CORREÇÃO: Timeouts aumentados
         configuration.setProperty("hibernate.connection.pool_size", "5");

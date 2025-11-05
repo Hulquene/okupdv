@@ -10,12 +10,17 @@ import com.okutonda.okudpdv.controllers.TaxeReasonController;
 import com.okutonda.okudpdv.controllers.TaxeController;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.ProductStatus;
+import com.okutonda.okudpdv.data.entities.ProductType;
 import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.helpers.Util;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 /**
@@ -39,127 +44,367 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         loadCombobox();
-//        listSupplierCombo();
-    }
-
-    public void setFormProduct(Product prod) {
-        if (prod != null) {
-            jTextFieldId.setText(String.valueOf(prod.getId()));
-            jComboBoxType.setSelectedItem(prod.getType());
-            jTextFieldCode.setText(prod.getCode());
-            jTextFieldBarCode.setText(prod.getBarcode());
-            jTextFieldDescription.setText(prod.getDescription());
-            jTextFieldPrice.setText(String.valueOf(prod.getPrice()));
-            jTextFieldPurchasePrice.setText(String.valueOf(prod.getPurchasePrice()));
-//            jTextFieldStockTotal.setText(String.valueOf(prod.getStockTotal()));
-//            jComboBoxTaxeId.setSelectedItem(prod.getTaxe().toString());
-//            jComboBoxReasonTaxeId.setSelectedItem(prod.getReasonTaxe().toString());
-//            jComboBoxReasonTaxeId.setSelectedItem(prod.getReasonTaxe().toString());
-//            jComboBoxSupplier.setSelectedItem(prod.getSupplier().getName());
-            jComboBoxStatus.setSelectedItem(prod.getStatus());
-            if (prod.getTaxe() != null) {
-                jLabelTaxeSelected.setText(prod.getTaxe().toString());
-            }
-            if (prod.getReasonTaxe() != null) {
-                jLabelReasonSeleted.setText(prod.getReasonTaxe().toString());
-            }
-        }
     }
 
     public Boolean getResponse() {
         return status;
     }
+    private boolean carregandoDados = false;
+
+    public void loadCombobox() {
+        // Combos com consulta ao banco
+        carregarComboReasonTaxes();
+        carregarComboTaxes();
+        carregarComboGroups();
+
+        // Combos estáticos
+        carregarCombosEstaticos();
+    }
+
+    private void carregarComboReasonTaxes() {
+        jComboBoxReasonTaxeId.removeAllItems();
+        List<ReasonTaxes> listR = reasonTaxeController.listarTodas();
+        for (ReasonTaxes item : listR) {
+            jComboBoxReasonTaxeId.addItem(item);
+        }
+    }
+
+    private void carregarComboTaxes() {
+        jComboBoxTaxeId.removeAllItems();
+        List<Taxes> listT = taxeController.listarTodas();
+        for (Taxes item : listT) {
+            jComboBoxTaxeId.addItem(item);
+        }
+    }
+
+    private void carregarComboGroups() {
+        jComboBoxGroup.removeAllItems();
+        List<GroupsProduct> listG = groupsProductController.getAll();
+        System.out.println(listG);
+        for (GroupsProduct item : listG) {
+            jComboBoxGroup.addItem(item);
+        }
+    }
+
+    private void carregarCombosEstaticos() {
+        carregandoDados = true; // Inicia o carregamento
+
+        // Combo Status
+        jComboBoxStatus.removeAllItems();
+        jComboBoxStatus.addItem("Ativo");
+        jComboBoxStatus.addItem("Inativo");
+
+        // Combo Tipo
+        jComboBoxType.removeAllItems();
+        jComboBoxType.addItem("Produto");
+        jComboBoxType.addItem("Serviço");
+
+        carregandoDados = false; // Finaliza o carregamento
+    }
+
+    public void setFormProduct(Product prod) {
+        if (prod != null) {
+            // TextFields
+            jTextFieldId.setText(String.valueOf(prod.getId()));
+            jTextFieldCode.setText(prod.getCode());
+            jTextFieldBarCode.setText(prod.getBarcode());
+            jTextFieldDescription.setText(prod.getDescription());
+            jTextFieldPrice.setText(String.valueOf(prod.getPrice()));
+            jTextFieldPurchasePrice.setText(String.valueOf(prod.getPurchasePrice()));
+            jTextFieldStockMinimo.setText(String.valueOf(prod.getMinStock()));
+
+            // Combos estáticos
+            selecionarItemPorString(jComboBoxType, prod.getType());
+            // Mapear status numérico para texto
+            if (prod.getStatus() != null) {
+                ProductStatus statusTexto = (prod.getStatus() == ProductStatus.ACTIVE) ? ProductStatus.ACTIVE : ProductStatus.INACTIVE;
+                jComboBoxStatus.setSelectedItem(statusTexto);
+            }
+
+            // Combos dinâmicos
+            if (prod.getTaxe() != null) {
+                selecionarItemComboBox(jComboBoxTaxeId, prod.getTaxe());
+            }
+            if (prod.getReasonTaxe() != null) {
+                selecionarItemComboBox(jComboBoxReasonTaxeId, prod.getReasonTaxe());
+            }
+            System.out.println("grupo: " + prod.getGroup());
+            if (prod.getGroup() != null) {
+                selecionarItemComboBox(jComboBoxGroup, prod.getGroup());
+            }
+        }
+    }
+
+// Método auxiliar para selecionar item por string nos combos estáticos
+    private void selecionarItemPorString(JComboBox<String> comboBox, ProductType valor) {
+        if (valor != null) {
+            for (int i = 0; i < comboBox.getItemCount(); i++) {
+                if (valor.equals(comboBox.getItemAt(i))) {
+                    comboBox.setSelectedIndex(i);
+                    return;
+                }
+            }
+        }
+    }
+
+// Método auxiliar para selecionar item por objeto nos combos dinâmicos
+    private void selecionarItemComboBox(JComboBox comboBox, Object objetoParaSelecionar) {
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            Object item = comboBox.getItemAt(i);
+
+            // Tenta comparar por igualdade direta
+            if (item.equals(objetoParaSelecionar)) {
+                comboBox.setSelectedIndex(i);
+                return;
+            }
+
+            // Tenta comparar por ID se disponível
+            if (temMesmoId(item, objetoParaSelecionar)) {
+                comboBox.setSelectedIndex(i);
+                return;
+            }
+        }
+    }
+
+// Verifica se dois objetos têm o mesmo ID
+    private boolean temMesmoId(Object obj1, Object obj2) {
+        try {
+            Method getId1 = obj1.getClass().getMethod("getId");
+            Method getId2 = obj2.getClass().getMethod("getId");
+
+            Object id1 = getId1.invoke(obj1);
+            Object id2 = getId2.invoke(obj2);
+
+            return id1 != null && id1.equals(id2);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public void setProduct(int id) {
-        loadCombobox();
         Product prod = productController.getById(id);
         setFormProduct(prod);
     }
 
-    public void changeValueTextFildForm(Product cModel) {
-        jTextFieldId.setText(Integer.toString(cModel.getId()));
-        jTextFieldCode.setText(cModel.getCode());
-        jTextFieldBarCode.setText(cModel.getBarcode());
-        jTextFieldDescription.setText(cModel.getDescription());
-        jComboBoxTaxeId.setSelectedItem(cModel.getTaxe().toString());
-        jComboBoxReasonTaxeId.setSelectedItem(cModel.getReasonTaxe().toString());
-//        jComboBoxSupplier.setSelectedItem(cModel.getSupplier().getName());
-        jComboBoxType.setSelectedItem(cModel.getType());
-        jTextFieldBarCode.setText(cModel.getBarcode());
-        jTextFieldPrice.setText(cModel.getPrice().toString());
-        jTextFieldPurchasePrice.setText(cModel.getPurchasePrice().toString());
-//        jComboBoxGroupId.setSelectedIndex(cModel.getGroupId());
-//        jComboBoxSubGroupId.setSelectedIndex(cModel.getSubGroupId());
-//        jComboBoxSupplier.setSelectedItem(cModel.getSupplier());
-        jComboBoxStatus.setSelectedItem(cModel.getStatus());
-//        jTextFieldStockTotal.setText(Double.toString(cModel.getStockTotal()));
-    }
+// Na sua View - validação completa de campos obrigatórios
+    private boolean validarCamposUI() {
+        // 1️⃣ Validação do Código
+        if (jTextFieldCode.getText().trim().isEmpty()) {
+            showError("Código é obrigatório!");
+            jTextFieldCode.requestFocus();
+            return false;
+        }
+        if (jTextFieldCode.getText().trim().length() < 3) {
+            showError("Código deve ter pelo menos 3 caracteres");
+            jTextFieldCode.requestFocus();
+            return false;
+        }
 
-    public Product validateProduct() {
-        Product cModel = new Product();
+        // 2️⃣ Validação da Descrição
+        if (jTextFieldDescription.getText().trim().isEmpty()) {
+            showError("Descrição é obrigatória!");
+            jTextFieldDescription.requestFocus();
+            return false;
+        }
+        if (jTextFieldDescription.getText().trim().length() < 3) {
+            showError("Descrição deve ter pelo menos 3 caracteres");
+            jTextFieldDescription.requestFocus();
+            return false;
+        }
 
-        if (jTextFieldCode.getText().isEmpty() || jTextFieldCode.getText().length() < 3) {
-            JOptionPane.showMessageDialog(null, "Campo Codigo invalido!! no minimo 3 caracteres");
-        } else if (jTextFieldDescription.getText().isEmpty() || jTextFieldDescription.getText().length() < 3) {
-            JOptionPane.showMessageDialog(null, "Campo Descrição invalido!! no minimo 3 caracteres");
-        } else if (jTextFieldBarCode.getText().isEmpty() || jTextFieldBarCode.getText().length() < 9) {
-            JOptionPane.showMessageDialog(null, "Campo Codigo de Barra invalido!! no minimo 9 caracteres");
-        } else if (Util.isValidDouble(jTextFieldPrice.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Preço invalido!! Insira um numero preço");
-        } else if (Util.isValidDouble(jTextFieldPurchasePrice.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Preço de Compra invalido!! Insira um numero compra");
-        } else if (jTextFieldStockTotal.getText().isEmpty() || Util.isInteger(jTextFieldStockTotal.getText()) == false) {
-            JOptionPane.showMessageDialog(null, "Campo Total de Estoque invalido!! Insira um numero");
-        } else if (jComboBoxReasonTaxeId.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo Reason Taxe invalido!! Selecione");
-        } else if (jComboBoxTaxeId.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(null, "Campo Taxe invalido!! Selecione");
-        } else {
-            cModel.setCode(jTextFieldCode.getText());
-            cModel.setType(jComboBoxType.getSelectedItem().toString());
-            cModel.setDescription(jTextFieldDescription.getText());
-            cModel.setBarcode(jTextFieldBarCode.getText());
-            cModel.setTaxe((Taxes) jComboBoxTaxeId.getSelectedItem());
-            cModel.setReasonTaxe((ReasonTaxes) jComboBoxReasonTaxeId.getSelectedItem());
-            cModel.setPrice(new BigDecimal(jTextFieldPrice.getText().replace(",", ".")));
-            cModel.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
-            cModel.setGroup((GroupsProduct) jComboBoxGroup.getSelectedItem());
-            String statusProd = (String) jComboBoxStatus.getSelectedItem();
-            if ("ativo".equals(statusProd)) {
-                cModel.setStatus(1);
-            } else {
-                cModel.setStatus(0);
+        // 3️⃣ Validação do Código de Barras
+        if (jTextFieldBarCode.getText().trim().isEmpty()) {
+            showError("Código de Barras é obrigatório!");
+            jTextFieldBarCode.requestFocus();
+            return false;
+        }
+        if (jTextFieldBarCode.getText().trim().length() < 9) {
+            showError("Código de Barras deve ter pelo menos 9 caracteres");
+            jTextFieldBarCode.requestFocus();
+            return false;
+        }
+
+        // 4️⃣ Validação do Preço de Venda
+        if (jTextFieldPrice.getText().trim().isEmpty()) {
+            showError("Preço de Venda é obrigatório!");
+            jTextFieldPrice.requestFocus();
+            return false;
+        }
+        if (!Util.isValidDouble(jTextFieldPrice.getText())) {
+            showError("Preço de Venda deve ser um número válido\nEx: 150.00 ou 150,00");
+            jTextFieldPrice.requestFocus();
+            return false;
+        }
+        try {
+            BigDecimal preco = new BigDecimal(jTextFieldPrice.getText().replace(",", "."));
+            if (preco.compareTo(BigDecimal.ZERO) < 0) {
+                showError("Preço de Venda não pode ser negativo");
+                jTextFieldPrice.requestFocus();
+                return false;
             }
-            return cModel;
+        } catch (NumberFormatException e) {
+            showError("Formato de Preço de Venda inválido");
+            jTextFieldPrice.requestFocus();
+            return false;
         }
-        return null;
+
+        // 5️⃣ Validação do Preço de Compra
+        if (jTextFieldPurchasePrice.getText().trim().isEmpty()) {
+            showError("Preço de Compra é obrigatório!");
+            jTextFieldPurchasePrice.requestFocus();
+            return false;
+        }
+        if (!Util.isValidDouble(jTextFieldPurchasePrice.getText())) {
+            showError("Preço de Compra deve ser um número válido\nEx: 100.00 ou 100,00");
+            jTextFieldPurchasePrice.requestFocus();
+            return false;
+        }
+        try {
+            BigDecimal precoCompra = new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", "."));
+            if (precoCompra.compareTo(BigDecimal.ZERO) < 0) {
+                showError("Preço de Compra não pode ser negativo");
+                jTextFieldPurchasePrice.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showError("Formato de Preço de Compra inválido");
+            jTextFieldPurchasePrice.requestFocus();
+            return false;
+        }
+
+        // 6️⃣ Validação do Stock Mínimo
+        if (jTextFieldStockMinimo.getText().trim().isEmpty()) {
+            showError("Stock Mínimo é obrigatório!");
+            jTextFieldStockMinimo.requestFocus();
+            return false;
+        }
+        if (!Util.isInteger(jTextFieldStockMinimo.getText())) {
+            showError("Stock Mínimo deve ser um número inteiro\nEx: 10, 50, 100");
+            jTextFieldStockMinimo.requestFocus();
+            return false;
+        }
+        try {
+            int stockMinimo = Integer.parseInt(jTextFieldStockMinimo.getText().trim());
+            if (stockMinimo < 0) {
+                showError("Stock Mínimo não pode ser negativo");
+                jTextFieldStockMinimo.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showError("Formato de Stock Mínimo inválido");
+            jTextFieldStockMinimo.requestFocus();
+            return false;
+        }
+
+        // 7️⃣ Validação do Tipo
+        if (jComboBoxType.getSelectedItem() == null) {
+            showError("Tipo do produto é obrigatório!");
+            jComboBoxType.requestFocus();
+            return false;
+        }
+
+        // 8️⃣ Validação da Taxa
+        if (jComboBoxTaxeId.getSelectedItem() == null) {
+            showError("Taxa é obrigatória!");
+            jComboBoxTaxeId.requestFocus();
+            return false;
+        }
+
+        // 9️⃣ Validação da Reason Tax
+        if (jComboBoxReasonTaxeId.getSelectedItem() == null) {
+            showError("Reason Tax é obrigatória!");
+            jComboBoxReasonTaxeId.requestFocus();
+            return false;
+        }
+
+        // 🔟 Validação do Status
+        if (jComboBoxStatus.getSelectedItem() == null) {
+            showError("Status é obrigatório!");
+            jComboBoxStatus.requestFocus();
+            return false;
+        }
+
+        // ✅ Todas as validações passaram
+        return true;
     }
 
-    public void loadCombobox() {
-//        List<Supplier> listS = supplierController.get("");
-//        jComboBoxSupplier.removeAllItems();
-//        for (Supplier item : listS) {
-//            jComboBoxSupplier.addItem(item);
-//        }
-//
-//        List<Warehouse> listW = warehouseController.get("");
-//        jComboBoxWarehause.removeAllItems();
-//        for (Warehouse item : listW) {
-//            jComboBoxWarehause.addItem(item);
-//        }
+// Método auxiliar para mostrar erros
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+    }
 
-        List<ReasonTaxes> listR = reasonTaxeController.listarTodas();
-        jComboBoxReasonTaxeId.removeAllItems();
-        for (ReasonTaxes item : listR) {
-            jComboBoxReasonTaxeId.addItem(item);
+// Método auxiliar para mostrar sucesso
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+    }
+    // Função simplificada para criar/salvar produto
+
+    private void salvarProduto() {
+        // 1️⃣ PRIMEIRO: Validação completa da UI
+        if (!validarCamposUI()) {
+            status = false;
+            return; // Para aqui se houver erro de validação
         }
 
-        List<Taxes> list = taxeController.listarTodas();
-        jComboBoxTaxeId.removeAllItems();
-        for (Taxes item : list) {
-            jComboBoxTaxeId.addItem(item);
+        try {
+            // 2️⃣ Criar objeto Product a partir dos campos
+            Product produto = criarProdutoFromCampos();
+
+            // 3️⃣ Chamar Controller (que vai fazer validação de negócio)
+            Product produtoSalvo = productController.save(produto);
+
+            // 4️⃣ Verificar resultado
+            if (produtoSalvo != null && produtoSalvo.getId() != null) {
+                showSuccess(produto.getId() == null
+                        ? "Produto criado com sucesso!"
+                        : "Produto atualizado com sucesso!");
+                status = true;
+                this.dispose(); // Fechar diálogo
+            }
+            // Se retornar null, o Controller já mostrou o erro
+
+        } catch (NumberFormatException e) {
+            showError("Erro na conversão de números: " + e.getMessage());
+        } catch (Exception e) {
+            showError("Erro inesperado: " + e.getMessage());
+            System.err.println("❌ Erro ao salvar produto: " + e.getMessage());
+            e.printStackTrace();
         }
-        jComboBoxTaxeId.setSelectedItem("IVA 14: 14.0");
+    }
+
+    private Product criarProdutoFromCampos() {
+        Product produto = new Product();
+
+        // Campos obrigatórios (já validados)
+        produto.setCode(jTextFieldCode.getText().trim());
+        produto.setDescription(jTextFieldDescription.getText().trim());
+        produto.setBarcode(jTextFieldBarCode.getText().trim());
+        produto.setPrice(new BigDecimal(jTextFieldPrice.getText().replace(",", ".")));
+        produto.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
+        produto.setMinStock(Integer.parseInt(jTextFieldStockMinimo.getText().trim()));
+        
+        String tipoSelecionado = jComboBoxType.getSelectedItem().toString();
+        produto.setType(ProductType.fromDescription(tipoSelecionado));
+//        produto.setType(jComboBoxType.getSelectedItem().toString());
+        produto.setTaxe((Taxes) jComboBoxTaxeId.getSelectedItem());
+        produto.setReasonTaxe((ReasonTaxes) jComboBoxReasonTaxeId.getSelectedItem());
+
+        // Campos opcionais
+        if (jComboBoxGroup.getSelectedItem() != null) {
+            produto.setGroup((GroupsProduct) jComboBoxGroup.getSelectedItem());
+        }
+
+        // Status
+        String status = (String) jComboBoxStatus.getSelectedItem();
+        produto.setStatus(ProductStatus.ACTIVE.equals(status) ? ProductStatus.ACTIVE : ProductStatus.INACTIVE);
+//        produto.setStatus("Ativo".equals(status) ? 1 : 0);
+
+        // Se é edição, setar ID
+        if (!jTextFieldId.getText().isEmpty()) {
+            produto.setId(Integer.parseInt(jTextFieldId.getText()));
+        }
+
+        return produto;
     }
 
     /**
@@ -193,16 +438,12 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jLabel21 = new javax.swing.JLabel();
         jComboBoxReasonTaxeId = new javax.swing.JComboBox();
         jTextFieldPrice = new javax.swing.JTextField();
-        jTextFieldStockTotal = new javax.swing.JTextField();
+        jTextFieldStockMinimo = new javax.swing.JTextField();
         jTextFieldPurchasePrice = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jLabelTaxeSelected = new javax.swing.JLabel();
-        jLabel22 = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
-        jLabelReasonSeleted = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jButtonClearForm = new javax.swing.JButton();
-        jButtonAdd = new javax.swing.JButton();
+        jButtonSalvarProduto = new javax.swing.JButton();
         jTextFieldId = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jButtonCancelFormAdd = new javax.swing.JButton();
@@ -315,22 +556,10 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             }
         });
 
-        jTextFieldStockTotal.setText("0");
+        jTextFieldStockMinimo.setText("0");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel2.setText("Preço de Compra");
-
-        jLabelTaxeSelected.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabelTaxeSelected.setText("Vazio");
-
-        jLabel22.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel22.setText("Taxas selecionada");
-
-        jLabel23.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel23.setText("Razão selecionada");
-
-        jLabelReasonSeleted.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabelReasonSeleted.setText("Vazio");
 
         jLabel5.setForeground(new java.awt.Color(204, 0, 0));
         jLabel5.setText("Imposto deve estar incluso no preco unitario");
@@ -340,13 +569,13 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jButtonClearForm.setText("Limpar");
         jButtonClearForm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 
-        jButtonAdd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButtonAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
-        jButtonAdd.setText("Salvar");
-        jButtonAdd.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
+        jButtonSalvarProduto.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonSalvarProduto.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
+        jButtonSalvarProduto.setText("Salvar");
+        jButtonSalvarProduto.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jButtonSalvarProduto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAddActionPerformed(evt);
+                jButtonSalvarProdutoActionPerformed(evt);
             }
         });
 
@@ -367,84 +596,78 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jPanelFormProduct.setLayout(jPanelFormProductLayout);
         jPanelFormProductLayout.setHorizontalGroup(
             jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jButtonAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonClearForm)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonCancelFormAdd)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel12))
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                        .addComponent(jTextFieldDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jButtonSearchForm, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(142, 142, 142)
-                                        .addComponent(jLabel10)
-                                        .addGap(208, 208, 208)))
-                                .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                    .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(jTextFieldCode))
-                                .addComponent(jComboBoxTaxeId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFormProductLayout.createSequentialGroup()
-                                    .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLabel13)
-                                                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addGap(174, 174, 174))
-                                        .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                            .addComponent(jTextFieldPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                                    .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jLabel2)
-                                        .addComponent(jTextFieldPurchasePrice, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                    .addGap(6, 6, 6)
-                                    .addComponent(jLabel11))
-                                .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                                    .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jLabelTaxeSelected, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(26, 26, 26)
+            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                    .addGap(347, 347, 347)
+                    .addComponent(jLabel12))
+                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 298, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel20)
-                            .addComponent(jLabel16)
-                            .addComponent(jLabel18)
-                            .addComponent(jLabel23)
-                            .addComponent(jLabelReasonSeleted, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBoxGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jTextFieldBarCode)
-                            .addComponent(jComboBoxReasonTaxeId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                    .addComponent(jTextFieldDescription, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(jButtonSearchForm, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(142, 142, 142)
+                                    .addComponent(jLabel10)
+                                    .addGap(208, 208, 208)))
                             .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                .addComponent(jComboBoxType, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jTextFieldCode))
+                            .addComponent(jComboBoxTaxeId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelFormProductLayout.createSequentialGroup()
+                                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                        .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel13)
+                                            .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(174, 174, 174))
+                                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                        .addComponent(jTextFieldPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel19))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel21)
-                                    .addComponent(jTextFieldStockTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)))))
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel1)
-                        .addGap(18, 18, 18)
-                        .addComponent(jTextFieldId, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(108, Short.MAX_VALUE))
+                                    .addComponent(jLabel2)
+                                    .addComponent(jTextFieldPurchasePrice, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabel11)))
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGap(26, 26, 26)
+                    .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel20)
+                        .addComponent(jLabel16)
+                        .addComponent(jLabel18)
+                        .addComponent(jComboBoxGroup, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jTextFieldBarCode)
+                        .addComponent(jComboBoxReasonTaxeId, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel19))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel21)
+                                .addComponent(jTextFieldStockMinimo, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)))))
+                .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                    .addGap(12, 12, 12)
+                    .addComponent(jLabel1)
+                    .addGap(18, 18, 18)
+                    .addComponent(jTextFieldId, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGroup(jPanelFormProductLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButtonSalvarProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButtonClearForm)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButtonCancelFormAdd)
+                .addContainerGap())
         );
         jPanelFormProductLayout.setVerticalGroup(
             jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -483,7 +706,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
                             .addComponent(jTextFieldPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jTextFieldPurchasePrice, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jComboBoxStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldStockTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextFieldStockMinimo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -498,28 +721,17 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
                             .addComponent(jTextFieldCode, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel20)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel23)
-                    .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabelTaxeSelected)))
+                .addGap(18, 18, 18)
+                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonSalvarProduto)
+                    .addComponent(jButtonClearForm)
+                    .addComponent(jButtonCancelFormAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, 0)
-                .addComponent(jLabelReasonSeleted)
-                .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addGap(37, 37, 37)
-                        .addComponent(jLabel12))
-                    .addGroup(jPanelFormProductLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButtonAdd)
-                            .addComponent(jButtonClearForm)
-                            .addComponent(jButtonCancelFormAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addComponent(jLabel12)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanelFormProductLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonAdd, jButtonCancelFormAdd, jButtonClearForm});
+        jPanelFormProductLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonCancelFormAdd, jButtonClearForm, jButtonSalvarProduto});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -532,7 +744,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             .addComponent(jPanelFormProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(878, 524));
+        setSize(new java.awt.Dimension(788, 470));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -542,16 +754,16 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 
     private void jTextFieldDescriptionKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldDescriptionKeyPressed
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            String description = jTextFieldDescription.getText();
-            Product cModel;
-            cModel = productController.getByDescription(description);
-            if (cModel.getDescription() != null) {
-                changeValueTextFildForm(cModel);
-            } else {
-                JOptionPane.showMessageDialog(null, "Product nao encontrado!");
-            }
-        }
+//        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+//            String description = jTextFieldDescription.getText();
+//            Product cModel;
+//            cModel = productController.getByDescription(description);
+//            if (cModel.getDescription() != null) {
+//                changeValueTextFildForm(cModel);
+//            } else {
+//                JOptionPane.showMessageDialog(null, "Product nao encontrado!");
+//            }
+//        }
     }//GEN-LAST:event_jTextFieldDescriptionKeyPressed
 
     private void jComboBoxTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxTypeActionPerformed
@@ -597,40 +809,10 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 //        }
     }//GEN-LAST:event_jComboBoxReasonTaxeIdAncestorAdded
 
-    private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
+    private void jButtonSalvarProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSalvarProdutoActionPerformed
         // TODO add your handling code here:
-        Product cModel = validateProduct();
-        if (cModel != null) {
-            int id = jTextFieldId.getText().isEmpty() == true ? 0 : Integer.parseInt(jTextFieldId.getText());
-//            boolean response;
-
-            if (id == 0) {
-                Product prod = productController.save(cModel);
-                status = (prod != null); // Converte para boolean
-            } else {
-                Product prod = productController.save(cModel);
-                status = (prod != null); // Converte para boolean
-            }
-//            if (id == 0) {
-//                status = productController.save(cModel);
-////                if (response) {
-////                    JOptionPane.showMessageDialog(null, "products salvo com Sucesso!!");
-////                    screanListProducts();
-////                }
-//            } else {
-//                status = productController.save(cModel);
-////                if (response) {
-////                    JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
-////                    screanListProducts();
-////                }
-//        }
-//            if (status == true) {
-//                JOptionPane.showMessageDialog(null, "products Atualizado com Sucesso!!");
-            this.dispose();
-//                screanListProducts();
-//            }
-        }
-    }//GEN-LAST:event_jButtonAddActionPerformed
+        salvarProduto();
+    }//GEN-LAST:event_jButtonSalvarProdutoActionPerformed
 
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         // TODO add your handling code here:
@@ -639,13 +821,25 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
 
     private void jComboBoxTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxTypeItemStateChanged
         // TODO add your handling code here:
-        String type = jComboBoxType.getSelectedItem().toString();
-        if (type.equals("product")) {
-            jTextFieldStockTotal.setEnabled(true);
-        } else {
-            jTextFieldStockTotal.setEnabled(false);
+        if (carregandoDados) {
+            return;
         }
-//        JOptionPane.showMessageDialog(null, "O tipo selecionado: " + type);
+
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            Object selectedItem = jComboBoxType.getSelectedItem();
+
+            // VERIFICAÇÃO CRÍTICA: nunca use toString() sem verificar null
+            if (selectedItem != null) {
+                String type = selectedItem.toString();
+                if ("Produto".equals(type)) {
+                    jTextFieldStockMinimo.setEnabled(true);
+                    jTextFieldBarCode.setEnabled(true);
+                } else {
+                    jTextFieldStockMinimo.setEnabled(false);
+                    jTextFieldBarCode.setEnabled(false);
+                }
+            }
+        }
     }//GEN-LAST:event_jComboBoxTypeItemStateChanged
 
     /**
@@ -691,9 +885,9 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonCancelFormAdd;
     private javax.swing.JButton jButtonClearForm;
+    private javax.swing.JButton jButtonSalvarProduto;
     private javax.swing.JButton jButtonSearchForm;
     private javax.swing.JComboBox jComboBoxGroup;
     private javax.swing.JComboBox jComboBoxReasonTaxeId;
@@ -712,13 +906,9 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JLabel jLabelReasonSeleted;
-    private javax.swing.JLabel jLabelTaxeSelected;
     private javax.swing.JPanel jPanelFormProduct;
     private javax.swing.JTextField jTextFieldBarCode;
     private javax.swing.JTextField jTextFieldCode;
@@ -726,6 +916,6 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     private javax.swing.JTextField jTextFieldId;
     private javax.swing.JTextField jTextFieldPrice;
     private javax.swing.JTextField jTextFieldPurchasePrice;
-    private javax.swing.JTextField jTextFieldStockTotal;
+    private javax.swing.JTextField jTextFieldStockMinimo;
     // End of variables declaration//GEN-END:variables
 }

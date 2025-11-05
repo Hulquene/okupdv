@@ -1,14 +1,17 @@
 package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
+import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.StockMovement;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +21,7 @@ public class StockMovementDao {
     private final Class<StockMovement> entityClass = StockMovement.class;
 
     // ==========================================================
-    // 🔹 CRUD
+    // 🔹 CRUD BÁSICO
     // ==========================================================
     public Optional<StockMovement> findById(Integer id) {
         Session session = HibernateUtil.getCurrentSession();
@@ -55,12 +58,6 @@ public class StockMovementDao {
             tx.commit();
 
             System.out.println("✅ StockMovement salvo: " + stockMovement.getProduct().getDescription());
-
-            // Se for entrada de compra, atualiza o item correspondente
-            if ("COMPRA".equalsIgnoreCase(stockMovement.getOrigin())) {
-                atualizarEntradaItemCompra(stockMovement);
-            }
-
             return stockMovement;
 
         } catch (Exception e) {
@@ -116,10 +113,10 @@ public class StockMovementDao {
     }
 
     // ==========================================================
-    // 🔹 CONSULTAS DE STOCK
+    // 🔹 CONSULTAS ESPECÍFICAS DE STOCK
     // ==========================================================
     /**
-     * 🔹 MÉTODO ADICIONADO: Calcula o stock atual de um produto
+     * Calcula o stock atual de um produto
      */
     public Integer getStockAtual(Integer productId) {
         Session session = HibernateUtil.getCurrentSession();
@@ -138,13 +135,6 @@ public class StockMovementDao {
             System.err.println("Erro ao calcular stock atual: " + e.getMessage());
             return 0;
         }
-    }
-
-    /**
-     * Método alternativo em inglês
-     */
-    public Integer getCurrentStock(Integer productId) {
-        return getStockAtual(productId);
     }
 
     /**
@@ -198,6 +188,29 @@ public class StockMovementDao {
     }
 
     /**
+     * Obtém a última movimentação de um produto
+     */
+    public LocalDateTime getUltimaMovimentacao(Integer productId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("product").get("id"), productId))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            List<StockMovement> movimentos = session.createQuery(cq).getResultList();
+            return movimentos.isEmpty() ? null : movimentos.get(0).getCreatedAt();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar última movimentação: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Verifica se há stock suficiente
      */
     public boolean hasStockSuficiente(Integer productId, Integer quantidadeRequerida) {
@@ -206,7 +219,7 @@ public class StockMovementDao {
     }
 
     // ==========================================================
-    // 🔹 OUTRAS CONSULTAS
+    // 🔹 CONSULTAS POR FILTROS
     // ==========================================================
     public List<StockMovement> findByProductId(Integer productId) {
         Session session = HibernateUtil.getCurrentSession();
@@ -265,6 +278,44 @@ public class StockMovementDao {
         }
     }
 
+    public List<StockMovement> findByReferenceId(Integer referenceId) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.equal(root.get("referenceId"), referenceId))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por referência: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<StockMovement> findByPeriodo(LocalDateTime inicio, LocalDateTime fim) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
+            Root<StockMovement> root = cq.from(StockMovement.class);
+
+            cq.select(root)
+                    .where(cb.between(root.get("createdAt"), inicio, fim))
+                    .orderBy(cb.desc(root.get("createdAt")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar StockMovements por período: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     public List<StockMovement> filter(String text) {
         Session session = HibernateUtil.getCurrentSession();
         try {
@@ -290,31 +341,83 @@ public class StockMovementDao {
         }
     }
 
-    public List<StockMovement> findByReferenceId(Integer referenceId) {
-        Session session = HibernateUtil.getCurrentSession();
+    // ==========================================================
+    // 🔹 MÉTODOS AUXILIARES PARA RELATÓRIOS (OPCIONAIS)
+    // ==========================================================
+    /**
+     * Obtém estatísticas básicas de stock
+     */
+    public EstatisticasStock getEstatisticasStock() {
         try {
-            CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<StockMovement> cq = cb.createQuery(StockMovement.class);
-            Root<StockMovement> root = cq.from(StockMovement.class);
+            // Busca todos os produtos ativos
+            ProductDao productDao = new ProductDao();
+            List<Product> produtos = productDao.findActive();
 
-            cq.select(root)
-                    .where(cb.equal(root.get("referenceId"), referenceId))
-                    .orderBy(cb.desc(root.get("createdAt")));
+            long totalProdutos = produtos.size();
+            long semStock = 0;
+            long stockBaixo = 0;
 
-            return session.createQuery(cq).getResultList();
+            for (Product produto : produtos) {
+                Integer stockAtual = getStockAtual(produto.getId());
+                Integer minStock = produto.getMinStock() != null ? produto.getMinStock() : 0;
+
+                if (stockAtual <= 0) {
+                    semStock++;
+                } else if (stockAtual <= minStock) {
+                    stockBaixo++;
+                }
+            }
+
+            long stockNormal = totalProdutos - semStock - stockBaixo;
+
+            return new EstatisticasStock(totalProdutos, semStock, stockBaixo, stockNormal);
 
         } catch (Exception e) {
-            System.err.println("Erro ao buscar StockMovements por referência: " + e.getMessage());
-            return new ArrayList<>();
+            System.err.println("Erro ao calcular estatísticas de stock: " + e.getMessage());
+            return new EstatisticasStock(0, 0, 0, 0);
         }
     }
 
     /**
-     * Atualiza entrada de item de compra (método auxiliar)
+     * Classe interna para estatísticas
      */
-    private void atualizarEntradaItemCompra(StockMovement movimento) {
-        System.out.println("🔄 Atualização de entrada de compra para: "
-                + movimento.getProduct().getDescription());
-        // Implementação específica conforme sua estrutura de banco
+    public static class EstatisticasStock {
+
+        private final long totalProdutos;
+        private final long semStock;
+        private final long stockBaixo;
+        private final long stockNormal;
+
+        public EstatisticasStock(long totalProdutos, long semStock, long stockBaixo, long stockNormal) {
+            this.totalProdutos = totalProdutos;
+            this.semStock = semStock;
+            this.stockBaixo = stockBaixo;
+            this.stockNormal = stockNormal;
+        }
+
+        // Getters
+        public long getTotalProdutos() {
+            return totalProdutos;
+        }
+
+        public long getSemStock() {
+            return semStock;
+        }
+
+        public long getStockBaixo() {
+            return stockBaixo;
+        }
+
+        public long getStockNormal() {
+            return stockNormal;
+        }
+
+        public double getPercentualSemStock() {
+            return totalProdutos > 0 ? (semStock * 100.0) / totalProdutos : 0;
+        }
+
+        public double getPercentualStockBaixo() {
+            return totalProdutos > 0 ? (stockBaixo * 100.0) / totalProdutos : 0;
+        }
     }
 }
