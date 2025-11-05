@@ -55,7 +55,7 @@ public class HibernateConfig {
         // SQL logging (desenvolvimento)
 //        configuration.setProperty("hibernate.show_sql", "true");
 //        configuration.setProperty("hibernate.format_sql", "true");
-        
+
         // Estratégia DDL - validate para produção
         configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
 //        configuration.setProperty("hibernate.hbm2ddl.auto", "update");

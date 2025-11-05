@@ -50,10 +50,27 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         initComponents();
 
         // Inicializar todas as tabelas e componentes
+        System.out.println("testeteste");
         inicializarComponentes();
         configurarListeners();
 
 //        loadCombobox();
+    }
+
+    /**
+     * Função principal que inicializa todas as tabelas e componentes Esta
+     * função deve ser chamada no construtor
+     */
+    private void inicializarComponentes() {
+        // Inicializar todas as tabelas
+        inicializarTabelaStockProdutos();
+        inicializarTabelaMovimentosStock();
+        inicializarTabelaAlertasStock();
+
+        // Carregar dados iniciais
+        carregarDadosIniciais();
+        // Configurar comboboxes
+        carregarComboboxes();
     }
 
     /**
@@ -106,23 +123,23 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         jTableStockProducts.getColumnModel().getColumn(9).setPreferredWidth(80);   // Tipo
         jTableStockProducts.getColumnModel().getColumn(10).setPreferredWidth(90);  // Total Entradas
         jTableStockProducts.getColumnModel().getColumn(11).setPreferredWidth(90);  // Total Saídas
-         jTableStockProducts.getColumnModel().getColumn(12).setPreferredWidth(50); // Status
+        jTableStockProducts.getColumnModel().getColumn(12).setPreferredWidth(50); // Status
         jTableStockProducts.getColumnModel().getColumn(13).setPreferredWidth(120); // Última Movimentação
-        
+
         // Configurar renderizador para status (opcional)
-        jTableStockProducts.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (value instanceof Integer) {
-                    int status = (Integer) value;
-                    setText(status == 1 ? "Ativo" : "Inativo");
-                    setForeground(status == 1 ? Color.BLUE : Color.RED);
-                }
-                return c;
-            }
-        });
+//        jTableStockProducts.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
+//            @Override
+//            public Component getTableCellRendererComponent(JTable table, Object value,
+//                    boolean isSelected, boolean hasFocus, int row, int column) {
+//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//                if (value instanceof Integer) {
+//                    int status = (Integer) value;
+//                    setText(status == 1 ? "Ativo" : "Inativo");
+//                    setForeground(status == 1 ? Color.BLUE : Color.RED);
+//                }
+//                return c;
+//            }
+//        });
     }
 
 // ==========================================================
@@ -201,23 +218,6 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         jTable3.getColumnModel().getColumn(4).setPreferredWidth(80);   // Diferença
         jTable3.getColumnModel().getColumn(5).setPreferredWidth(100);  // Status
         jTable3.getColumnModel().getColumn(6).setPreferredWidth(120);  // Última Movimentação
-    }
-
-    /**
-     * Função principal que inicializa todas as tabelas e componentes Esta
-     * função deve ser chamada no construtor
-     */
-    private void inicializarComponentes() {
-        // Inicializar todas as tabelas
-        inicializarTabelaStockProdutos();
-        inicializarTabelaMovimentosStock();
-        inicializarTabelaAlertasStock();
-
-        // Carregar dados iniciais
-        carregarDadosIniciais();
-
-        // Configurar comboboxes
-        carregarComboboxes();
     }
 
     /**
@@ -311,8 +311,6 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         List<ProductStockReport> relatorios = stockController.getRelatorioStockCompletoReport();
 
         System.out.println("repo" + relatorios);
-        
-        
         System.out.println("Relatórios carregados: " + relatorios.size());
 
         // Debug para ver os dados
@@ -413,8 +411,10 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         DefaultTableModel model = (DefaultTableModel) jTableStockProducts.getModel();
         model.setRowCount(0); // Limpar tabela
 
+        System.out.println("teste1");
+
         for (ProductStockReport relatorio : relatorios) {
-            System.out.println("Stock: " + relatorio.getCurrentStock());
+//            System.out.println("Stock: " + relatorio.getCurrentStock());
 
             model.addRow(new Object[]{
                 relatorio.getProductId(), // ID do produto

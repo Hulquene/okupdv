@@ -5,10 +5,7 @@
 package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.ProductController;
-import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.entities.Product;
-import com.okutonda.okudpdv.data.entities.Supplier;
-import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
 import java.awt.Color;
 import java.awt.Component;
 import java.math.BigDecimal;
@@ -37,6 +34,19 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
 //        listProducts();
 //        loadCombobox();
+    }
+
+    /**
+     * Inicializa todos os componentes da tela de produtos Esta função deve ser
+     * chamada no construtor
+     */
+    private void inicializarComponentesProdutos() {
+        // 1. Inicializar tabela
+        inicializarTabelaProdutos();
+        // 2. Carregar dados iniciais
+        carregarDadosIniciais();
+        // 3. Configurar listeners (se necessário)
+        configurarListeners();
     }
 
     /**
@@ -94,19 +104,19 @@ public final class JPanelProduct extends javax.swing.JPanel {
         });
 
         // Configurar renderizador para status (opcional)
-        jTableProducts.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (value instanceof Integer) {
-                    int status = (Integer) value;
-                    setText(status == 1 ? "Ativo" : "Inativo");
-                    setForeground(status == 1 ? Color.BLUE : Color.RED);
-                }
-                return c;
-            }
-        });
+//        jTableProducts.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+//            @Override
+//            public Component getTableCellRendererComponent(JTable table, Object value,
+//                    boolean isSelected, boolean hasFocus, int row, int column) {
+//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//                if (value instanceof Integer) {
+//                    int status = (Integer) value;
+//                    setText(status == 1 ? "Ativo" : "Inativo");
+//                    setForeground(status == 1 ? Color.BLUE : Color.RED);
+//                }
+//                return c;
+//            }
+//        });
     }
 
     /**
@@ -121,6 +131,8 @@ public final class JPanelProduct extends javax.swing.JPanel {
             System.out.println("ℹ️ Nenhum produto encontrado para carregar na tabela");
             return;
         }
+        
+        System.out.println("✅ Tabela de produtos carregada: " + list.size() + " registros");
 
         for (Product produto : list) {
             data.addRow(new Object[]{
@@ -139,7 +151,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
             });
         }
 
-        System.out.println("✅ Tabela de produtos carregada: " + list.size() + " registros");
     }
 
     /**
@@ -252,29 +263,13 @@ public final class JPanelProduct extends javax.swing.JPanel {
     }
 
     /**
-     * Inicializa todos os componentes da tela de produtos Esta função deve ser
-     * chamada no construtor
-     */
-    private void inicializarComponentesProdutos() {
-        // 1. Inicializar tabela
-        inicializarTabelaProdutos();
-
-        // 2. Carregar dados iniciais
-        carregarDadosIniciais();
-
-        // 3. Configurar listeners (se necessário)
-        configurarListeners();
-    }
-
-    /**
      * Carrega dados iniciais na interface
      */
     private void carregarDadosIniciais() {
         // Carregar produtos na tabela
         listProducts();
-
         // Opcional: Carregar estatísticas em labels
-        carregarEstatisticas();
+//        carregarEstatisticas();
     }
 
     /**

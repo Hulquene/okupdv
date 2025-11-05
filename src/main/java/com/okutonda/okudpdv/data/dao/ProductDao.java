@@ -226,8 +226,9 @@ public class ProductDao {
                     + "WHERE p.status = :activeStatus "
                     + "ORDER BY p.description";
 
+            
             return session.createQuery(hql, Product.class)
-                    .setParameter("activeStatus", ProductStatus.ACTIVE)
+                    .setParameter("activeStatus", ProductStatus.ACTIVE.getCode())
                     .getResultList();
 
         } catch (Exception e) {

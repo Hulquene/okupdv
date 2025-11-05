@@ -135,7 +135,7 @@ System.out.println("findAllWithDetails" + produtos);
                 ProductStockReport report = criarRelatorioProduto(produto);
                 relatorio.add(report);
             }
-System.out.println("repo" + relatorio);
+System.out.println("report" + relatorio);
             return relatorio;
 
         } catch (Exception e) {
