@@ -226,7 +226,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             if (v.signum() > 0) {
                 Payment p = new Payment();
                 p.setPaymentMode(PaymentMode.NU); // ✅ CORRETO: NU em vez de NUMERARIO
-                p.setStatus(Payment.PaymentStatus.SUCCESS); // ✅ CORRETO: Payment.PaymentStatus
+                p.setStatus(PaymentStatus.PAGO); // ✅ CORRETO: Payment.PaymentStatus
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 nova.add(p);
@@ -237,7 +237,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             if (v.signum() > 0) {
                 Payment p = new Payment();
                 p.setPaymentMode(PaymentMode.MB); // ✅ CORRETO: MB em vez de MULTICAIXA
-                p.setStatus(Payment.PaymentStatus.SUCCESS);
+                p.setStatus(PaymentStatus.PAGO);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 // p.setReference(jTextFieldNSU.getText()); // se tiver
@@ -249,7 +249,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             if (v.signum() > 0) {
                 Payment p = new Payment();
                 p.setPaymentMode(PaymentMode.TB); // ✅ CORRETO: TB em vez de TRANSFERENCIA
-                p.setStatus(Payment.PaymentStatus.SUCCESS);
+                p.setStatus(PaymentStatus.PAGO);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 // p.setReference(jTextFieldRefBancaria.getText());
@@ -261,7 +261,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             if (v.signum() > 0) {
                 Payment p = new Payment();
                 p.setPaymentMode(PaymentMode.OU); // ✅ CORRETO: OU em vez de OUTROS
-                p.setStatus(Payment.PaymentStatus.SUCCESS);
+                p.setStatus(PaymentStatus.PAGO);
                 p.setTotal(v);
                 p.setCurrency("AOA");
                 nova.add(p);

@@ -224,7 +224,7 @@
                   <Font name="Segoe UI" size="14" style="1"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/icon/Document.png"/>
+                  <Image iconType="3" name="/icons/Document.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Gerar"/>
               </Properties>
@@ -243,7 +243,7 @@
                   <Font name="Segoe UI" size="14" style="1"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/icon/Trash Can.png"/>
+                  <Image iconType="3" name="/icons/Trash Can.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Apagar"/>
                 <Property name="borderPainted" type="boolean" value="false"/>

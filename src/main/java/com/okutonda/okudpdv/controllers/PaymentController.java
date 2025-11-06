@@ -3,6 +3,7 @@ package com.okutonda.okudpdv.controllers;
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -164,7 +165,7 @@ public class PaymentController {
     /**
      * Busca pagamentos por status
      */
-    public List<Payment> getByStatus(Payment.PaymentStatus status) {
+    public List<Payment> getByStatus(PaymentStatus status) {
         try {
             return dao.findByStatus(status);
         } catch (Exception e) {
@@ -219,7 +220,7 @@ public class PaymentController {
             List<Payment> pagamentos = dao.findByPaymentMode(paymentMode);
             return pagamentos.stream()
                     .filter(p -> isDataNoPeriodo(p.getDate(), from, to))
-                    .filter(p -> p.getStatus() == Payment.PaymentStatus.SUCCESS)
+                    .filter(p -> p.getStatus() == PaymentStatus.PAGO)
                     .mapToDouble(p -> p.getTotal().doubleValue())
                     .sum();
         } catch (Exception e) {
@@ -231,7 +232,7 @@ public class PaymentController {
     /**
      * Altera o status de um pagamento
      */
-    public boolean alterarStatus(Integer paymentId, Payment.PaymentStatus novoStatus) {
+    public boolean alterarStatus(Integer paymentId, PaymentStatus novoStatus) {
         try {
             Optional<Payment> paymentOpt = dao.findById(paymentId);
             if (paymentOpt.isPresent()) {
@@ -297,7 +298,7 @@ public class PaymentController {
         }
 
         if (payment.getStatus() == null) {
-            payment.setStatus(Payment.PaymentStatus.SUCCESS);
+            payment.setStatus(PaymentStatus.PAGO);
         }
 
         return true;
@@ -386,7 +387,7 @@ public class PaymentController {
         payment.setReference(referencia);
         payment.setPaymentMode(modo);
         payment.setDate(java.time.LocalDate.now().toString());
-        payment.setStatus(Payment.PaymentStatus.SUCCESS);
+        payment.setStatus(PaymentStatus.PAGO);
 
         return add(payment);
     }

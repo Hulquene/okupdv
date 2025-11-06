@@ -16,7 +16,7 @@ public class Payment {
     private String description;
 
     @Column(name = "total", precision = 10, scale = 2)
-    private BigDecimal total = BigDecimal.ZERO; // Valor padrão
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Column(name = "prefix", length = 10)
     private String prefix;
@@ -44,11 +44,11 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "mode", length = 20)
-    private PaymentMode paymentMode = PaymentMode.NU; // Usando NU em vez de NUMERARIO
+    private PaymentMode paymentMode = PaymentMode.NU;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private PaymentStatus status = PaymentStatus.SUCCESS;
+    private PaymentStatus status = PaymentStatus.PENDENTE; // CORREÇÃO: Usando PaymentStatus externo
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clientId")
@@ -71,6 +71,11 @@ public class Payment {
         this.description = description;
         this.total = total;
         this.paymentMode = paymentMode;
+    }
+
+    public Payment(String description, BigDecimal total, PaymentMode paymentMode, PaymentStatus status) {
+        this(description, total, paymentMode);
+        this.status = status;
     }
 
     // Getters e Setters
@@ -202,13 +207,45 @@ public class Payment {
         this.createdAt = createdAt;
     }
 
-    @Override
-    public String toString() {
-        return "Payment{id=" + id + ", total=" + total + ", reference='" + reference + "'}";
+    // Métodos utilitários
+    public boolean isPago() {
+        return status == PaymentStatus.PAGO;
     }
 
-    // REMOVA o enum PaymentMode interno e mantenha apenas PaymentStatus
-    public enum PaymentStatus {
-        PENDING, SUCCESS, FAILED, CANCELLED, REFUNDED
+    public boolean isPendente() {
+        return status == PaymentStatus.PENDENTE;
+    }
+
+    public boolean isParcial() {
+        return status == PaymentStatus.PARCIAL;
+    }
+
+    public boolean isAtrasado() {
+        return status == PaymentStatus.ATRASADO;
+    }
+
+    public boolean isCancelado() {
+        return status == PaymentStatus.CANCELADO;
+    }
+
+    // Método para obter descrição do status
+    public String getStatusDescricao() {
+        return status != null ? status.getDescricao() : "Desconhecido";
+    }
+
+    // Método para obter descrição do modo de pagamento
+    public String getPaymentModeDescricao() {
+        return paymentMode != null ? paymentMode.getDescricao() : "Desconhecido";
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", total=" + total +
+                ", reference='" + reference + '\'' +
+                ", status=" + getStatusDescricao() +
+                ", paymentMode=" + getPaymentModeDescricao() +
+                '}';
     }
 }

@@ -141,7 +141,7 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
         jFormattedTextFieldDateEnd.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
         jButtonGerarFile.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonGerarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Document.png"))); // NOI18N
+        jButtonGerarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
         jButtonGerarFile.setText("Gerar");
         jButtonGerarFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -152,7 +152,7 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
         jTextField1.setToolTipText("Pesquisar");
 
         jButtonApagarFile.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonApagarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Trash Can.png"))); // NOI18N
+        jButtonApagarFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonApagarFile.setText("Apagar");
         jButtonApagarFile.setBorderPainted(false);
         jButtonApagarFile.setContentAreaFilled(false);

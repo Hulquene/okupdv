@@ -3,6 +3,7 @@ package com.okutonda.okudpdv.data.dao;
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -195,7 +196,7 @@ public class PaymentDao {
         }
     }
 
-    public List<Payment> findByStatus(Payment.PaymentStatus status) {
+    public List<Payment> findByStatus(PaymentStatus status) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -247,7 +248,7 @@ public class PaymentDao {
             cq.select(cb.sum(root.get("total")))
                     .where(cb.and(
                             cb.between(root.get("date"), from.toString(), to.toString()),
-                            cb.equal(root.get("status"), Payment.PaymentStatus.SUCCESS)
+                            cb.equal(root.get("status"), PaymentStatus.PAGO)
                     ));
 
             Double total = session.createQuery(cq).getSingleResult();

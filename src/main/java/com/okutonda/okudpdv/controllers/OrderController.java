@@ -175,7 +175,7 @@ public class OrderController {
                     p.setCurrency("AOA");
                 }
                 if (p.getStatus() == null) {
-                    p.setStatus(Payment.PaymentStatus.SUCCESS);
+                    p.setStatus(PaymentStatus.PAGO);
                 }
 
                 paymentDao.save(p);
