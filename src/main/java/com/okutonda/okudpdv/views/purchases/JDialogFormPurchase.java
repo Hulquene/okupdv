@@ -8,9 +8,11 @@ import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.WarehouseController;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
+import com.okutonda.okudpdv.data.entities.StockStatus;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.ui.TemaCores;
 import java.math.BigDecimal;
@@ -264,7 +266,8 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
             purchase.setDataVencimento(dataVenc);
 
             // Status inicial
-            purchase.setStatus("ABERTO");
+            purchase.setStockStatus(StockStatus.PENDENTE);
+            purchase.setPaymentStatus(PaymentStatus.PENDENTE);
 
             // 🔹 DEBUG: Verificar se os itens estão associados
             System.out.println("=== DEBUG FINALIZAR COMPRA ===");

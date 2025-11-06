@@ -58,7 +58,8 @@ public class FinanceDao {
                 p.setIvaTotal((BigDecimal) row[5]);
                 p.setDataCompra((java.sql.Date) row[6]);
                 p.setDataVencimento((java.sql.Date) row[7]);
-                p.setStatus((String) row[8]);
+//                p.setStatus((String) row[8]);
+                p.setStockStatus(StockStatus.valueOf((String) row[8]));
                 p.setTotal_pago((BigDecimal) row[11]);
 
                 String tipo = (String) row[2];

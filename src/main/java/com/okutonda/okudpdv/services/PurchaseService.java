@@ -2,8 +2,10 @@ package com.okutonda.okudpdv.services;
 
 import com.okutonda.okudpdv.data.dao.PurchaseDao;
 import com.okutonda.okudpdv.data.entities.InvoiceType;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
+import com.okutonda.okudpdv.data.entities.StockStatus;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 
@@ -126,7 +128,8 @@ public class PurchaseService {
     public List<Purchase> listarContasAPagar() {
         List<Purchase> todas = purchaseDao.findAll();
         return todas.stream()
-                .filter(p -> "ABERTO".equals(p.getStatus()) || "PARCIAL".equals(p.getStatus()))
+                .filter(p -> PaymentStatus.PENDENTE.equals(p.getPaymentStatus())
+                || PaymentStatus.PARCIAL.equals(p.getPaymentStatus()))
                 .toList();
     }
 
@@ -265,9 +268,12 @@ public class PurchaseService {
             compra.setDataVencimento(java.sql.Date.valueOf(LocalDate.now().plusDays(30)));
         }
 
-        // Status padrão
-        if (compra.getStatus() == null || compra.getStatus().isEmpty()) {
-            compra.setStatus("ABERTO");
+        // Status padrão - CORREÇÃO
+        if (compra.getPaymentStatus() == null) {
+            compra.setPaymentStatus(PaymentStatus.PENDENTE);
+        }
+        if (compra.getStockStatus() == null) {
+            compra.setStockStatus(StockStatus.PENDENTE);
         }
     }
 
@@ -288,5 +294,5 @@ public class PurchaseService {
         JOptionPane.showMessageDialog(null, message + ": " + e.getMessage(),
                 "Erro", JOptionPane.ERROR_MESSAGE);
     }
-    
+
 }

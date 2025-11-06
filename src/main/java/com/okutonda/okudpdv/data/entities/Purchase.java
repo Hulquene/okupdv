@@ -29,7 +29,7 @@ public class Purchase {
     private String descricao;
 
     @Column(name = "total", nullable = false, precision = 10, scale = 2)
-    private BigDecimal total = BigDecimal.ZERO; // Valor padrão
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Column(name = "iva_total", precision = 10, scale = 2)
     private BigDecimal ivaTotal = BigDecimal.ZERO;
@@ -45,8 +45,15 @@ public class Purchase {
     @Column(name = "data_vencimento")
     private Date dataVencimento;
 
-    @Column(name = "status", length = 20)
-    private String status = "PENDENTE";
+    // STATUS DE STOCK - controle de entrada no stock
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stock_status", length = 20)
+    private StockStatus stockStatus = StockStatus.PENDENTE;
+
+    // STATUS DE PAGAMENTO - controle financeiro
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", length = 20)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDENTE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -149,12 +156,20 @@ public class Purchase {
         this.dataVencimento = dataVencimento;
     }
 
-    public String getStatus() {
-        return status;
+    public StockStatus getStockStatus() {
+        return stockStatus;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setStockStatus(StockStatus stockStatus) {
+        this.stockStatus = stockStatus;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public User getUser() {
@@ -202,8 +217,30 @@ public class Purchase {
         payment.setPurchase(null);
     }
 
+    // Métodos de negócio
+    public boolean isStockProcessado() {
+        return stockStatus == StockStatus.PROCESSADO;
+    }
+
+    public boolean isStockPendente() {
+        return stockStatus == StockStatus.PENDENTE;
+    }
+
+    public boolean isPaymentPago() {
+        return paymentStatus == PaymentStatus.PAGO;
+    }
+
+    public boolean isPaymentPendente() {
+        return paymentStatus == PaymentStatus.PENDENTE;
+    }
+
+    public boolean isPaymentParcial() {
+        return paymentStatus == PaymentStatus.PARCIAL;
+    }
+
     @Override
     public String toString() {
-        return "Purchase{id=" + id + ", invoice='" + invoiceNumber + "', total=" + total + "}";
+        return "Purchase{id=" + id + ", invoice='" + invoiceNumber + "', total=" + total
+                + ", stock=" + stockStatus + ", payment=" + paymentStatus + "}";
     }
 }

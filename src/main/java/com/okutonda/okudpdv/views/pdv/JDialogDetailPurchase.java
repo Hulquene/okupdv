@@ -65,14 +65,19 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
         }
 
         // 💰 Pagamentos
+        // 💰 Pagamentos - CORREÇÃO
         BigDecimal totalPago = purchase.getTotal_pago() != null ? purchase.getTotal_pago() : BigDecimal.ZERO;
         BigDecimal saldo = purchase.getTotal().subtract(totalPago);
+
+// Obtém a descrição do status de pagamento
+        String statusPagamento = purchase.getPaymentStatus() != null
+                ? purchase.getPaymentStatus().getDescricao() : "Pendente";
+
         jLabelDadosPagamentos.setText(
                 "<html><b>Total Pago:</b> " + totalPago + " AOA<br>"
                 + "<b>Saldo:</b> " + saldo + " AOA<br>"
-                + "<b>Status:</b> " + purchase.getStatus() + "</html>"
+                + "<b>Status Pagamento:</b> " + statusPagamento + "</html>"
         );
-
         // 🧾 Tabela de produtos
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Produto");
@@ -96,7 +101,7 @@ public class JDialogDetailPurchase extends javax.swing.JDialog {
                 BigDecimal totalComIva = subtotal.add(valorIva);
 
                 model.addRow(new Object[]{
-                    (produto != null ? produto.getDescription(): "—"),
+                    (produto != null ? produto.getDescription() : "—"),
                     item.getQuantidade(),
                     item.getPrecoCusto(),
                     ivaPercent + " %",

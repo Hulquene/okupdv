@@ -8,11 +8,19 @@ import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.controllers.StockMovementController;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.Purchase;
+import com.okutonda.okudpdv.data.entities.StockStatus;
 import com.okutonda.okudpdv.views.pdv.JDialogDetailPurchase;
 import com.okutonda.okudpdv.views.stock.JDialogFormEntryProdPurchase;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -28,34 +36,68 @@ public class JPanelPurchases extends javax.swing.JPanel {
      */
     public JPanelPurchases() {
         initComponents();
+        inicializarTabelaCompras();
+        listPurchases();
+    }
 
+    /**
+     * Inicializa a configuração da tabela de compras
+     */
+    private void inicializarTabelaCompras() {
+        // Define o modelo da tabela
         jTablePurchases.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
                 new String[]{
                     "ID", "Fornecedor", "Nº Documento", "Tipo", "Descrição",
-                    "Total", "Pago", "Em Aberto", "Data Compra", "Vencimento", "Status"
+                    "Total", "Pago", "Em Aberto", "Data Compra", "Vencimento",
+                    "Status Stock", "Status Pagamento" // Adicionados os novos status
                 }
         ) {
             Class[] types = new Class[]{
                 Integer.class, String.class, String.class, String.class,
                 String.class, Double.class, Double.class, Double.class,
-                String.class, String.class, String.class
+                String.class, String.class, String.class, String.class
             };
             boolean[] canEdit = new boolean[]{
                 false, false, false, false, false, false,
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
+            @Override
             public Class getColumnClass(int columnIndex) {
                 return types[columnIndex];
             }
 
+            @Override
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit[columnIndex];
             }
         });
 
-        listPurchases();
+        // Configuração adicional da tabela (opcional)
+        configurarAparenciaTabela();
+    }
+
+    /**
+     * Configura a aparência da tabela
+     */
+    private void configurarAparenciaTabela() {
+        // Ajusta a largura das colunas
+        jTablePurchases.getColumnModel().getColumn(0).setPreferredWidth(50);  // ID
+        jTablePurchases.getColumnModel().getColumn(1).setPreferredWidth(150); // Fornecedor
+        jTablePurchases.getColumnModel().getColumn(2).setPreferredWidth(100); // Nº Documento
+        jTablePurchases.getColumnModel().getColumn(5).setPreferredWidth(80);  // Total
+        jTablePurchases.getColumnModel().getColumn(6).setPreferredWidth(80);  // Pago
+        jTablePurchases.getColumnModel().getColumn(7).setPreferredWidth(80);  // Em Aberto
+
+        // Centraliza algumas colunas
+        javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(javax.swing.JLabel.CENTER);
+
+        jTablePurchases.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // ID
+        jTablePurchases.getColumnModel().getColumn(5).setCellRenderer(centerRenderer); // Total
+        jTablePurchases.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Pago
+        jTablePurchases.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Em Aberto
     }
 
     public void listPurchases() {
@@ -71,20 +113,100 @@ public class JPanelPurchases extends javax.swing.JPanel {
             double pago = p.getTotal_pago() != null ? p.getTotal_pago().doubleValue() : 0d;
             double emAberto = p.getTotal() != null ? p.getTotal().doubleValue() - pago : 0d;
 
+            // Formata as datas
+            String dataCompra = formatarData(p.getDataCompra());
+            String dataVencimento = formatarData(p.getDataVencimento());
+
+            // Obtém os status separados
+            String statusStock = p.getStockStatus() != null ? p.getStockStatus().getDescricao() : "Pendente";
+            String statusPagamento = p.getPaymentStatus() != null ? p.getPaymentStatus().getDescricao() : "Pendente";
+
             data.addRow(new Object[]{
                 p.getId(),
                 (p.getSupplier() != null ? p.getSupplier().getName() : ""),
                 p.getInvoiceNumber(),
-                p.getInvoiceType(),
+                (p.getInvoiceType() != null ? p.getInvoiceType().name() : ""),
                 p.getDescricao(),
                 p.getTotal(),
                 pago,
                 emAberto,
-                (p.getDataCompra() != null ? p.getDataCompra().toString() : ""),
-                (p.getDataVencimento() != null ? p.getDataVencimento().toString() : ""),
-                p.getStatus()
+                dataCompra,
+                dataVencimento,
+                statusStock, // Novo: Status do Stock
+                statusPagamento // Novo: Status do Pagamento
             });
         }
+
+        // Aplica renderizadores customizados para os status
+        aplicarRenderizadoresStatus();
+    }
+
+    /**
+     * Formata uma data para exibição
+     */
+    private String formatarData(Date data) {
+        if (data == null) {
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(data);
+    }
+
+    /**
+     * Aplica renderizadores de cor para os status
+     */
+    private void aplicarRenderizadoresStatus() {
+        // Renderizador para Status do Stock
+        jTablePurchases.getColumnModel().getColumn(10).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (value != null) {
+                    String status = value.toString();
+                    if ("Processado".equals(status)) {
+                        setForeground(new Color(0, 128, 0)); // Verde
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if ("Parcial".equals(status)) {
+                        setForeground(Color.ORANGE);
+                    } else if ("Pendente".equals(status)) {
+                        setForeground(Color.RED);
+                    } else {
+                        setForeground(Color.BLACK);
+                    }
+                }
+                return c;
+            }
+        });
+
+        // Renderizador para Status do Pagamento
+        jTablePurchases.getColumnModel().getColumn(11).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (value != null) {
+                    String status = value.toString();
+                    if ("Pago".equals(status)) {
+                        setForeground(new Color(0, 128, 0)); // Verde
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if ("Parcial".equals(status)) {
+                        setForeground(Color.ORANGE);
+                    } else if ("Atrasado".equals(status)) {
+                        setForeground(Color.RED);
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    } else if ("Pendente".equals(status)) {
+                        setForeground(Color.BLUE);
+                    } else {
+                        setForeground(Color.BLACK);
+                    }
+                }
+                return c;
+            }
+        });
     }
 
     private void processarEntradaStock(Integer compraId) {
@@ -101,7 +223,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
             }
 
             // Valida se a compra já não foi processada
-            if (compra.getStatus() != null && "PROCESSADA".equals(compra.getStatus())) {
+            if (compra.getStockStatus() != null && StockStatus.PROCESSADO.equals(compra.getStockStatus())) {
                 int resposta = JOptionPane.showConfirmDialog(
                         null,
                         "Esta compra já foi processada anteriormente. Deseja processar novamente?",
@@ -206,15 +328,79 @@ public class JPanelPurchases extends javax.swing.JPanel {
             Purchase compra = purchaseController.buscarPorId(compraId);
 
             if (compra != null) {
-                compra.setStatus("PROCESSADA");
+                // CORREÇÃO: Usar stockStatus em vez de status
+                compra.setStockStatus(StockStatus.PROCESSADO);
                 purchaseController.atualizarCompra(compra);
-                System.out.println("✅ Status da compra #" + compraId + " atualizado para: PROCESSADA");
+                System.out.println("✅ Status do stock da compra #" + compraId + " atualizado para: PROCESSADO");
             }
 
         } catch (Exception e) {
             System.err.println("❌ Erro ao atualizar status da compra: " + e.getMessage());
             // Não mostra erro ao usuário pois o stock já foi processado
         }
+    }
+
+    private void abrirDialogoPagamentoCompra(Integer compraId) {
+//        PurchaseController purchaseController = new PurchaseController();
+//
+//        try {
+//            // Obtém detalhes da compra
+//            Purchase compra = purchaseController.buscarPorId(compraId);
+//
+//            if (compra == null) {
+//                JOptionPane.showMessageDialog(null, "Compra não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
+//                return;
+//            }
+//
+//            // Valida se a compra já não foi paga
+//            if (compra.getStatus() != null && "PAGA".equals(compra.getStatus())) {
+//                JOptionPane.showMessageDialog(null,
+//                        "Esta compra já foi paga anteriormente!",
+//                        "Compra Já Paga",
+//                        JOptionPane.INFORMATION_MESSAGE);
+//                return;
+//            }
+//
+//            // Prepara informações para exibir
+//            StringBuilder infoCompra = new StringBuilder();
+//            infoCompra.append("Compra #").append(compraId)
+//                    .append(" - ").append(compra.getInvoiceNumber())
+//                    .append("\nFornecedor: ").append(compra.getSupplier().getName())
+//                    .append("\nTotal: ").append(compra.getTotalAmount())
+//                    .append("\n\nDeseja processar o pagamento desta compra?");
+//
+//            int confirmacao = JOptionPane.showConfirmDialog(
+//                    null,
+//                    infoCompra.toString(),
+//                    "Confirmar Pagamento",
+//                    JOptionPane.YES_NO_OPTION,
+//                    JOptionPane.QUESTION_MESSAGE
+//            );
+//
+//            if (confirmacao == JOptionPane.YES_OPTION) {
+//                // Abre o diálogo de pagamento
+//                JDialogPayPurchase dialogPagamento = new JDialogPayPurchase(null, true);
+//                dialogPagamento.setCompra(compra); // Você precisa criar este método
+//                dialogPagamento.setVisible(true);
+//
+//                // Verifica se o pagamento foi processado com sucesso
+//                if (dialogPagamento.isPagamentoProcessado()) {
+//                    JOptionPane.showMessageDialog(null,
+//                            "Pagamento processado com sucesso!",
+//                            "Sucesso",
+//                            JOptionPane.INFORMATION_MESSAGE);
+//
+//                    listPurchases(); // Atualiza a tabela de compras
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            System.err.println("❌ Erro ao abrir diálogo de pagamento: " + e.getMessage());
+//            JOptionPane.showMessageDialog(null,
+//                    "Erro ao processar pagamento: " + e.getMessage(),
+//                    "Erro",
+//                    JOptionPane.ERROR_MESSAGE);
+//        }
     }
 
     /**
@@ -238,7 +424,10 @@ public class JPanelPurchases extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButtonEntradaStockCompra = new javax.swing.JButton();
+        jButtonPayPurchase = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTablePaymentsPurchase = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
 
         jTablePurchases.setModel(new javax.swing.table.DefaultTableModel(
@@ -289,6 +478,13 @@ public class JPanelPurchases extends javax.swing.JPanel {
             }
         });
 
+        jButtonPayPurchase.setText("Pagar Compra");
+        jButtonPayPurchase.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPayPurchaseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -300,14 +496,16 @@ public class JPanelPurchases extends javax.swing.JPanel {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(32, 32, 32)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 63, Short.MAX_VALUE)
-                                .addGap(15, 15, 15)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonPayPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonEntradaStockCompra)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton1)
@@ -332,7 +530,8 @@ public class JPanelPurchases extends javax.swing.JPanel {
                     .addComponent(jButtonAddPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonEntradaStockCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButtonEntradaStockCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPayPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 456, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(58, 58, 58))
@@ -340,15 +539,34 @@ public class JPanelPurchases extends javax.swing.JPanel {
 
         jTabbedPane1.addTab("Compras", jPanel1);
 
+        jTablePaymentsPurchase.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(jTablePaymentsPurchase);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 947, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 944, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 525, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(92, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("Pagamentos de compras", jPanel2);
@@ -357,7 +575,7 @@ public class JPanelPurchases extends javax.swing.JPanel {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 947, Short.MAX_VALUE)
+            .addGap(0, 956, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -428,12 +646,28 @@ public class JPanelPurchases extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonEntradaStockCompraActionPerformed
 
+    private void jButtonPayPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPayPurchaseActionPerformed
+        // TODO add your handling code here:
+        int compraId = 0;
+        try {
+            compraId = (int) jTablePurchases.getValueAt(jTablePurchases.getSelectedRow(), 0);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Selecione uma Compra na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (compraId > 0) {
+            abrirDialogoPagamentoCompra(compraId);
+        }
+    }//GEN-LAST:event_jButtonPayPurchaseActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButtonAddPurchase;
     private javax.swing.JButton jButtonEntradaStockCompra;
+    private javax.swing.JButton jButtonPayPurchase;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -441,7 +675,9 @@ public class JPanelPurchases extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTable jTablePaymentsPurchase;
     private javax.swing.JTable jTablePurchases;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables

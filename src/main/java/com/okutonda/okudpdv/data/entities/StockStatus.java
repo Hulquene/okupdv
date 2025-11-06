@@ -1,16 +1,15 @@
 package com.okutonda.okudpdv.data.entities;
 
-public enum PaymentStatus {
-    PENDENTE("Pendente", "Pagamento pendente"),
-    PARCIAL("Parcial", "Pagamento parcial"),
-    PAGO("Pago", "Pagamento concluído"),
-    ATRASADO("Atrasado", "Pagamento em atraso"),
-    CANCELADO("Cancelado", "Pagamento cancelado");
+public enum StockStatus {
+    PENDENTE("Pendente", "Stock pendente de entrada"),
+    PROCESSADO("Processado", "Stock totalmente processado"),
+    PARCIAL("Parcial", "Stock parcialmente processado"),
+    CANCELADO("Cancelado", "Entrada de stock cancelada");
 
     private final String descricao;
     private final String observacao;
 
-    PaymentStatus(String descricao, String observacao) {
+    StockStatus(String descricao, String observacao) {
         this.descricao = descricao;
         this.observacao = observacao;
     }
