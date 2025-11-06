@@ -36,6 +36,8 @@ public class ProductService {
 
     public List<Product> listarTodos() {
         try {
+//            List<Product> p = productDao.findAll();
+//            System.out.println("listarTodos:" + p);
             return productDao.findAll();
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar todos os produtos: " + e.getMessage());

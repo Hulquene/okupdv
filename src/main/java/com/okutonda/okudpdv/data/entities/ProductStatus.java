@@ -1,9 +1,9 @@
 package com.okutonda.okudpdv.data.entities;
 
 public enum ProductStatus {
-    ACTIVE(1, "Ativo"),
-    INACTIVE(0, "Inativo"),
-    DISCONTINUED(2, "Descontinuado"),
+    INACTIVE(0, "Inativo"), // ORDINAL 0
+    ACTIVE(1, "Ativo"),  // ORDINAL 1  
+    DISCONTINUED(2, "Descontinuado"),// ORDINAL 2
     OUT_OF_STOCK(3, "Fora de Stock"),
     PROMOTIONAL(4, "Promocional");
 

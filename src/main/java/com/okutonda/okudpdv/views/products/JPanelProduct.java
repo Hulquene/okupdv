@@ -6,6 +6,7 @@ package com.okutonda.okudpdv.views.products;
 
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.ProductStatus;
 import java.awt.Color;
 import java.awt.Component;
 import java.math.BigDecimal;
@@ -104,19 +105,25 @@ public final class JPanelProduct extends javax.swing.JPanel {
         });
 
         // Configurar renderizador para status (opcional)
-//        jTableProducts.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
-//            @Override
-//            public Component getTableCellRendererComponent(JTable table, Object value,
-//                    boolean isSelected, boolean hasFocus, int row, int column) {
-//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                if (value instanceof Integer) {
-//                    int status = (Integer) value;
-//                    setText(status == 1 ? "Ativo" : "Inativo");
-//                    setForeground(status == 1 ? Color.BLUE : Color.RED);
-//                }
-//                return c;
-//            }
-//        });
+        jTableProducts.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (value instanceof ProductStatus) {
+                    ProductStatus status = (ProductStatus) value;
+                    setText(status.getDescription()); // "Ativo" ou "Inativo"
+                    setForeground(status.isActive() ? Color.BLUE : Color.RED);
+                } else if (value instanceof Integer) {
+                    // Fallback para compatibilidade
+                    int statusCode = (Integer) value;
+                    setText(statusCode == 1 ? "Ativo" : "Inativo");
+                    setForeground(statusCode == 1 ? Color.BLUE : Color.RED);
+                }
+                return c;
+            }
+        });
     }
 
     /**
@@ -131,7 +138,7 @@ public final class JPanelProduct extends javax.swing.JPanel {
             System.out.println("ℹ️ Nenhum produto encontrado para carregar na tabela");
             return;
         }
-        
+
         System.out.println("✅ Tabela de produtos carregada: " + list.size() + " registros");
 
         for (Product produto : list) {
@@ -160,13 +167,14 @@ public final class JPanelProduct extends javax.swing.JPanel {
     public void listProducts() {
         try {
             List<Product> list = productController.listAll();
+
+            System.out.println("lista:" + list);
             loadListProducts(list);
 
             // Opcional: Mostrar estatísticas
-            Long totalAtivos = productController.contarProdutosAtivos();
-            System.out.println("📊 Estatísticas: " + list.size() + " produtos totais, "
-                    + totalAtivos + " ativos");
-
+//            Long totalAtivos = productController.contarProdutosAtivos();
+//            System.out.println("📊 Estatísticas: " + list.size() + " produtos totais, "
+//                    + totalAtivos + " ativos");
         } catch (Exception e) {
             System.err.println("❌ Erro ao listar produtos: " + e.getMessage());
             JOptionPane.showMessageDialog(null,

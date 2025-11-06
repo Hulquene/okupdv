@@ -9,6 +9,7 @@ import com.okutonda.okudpdv.controllers.StockMovementController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.data.entities.Product;
+import com.okutonda.okudpdv.data.entities.ProductStatus;
 import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.data.entities.Warehouse;
@@ -127,19 +128,25 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         jTableStockProducts.getColumnModel().getColumn(13).setPreferredWidth(120); // Última Movimentação
 
         // Configurar renderizador para status (opcional)
-//        jTableStockProducts.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
-//            @Override
-//            public Component getTableCellRendererComponent(JTable table, Object value,
-//                    boolean isSelected, boolean hasFocus, int row, int column) {
-//                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//                if (value instanceof Integer) {
-//                    int status = (Integer) value;
-//                    setText(status == 1 ? "Ativo" : "Inativo");
-//                    setForeground(status == 1 ? Color.BLUE : Color.RED);
-//                }
-//                return c;
-//            }
-//        });
+        jTableStockProducts.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (value instanceof ProductStatus) {
+                    ProductStatus status = (ProductStatus) value;
+                    setText(status.getDescription()); // "Ativo" ou "Inativo"
+                    setForeground(status.isActive() ? Color.BLUE : Color.RED);
+                } else if (value instanceof Integer) {
+                    // Fallback para compatibilidade
+                    int statusCode = (Integer) value;
+                    setText(statusCode == 1 ? "Ativo" : "Inativo");
+                    setForeground(statusCode == 1 ? Color.BLUE : Color.RED);
+                }
+                return c;
+            }
+        });
     }
 
 // ==========================================================
@@ -185,7 +192,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
 // 🔹 INICIALIZAÇÃO DA TABELA DE ALERTAS DE STOCK MÍNIMO
 // ==========================================================
     private void inicializarTabelaAlertasStock() {
-        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+        jTableStockMin.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][]{},
                 new String[]{
                     "ID", "Produto", "Stock Atual", "Stock Mínimo", "Diferença",
@@ -211,13 +218,13 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         });
 
         // Configurar largura das colunas
-        jTable3.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
-        jTable3.getColumnModel().getColumn(1).setPreferredWidth(200);  // Produto
-        jTable3.getColumnModel().getColumn(2).setPreferredWidth(80);   // Stock Atual
-        jTable3.getColumnModel().getColumn(3).setPreferredWidth(80);   // Stock Mínimo
-        jTable3.getColumnModel().getColumn(4).setPreferredWidth(80);   // Diferença
-        jTable3.getColumnModel().getColumn(5).setPreferredWidth(100);  // Status
-        jTable3.getColumnModel().getColumn(6).setPreferredWidth(120);  // Última Movimentação
+        jTableStockMin.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
+        jTableStockMin.getColumnModel().getColumn(1).setPreferredWidth(200);  // Produto
+        jTableStockMin.getColumnModel().getColumn(2).setPreferredWidth(80);   // Stock Atual
+        jTableStockMin.getColumnModel().getColumn(3).setPreferredWidth(80);   // Stock Mínimo
+        jTableStockMin.getColumnModel().getColumn(4).setPreferredWidth(80);   // Diferença
+        jTableStockMin.getColumnModel().getColumn(5).setPreferredWidth(100);  // Status
+        jTableStockMin.getColumnModel().getColumn(6).setPreferredWidth(120);  // Última Movimentação
     }
 
     /**
@@ -341,7 +348,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
     }
 
     public void carregarDadosTabelaAlertasStock(List<ProductStockReport> relatorios) {
-        DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+        DefaultTableModel model = (DefaultTableModel) jTableStockMin.getModel();
         model.setRowCount(0); // Limpar tabela
 
         for (ProductStockReport relatorio : relatorios) {
@@ -716,7 +723,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         jLabel19 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jTable3 = new javax.swing.JTable();
+        jTableStockMin = new javax.swing.JTable();
         jLabel10 = new javax.swing.JLabel();
 
         setMaximumSize(new java.awt.Dimension(1720, 1080));
@@ -1029,7 +1036,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
         jButton5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jButton5.setText("Filtrar");
 
-        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+        jTableStockMin.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -1055,7 +1062,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane5.setViewportView(jTable3);
+        jScrollPane5.setViewportView(jTableStockMin);
 
         jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel10.setText("Objetivo: Permitir visualizar o stock disponível de cada produto, em cada armazém (se existir mais de um).");
@@ -1251,7 +1258,7 @@ public final class JPanelStockMovement extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane3;
-    private javax.swing.JTable jTable3;
+    private javax.swing.JTable jTableStockMin;
     private javax.swing.JTable jTableStockMovement;
     private javax.swing.JTable jTableStockProducts;
     private javax.swing.JTextField jTextField2;

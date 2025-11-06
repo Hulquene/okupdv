@@ -228,7 +228,7 @@ public class ProductDao {
 
             
             return session.createQuery(hql, Product.class)
-                    .setParameter("activeStatus", ProductStatus.ACTIVE.getCode())
+                    .setParameter("activeStatus", ProductStatus.ACTIVE)
                     .getResultList();
 
         } catch (Exception e) {

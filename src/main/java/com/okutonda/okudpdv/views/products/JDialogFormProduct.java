@@ -16,7 +16,6 @@ import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.helpers.Util;
 import java.awt.event.ItemEvent;
-import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
@@ -113,11 +112,11 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             jTextFieldPurchasePrice.setText(String.valueOf(prod.getPurchasePrice()));
             jTextFieldStockMinimo.setText(String.valueOf(prod.getMinStock()));
 
-            // Combos estáticos
-            selecionarItemPorString(jComboBoxType, prod.getType());
-            // Mapear status numérico para texto
+            // Combos estáticos - CORREÇÃO
+            selecionarItemPorString(jComboBoxType, prod.getType().getDescription()); // Converte enum para string
+            // Mapear status enum para texto
             if (prod.getStatus() != null) {
-                ProductStatus statusTexto = (prod.getStatus() == ProductStatus.ACTIVE) ? ProductStatus.ACTIVE : ProductStatus.INACTIVE;
+                String statusTexto = (prod.getStatus() == ProductStatus.ACTIVE) ? "Ativo" : "Inativo";
                 jComboBoxStatus.setSelectedItem(statusTexto);
             }
 
@@ -132,11 +131,32 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             if (prod.getGroup() != null) {
                 selecionarItemComboBox(jComboBoxGroup, prod.getGroup());
             }
+
+            // Aplicar regras do tipo após carregar os dados
+            aplicarRegrasTipoProduto();
         }
     }
 
+    private void aplicarRegrasTipoProduto() {
+        if (carregandoDados) {
+            return;
+        }
+
+        Object selectedItem = jComboBoxType.getSelectedItem();
+        if (selectedItem != null) {
+            String type = selectedItem.toString();
+            if ("Produto".equals(type)) {
+                jTextFieldStockMinimo.setEnabled(true);
+                jTextFieldBarCode.setEnabled(true);
+            } else {
+                jTextFieldStockMinimo.setEnabled(false);
+                jTextFieldBarCode.setEnabled(false);
+            }
+        }
+    }
 // Método auxiliar para selecionar item por string nos combos estáticos
-    private void selecionarItemPorString(JComboBox<String> comboBox, ProductType valor) {
+// Este método deve aceitar String como segundo parâmetro
+    private void selecionarItemPorString(JComboBox<String> comboBox, String valor) {
         if (valor != null) {
             for (int i = 0; i < comboBox.getItemCount(); i++) {
                 if (valor.equals(comboBox.getItemAt(i))) {
@@ -382,10 +402,12 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         produto.setPrice(new BigDecimal(jTextFieldPrice.getText().replace(",", ".")));
         produto.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
         produto.setMinStock(Integer.parseInt(jTextFieldStockMinimo.getText().trim()));
-        
+
+        // Tipo - CORREÇÃO: converter string para enum
         String tipoSelecionado = jComboBoxType.getSelectedItem().toString();
         produto.setType(ProductType.fromDescription(tipoSelecionado));
-//        produto.setType(jComboBoxType.getSelectedItem().toString());
+
+        // Combos dinâmicos
         produto.setTaxe((Taxes) jComboBoxTaxeId.getSelectedItem());
         produto.setReasonTaxe((ReasonTaxes) jComboBoxReasonTaxeId.getSelectedItem());
 
@@ -394,10 +416,9 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             produto.setGroup((GroupsProduct) jComboBoxGroup.getSelectedItem());
         }
 
-        // Status
+        // Status - CORREÇÃO: converter string para enum
         String status = (String) jComboBoxStatus.getSelectedItem();
-        produto.setStatus(ProductStatus.ACTIVE.equals(status) ? ProductStatus.ACTIVE : ProductStatus.INACTIVE);
-//        produto.setStatus("Ativo".equals(status) ? 1 : 0);
+        produto.setStatus("Ativo".equals(status) ? ProductStatus.ACTIVE : ProductStatus.INACTIVE);
 
         // Se é edição, setar ID
         if (!jTextFieldId.getText().isEmpty()) {
@@ -826,19 +847,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         }
 
         if (evt.getStateChange() == ItemEvent.SELECTED) {
-            Object selectedItem = jComboBoxType.getSelectedItem();
-
-            // VERIFICAÇÃO CRÍTICA: nunca use toString() sem verificar null
-            if (selectedItem != null) {
-                String type = selectedItem.toString();
-                if ("Produto".equals(type)) {
-                    jTextFieldStockMinimo.setEnabled(true);
-                    jTextFieldBarCode.setEnabled(true);
-                } else {
-                    jTextFieldStockMinimo.setEnabled(false);
-                    jTextFieldBarCode.setEnabled(false);
-                }
-            }
+            aplicarRegrasTipoProduto(); // Usa o método auxiliar
         }
     }//GEN-LAST:event_jComboBoxTypeItemStateChanged
 

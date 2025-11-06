@@ -202,6 +202,8 @@ System.out.println("report" + relatorio);
     // 🔹 MÉTODOS PRIVADOS AUXILIARES
     // ==========================================================
     private ProductStockReport criarRelatorioProduto(Product produto) {
+        
+        System.out.println("produto:"+produto);
         try {
             Integer stockAtual = getStockAtual(produto.getId());
             Integer totalEntradas = getTotalEntradas(produto.getId());
