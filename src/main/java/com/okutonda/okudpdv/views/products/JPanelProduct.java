@@ -361,87 +361,104 @@ public final class JPanelProduct extends javax.swing.JPanel {
         }
     }
 
-//    public void screanListProducts() {
-//        jTabbedPaneProduct.setSelectedIndex(0);
-//        listProducts();
-//    }
-//    public void loadCombobox() {
-//        List<Supplier> listS = supplierController.get("");
-//        jComboBoxSunpplierHistoryInput.removeAllItems();
-//        for (Supplier item : listS) {
-//            jComboBoxSunpplierHistoryInput.addItem(item);
-//        }
-//
-////        List<ReasonTaxes> listR = reasonTaxeController.get("");
-////        jComboBoxReasonTaxeId.removeAllItems();
-////        for (ReasonTaxes item : listR) {
-////            jComboBoxReasonTaxeId.addItem(item);
-////        }
-//    }
-//    public void loadListProducts(List<Product> list) {
-//        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
-//        data.setNumRows(0);
-//        for (Product c : list) {
-//            data.addRow(new Object[]{
-//                c.getId(),
-//                c.getType(),
-//                c.getCode(),
-//                //                c.getBarcode(),
-//                c.getDescription(),
-//                c.getPrice(),
-//                //                c.getPurchasePrice(),
-//                //                c.getStockTotal(),
-//                c.getTaxe(),
-//                c.getReasonTaxe(),
-//                //                c.getGroupId(),
-//                //                c.getSubGroupId(),
-//                //                c.getSupplier().getName(),
-//                c.getStatus(),
-//                c.getGroup()
-//            });
-//        }
-//    }
-//
-//    public void listProducts() {
-//        List<Product> list = productController.listAll();
-//        loadListProducts(list);
-//    }
-//
-//    public void filterListProduct(String txt) {
-////        ProductDao cDao = new ProductDao();
-//        List<Product> list = productController.listForPDV(txt);
-//        loadListProducts(list);
-//    }
-//    public void loadListProductsInventory(List<Product> list) {
-//        if (list == null) {
-//            list = productController.getForPDV(null);
-//        }
-//        DefaultTableModel data = (DefaultTableModel) jTableInventory.getModel();
-//        data.setNumRows(0);
-//        for (Product c : list) {
-//            data.addRow(new Object[]{
-//                c.getId(),
-//                c.getCode(),
-//                c.getBarcode(),
-//                c.getDescription(),
-//                c.getCurrentStock(),
-//                c.getPrice(),
-//                c.getPurchasePrice(),
-//                c.getSupplier().getName(),
-//                c.getType()
-//            });
-//        }
-//    }
-//    public void listProductsInventory() {
-////        List<Product> list = productController.getProducts();
-//        List<Product> list = productController.get(null);
-//        loadListProductsInventory(list);
-//    }
-//    public void filterListProductInventory(String txt) {
-////        ProductDao cDao = new ProductDao();
-//        List<Product> list = productController.get(txt);
-//        loadListProductsInventory(list);
-//    }
+    /**
+     * Exibe os detalhes do produto em uma mensagem formatada
+     */
+    private void exibirDetalhesProduto(Product prod) {
+        StringBuilder mensagem = new StringBuilder();
+
+        // Título
+        mensagem.append("<html><body style='width: 400px; font-family: Arial, sans-serif;'>");
+        mensagem.append("<h2 style='color: #2E86AB; margin-bottom: 15px;'>📦 Detalhes do Produto</h2>");
+
+        // Informações básicas
+        mensagem.append("<div style='background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>");
+        mensagem.append("<h3 style='color: #264653; margin-top: 0;'>").append(prod.getDescription()).append("</h3>");
+        mensagem.append("</div>");
+
+        // Dados do produto em tabela
+        mensagem.append("<table style='width: 100%; border-collapse: collapse;'>");
+
+        // Linha 1: ID e Código
+        adicionarLinhaTabela(mensagem, "🆔 ID", String.valueOf(prod.getId()));
+        adicionarLinhaTabela(mensagem, "🏷️ Código", prod.getCode() != null ? prod.getCode() : "N/A");
+
+        // Linha 2: Código de Barras
+        adicionarLinhaTabela(mensagem, "📊 Código de Barras", prod.getBarcode() != null ? prod.getBarcode() : "N/A");
+
+        // Linha 3: Tipo
+        adicionarLinhaTabela(mensagem, "📋 Tipo", prod.getType() != null ? prod.getType().getDescription() : "N/A");
+
+        // Linha 4: Preços
+        adicionarLinhaTabela(mensagem, "💰 Preço Venda", formatarMoeda(prod.getPrice()));
+        adicionarLinhaTabela(mensagem, "🏷️ Preço Compra", formatarMoeda(prod.getPurchasePrice()));
+
+        // Linha 5: Stock
+        adicionarLinhaTabela(mensagem, "📦 Stock Mínimo", String.valueOf(prod.getMinStock()));
+        adicionarLinhaTabela(mensagem, "📊 Stock Atual", prod.getCurrentStock() != null ? String.valueOf(prod.getCurrentStock()) : "N/A");
+
+        // Linha 6: Status
+        String statusTexto = prod.getStatus() != null ? prod.getStatus().getDescription() : "N/A";
+        String corStatus = prod.isActive() ? "#28a745" : "#dc3545";
+        adicionarLinhaTabela(mensagem, "📈 Status", "<span style='color: " + corStatus + "; font-weight: bold;'>" + statusTexto + "</span>");
+
+        // Linha 7: Grupo
+        adicionarLinhaTabela(mensagem, "📁 Grupo", prod.getGroup() != null ? prod.getGroup().getName() : "N/A");
+
+        // Linha 8: Taxa
+        if (prod.getTaxe() != null) {
+            adicionarLinhaTabela(mensagem, "📊 Taxa", String.format("%s (%.1f%%)",
+                    prod.getTaxe().getName(),
+                    prod.getTaxe().getPercetage()));
+        } else {
+            adicionarLinhaTabela(mensagem, "📊 Taxa", "N/A");
+        }
+
+        // Linha 9: Motivo Fiscal
+        adicionarLinhaTabela(mensagem, "📑 Motivo Fiscal", prod.getReasonTaxe() != null ? prod.getReasonTaxe().getReason() : "N/A");
+
+        mensagem.append("</table>");
+
+        // Informações adicionais
+        mensagem.append("<div style='margin-top: 15px; padding: 10px; background: #e8f4fd; border-radius: 5px; border-left: 4px solid #2E86AB;'>");
+        mensagem.append("<small style='color: #666;'>");
+        mensagem.append("Produto ").append(prod.isActive() ? "ativo" : "inativo").append(" | ");
+        mensagem.append("Tipo: ").append(prod.isProduct() ? "Produto" : "Serviço");
+        mensagem.append("</small>");
+        mensagem.append("</div>");
+
+        mensagem.append("</body></html>");
+
+        // Exibir mensagem
+        JOptionPane.showMessageDialog(null, mensagem.toString(),
+                "Detalhes do Produto - " + prod.getDescription(),
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Adiciona uma linha à tabela HTML
+     */
+    private void adicionarLinhaTabela(StringBuilder mensagem, String label, String valor) {
+        mensagem.append("<tr>")
+                .append("<td style='padding: 8px 5px; border-bottom: 1px solid #eee; font-weight: bold; color: #555; width: 40%;'>")
+                .append(label)
+                .append("</td>")
+                .append("<td style='padding: 8px 5px; border-bottom: 1px solid #eee; color: #333;'>")
+                .append(valor)
+                .append("</td>")
+                .append("</tr>");
+    }
+
+    /**
+     * Formata valor monetário
+     */
+    private String formatarMoeda(BigDecimal valor) {
+        if (valor == null) {
+            return "0,00 AOA";
+        }
+        return String.format("%,.2f AOA", valor);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -636,28 +653,24 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
     private void jButtonViewSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSeletedActionPerformed
         // TODO add your handling code here:
-
         int id = 0;
         try {
             id = (int) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0);
-//            System.out.println("jTableUsers id:" + value);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Products na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
+            JOptionPane.showMessageDialog(null, "Selecione um produto na tabela!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-//            int id = Integer.parseInt(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 0).toString());
-            if (id > 0) {
+        if (id > 0) {
+            try {
                 Product prod = productController.getById(id);
-                JOptionPane.showMessageDialog(null, "Produto :" + prod.getDescription() + "\n Codigo de barra:" + prod.getBarcode() + "\n Preço:" + prod.getPrice() + "\n Status:" + prod.getStatus());
-
-//                JDialogFormProduct formProd = new JDialogFormProduct(null, true);
-//                formProd.setProduct(value);
-//                formProd.setVisible(true);
-//                Boolean resp = formProd.getResponse();
-//                if (resp == true) {
-//                    JOptionPane.showMessageDialog(null, "FormProduct salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-//                    listProducts();
-//                }
+                if (prod != null) {
+                    exibirDetalhesProduto(prod);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Produto não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro ao carregar produto: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_jButtonViewSeletedActionPerformed

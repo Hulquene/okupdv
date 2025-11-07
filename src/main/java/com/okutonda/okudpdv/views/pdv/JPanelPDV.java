@@ -52,7 +52,6 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -241,7 +240,6 @@ public class JPanelPDV extends javax.swing.JFrame {
 //                int quantidade = textoQuantidade.isEmpty() ? 0 : Integer.parseInt(textoQuantidade);
 //                quantidade++;
 //                jTextFieldQtdProductsSelected.setText(String.valueOf(quantidade));
-
             } catch (NumberFormatException e) {
                 jTextFieldQtdProductsSelected.setText("1");
             } catch (Exception e) {

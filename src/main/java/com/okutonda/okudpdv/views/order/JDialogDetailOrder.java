@@ -2,13 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package com.okutonda.okudpdv.views.Orders;
+package com.okutonda.okudpdv.views.order;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.helpers.UtilSales;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.math.BigDecimal;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,7 +25,7 @@ import javax.swing.table.DefaultTableModel;
 public class JDialogDetailOrder extends javax.swing.JDialog {
 
     Order order;
-    OrderController orderController;
+    OrderController orderController = new OrderController();
 
     /**
      * Creates new form JDialogDetailOrder
@@ -26,31 +33,220 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
     public JDialogDetailOrder(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        this.orderController = new OrderController();
+        inicializarTabelaProdutosOrder(); // ← Adicione esta linha
     }
 
-    public void listProdutsOrder() {
-        DefaultTableModel data = (DefaultTableModel) jTable1.getModel();
-        data.setNumRows(0);
-        for (ProductOrder c : order.getProducts()) {
-            data.addRow(new Object[]{
-                c.getProduct().getId(),
-                c.getCode(),
-                c.getDescription(),
-                c.getPrice(),
-                c.getQty(),
-                c.getPrice().multiply(BigDecimal.valueOf(c.getQty()))
-//                c.getQty() * c.getPrice()
+    /**
+     * Carrega os dados do pedido na interface
+     */
+    public void setOrder(int id) {
+        try {
+            System.out.println("id order: " + id);
+            this.order = this.orderController.getById(id);
+
+            if (order != null) {
+                carregarDadosOrderUI();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Pedido não encontrado!",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
-            );
+
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar pedido: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar pedido: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    public void setOrder(int id) {
-        System.out.println("id order: " + id);
-        this.order = this.orderController.getById(id);
-//        this.order = order;
-//        jLabelTotalOrder.setText(order.getTotal().toString());
+    /**
+     * Inicializa a configuração da tabela de produtos do pedido
+     */
+    private void inicializarTabelaProdutosOrder() {
+        // Define o modelo da tabela
+        jTableProductsOrder.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "ID", "Código", "Descrição", "Preço", "Qtd", "Taxa %", "Total"
+                }
+        ) {
+            Class[] types = new Class[]{
+                Integer.class, String.class, String.class,
+                BigDecimal.class, Integer.class, BigDecimal.class, BigDecimal.class
+            };
+            boolean[] canEdit = new boolean[]{
+                false, false, false, false, false, false, false
+            };
+
+            @Override
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        // Configuração da aparência da tabela
+        configurarAparenciaTabelaProdutosOrder();
+    }
+
+    /**
+     * Configura a aparência da tabela de produtos do pedido
+     */
+    private void configurarAparenciaTabelaProdutosOrder() {
+        // Ajusta a largura das colunas
+        jTableProductsOrder.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
+        jTableProductsOrder.getColumnModel().getColumn(1).setPreferredWidth(80);   // Código
+        jTableProductsOrder.getColumnModel().getColumn(2).setPreferredWidth(200);  // Descrição
+        jTableProductsOrder.getColumnModel().getColumn(3).setPreferredWidth(80);   // Preço
+        jTableProductsOrder.getColumnModel().getColumn(4).setPreferredWidth(60);   // Qtd
+        jTableProductsOrder.getColumnModel().getColumn(5).setPreferredWidth(70);   // Taxa %
+        jTableProductsOrder.getColumnModel().getColumn(6).setPreferredWidth(90);   // Subtotal
+
+        // Centraliza algumas colunas
+        javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(javax.swing.JLabel.CENTER);
+
+        jTableProductsOrder.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // ID
+        jTableProductsOrder.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Qtd
+        jTableProductsOrder.getColumnModel().getColumn(5).setCellRenderer(centerRenderer); // Taxa %
+
+        // Aplica renderizador para preços e subtotais
+        jTableProductsOrder.getColumnModel().getColumn(3).setCellRenderer(new PrecoTableCellRenderer());
+        jTableProductsOrder.getColumnModel().getColumn(6).setCellRenderer(new PrecoTableCellRenderer());
+
+        // Aplica renderizador para taxa %
+        jTableProductsOrder.getColumnModel().getColumn(5).setCellRenderer(new TaxaTableCellRenderer());
+    }
+
+    /**
+     * Lista os produtos do pedido na tabela
+     */
+    public void listProdutsOrder() {
+        DefaultTableModel data = (DefaultTableModel) jTableProductsOrder.getModel();
+        data.setNumRows(0);
+
+        if (order != null && order.getProducts() != null) {
+            for (ProductOrder c : order.getProducts()) {
+                // Obtém a taxa do produto
+                BigDecimal taxaPercent = BigDecimal.ZERO;
+                if (c.getProduct() != null && c.getProduct().getTaxe() != null) {
+                    taxaPercent = c.getProduct().getTaxe().getPercetage();
+                }
+
+                data.addRow(new Object[]{
+                    c.getProduct().getId(),
+                    c.getCode(),
+                    c.getDescription(),
+                    c.getPrice(),
+                    c.getQty(),
+                    taxaPercent, // Taxa %
+                    c.getPrice().multiply(BigDecimal.valueOf(c.getQty())) // Subtotal
+                });
+            }
+        }
+    }
+
+    /**
+     * Renderizador para colunas de taxa %
+     */
+    private class TaxaTableCellRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (value instanceof BigDecimal) {
+                BigDecimal taxa = (BigDecimal) value;
+                setText(String.format("%.1f%%", taxa));
+                setHorizontalAlignment(JLabel.CENTER);
+
+                // Destaca taxas diferentes de zero
+                if (taxa.compareTo(BigDecimal.ZERO) > 0) {
+                    setForeground(new Color(178, 34, 34)); // Vermelho escuro para taxas
+                    setFont(getFont().deriveFont(Font.BOLD));
+                }
+            }
+            return c;
+        }
+    }
+
+    /**
+     * Carrega os dados do pedido na interface gráfica
+     */
+    private void carregarDadosOrderUI() {
+        try {
+            // Informações do cabeçalho
+            jLabelNumberOrder.setText(UtilSales.FormatedNumberPrefix2(order.getNumber(), order.getYear(), order.getPrefix()));
+            jLabelDate.setText(order.getDatecreate() != null ? order.getDatecreate() : "");
+
+            // Vendedor
+            if (order.getSeller() != null) {
+                jLabelSeller.setText(order.getSeller().getName());
+            } else {
+                jLabelSeller.setText("N/A");
+            }
+
+            // Cliente
+            if (order.getClient() != null) {
+                jLabelClientName.setText(order.getClient().getName());
+                jLabelClientNif.setText(order.getClient().getNif() != null ? order.getClient().getNif() : "");
+            } else {
+                jLabelClientName.setText("Consumidor Final");
+                jLabelClientNif.setText("");
+            }
+
+            // Observações
+            jTextPaneNote.setText(order.getNote() != null ? order.getNote() : "");
+
+            // Totais
+            jLabelSubTotalOrder.setText(order.getSubTotal() != null ? formatarMoeda(order.getSubTotal()) : "0.00 AOA");
+            jLabelTaxOrder.setText(order.getTotalTaxe() != null ? formatarMoeda(order.getTotalTaxe()) : "0.00 AOA");
+            jLabelTotalOrder.setText(order.getTotal() != null ? formatarMoeda(order.getTotal()) : "0.00 AOA");
+
+            // Lista produtos
+            listProdutsOrder();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar dados do pedido na UI: " + e.getMessage());
+            throw new RuntimeException("Erro ao carregar dados do pedido", e);
+        }
+    }
+
+    /**
+     * Formata valor monetário para exibição
+     */
+    private String formatarMoeda(BigDecimal valor) {
+        if (valor == null) {
+            return "0.00 AOA";
+        }
+        return String.format("%,.2f AOA", valor);
+    }
+
+    /**
+     * Renderizador para colunas de preço
+     */
+    private class PrecoTableCellRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (value instanceof BigDecimal) {
+                BigDecimal preco = (BigDecimal) value;
+                setText(String.format("%,.2f", preco));
+                setHorizontalAlignment(JLabel.RIGHT);
+            }
+            return c;
+        }
     }
 
     /**
@@ -65,7 +261,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTableProductsOrder = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -100,7 +296,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel1.setText("Detalhe da Fatura");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        jTableProductsOrder.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -126,10 +322,10 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(2).setResizable(false);
+        jScrollPane1.setViewportView(jTableProductsOrder);
+        if (jTableProductsOrder.getColumnModel().getColumnCount() > 0) {
+            jTableProductsOrder.getColumnModel().getColumn(0).setResizable(false);
+            jTableProductsOrder.getColumnModel().getColumn(2).setResizable(false);
         }
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -398,7 +594,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTableProductsOrder;
     private javax.swing.JTextPane jTextPaneNote;
     // End of variables declaration//GEN-END:variables
 }
