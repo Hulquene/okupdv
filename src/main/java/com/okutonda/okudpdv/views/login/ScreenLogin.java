@@ -15,7 +15,7 @@ import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.views.suport.JDialogSuport;
 import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.install.JDialogInstallInsertUser;
-import com.okutonda.okudpdv.views.pdv.ScreenPdv;
+import com.okutonda.okudpdv.views.pdv.JPanelPDV;
 import com.okutonda.okudpdv.views.install.ScreenInstall;
 import com.okutonda.okudpdv.views.suport.JDialogAbout;
 import java.util.List;
@@ -126,7 +126,7 @@ public class ScreenLogin extends javax.swing.JFrame {
         if (response != null) {
             if (response.getStatus() == 1) {
                 if (response.getProfile().equals("seller")) {
-                    ScreenPdv pdv = new ScreenPdv();
+                    JPanelPDV pdv = new JPanelPDV();
                     this.dispose();
                     pdv.setVisible(true);
                 } else {

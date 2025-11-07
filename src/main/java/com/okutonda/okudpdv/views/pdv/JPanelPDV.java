@@ -6,7 +6,6 @@ package com.okutonda.okudpdv.views.pdv;
 
 import com.okutonda.okudpdv.views.shift.JDialogCloseShift;
 import com.okutonda.okudpdv.views.shift.JDialogOpenShift;
-import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
@@ -14,6 +13,7 @@ import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.dao.StockMovementDao;
 import com.okutonda.okudpdv.helpers.Utilities;
 import com.okutonda.okudpdv.data.entities.Clients;
+import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
@@ -27,6 +27,9 @@ import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.okutonda.okudpdv.views.sales.JDialogListOrder;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
@@ -37,20 +40,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author kenny
  */
-public class ScreenPdv extends javax.swing.JFrame {
+public class JPanelPDV extends javax.swing.JFrame {
 
     JDialogOrder jdialogOrder;
     UserSession session;
@@ -71,7 +80,7 @@ public class ScreenPdv extends javax.swing.JFrame {
     /**
      * Creates new form ScreenPdv
      */
-    public ScreenPdv() {
+    public JPanelPDV() {
         initComponents();
 
         // Inicializar services e estado
@@ -79,9 +88,11 @@ public class ScreenPdv extends javax.swing.JFrame {
         this.carrinho = new ArrayList<>();
         this.clienteSelecionado = null;
 
+//        inicializarTabelaProdutos();
         inicializarUI();
+        configurarListeners();
 
-        this.setExtendedState(ScreenPdv.MAXIMIZED_BOTH);
+        this.setExtendedState(JPanelPDV.MAXIMIZED_BOTH);
         session = UserSession.getInstance();
         shiftSession = ShiftSession.getInstance();
         companySession = CompanySession.getInstance();
@@ -94,22 +105,148 @@ public class ScreenPdv extends javax.swing.JFrame {
 
         configurarAtalhos();
     }
+// No construtor ou initComponents(), adicione:
+
+    private void configurarListeners() {
+        // Filtro em tempo real
+        jTextFieldSearchProducts.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                carregarProdutos(jTextFieldSearchProducts.getText().trim());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                carregarProdutos(jTextFieldSearchProducts.getText().trim());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                carregarProdutos(jTextFieldSearchProducts.getText().trim());
+            }
+        });
+
+        // Evento de clique na tabela de produtos
+        jTableProducts.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                processarCliqueTabelaProdutos();
+            }
+        });
+    }
 
     private void inicializarUI() {
         try {
             // Verificar se sistema está pronto
             pdvService.sistemaProntoParaVendas();
 
+            // Inicializar componentes UI
+            inicializarTabelaProdutos();
+
             // Carregar dados iniciais
             carregarClientePadrao();
-            carregarProdutos();
+            carregarProdutos(null);
             atualizarInformacoesTurno();
             atualizarCarrinhoUI();
 
-            System.out.println("inicializarUI");
+            System.out.println("✅ UI inicializada com sucesso");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Atenção", JOptionPane.WARNING_MESSAGE);
-            // Em produção, você pode redirecionar para abertura de turno
+        }
+    }
+
+    /**
+     * Inicializa e configura a tabela de produtos
+     */
+    private void inicializarTabelaProdutos() {
+        // Define o modelo da tabela
+        jTableProducts.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][]{},
+                new String[]{
+                    "ID", "Código Barras", "Descrição", "Preço", "Taxa %"
+                }
+        ) {
+            Class[] types = new Class[]{
+                Integer.class, String.class, String.class,
+                BigDecimal.class, BigDecimal.class
+            };
+            boolean[] canEdit = new boolean[]{
+                false, false, false, false, false
+            };
+
+            @Override
+            public Class getColumnClass(int columnIndex) {
+                return types[columnIndex];
+            }
+
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+
+        // Configuração da aparência da tabela
+        javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(javax.swing.JLabel.CENTER);
+
+        // Ajusta a largura das colunas
+        jTableProducts.getColumnModel().getColumn(0).setPreferredWidth(50);   // ID
+        jTableProducts.getColumnModel().getColumn(1).setPreferredWidth(120);  // Código Barras
+        jTableProducts.getColumnModel().getColumn(2).setPreferredWidth(250);  // Descrição
+        jTableProducts.getColumnModel().getColumn(3).setPreferredWidth(80);   // Preço
+        jTableProducts.getColumnModel().getColumn(4).setPreferredWidth(70);   // Taxa %
+
+        // Centraliza colunas
+        jTableProducts.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // ID
+        jTableProducts.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Preço
+        jTableProducts.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Taxa %
+
+        // Aplica renderizador customizado para preços
+        jTableProducts.getColumnModel().getColumn(3).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                if (value instanceof BigDecimal) {
+                    BigDecimal preco = (BigDecimal) value;
+                    setText(String.format("%,.2f AOA", preco));
+                    setHorizontalAlignment(JLabel.RIGHT);
+
+                    // Destaca preços altos
+                    if (preco.compareTo(new BigDecimal("10000")) > 0) {
+                        setForeground(new Color(178, 34, 34)); // Vermelho escuro para preços altos
+                        setFont(getFont().deriveFont(Font.BOLD));
+                    }
+                }
+                return c;
+            }
+        });
+    }
+
+    /**
+     * Processa o clique na tabela de produtos - preenche campos e incrementa
+     * quantidade
+     */
+    private void processarCliqueTabelaProdutos() {
+        if (jTableProducts.getSelectedRow() >= 0) {
+            try {
+                // Preenche os campos do produto
+                jTextFieldBarCodeProductSelect.setText((String) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 1));
+                jTextFieldNameProductSelected.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 2).toString());
+                jTextFieldPriceProductSelect.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 3).toString());
+
+                // Incrementa a quantidade
+//                String textoQuantidade = jTextFieldQtdProductsSelected.getText().trim();
+//                int quantidade = textoQuantidade.isEmpty() ? 0 : Integer.parseInt(textoQuantidade);
+//                quantidade++;
+//                jTextFieldQtdProductsSelected.setText(String.valueOf(quantidade));
+
+            } catch (NumberFormatException e) {
+                jTextFieldQtdProductsSelected.setText("1");
+            } catch (Exception e) {
+                System.err.println("Erro ao processar clique na tabela: " + e.getMessage());
+            }
         }
     }
 
@@ -209,27 +346,61 @@ public class ScreenPdv extends javax.swing.JFrame {
         System.out.println("buscarClientePorNif");
     }
 
-    private void carregarProdutos() {
+    /**
+     * Filtra produtos por categoria/grupo
+     */
+    private void filtrarProdutosPorGrupo(GroupsProduct grupo) {
         try {
             List<Product> produtos = pdvService.listarProdutosPDV(null);
-            System.out.println(produtos);
+
+            if (grupo != null) {
+                produtos = produtos.stream()
+                        .filter(p -> p.getGroup() != null && p.getGroup().getId().equals(grupo.getId()))
+                        .collect(Collectors.toList());
+            }
+
             atualizarTabelaProdutos(produtos);
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao filtrar por grupo: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void filtrarProdutos() {
+    /**
+     * Filtra produtos com stock baixo
+     */
+    private void filtrarProdutosStockBaixo() {
         try {
-            String filtro = jTextFieldSearchProducts.getText().trim();
+            List<Product> produtos = pdvService.listarProdutosPDV(null);
+            produtos = produtos.stream()
+                    .filter(p -> p.getCurrentStock() != null && p.getCurrentStock() <= 5)
+                    .collect(Collectors.toList());
+
+            atualizarTabelaProdutos(produtos);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao filtrar stock baixo: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Carrega e atualiza a tabela de produtos com filtro opcional
+     */
+    private void carregarProdutos(String filtro) {
+        try {
             List<Product> produtos = pdvService.listarProdutosPDV(filtro);
             atualizarTabelaProdutos(produtos);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
         }
-        System.out.println("filtrarProdutos");
     }
 
+    /**
+     * Atualiza a tabela de produtos
+     */
     private void atualizarTabelaProdutos(List<Product> produtos) {
         DefaultTableModel model = (DefaultTableModel) jTableProducts.getModel();
         model.setNumRows(0);
@@ -240,8 +411,7 @@ public class ScreenPdv extends javax.swing.JFrame {
                 produto.getBarcode(),
                 produto.getDescription(),
                 produto.getPrice(),
-                produto.getTaxe() != null ? produto.getTaxe().getPercetage() : BigDecimal.ZERO,
-                produto.getCurrentStock()
+                produto.getTaxe() != null ? produto.getTaxe().getPercetage() : BigDecimal.ZERO
             });
         }
     }
@@ -357,7 +527,7 @@ public class ScreenPdv extends javax.swing.JFrame {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JPanelPDV.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(this, "Ocorreu um erro ao finalizar a venda:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         } finally {
             jButtonFinishInvoice.setEnabled(true);
@@ -684,25 +854,6 @@ public class ScreenPdv extends javax.swing.JFrame {
 //        return false;
     }
 
-    public void listProduts(List<Product> list) {
-        if (list == null) {
-            list = productController.listForPDV(null);
-        }
-        DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
-        data.setNumRows(0);
-        for (Product c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getBarcode(),
-                c.getDescription(),
-                c.getPrice(),
-                c.getTaxe().getPercetage(),
-                c.getCurrentStock()
-            }
-            );
-        }
-    }
-
     public void listProdutsOrder() {
         DefaultTableModel data = (DefaultTableModel) jTableProductsInvoice.getModel();
         data.setNumRows(0);
@@ -720,18 +871,6 @@ public class ScreenPdv extends javax.swing.JFrame {
         }
     }
 
-    public void filterListProducts(String txt) {
-        listProduts(productController.listForPDV(txt));
-    }
-
-//    public void listClients() {
-//        ClientDao dao = new ClientDao();
-//        List<Clients> list = dao.list("");
-//        jComboBoxClients.removeAllItems();
-//        for (Clients item : list) {
-//            jComboBoxClients.addItem(item);
-//        }
-//    }
 //    public void seletedClient() {
 ////        String name = jComboBoxClients.getSelectedItem().toString();
 ////        ClientDao cDao = new ClientDao();
@@ -748,15 +887,6 @@ public class ScreenPdv extends javax.swing.JFrame {
         this.dispose();
     }
 
-//    public void calculTotal() {
-//        total = subTotal = 0;
-//        for (ProductOrder productOrder : listProductOrder) {
-//            subTotal = productOrder.getProduct().getPrice() * productOrder.getQty();
-//            total += productOrder.getProduct().getPrice() * productOrder.getQty();
-//        }
-//        jTextFieldTotalInvoice.setText(String.valueOf(total));
-////        jTextFieldPayClient.setText(String.valueOf(total));
-//    }
     public void calculTotal() {
         BigDecimal subTotal = BigDecimal.ZERO;
         BigDecimal total = BigDecimal.ZERO;
@@ -1654,10 +1784,10 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jTableProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableProductsMouseClicked
         // TODO add your handling code here:
-        jTextFieldBarCodeProductSelect.setText((String) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 1));
-        jTextFieldNameProductSelected.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 2).toString());
-        jTextFieldPriceProductSelect.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 3).toString());
-        //        jTextFieldStock.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 4).toString());
+//        jTextFieldBarCodeProductSelect.setText((String) jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 1));
+//        jTextFieldNameProductSelected.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 2).toString());
+//        jTextFieldPriceProductSelect.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 3).toString());
+//        //        jTextFieldStock.setText(jTableProducts.getValueAt(jTableProducts.getSelectedRow(), 4).toString());
     }//GEN-LAST:event_jTableProductsMouseClicked
 
     private void jButtonAddProductInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductInvoiceActionPerformed
@@ -1737,13 +1867,7 @@ public class ScreenPdv extends javax.swing.JFrame {
 
     private void jTextFieldSearchProductsKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldSearchProductsKeyReleased
         // TODO add your handling code here:
-        filtrarProdutos();
-//        String txt = jTextFieldSearchProducts.getText();
-//        if (!txt.isEmpty()) {
-//            filterListProducts(txt);
-//        } else {
-//            listProduts(null);
-//        }
+        carregarProdutos(jTextFieldSearchProducts.getText().trim());
     }//GEN-LAST:event_jTextFieldSearchProductsKeyReleased
 
     private void jButtonPesquisarCompanyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPesquisarCompanyActionPerformed
@@ -1783,27 +1907,28 @@ public class ScreenPdv extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ScreenPdv.class
+            java.util.logging.Logger.getLogger(JPanelPDV.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ScreenPdv.class
+            java.util.logging.Logger.getLogger(JPanelPDV.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ScreenPdv.class
+            java.util.logging.Logger.getLogger(JPanelPDV.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
 
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ScreenPdv.class
+            java.util.logging.Logger.getLogger(JPanelPDV.class
                     .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ScreenPdv().setVisible(true);
+                new JPanelPDV().setVisible(true);
             }
         });
     }

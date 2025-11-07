@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.views.report.JPanelReport;
 import com.okutonda.okudpdv.views.products.JPanelProduct;
 import com.okutonda.okudpdv.views.setting.JDialogSetting;
 import com.okutonda.okudpdv.views.dashboard.JPanelDashboard;
-import com.okutonda.okudpdv.views.pdv.ScreenPdv;
+import com.okutonda.okudpdv.views.pdv.JPanelPDV;
 import com.okutonda.okudpdv.views.entity.JPanelEntity;
 import com.okutonda.okudpdv.views.sales.JPanelSales;
 import com.okutonda.okudpdv.views.users.JPanelUser;
@@ -571,7 +571,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         // TODO add your handling code here:
         int sair = JOptionPane.showConfirmDialog(null, "Abrir o PDV ?", "Atenção", JOptionPane.YES_NO_OPTION);
         if (sair == JOptionPane.YES_OPTION) {
-            new ScreenPdv().setVisible(true);
+            new JPanelPDV().setVisible(true);
             this.dispose();
         }
     }//GEN-LAST:event_jToggleButtonSideBarDashboard1ActionPerformed
