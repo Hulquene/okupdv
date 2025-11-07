@@ -9,8 +9,11 @@ import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.helpers.JpanelLoader;
 import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.views.invoice.JPanelInvoices;
+import com.okutonda.okudpdv.views.notaCredito.JPanelNoteCredit;
 import com.okutonda.okudpdv.views.order.JDialogDetailOrder;
 import com.okutonda.okudpdv.views.order.JPanelOrders;
+import com.okutonda.okudpdv.views.proposta.JPanelProposta;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -539,18 +542,33 @@ public final class JPanelSales extends javax.swing.JPanel {
         jButton2.setFocusable(false);
         jButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
         jToolBar1.add(jButton2);
 
         jButton3.setText("Nota de Credito -NC");
         jButton3.setFocusable(false);
         jButton3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
         jToolBar1.add(jButton3);
 
         jButton4.setText("Proposta -PP");
         jButton4.setFocusable(false);
         jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton4.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
         jToolBar1.add(jButton4);
 
         jLabelJpanelSelected.setText("Tela Selecionada");
@@ -724,6 +742,27 @@ public final class JPanelSales extends javax.swing.JPanel {
         jpload.jPanelLoader(jPanelSalesContent, pOrder);
         jLabelJpanelSelected.setText("Pedidos");
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        JPanelInvoices pInvoice = new JPanelInvoices();
+        jpload.jPanelLoader(jPanelSalesContent, pInvoice);
+        jLabelJpanelSelected.setText("FATURAS");
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        JPanelNoteCredit pNoteCredit = new JPanelNoteCredit();
+        jpload.jPanelLoader(jPanelSalesContent, pNoteCredit);
+        jLabelJpanelSelected.setText("NOTA DE CREDITO");
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        JPanelProposta pProposta = new JPanelProposta();
+        jpload.jPanelLoader(jPanelSalesContent, pProposta);
+        jLabelJpanelSelected.setText("PROPOSTA");
+    }//GEN-LAST:event_jButton4ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package com.okutonda.okudpdv.views.faturas;
+package com.okutonda.okudpdv.views.invoice;
 
 /**
  *
@@ -35,7 +35,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
         jLabel4 = new javax.swing.JLabel();
         jButtonFilterOrderFT = new javax.swing.JButton();
         jButtonPrintFT = new javax.swing.JButton();
-        jButtonDeleteOrder1 = new javax.swing.JButton();
         jButtonGenerateNoteCreditFT = new javax.swing.JButton();
         jButtonViewOrder2 = new javax.swing.JButton();
 
@@ -96,18 +95,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
             }
         });
 
-        jButtonDeleteOrder1.setBackground(new java.awt.Color(255, 0, 0));
-        jButtonDeleteOrder1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
-        jButtonDeleteOrder1.setText("Apagar a ultima");
-        jButtonDeleteOrder1.setContentAreaFilled(false);
-        jButtonDeleteOrder1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonDeleteOrder1.setEnabled(false);
-        jButtonDeleteOrder1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDeleteOrder1ActionPerformed(evt);
-            }
-        });
-
         jButtonGenerateNoteCreditFT.setBackground(new java.awt.Color(153, 255, 255));
         jButtonGenerateNoteCreditFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
         jButtonGenerateNoteCreditFT.setText("Gerar Nota de Credito");
@@ -150,13 +137,11 @@ public class JPanelInvoices extends javax.swing.JPanel {
                                 .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(33, 33, 33)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 372, Short.MAX_VALUE)
                                 .addComponent(jButtonViewOrder2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonGenerateNoteCreditFT)
-                                .addGap(34, 34, 34)
-                                .addComponent(jButtonDeleteOrder1)
-                                .addGap(18, 18, 18)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonPrintFT))))
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
@@ -174,7 +159,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
                     .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonPrintFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonDeleteOrder1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonGenerateNoteCreditFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonViewOrder2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -186,20 +170,15 @@ public class JPanelInvoices extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 971, Short.MAX_VALUE)
+            .addGap(0, 1110, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 495, Short.MAX_VALUE)
+            .addGap(0, 535, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 486, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 9, Short.MAX_VALUE)))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 535, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -211,10 +190,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButtonPrintFTActionPerformed
 
-    private void jButtonDeleteOrder1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteOrder1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButtonDeleteOrder1ActionPerformed
-
     private void jButtonGenerateNoteCreditFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditFTActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButtonGenerateNoteCreditFTActionPerformed
@@ -225,7 +200,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton jButtonDeleteOrder1;
     private javax.swing.JButton jButtonFilterOrderFT;
     public javax.swing.JButton jButtonGenerateNoteCreditFT;
     private javax.swing.JButton jButtonPrintFT;
