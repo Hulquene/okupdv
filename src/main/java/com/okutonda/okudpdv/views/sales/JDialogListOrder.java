@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Purchase;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.time.LocalDate;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -36,7 +36,7 @@ public class JDialogListOrder extends javax.swing.JDialog {
         for (Order c : list) {
             data.addRow(new Object[]{
                 c.getId(),
-                UtilSales.FormatedNumberPrefix2(c.getNumber(), c.getYear(), c.getPrefix()),
+                PrintHelper.formatDocumentNumber(c.getNumber(), c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
                 c.getTotal(),
                 c.getClient().getName(),

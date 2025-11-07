@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.order;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import com.okutonda.okudpdv.views.sales.JDialogGenerateNoteCredit;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -38,7 +38,7 @@ public class JPanelOrders extends javax.swing.JPanel {
         for (Order c : list) {
             data.addRow(new Object[]{
                 c.getId(),
-                UtilSales.FormatedNumberPrefix2(c.getNumber(), c.getYear(), c.getPrefix()),
+                PrintHelper.formatDocumentNumber(c.getNumber(), c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
                 c.getTotal(),
                 c.getClient().getName(),

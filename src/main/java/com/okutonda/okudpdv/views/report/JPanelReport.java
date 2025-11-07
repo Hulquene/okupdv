@@ -13,7 +13,7 @@ import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import com.okutonda.okudpdv.views.export.JDialogExportSaftFat;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -145,7 +145,7 @@ public final class JPanelReport extends javax.swing.JPanel {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getSeller().getName(),
-                UtilSales.FormatedNumberPrefix(c.getId(), c.getPrefix()),
+                PrintHelper.formatDocumentNumber(c.getId(),c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
                 c.getTotalTaxe(),
                 c.getTotal()
@@ -162,7 +162,7 @@ public final class JPanelReport extends javax.swing.JPanel {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getSeller().toString(),
-                UtilSales.FormatedNumberPrefix(c.getId(), c.getPrefix()),
+                PrintHelper.formatDocumentNumber(c.getId(),c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
                 c.getSubTotal(),
                 c.getTotal()

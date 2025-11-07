@@ -7,11 +7,14 @@ package com.okutonda.okudpdv.views.order;
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.print.PrinterException;
 import java.math.BigDecimal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -184,7 +187,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
     private void carregarDadosOrderUI() {
         try {
             // Informações do cabeçalho
-            jLabelNumberOrder.setText(UtilSales.FormatedNumberPrefix2(order.getNumber(), order.getYear(), order.getPrefix()));
+            jLabelNumberOrder.setText(PrintHelper.formatDocumentNumber(order.getNumber(), order.getYear(), order.getPrefix()));
             jLabelDate.setText(order.getDatecreate() != null ? order.getDatecreate() : "");
 
             // Vendedor
@@ -510,7 +513,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
     private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
         // TODO add your handling code here:
 
-        jLabelNumberOrder.setText(UtilSales.FormatedNumberPrefix2(order.getNumber(), order.getYear(), order.getPrefix()));
+        jLabelNumberOrder.setText(PrintHelper.formatDocumentNumber(order.getNumber(), order.getYear(), order.getPrefix()));
         jLabelDate.setText(order.getDatecreate());
         jLabelSeller.setText(order.getSeller().getName());
         jLabelClientName.setText(order.getClient().getName());
@@ -525,8 +528,12 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
     }//GEN-LAST:event_formWindowActivated
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        UtilSales.print(order);
+        try {
+            // TODO add your handling code here:
+            PrintHelper.printThermalTicket(this.order);
+        } catch (PrinterException ex) {
+            Logger.getLogger(JDialogDetailOrder.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

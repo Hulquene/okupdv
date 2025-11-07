@@ -7,7 +7,7 @@ import com.okutonda.okudpdv.data.dao.StockMovementDao;
 import com.okutonda.okudpdv.data.entities.*;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import com.okutonda.okudpdv.helpers.UtilSaft;
 
 import java.math.BigDecimal;
@@ -117,11 +117,11 @@ public class OrderController {
             order.setTotal(t.total);
 
             // Numerar e gerar hash
-            String prefix = UtilSales.getPrefix("order");
+            String prefix = PrintHelper.getDocumentPrefix("order");
             Integer number = orderDao.getNextNumber();
             String date = UtilDate.getFormatDataNow();
             Integer year = UtilDate.getYear();
-            String numberOrder = UtilSales.FormatedNumberPrefix2(number, year, prefix);
+            String numberOrder = PrintHelper.formatDocumentNumber(number, year, prefix);
             String hash = UtilSaft.appGenerateHashInvoice(date, date, numberOrder,
                     String.valueOf(order.getTotal()), "");
 

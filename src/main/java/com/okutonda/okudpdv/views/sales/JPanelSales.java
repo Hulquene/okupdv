@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.helpers.JpanelLoader;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import com.okutonda.okudpdv.views.invoice.JPanelInvoices;
 import com.okutonda.okudpdv.views.notaCredito.JPanelNoteCredit;
 import com.okutonda.okudpdv.views.order.JDialogDetailOrder;
@@ -88,7 +88,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         for (Order c : list) {
             data.addRow(new Object[]{
                 c.getId(),
-                UtilSales.FormatedNumberPrefix2(c.getNumber(), c.getYear(), c.getPrefix()),
+                PrintHelper.formatDocumentNumber(c.getNumber(), c.getYear(), c.getPrefix()),
                 c.getDatecreate(),
                 c.getTotal(),
                 c.getClient().getName(),
@@ -740,7 +740,7 @@ public final class JPanelSales extends javax.swing.JPanel {
         // TODO add your handling code here:
         JPanelOrders pOrder = new JPanelOrders();
         jpload.jPanelLoader(jPanelSalesContent, pOrder);
-        jLabelJpanelSelected.setText("Pedidos");
+        jLabelJpanelSelected.setText("FATURA RECIBO");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed

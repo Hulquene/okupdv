@@ -18,7 +18,7 @@ import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -417,7 +417,7 @@ public final class JPanelFinance extends javax.swing.JPanel {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getDate(),
-                UtilSales.FormatedNumberPrefix(c.getOrderId(), "order"),
+                PrintHelper.formatDocumentNumber(c.getOrderId()),
                 c.getDescription(),
                 c.getQty(),
                 c.getPrice(),

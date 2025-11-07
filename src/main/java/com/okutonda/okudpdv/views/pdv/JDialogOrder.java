@@ -15,7 +15,7 @@ import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.ProductOrder;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
-import com.okutonda.okudpdv.helpers.UtilSales;
+import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -134,14 +134,16 @@ public class JDialogOrder extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(this, "Venda gravada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 this.response = true;  // se o diálogo usa getResponse()
                 this.statusClose = true;
-                UtilSales.print(order);
+                // Imprimir automaticamente em impressora térmica
+                PrintHelper.printThermalTicket(order);
+
+//                PrintHelper.print(order);
 //             try {
 //            // TODO add your handling code here:
 //                UtilSales.PrintOrderTicket(order);
 //            } catch (PrinterException ex) {
 //                Logger.getLogger(JDialogOrder.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-
                 dispose();             // fecha o diálogo
             } else {
                 JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
