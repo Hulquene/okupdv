@@ -1,7 +1,7 @@
 package com.okutonda.okudpdv.services;
 
 import com.okutonda.okudpdv.data.dao.PurchaseDao;
-import com.okutonda.okudpdv.data.entities.InvoiceType;
+import com.okutonda.okudpdv.data.entities.DocumentType;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
@@ -257,7 +257,7 @@ public class PurchaseService {
 
         // Tipo de fatura padrão
         if (compra.getInvoiceType() == null) {
-            compra.setInvoiceType(InvoiceType.FT);
+            compra.setInvoiceType(DocumentType.FT);
         }
 
         // Datas padrão

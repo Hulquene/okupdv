@@ -5,6 +5,7 @@
 package com.okutonda.okudpdv.helpers;
 
 import com.okutonda.okudpdv.data.dao.OrderDao;
+import com.okutonda.okudpdv.data.entities.Invoices;
 import com.okutonda.okudpdv.data.entities.Order;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
@@ -16,6 +17,7 @@ import javax.swing.JOptionPane;
 
 /**
  * Utilitário para impressão e formatação de documentos
+ *
  * @author kenny
  */
 public class PrintHelper {
@@ -33,7 +35,7 @@ public class PrintHelper {
     public static String formatDocumentNumber(int documentId) {
         OrderDao dao = new OrderDao();
         Order order = dao.findById(documentId).orElse(null);
-        
+
         if (order != null) {
             return formatDocumentNumber(order.getNumber(), order.getYear(), order.getPrefix());
         }
@@ -69,7 +71,7 @@ public class PrintHelper {
         PrintService selectedService = selectPrinter();
         if (selectedService != null) {
             job.setPrintService(selectedService);
-            
+
             try {
                 job.print();
                 System.out.println("✅ Ticket impresso com sucesso: " + formatDocumentNumber(order.getNumber(), order.getYear(), order.getPrefix()));
@@ -102,10 +104,10 @@ public class PrintHelper {
                 return true;
             } catch (PrinterException e) {
                 System.err.println("❌ Erro ao imprimir documento: " + e.getMessage());
-                JOptionPane.showMessageDialog(null, 
-                    "Erro ao imprimir: " + e.getMessage(), 
-                    "Erro de Impressão", 
-                    JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null,
+                        "Erro ao imprimir: " + e.getMessage(),
+                        "Erro de Impressão",
+                        JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
@@ -129,7 +131,7 @@ public class PrintHelper {
      */
     private static PrintService selectPrinter() {
         PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
-        
+
         if (printServices.length == 0) {
             System.err.println("❌ Nenhuma impressora encontrada.");
             return null;
@@ -153,10 +155,10 @@ public class PrintHelper {
     private static PrintService findThermalPrinter(PrintService[] services) {
         // Palavras-chave comuns em impressoras térmicas
         String[] thermalKeywords = {"thermal", "termica", "ticket", "cupom", "80mm", "58mm", "POS"};
-        
+
         for (PrintService service : services) {
             String serviceName = service.getName().toLowerCase();
-            
+
             for (String keyword : thermalKeywords) {
                 if (serviceName.contains(keyword.toLowerCase())) {
                     return service;
@@ -179,7 +181,7 @@ public class PrintHelper {
      */
     public static void listAvailablePrinters() {
         PrintService[] printServices = PrintServiceLookup.lookupPrintServices(null, null);
-        
+
         if (printServices.length == 0) {
             System.out.println("Nenhuma impressora disponível.");
             return;
@@ -190,9 +192,85 @@ public class PrintHelper {
             System.out.println((i + 1) + ". " + printServices[i].getName());
         }
     }
+
+    /**
+     * Imprime ticket da fatura em impressora térmica (formato 80mm)
+     */
+    /**
+     * Imprime ticket da fatura em impressora térmica (formato 80mm)
+     */
+    public static void printThermalInvoice(Invoices invoice) throws PrinterException {
+        if (invoice == null) {
+            throw new IllegalArgumentException("Fatura não pode ser nula");
+        }
+
+        PrinterJob job = PrinterJob.getPrinterJob();
+        FaturaTicketInvoice ticket = new FaturaTicketInvoice(invoice); // ✅ Usa a nova classe
+
+        // Configurar formato para impressora térmica (80mm)
+        PageFormat pageFormat = job.defaultPage();
+        Paper paper = createThermalPaper();
+        pageFormat.setPaper(paper);
+
+        job.setPrintable(ticket, pageFormat);
+
+        // Selecionar impressora automaticamente ou permitir escolha
+        PrintService selectedService = selectPrinter();
+        if (selectedService != null) {
+            job.setPrintService(selectedService);
+
+            try {
+                job.print();
+                System.out.println("✅ Fatura impressa com sucesso: " + formatDocumentNumber(invoice.getNumber(), invoice.getYear(), invoice.getPrefix()));
+            } catch (PrinterException e) {
+                System.err.println("❌ Erro ao imprimir fatura: " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Imprime fatura com diálogo de seleção de impressora
+     */
+    public static boolean printInvoiceWithDialog(Invoices invoice) {
+        if (invoice == null) {
+            JOptionPane.showMessageDialog(null, "Fatura não pode ser nula", "Erro", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        FaturaTicketInvoice ticket = new FaturaTicketInvoice(invoice); // ✅ Usa a nova classe
+        PrinterJob job = PrinterJob.getPrinterJob();
+        job.setPrintable(ticket);
+
+        // Exibir diálogo de impressão
+        boolean confirmPrint = job.printDialog();
+        if (confirmPrint) {
+            try {
+                job.print();
+                System.out.println("✅ Fatura impressa com sucesso: " + formatDocumentNumber(invoice.getNumber(), invoice.getYear(), invoice.getPrefix()));
+                return true;
+            } catch (PrinterException e) {
+                System.err.println("❌ Erro ao imprimir fatura: " + e.getMessage());
+                JOptionPane.showMessageDialog(null,
+                        "Erro ao imprimir: " + e.getMessage(),
+                        "Erro de Impressão",
+                        JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Formata o número do documento de invoice
+     */
+    public static String formatInvoiceNumber(Invoices invoice) {
+        if (invoice == null) {
+            return "N/A";
+        }
+        return formatDocumentNumber(invoice.getNumber(), invoice.getYear(), invoice.getPrefix());
+    }
 }
-
-
 
 //// Imprimir automaticamente em impressora térmica
 //PrintHelper.printThermalTicket(order);

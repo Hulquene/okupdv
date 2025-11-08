@@ -12,7 +12,7 @@ import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
 import com.okutonda.okudpdv.helpers.PrintHelper;
@@ -160,7 +160,7 @@ public class JDialogOrder extends javax.swing.JDialog {
     public void listProdutsOrder() {
         DefaultTableModel data = (DefaultTableModel) jTableProducts.getModel();
         data.setNumRows(0);
-        for (ProductOrder c : order.getProducts()) {
+        for (ProductSales c : order.getProducts()) {
             data.addRow(new Object[]{
                 c.getProduct().getId(),
                 c.getCode(),
@@ -1054,7 +1054,6 @@ public class JDialogOrder extends javax.swing.JDialog {
     }//GEN-LAST:event_formWindowActivated
 
     private void jButtonSaveOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSaveOrderActionPerformed
-
         finalizarVenda();
     }//GEN-LAST:event_jButtonSaveOrderActionPerformed
 

@@ -2,7 +2,7 @@ package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Purchase;
-import com.okutonda.okudpdv.data.entities.InvoiceType;
+import com.okutonda.okudpdv.data.entities.DocumentType;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -196,7 +196,7 @@ public class PurchaseDao {
         }
     }
 
-    public List<Purchase> findByInvoiceType(InvoiceType invoiceType) {
+    public List<Purchase> findByInvoiceType(DocumentType invoiceType) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();

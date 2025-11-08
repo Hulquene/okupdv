@@ -1,7 +1,7 @@
 package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.ProductOrderDao;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,15 +21,15 @@ public class ProductOrderController {
     /**
      * Obtém um item pelo ID
      */
-    public ProductOrder getById(Integer id) {
-        Optional<ProductOrder> itemOpt = dao.findById(id);
+    public ProductSales getById(Integer id) {
+        Optional<ProductSales> itemOpt = dao.findById(id);
         return itemOpt.orElse(null);
     }
 
     /**
      * Lista todos os itens de um pedido
      */
-    public List<ProductOrder> getByOrderId(Integer orderId) {
+    public List<ProductSales> getByOrderId(Integer orderId) {
         try {
             return dao.findByOrderId(orderId);
         } catch (Exception e) {
@@ -41,15 +41,15 @@ public class ProductOrderController {
     /**
      * Adiciona novo item (usa orderId do próprio objeto)
      */
-    public ProductOrder add(ProductOrder item) {
-        if (item == null || item.getOrderId() == null || item.getOrderId() <= 0) {
+    public ProductSales add(ProductSales item) {
+        if (item == null || item.getDocumentId()== null || item.getDocumentId() <= 0) {
             System.err.println("❌ ProductOrder inválido — orderId ausente.");
             return null;
         }
 
         try {
-            ProductOrder savedItem = dao.save(item);
-            System.out.println("✅ Item adicionado ao pedido: " + savedItem.getOrderId());
+            ProductSales savedItem = dao.save(item);
+            System.out.println("✅ Item adicionado ao pedido: " + savedItem.getDocumentId());
             return savedItem;
         } catch (Exception e) {
             System.err.println("❌ Erro ao adicionar item: " + e.getMessage());
@@ -60,14 +60,14 @@ public class ProductOrderController {
     /**
      * Atualiza item existente
      */
-    public ProductOrder edit(ProductOrder item) {
+    public ProductSales edit(ProductSales item) {
         if (item == null || item.getId() == null || item.getId() <= 0) {
             System.err.println("❌ ID inválido para atualização de ProductOrder.");
             return null;
         }
 
         try {
-            ProductOrder updatedItem = dao.update(item);
+            ProductSales updatedItem = dao.update(item);
             System.out.println("✅ Item atualizado: " + updatedItem.getId());
             return updatedItem;
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class ProductOrderController {
     /**
      * Filtro por texto
      */
-    public List<ProductOrder> filter(String text) {
+    public List<ProductSales> filter(String text) {
         try {
             return dao.filter(text);
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class ProductOrderController {
     /**
      * Salva múltiplos itens em lote
      */
-    public boolean saveBatch(List<ProductOrder> items) {
+    public boolean saveBatch(List<ProductSales> items) {
         if (items == null || items.isEmpty()) {
             System.err.println("❌ Lista de itens vazia");
             return false;
@@ -152,7 +152,7 @@ public class ProductOrderController {
     /**
      * Lista todos os itens
      */
-    public List<ProductOrder> getAll() {
+    public List<ProductSales> getAll() {
         try {
             return dao.findAll();
         } catch (Exception e) {

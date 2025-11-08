@@ -15,7 +15,7 @@ public class Payment {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "total", precision = 10, scale = 2)
+    @Column(name = "total", precision = 10, scale = 2, nullable = false)
     private BigDecimal total = BigDecimal.ZERO;
 
     @Column(name = "prefix", length = 10)
@@ -33,49 +33,67 @@ public class Payment {
     @Column(name = "order_id")
     private Integer invoiceId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "order_type", length = 20)
-    private String invoiceType = "ORDER";
+    private DocumentType invoiceType = DocumentType.FT; // CORREÇÃO: Usando enum DocumentType
 
     @Column(name = "reference", length = 100)
     private String reference;
 
-    @Column(name = "currency", length = 10)
+    @Column(name = "currency", length = 10, nullable = false)
     private String currency = "AOA";
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "mode", length = 20)
+    @Column(name = "mode", length = 20, nullable = false)
     private PaymentMode paymentMode = PaymentMode.NU;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20)
-    private PaymentStatus status = PaymentStatus.PENDENTE; // CORREÇÃO: Usando PaymentStatus externo
+    @Column(name = "status", length = 20, nullable = false)
+    private PaymentStatus status = PaymentStatus.PENDENTE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clientId")
     private Clients client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userId", nullable = false)
     private User user;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     // Construtores
     public Payment() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Payment(String description, BigDecimal total, PaymentMode paymentMode) {
         this();
         this.description = description;
-        this.total = total;
+        this.total = total != null ? total : BigDecimal.ZERO;
         this.paymentMode = paymentMode;
     }
 
     public Payment(String description, BigDecimal total, PaymentMode paymentMode, PaymentStatus status) {
         this(description, total, paymentMode);
-        this.status = status;
+        this.status = status != null ? status : PaymentStatus.PENDENTE;
+    }
+
+    public Payment(String description, BigDecimal total, PaymentMode paymentMode,
+            PaymentStatus status, Clients client, User user) {
+        this(description, total, paymentMode, status);
+        this.client = client;
+        this.user = user;
+    }
+
+    public Payment(String description, BigDecimal total, PaymentMode paymentMode,
+            PaymentStatus status, Clients client, User user, DocumentType invoiceType) {
+        this(description, total, paymentMode, status, client, user);
+        this.invoiceType = invoiceType != null ? invoiceType : DocumentType.FT;
     }
 
     // Getters e Setters
@@ -100,7 +118,7 @@ public class Payment {
     }
 
     public void setTotal(BigDecimal total) {
-        this.total = total;
+        this.total = total != null ? total : BigDecimal.ZERO;
     }
 
     public String getPrefix() {
@@ -143,12 +161,12 @@ public class Payment {
         this.invoiceId = invoiceId;
     }
 
-    public String getInvoiceType() {
+    public DocumentType getInvoiceType() {
         return invoiceType;
     }
 
-    public void setInvoiceType(String invoiceType) {
-        this.invoiceType = invoiceType;
+    public void setInvoiceType(DocumentType invoiceType) {
+        this.invoiceType = invoiceType != null ? invoiceType : DocumentType.FT;
     }
 
     public String getReference() {
@@ -164,7 +182,9 @@ public class Payment {
     }
 
     public void setCurrency(String currency) {
-        this.currency = currency;
+        if (currency != null && !currency.trim().isEmpty()) {
+            this.currency = currency;
+        }
     }
 
     public PaymentMode getPaymentMode() {
@@ -172,7 +192,7 @@ public class Payment {
     }
 
     public void setPaymentMode(PaymentMode paymentMode) {
-        this.paymentMode = paymentMode;
+        this.paymentMode = paymentMode != null ? paymentMode : PaymentMode.NU;
     }
 
     public PaymentStatus getStatus() {
@@ -180,7 +200,8 @@ public class Payment {
     }
 
     public void setStatus(PaymentStatus status) {
-        this.status = status;
+        this.status = status != null ? status : PaymentStatus.PENDENTE;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Clients getClient() {
@@ -207,25 +228,48 @@ public class Payment {
         this.createdAt = createdAt;
     }
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     // Métodos utilitários
     public boolean isPago() {
-        return status == PaymentStatus.PAGO;
+        return PaymentStatus.PAGO.equals(status);
     }
 
     public boolean isPendente() {
-        return status == PaymentStatus.PENDENTE;
+        return PaymentStatus.PENDENTE.equals(status);
     }
 
     public boolean isParcial() {
-        return status == PaymentStatus.PARCIAL;
+        return PaymentStatus.PARCIAL.equals(status);
     }
 
     public boolean isAtrasado() {
-        return status == PaymentStatus.ATRASADO;
+        return PaymentStatus.ATRASADO.equals(status);
     }
 
     public boolean isCancelado() {
-        return status == PaymentStatus.CANCELADO;
+        return PaymentStatus.CANCELADO.equals(status);
+    }
+
+    // Método para verificar se o pagamento está ativo
+    public boolean isAtivo() {
+        return !PaymentStatus.CANCELADO.equals(status);
+    }
+
+    // Método para verificar se é um documento fiscal
+    public boolean isDocumentoFiscal() {
+        return invoiceType != null
+                && (invoiceType == DocumentType.FT
+                || invoiceType == DocumentType.FR
+                || invoiceType == DocumentType.NC
+                || invoiceType == DocumentType.ND
+                || invoiceType == DocumentType.RC);
     }
 
     // Método para obter descrição do status
@@ -238,14 +282,65 @@ public class Payment {
         return paymentMode != null ? paymentMode.getDescricao() : "Desconhecido";
     }
 
+    // Método para obter descrição do tipo de fatura
+    public String getInvoiceTypeDescricao() {
+        return invoiceType != null ? invoiceType.toString() : "Desconhecido";
+    }
+
+    // Método para marcar como pago
+    public void marcarComoPago() {
+        this.status = PaymentStatus.PAGO;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Método para marcar como cancelado
+    public void marcarComoCancelado() {
+        this.status = PaymentStatus.CANCELADO;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Método para validar dados básicos
+    public boolean isValid() {
+        return total != null
+                && total.compareTo(BigDecimal.ZERO) >= 0
+                && paymentMode != null
+                && status != null
+                && user != null
+                && invoiceType != null;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
     @Override
     public String toString() {
-        return "Payment{" +
-                "id=" + id +
-                ", total=" + total +
-                ", reference='" + reference + '\'' +
-                ", status=" + getStatusDescricao() +
-                ", paymentMode=" + getPaymentModeDescricao() +
-                '}';
+        return "Payment{"
+                + "id=" + id
+                + ", total=" + total
+                + ", reference='" + reference + '\''
+                + ", invoiceType=" + getInvoiceTypeDescricao()
+                + ", status=" + getStatusDescricao()
+                + ", paymentMode=" + getPaymentModeDescricao()
+                + ", createdAt=" + createdAt
+                + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Payment)) {
+            return false;
+        }
+        Payment payment = (Payment) o;
+        return id != null && id.equals(payment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

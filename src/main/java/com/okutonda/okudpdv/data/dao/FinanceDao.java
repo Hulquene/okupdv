@@ -65,9 +65,9 @@ public class FinanceDao {
                 String tipo = (String) row[2];
                 if (tipo != null) {
                     try {
-                        p.setInvoiceType(InvoiceType.valueOf(tipo));
+                        p.setInvoiceType(DocumentType.valueOf(tipo));
                     } catch (IllegalArgumentException e) {
-                        p.setInvoiceType(InvoiceType.FT);
+                        p.setInvoiceType(DocumentType.FT);
                     }
                 }
 

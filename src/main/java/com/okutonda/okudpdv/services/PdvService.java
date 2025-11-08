@@ -83,7 +83,7 @@ public class PdvService {
         }
 
         // Validar cada item do carrinho
-        for (ProductOrder item : order.getProducts()) {
+        for (ProductSales item : order.getProducts()) {
             validarItemVenda(item);
         }
 
@@ -159,7 +159,7 @@ public class PdvService {
     /**
      * Valida item individual da venda
      */
-    private void validarItemVenda(ProductOrder item) {
+    private void validarItemVenda(ProductSales item) {
         if (item == null || item.getProduct() == null) {
             throw new PdvException("Item de venda inválido.");
         }
@@ -179,8 +179,8 @@ public class PdvService {
     /**
      * Cria item do pedido com todas as informações necessárias
      */
-    public ProductOrder criarItemPedido(Product produto, int quantidade) {
-        ProductOrder item = new ProductOrder();
+    public ProductSales criarItemPedido(Product produto, int quantidade) {
+        ProductSales item = new ProductSales();
         item.setProduct(produto);
         item.setDescription(produto.getDescription());
         item.setCode(produto.getCode());
@@ -204,10 +204,10 @@ public class PdvService {
     /**
      * Adiciona ou atualiza item no carrinho
      */
-    public void adicionarOuAtualizarCarrinho(List<ProductOrder> carrinho, ProductOrder novoItem) {
+    public void adicionarOuAtualizarCarrinho(List<ProductSales> carrinho, ProductSales novoItem) {
         // Verificar se já existe no carrinho
         for (int i = 0; i < carrinho.size(); i++) {
-            ProductOrder itemExistente = carrinho.get(i);
+            ProductSales itemExistente = carrinho.get(i);
             if (itemExistente.getProduct().getId().equals(novoItem.getProduct().getId())) {
                 // Atualizar quantidade
                 int novaQuantidade = itemExistente.getQty() + novoItem.getQty();
@@ -231,13 +231,13 @@ public class PdvService {
     /**
      * Calcula totais da venda com IVA
      */
-    public Totais calcularTotaisComIVA(List<ProductOrder> itens) {
+    public Totais calcularTotaisComIVA(List<ProductSales> itens) {
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal impostos = BigDecimal.ZERO;
         BigDecimal total = BigDecimal.ZERO;
 
         if (itens != null) {
-            for (ProductOrder item : itens) {
+            for (ProductSales item : itens) {
                 if (item == null || item.getProduct() == null) {
                     continue;
                 }
@@ -332,7 +332,7 @@ public class PdvService {
     /**
      * Cria pedido básico a partir do carrinho
      */
-    public Order criarPedidoFromCarrinho(List<ProductOrder> carrinho, Clients cliente) {
+    public Order criarPedidoFromCarrinho(List<ProductSales> carrinho, Clients cliente) {
         Order pedido = new Order();
         pedido.setProducts(new ArrayList<>(carrinho));
         pedido.setClient(cliente);

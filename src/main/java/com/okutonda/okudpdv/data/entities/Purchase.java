@@ -23,18 +23,18 @@ public class Purchase {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "invoice_type", length = 20)
-    private InvoiceType invoiceType;
+    private DocumentType invoiceType;
 
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    @Column(name = "total", nullable = false, precision = 10, scale = 2)
+    @Column(name = "total", nullable = false, precision = 15, scale = 2)
     private BigDecimal total = BigDecimal.ZERO;
 
-    @Column(name = "iva_total", precision = 10, scale = 2)
+    @Column(name = "iva_total", precision = 15, scale = 2, nullable = false)
     private BigDecimal ivaTotal = BigDecimal.ZERO;
 
-    @Column(name = "total_pago", precision = 10, scale = 2)
+    @Column(name = "total_pago", precision = 15, scale = 2, nullable = false)
     private BigDecimal total_pago = BigDecimal.ZERO;
 
     @Temporal(TemporalType.DATE)
@@ -100,11 +100,11 @@ public class Purchase {
         this.invoiceNumber = invoiceNumber;
     }
 
-    public InvoiceType getInvoiceType() {
+    public DocumentType getInvoiceType() {
         return invoiceType;
     }
 
-    public void setInvoiceType(InvoiceType invoiceType) {
+    public void setInvoiceType(DocumentType invoiceType) {
         this.invoiceType = invoiceType;
     }
 

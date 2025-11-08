@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ExportSaftFat;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.dao.ProductDao;
 import com.okutonda.okudpdv.data.dao.ProductOrderDao;
@@ -252,11 +252,11 @@ public class SaftFatController {
         // PRODUTOS distintos presentes nas vendas
         Set<Integer> productIds = new LinkedHashSet<>();
         for (Order o : orders) {
-            List<ProductOrder> lines = productOrderDao.findByOrderId(o.getId());
+            List<ProductSales> lines = productOrderDao.findByOrderId(o.getId());
             if (lines == null) {
                 continue;
             }
-            for (ProductOrder l : lines) {
+            for (ProductSales l : lines) {
                 if (l.getProduct() != null) {
                     productIds.add(l.getProduct().getId());
                 }
@@ -372,7 +372,7 @@ public class SaftFatController {
             w.writeEndElement();
 
             // Linhas
-            List<ProductOrder> lines = productOrderDao.findByOrderId(o.getId());
+            List<ProductSales> lines = productOrderDao.findByOrderId(o.getId());
             writeInvoiceLines(w, lines, invoiceDate);
 
             // Totais
@@ -410,13 +410,13 @@ public class SaftFatController {
         w.writeEndElement(); // </SalesInvoices>
     }
 
-    private void writeInvoiceLines(XMLStreamWriter w, List<ProductOrder> lines, String invoiceDate) throws Exception {
+    private void writeInvoiceLines(XMLStreamWriter w, List<ProductSales> lines, String invoiceDate) throws Exception {
         if (lines == null) {
             return;
         }
         int lineNo = 0;
 
-        for (ProductOrder line : lines) {
+        for (ProductSales line : lines) {
             lineNo++;
             w.writeStartElement("Line");
 
@@ -476,7 +476,7 @@ public class SaftFatController {
 
             // documento de origem (fatura) para o SourceDocumentID
             String originNo = "";
-            String invType = nz(p.getInvoiceType());
+            String invType = nz(p.getInvoiceType().getPrefix());
             if (p.getInvoiceId() > 0) {
                 Order inv = orderDao.findById(p.getInvoiceId()).orElse(null);
                 if (inv != null) {
@@ -708,7 +708,7 @@ public class SaftFatController {
 //import com.okutonda.okudpdv.data.entities.Clients;
 //import com.okutonda.okudpdv.data.entities.Product;
 //import com.okutonda.okudpdv.data.entities.ExportSaftFat;
-//import com.okutonda.okudpdv.data.entities.ProductOrder;
+//import com.okutonda.okudpdv.data.entities.ProductSales;
 //import com.okutonda.okudpdv.data.entities.Order;
 //import com.okutonda.okudpdv.data.dao.ProductDao;
 //import com.okutonda.okudpdv.data.dao.ProductOrderDao;
@@ -921,7 +921,7 @@ public class SaftFatController {
 //            if (lines == null) {
 //                continue;
 //            }
-//            for (ProductOrder l : lines) {
+//            for (ProductSales l : lines) {
 //                if (l.getProduct() != null) {
 //                    productIds.add(l.getProduct().getId());
 //                }
@@ -1013,7 +1013,7 @@ public class SaftFatController {
 //            writeTag(w, "HashControl", "1");
 //            writeTag(w, "Period", stripLeadingZero(periodMM));
 //            writeTag(w, "InvoiceDate", invoiceDate);
-//            writeTag(w, "InvoiceType", invoiceType);
+//            writeTag(w, "DocumentType", invoiceType);
 //
 //            // SpecialRegimes
 //            w.writeStartElement("SpecialRegimes");
@@ -1082,7 +1082,7 @@ public class SaftFatController {
 //        }
 //        int lineNo = 0;
 //
-//        for (ProductOrder line : lines) {
+//        for (ProductSales line : lines) {
 //            lineNo++;
 //            w.writeStartElement("Line");
 //
@@ -1262,7 +1262,7 @@ public class SaftFatController {
 //
 //            w.writeStartElement("SourceDocumentID");
 //            writeTag(w, "OriginatingON", originNo);
-//            writeTag(w, "InvoiceType", inferInvoiceType(invType));
+//            writeTag(w, "DocumentType", inferInvoiceType(invType));
 //            writeTag(w, "Description", "Liquidação");
 //            w.writeEndElement(); // </SourceDocumentID>
 //

@@ -14,7 +14,7 @@ import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Expense;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Payment;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.data.entities.User;
@@ -405,19 +405,19 @@ public final class JPanelFinance extends javax.swing.JPanel {
     }
 
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.getAll();
+        List<ProductSales> list = productOrderController.getAll();
         loadListSalesProducts(list);
     }
 
-    public void loadListSalesProducts(List<ProductOrder> list) {
+    public void loadListSalesProducts(List<ProductSales> list) {
 //        List<ProductOrder> list = productOrderController.get("");
         DefaultTableModel data = (DefaultTableModel) jTableFinanceSales.getModel();
         data.setNumRows(0);
-        for (ProductOrder c : list) {
+        for (ProductSales c : list) {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getDate(),
-                PrintHelper.formatDocumentNumber(c.getOrderId()),
+                PrintHelper.formatDocumentNumber(c.getDocumentId()),
                 c.getDescription(),
                 c.getQty(),
                 c.getPrice(),

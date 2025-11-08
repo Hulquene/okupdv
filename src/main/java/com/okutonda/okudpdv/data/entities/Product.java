@@ -24,10 +24,10 @@ public class Product {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "price", precision = 10, scale = 2)
+    @Column(name = "price", precision = 15, scale = 2, nullable = false)
     private BigDecimal price = BigDecimal.ZERO;
 
-    @Column(name = "purchase_price", precision = 10, scale = 2)
+    @Column(name = "purchase_price", precision = 15, scale = 2, nullable = false)
     private BigDecimal purchasePrice = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)

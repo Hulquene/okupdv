@@ -11,7 +11,7 @@ import com.okutonda.okudpdv.controllers.ReportController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.PrintHelper;
 import com.okutonda.okudpdv.views.export.JDialogExportSaftFat;
@@ -65,10 +65,10 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listSalesProducts() {
-        List<ProductOrder> list = productOrderController.getAll();
+        List<ProductSales> list = productOrderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportSalesOrderProduct.getModel();
         data.setNumRows(0);
-        for (ProductOrder c : list) {
+        for (ProductSales c : list) {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getDate(),
@@ -101,11 +101,11 @@ public final class JPanelReport extends javax.swing.JPanel {
 //        }
 //    }
     public void listButSalesProducts() {
-        List<ProductOrder> list = productOrderController.getAll();
+        List<ProductSales> list = productOrderController.getAll();
         DefaultTableModel data = (DefaultTableModel) jTableReportButSalesProduct.getModel();
         data.setNumRows(0);
 
-        for (ProductOrder c : list) {
+        for (ProductSales c : list) {
             data.addRow(new Object[]{
                 c.getId(),
                 c.getCode(),
@@ -900,7 +900,7 @@ public final class JPanelReport extends javax.swing.JPanel {
                     jTableReportSalesOrderProduct.getValueAt(i, 6).toString(),
                     jTableReportSalesOrderProduct.getValueAt(i, 7).toString()
             ));
-//            ProductOrder prod = new ProductOrder();
+//            ProductSales prod = new ProductSales();
 //            prod.setId((int) jTableReportSalesOrderProduct.getValueAt(i, 0));
 //            prod.setDate((String) jTableReportSalesOrderProduct.getValueAt(i, 1));
 ////            prod.setDate((String) jTableReportSalesOrderProduct.getValueAt(i, 2));
@@ -934,7 +934,7 @@ public final class JPanelReport extends javax.swing.JPanel {
                     jTableReportButSalesProduct.getValueAt(i, 7).toString()
             ));
 
-//            ProductOrder prod = new ProductOrder();
+//            ProductSales prod = new ProductSales();
 //            prod.setId((int) jTableReportButSalesProduct.getValueAt(i, 0));
 //            prod.setDate((String) jTableReportButSalesProduct.getValueAt(i, 1));
 ////            prod.setDate((String) jTableReportButSalesProduct.getValueAt(i, 2));

@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.order;
 
 import com.okutonda.okudpdv.controllers.OrderController;
 import com.okutonda.okudpdv.data.entities.Order;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.awt.Color;
 import java.awt.Component;
@@ -136,7 +136,7 @@ public class JDialogDetailOrder extends javax.swing.JDialog {
         data.setNumRows(0);
 
         if (order != null && order.getProducts() != null) {
-            for (ProductOrder c : order.getProducts()) {
+            for (ProductSales c : order.getProducts()) {
                 // Obtém a taxa do produto
                 BigDecimal taxaPercent = BigDecimal.ZERO;
                 if (c.getProduct() != null && c.getProduct().getTaxe() != null) {

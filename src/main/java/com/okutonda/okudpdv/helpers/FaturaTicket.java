@@ -5,7 +5,7 @@
 package com.okutonda.okudpdv.helpers;
 
 import com.okutonda.okudpdv.data.entities.Order;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -72,7 +72,7 @@ public class FaturaTicket implements Printable {
 //        y += 10;
 //
 //        // Itens da fatura
-//        for (ProductOrder item : order.getProducts()) {
+//        for (ProductSales item : order.getProducts()) {
 //            g2d.drawString(item.getDescription(), 10, y);
 //            g2d.drawString(String.valueOf(item.getQty()), 60, y);
 //            g2d.drawString("R$ " + String.format("%.2f", item.getPrice()), 100, y);
@@ -168,7 +168,7 @@ public class FaturaTicket implements Printable {
         BigDecimal totalImposto = BigDecimal.ZERO;
 
         // Itens da Fatura
-        for (ProductOrder item : order.getProducts()) {
+        for (ProductSales item : order.getProducts()) {
 
 //            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(line.getQty()));
             BigDecimal precoTotal = item.getPrice().multiply(BigDecimal.valueOf(item.getQty()));
@@ -238,7 +238,7 @@ public class FaturaTicket implements Printable {
         y += 10;
 
         // Razões de Isenção
-        for (ProductOrder item : order.getProducts()) {
+        for (ProductSales item : order.getProducts()) {
             if (item.getTaxePercentage() == BigDecimal.ZERO) {
                 g2d.drawString(item.getDescription(), 10, y);
                 g2d.drawString(item.getReasonTax(), 60, y);

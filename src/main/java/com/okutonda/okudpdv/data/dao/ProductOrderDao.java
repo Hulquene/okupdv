@@ -1,12 +1,11 @@
 package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import java.util.ArrayList;
@@ -15,16 +14,16 @@ import java.util.Optional;
 
 public class ProductOrderDao {
 
-    private final Class<ProductOrder> entityClass = ProductOrder.class;
+    private final Class<ProductSales> entityClass = ProductSales.class;
 
     // ==========================================================
     // 🔹 CRUD
     // ==========================================================
     
-    public Optional<ProductOrder> findById(Integer id) {
+    public Optional<ProductSales> findById(Integer id) {
         Session session = HibernateUtil.getCurrentSession();
         try {
-            ProductOrder entity = session.find(ProductOrder.class, id);
+            ProductSales entity = session.find(ProductSales.class, id);
             return Optional.ofNullable(entity);
         } catch (Exception e) {
             System.err.println("Erro ao buscar ProductOrder por ID: " + e.getMessage());
@@ -32,12 +31,12 @@ public class ProductOrderDao {
         }
     }
 
-    public List<ProductOrder> findAll() {
+    public List<ProductSales> findAll() {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
-            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            CriteriaQuery<ProductSales> cq = cb.createQuery(ProductSales.class);
+            Root<ProductSales> root = cq.from(ProductSales.class);
             cq.select(root);
             
             return session.createQuery(cq).getResultList();
@@ -47,7 +46,7 @@ public class ProductOrderDao {
         }
     }
 
-    public ProductOrder save(ProductOrder productOrder) {
+    public ProductSales save(ProductSales productOrder) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
@@ -55,7 +54,7 @@ public class ProductOrderDao {
             session.persist(productOrder);
             tx.commit();
             
-            System.out.println("✅ ProductOrder salvo para order: " + productOrder.getOrderId());
+            System.out.println("✅ ProductOrder salvo para order: " + productOrder.getDocumentId());
             return productOrder;
             
         } catch (Exception e) {
@@ -67,12 +66,12 @@ public class ProductOrderDao {
         }
     }
 
-    public ProductOrder update(ProductOrder productOrder) {
+    public ProductSales update(ProductSales productOrder) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            ProductOrder merged = session.merge(productOrder);
+            ProductSales merged = session.merge(productOrder);
             tx.commit();
             
             System.out.println("✅ ProductOrder atualizado: " + productOrder.getId());
@@ -93,7 +92,7 @@ public class ProductOrderDao {
         try {
             tx = session.beginTransaction();
             
-            ProductOrder productOrder = session.find(ProductOrder.class, id);
+            ProductSales productOrder = session.find(ProductSales.class, id);
             if (productOrder != null) {
                 session.remove(productOrder);
             }
@@ -114,12 +113,12 @@ public class ProductOrderDao {
     // 🔹 CONSULTAS ESPECÍFICAS
     // ==========================================================
     
-    public List<ProductOrder> findByOrderId(Integer orderId) {
+    public List<ProductSales> findByOrderId(Integer orderId) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
-            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            CriteriaQuery<ProductSales> cq = cb.createQuery(ProductSales.class);
+            Root<ProductSales> root = cq.from(ProductSales.class);
             
             cq.select(root).where(cb.equal(root.get("orderId"), orderId));
             
@@ -131,12 +130,12 @@ public class ProductOrderDao {
         }
     }
 
-    public List<ProductOrder> filter(String text) {
+    public List<ProductSales> filter(String text) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ProductOrder> cq = cb.createQuery(ProductOrder.class);
-            Root<ProductOrder> root = cq.from(ProductOrder.class);
+            CriteriaQuery<ProductSales> cq = cb.createQuery(ProductSales.class);
+            Root<ProductSales> root = cq.from(ProductSales.class);
             
             String likePattern = "%" + text + "%";
             
@@ -153,7 +152,7 @@ public class ProductOrderDao {
     /**
      * Salva múltiplos ProductOrders em lote (para melhor performance)
      */
-    public void saveBatch(List<ProductOrder> productOrders) {
+    public void saveBatch(List<ProductSales> productOrders) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {

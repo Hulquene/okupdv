@@ -1,6 +1,6 @@
 package com.okutonda.okudpdv.controllers;
 
-import com.okutonda.okudpdv.data.entities.InvoiceType;
+import com.okutonda.okudpdv.data.entities.DocumentType;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.services.PurchaseService;
 
@@ -28,7 +28,7 @@ public class PurchaseController {
         try {
             System.out.println("=== INICIANDO ADIÇÃO DE COMPRA ===");
             System.out.println("Purchase recebido: " + p);
-            p.setInvoiceType(InvoiceType.FT);
+            p.setInvoiceType(DocumentType.FT);
             Purchase compraSalva = purchaseService.criarCompra(p);
             boolean sucesso = compraSalva != null && compraSalva.getId() != null;
 
@@ -81,7 +81,7 @@ public class PurchaseController {
         return purchaseService.listarPorFornecedor(fornecedorId);
     }
 
-    public List<Purchase> listarPorTipoFatura(InvoiceType tipoFatura) {
+    public List<Purchase> listarPorTipoFatura(DocumentType tipoFatura) {
         // Implementar no service se necessário
         return List.of();
     }

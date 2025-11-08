@@ -57,8 +57,8 @@ public class HibernateConfig {
 //        configuration.setProperty("hibernate.format_sql", "true");
 
         // Estratégia DDL - validate para produção
-        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
-//        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+//        configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "update");
 //        configuration.setProperty("hibernate.hbm2ddl.auto", "create-drop");
 
         // 🔥 CORREÇÃO: Timeouts aumentados
@@ -91,10 +91,11 @@ public class HibernateConfig {
 
             // 🔹 ENTIDADE CRÍTICA - ADICIONE ESTA LINHA
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Order.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Invoices.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.PurchaseItem.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.PurchasePayment.class);
 
-            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ProductOrder.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ProductSales.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Taxes.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ReasonTaxes.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Warehouse.class);

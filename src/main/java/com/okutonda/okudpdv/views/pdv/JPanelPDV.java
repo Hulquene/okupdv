@@ -16,7 +16,7 @@ import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.Product;
-import com.okutonda.okudpdv.data.entities.ProductOrder;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.ProductStatus;
 import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.helpers.ShiftSession;
@@ -66,14 +66,14 @@ public class JPanelPDV extends javax.swing.JFrame {
     UserController userController;
     ShiftSession shiftSession;
     ProductController productController;
-    List<ProductOrder> listProductOrder;
+    List<ProductSales> listProductOrder;
     Clients clientSelected;
     ShiftController shiftController = new ShiftController();
     double subTotal, total;
 
     // 🔹 Services e Estado
     private final PdvService pdvService;
-    private List<ProductOrder> carrinho;
+    private List<ProductSales> carrinho;
     private Clients clienteSelecionado;
 
     /**
@@ -419,7 +419,7 @@ public class JPanelPDV extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) jTableProductsInvoice.getModel();
         model.setNumRows(0);
 
-        for (ProductOrder item : carrinho) {
+        for (ProductSales item : carrinho) {
             BigDecimal totalItem = item.getPrice().multiply(BigDecimal.valueOf(item.getQty()));
             model.addRow(new Object[]{
                 item.getProduct().getId(),
@@ -557,13 +557,13 @@ public class JPanelPDV extends javax.swing.JFrame {
      * Regras: - perc = 0 => tudo líquido, tax = 0 (mas pode ter reason Mxx) -
      * perc > 0 => líquido = preço / (1 + perc/100), imposto = preço - líquido
      */
-    private Totais calcularTotaisLocalComIVA(List<ProductOrder> itens) {
+    private Totais calcularTotaisLocalComIVA(List<ProductSales> itens) {
         BigDecimal sub = BigDecimal.ZERO; // líquido
         BigDecimal iva = BigDecimal.ZERO; // imposto
         BigDecimal tot = BigDecimal.ZERO; // bruto (soma dos preços com IVA)
 
         if (itens != null) {
-            for (ProductOrder po : itens) {
+            for (ProductSales po : itens) {
                 if (po == null || po.getProduct() == null) {
                     continue;
                 }
@@ -708,9 +708,9 @@ public class JPanelPDV extends javax.swing.JFrame {
 
         // 3) Verificar se já existe no carrinho
         int existingIdx = -1;
-        ProductOrder existing = null;
+        ProductSales existing = null;
         for (int i = 0; i < listProductOrder.size(); i++) {
-            ProductOrder po = listProductOrder.get(i);
+            ProductSales po = listProductOrder.get(i);
             if (po != null && po.getProduct() != null && po.getProduct().getId() == prod.getId()) {
                 existingIdx = i;
                 existing = po;
@@ -741,9 +741,9 @@ public class JPanelPDV extends javax.swing.JFrame {
 //                    "Atenção", JOptionPane.ERROR_MESSAGE);
 //            return false;
 //        }
-        // 5) Criar/Atualizar ProductOrder
+        // 5) Criar/Atualizar ProductSales
         if (existing == null) {
-            ProductOrder po = new ProductOrder();
+            ProductSales po = new ProductSales();
             po.setProduct(prod);
             po.setDescription(prod.getDescription());
             po.setCode(prod.getCode());
@@ -793,7 +793,7 @@ public class JPanelPDV extends javax.swing.JFrame {
 //        if (prod.getDescription() != null) {
 ////                System.out.println("product encontrado2:" + prod.getDescription());
 //            if (prod.getStockTotal() >= qtd && qtd > 0) {
-//                ProductOrder prodOrder = new ProductOrder();
+//                ProductSales prodOrder = new ProductSales();
 //                prodOrder.setProduct(prod);
 //                prodOrder.setDescription(prod.getDescription());
 //
@@ -823,7 +823,7 @@ public class JPanelPDV extends javax.swing.JFrame {
 //                prodOrder.setPrice(prod.getPrice());
 //                prodOrder.setQty(qtd);
 //
-//                for (ProductOrder productOrder : listProductOrder) {
+//                for (ProductSales productOrder : listProductOrder) {
 //                    if (productOrder.getProduct().getId() == prodOrder.getProduct().getId()) {
 //                        prodOrder.setQty(prodOrder.getQty() + productOrder.getQty());
 //                        listProductOrder.remove(productOrder);
@@ -855,7 +855,7 @@ public class JPanelPDV extends javax.swing.JFrame {
     public void listProdutsOrder() {
         DefaultTableModel data = (DefaultTableModel) jTableProductsInvoice.getModel();
         data.setNumRows(0);
-        for (ProductOrder c : listProductOrder) {
+        for (ProductSales c : listProductOrder) {
             data.addRow(new Object[]{
                 c.getProduct().getId(),
                 c.getCode(),
@@ -889,7 +889,7 @@ public class JPanelPDV extends javax.swing.JFrame {
         BigDecimal subTotal = BigDecimal.ZERO;
         BigDecimal total = BigDecimal.ZERO;
 
-        for (ProductOrder productOrder : listProductOrder) {
+        for (ProductSales productOrder : listProductOrder) {
             if (productOrder.getProduct() != null && productOrder.getProduct().getPrice() != null) {
                 BigDecimal price = productOrder.getProduct().getPrice();
                 BigDecimal qty = BigDecimal.valueOf(productOrder.getQty());
@@ -1703,7 +1703,7 @@ public class JPanelPDV extends javax.swing.JFrame {
         } finally {
 //            System.out.println("jTableUsers id:" + value);
             if (value > 0) {
-                for (ProductOrder productOrder : listProductOrder) {
+                for (ProductSales productOrder : listProductOrder) {
                     if (productOrder.getProduct().getId() == value) {
                         listProductOrder.remove(productOrder);
                         break;
