@@ -5,7 +5,6 @@
 package com.okutonda.okudpdv.views;
 
 import com.okutonda.okudpdv.views.report.JPanelReport;
-import com.okutonda.okudpdv.views.products.JPanelProduct;
 import com.okutonda.okudpdv.views.setting.JDialogSetting;
 import com.okutonda.okudpdv.views.dashboard.JPanelDashboard;
 import com.okutonda.okudpdv.views.pdv.JPanelPDV;
@@ -16,20 +15,22 @@ import com.okutonda.okudpdv.views.login.ScreenLogin;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.okutonda.okudpdv.controllers.AdminRoot;
 import com.okutonda.okudpdv.controllers.UserController;
-import com.okutonda.okudpdv.ui.TemaCleaner;
-import com.okutonda.okudpdv.ui.TemaCores;
-import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.helpers.JpanelLoader;
 import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.ui.TemaCleaner;
+import com.okutonda.okudpdv.ui.TemaCores;
+import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.views.finance.JPanelFinance;
 import com.okutonda.okudpdv.views.inventory.JPanelInventory;
 import com.okutonda.okudpdv.views.purchases.JPanelPurchases;
 import com.okutonda.okudpdv.views.suport.JDialogValidateLicence;
 import com.okutonda.okudpdv.views.users.JDialogProfile;
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.JToggleButton;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -99,39 +100,84 @@ public final class ScreenMain extends javax.swing.JFrame {
                 jComboBoxOptionsDash.setToolTipText(name);
                 jComboBoxOptionsDash.setSelectedItem(name);
             }
+
+            // 🔥 INICIALIZAR SIDEBAR
+            inicializarSidebar();
         }
     }
 
     private void applyTheme() {
+        // APENAS ISSO - essencial para limpar cores manuais do GUI Builder
         TemaCleaner.clearBuilderOverrides(getContentPane());
-        // Painel de fundo da janela
-        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
-//        jPanelSidebar.setBackground(TemaCores.PRIMARY);
-        // Card do login
-//        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
-        // Título
 
-        TemaUI.aplicarTitulo(jLabelNameUserLogin);
-//        TemaUI.aplicarTitulo(jLabelNameCompany);
-//        jLabelNameCompany.setForeground(TemaCores.PRIMARY);
-        // Labels
-//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
-//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
-        // Campos
-//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
-//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
-        // Botões
-//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
-//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonInstall.setForeground(TemaCores.PRIMARY);
-//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
-        // Status de BD (cor dinâmica) — chama depois de testar a conexão
-//        updateDbStatusLabel(this.conn != null);
-        // Borda superior/rodapé (opcional)
-        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
-        // Se o GUI Builder deixou cores hardcoded em initComponents,
-        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
+        // Configurações funcionais (não relacionadas a cores)
+//        iniciarRelogio();
+        // O UIManager já aplica todas as cores automaticamente!
+        // NÃO aplique cores manualmente aqui
+    }
+
+    private void aplicarEstiloBotaoSidebar(JToggleButton botao, boolean ativo) {
+        TemaUI.aplicarBotaoSidebar(botao, ativo);
+    }
+
+    /**
+     * Controla a ativação/desativação dos botões do sidebar
+     */
+    private void ativarBotaoSidebar(JToggleButton botaoClicado) {
+        // Lista de todos os botões do sidebar
+        JToggleButton[] botoesSidebar = {
+            jToggleButtonSideBarDashboard,
+            jToggleButtonSideBarDashboard1,
+            jToggleButtonSideBarClient,
+            jToggleButtonSideBarProduct,
+            jToggleButtonSideBarSales,
+            jToggleButtonSideBarPurchases,
+            jToggleButtonSideBarPayment,
+            jToggleButtonSideBarReport,
+            jToggleButtonUsers,
+            jToggleButtonSettings
+        };
+
+        // Desativa todos os botões
+        for (JToggleButton botao : botoesSidebar) {
+            if (botao != null) {
+                botao.setSelected(false);
+                aplicarEstiloBotaoSidebar(botao, false);
+            }
+        }
+
+        // Ativa apenas o botão clicado
+        if (botaoClicado != null) {
+            botaoClicado.setSelected(true);
+            aplicarEstiloBotaoSidebar(botaoClicado, true);
+        }
+    }
+
+    /**
+     * Aplica estilo visual ao botão do sidebar
+     */
+//    private void aplicarEstiloBotaoSidebar(JToggleButton botao, boolean ativo) {
+//        if (ativo) {
+//            // Estilo quando ativo/selecionado
+//            botao.setBackground(TemaCores.PRIMARY);
+//            botao.setForeground(Color.WHITE);
+//            botao.setContentAreaFilled(true);
+//            botao.setBorderPainted(false);
+//        } else {
+//            // Estilo quando inativo
+//            botao.setBackground(TemaCores.BG_SECONDARY);
+//            botao.setForeground(TemaCores.TEXT_PRIMARY);
+//            botao.setContentAreaFilled(false);
+//            botao.setBorderPainted(false);
+//        }
+//    }
+
+    /**
+     * Inicializa o estado dos botões do sidebar
+     */
+    private void inicializarSidebar() {
+        // Ativa o botão do Dashboard por padrão
+        ativarBotaoSidebar(jToggleButtonSideBarDashboard);
     }
 
     private void iniciarRelogio() {
@@ -184,7 +230,6 @@ public final class ScreenMain extends javax.swing.JFrame {
             }
         });
 
-        jPanelSidebar.setBackground(new java.awt.Color(204, 204, 255));
         jPanelSidebar.setMinimumSize(new java.awt.Dimension(170, 600));
         jPanelSidebar.setPreferredSize(new java.awt.Dimension(180, 700));
         jPanelSidebar.setRequestFocusEnabled(false);
@@ -223,7 +268,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarClient);
         jToggleButtonSideBarClient.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarClient.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Male User_2.png"))); // NOI18N
+        jToggleButtonSideBarClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Folder.png"))); // NOI18N
         jToggleButtonSideBarClient.setText("Entidades");
         jToggleButtonSideBarClient.setBorderPainted(false);
         jToggleButtonSideBarClient.setContentAreaFilled(false);
@@ -253,7 +298,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarSales);
         jToggleButtonSideBarSales.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarSales.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarSales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/shop_6895262.png"))); // NOI18N
+        jToggleButtonSideBarSales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/invo.png"))); // NOI18N
         jToggleButtonSideBarSales.setText("Vendas");
         jToggleButtonSideBarSales.setBorderPainted(false);
         jToggleButtonSideBarSales.setContentAreaFilled(false);
@@ -268,7 +313,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarPayment);
         jToggleButtonSideBarPayment.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarPayment.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/report_1321938.png"))); // NOI18N
+        jToggleButtonSideBarPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Puzzle.png"))); // NOI18N
         jToggleButtonSideBarPayment.setText("Financeiro");
         jToggleButtonSideBarPayment.setBorderPainted(false);
         jToggleButtonSideBarPayment.setContentAreaFilled(false);
@@ -333,7 +378,7 @@ public final class ScreenMain extends javax.swing.JFrame {
         buttonGroupSideBar.add(jToggleButtonSideBarPurchases);
         jToggleButtonSideBarPurchases.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jToggleButtonSideBarPurchases.setForeground(new java.awt.Color(0, 0, 102));
-        jToggleButtonSideBarPurchases.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/shop_6895262.png"))); // NOI18N
+        jToggleButtonSideBarPurchases.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Restart.png"))); // NOI18N
         jToggleButtonSideBarPurchases.setText("Compras");
         jToggleButtonSideBarPurchases.setBorderPainted(false);
         jToggleButtonSideBarPurchases.setContentAreaFilled(false);
@@ -421,18 +466,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 
         jScrollPane2.setViewportView(jPanelContent);
 
-        jLabelDateTime.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabelDateTime.setForeground(new java.awt.Color(0, 0, 102));
         jLabelDateTime.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelDateTime.setText("Data e hora");
 
-        jLabelNamePanelOpen.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabelNamePanelOpen.setForeground(new java.awt.Color(0, 0, 102));
         jLabelNamePanelOpen.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNamePanelOpen.setText("DASHBOARD");
 
-        jComboBoxOptionsDash.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jComboBoxOptionsDash.setForeground(new java.awt.Color(0, 0, 102));
         jComboBoxOptionsDash.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Perfil", "Configuração", "Sair" }));
         jComboBoxOptionsDash.setToolTipText("Usuario");
         jComboBoxOptionsDash.setAutoscrolls(true);
@@ -449,11 +488,11 @@ public final class ScreenMain extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jComboBoxOptionsDash, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabelDateTime, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabelNamePanelOpen, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jComboBoxOptionsDash, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -507,12 +546,12 @@ public final class ScreenMain extends javax.swing.JFrame {
 //                jLabelDateTime.setText(dateF.format(date));
                 iniciarRelogio();
             }
-
         }
     }//GEN-LAST:event_formWindowActivated
 
     private void jToggleButtonSideBarClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarClientActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarClient);
         JPanelEntity pClient = new JPanelEntity();
         jpload.jPanelLoader(jPanelContent, pClient);
         jLabelNamePanelOpen.setText("CLIENTES");
@@ -521,9 +560,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarProductActionPerformed
         // TODO add your handling code here:
-//        JPanelProduct pProduct = new JPanelProduct();
-//        jpload.jPanelLoader(jPanelContent, pProduct);
-//        jLabelNamePanelOpen.setText("PRODUTO");
+        ativarBotaoSidebar(jToggleButtonSideBarProduct);
         JPanelInventory pInventory = new JPanelInventory();
         jpload.jPanelLoader(jPanelContent, pInventory);
         jLabelNamePanelOpen.setText("INVENTARIO");
@@ -531,16 +568,15 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarPaymentActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarPayment);
         JPanelFinance pFinanec = new JPanelFinance();
         jpload.jPanelLoader(jPanelContent, pFinanec);
         jLabelNamePanelOpen.setText("FINANCEIRO");
-//        JPanelPayment pPayment = new JPanelPayment();
-//        jpload.jPanelLoader(jPanelContent, pPayment);
-//        jLabelNamePanelOpen.setText("PAGAMENTOS");
     }//GEN-LAST:event_jToggleButtonSideBarPaymentActionPerformed
 
     private void jToggleButtonSideBarSalesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarSalesActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarSales);
         JPanelSales pSales = new JPanelSales();
         jpload.jPanelLoader(jPanelContent, pSales);
         jLabelNamePanelOpen.setText("VENDAS");
@@ -548,6 +584,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarReportActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarReport);
         JPanelReport pReport = new JPanelReport();
         jpload.jPanelLoader(jPanelContent, pReport);
         jLabelNamePanelOpen.setText("RELATORIOS");
@@ -555,6 +592,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarDashboardActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarDashboard);
         JPanelDashboard pDashboard = new JPanelDashboard();
         jpload.jPanelLoader(jPanelContent, pDashboard);
         jLabelNamePanelOpen.setText("DASHBOARD");
@@ -562,6 +600,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonUsersActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonUsers);
         JPanelUser pUser = new JPanelUser();
         jpload.jPanelLoader(jPanelContent, pUser);
         jLabelNamePanelOpen.setText("USUARIO");
@@ -569,6 +608,7 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSideBarDashboard1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarDashboard1ActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarDashboard1);
         int sair = JOptionPane.showConfirmDialog(null, "Abrir o PDV ?", "Atenção", JOptionPane.YES_NO_OPTION);
         if (sair == JOptionPane.YES_OPTION) {
             new JPanelPDV().setVisible(true);
@@ -598,11 +638,13 @@ public final class ScreenMain extends javax.swing.JFrame {
 
     private void jToggleButtonSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSettingsActionPerformed
         // TODO add your handling code here:
+//        ativarBotaoSidebar(jToggleButtonSettings);
         new JDialogSetting(this, rootPaneCheckingEnabled).setVisible(true);
     }//GEN-LAST:event_jToggleButtonSettingsActionPerformed
 
     private void jToggleButtonSideBarPurchasesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButtonSideBarPurchasesActionPerformed
         // TODO add your handling code here:
+        ativarBotaoSidebar(jToggleButtonSideBarPurchases);
         JPanelPurchases pPurchases = new JPanelPurchases();
         jpload.jPanelLoader(jPanelContent, pPurchases);
         jLabelNamePanelOpen.setText("COMPRAS");

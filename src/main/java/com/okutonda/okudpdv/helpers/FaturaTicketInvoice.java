@@ -161,7 +161,7 @@ public class FaturaTicketInvoice implements Printable {
 
         // Status da Fatura
         g2d.setFont(new Font("Serif", Font.PLAIN, 10));
-        g2d.drawString("Status: " + getStatusDescricao(invoice.getStatus()), 10, y);
+        g2d.drawString("Status: " + invoice.getStatus(), 10, y);
         y += 15;
 
         // Valor Pago

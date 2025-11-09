@@ -288,14 +288,14 @@ public class OrderController {
      */
     public EstatisticasVendas calcularEstatisticas(LocalDate from, LocalDate to) {
         try {
-            Double totalVendas = orderDao.calculateTotalSalesByPeriod(from, to);
-            Long pedidosConcluidos = orderDao.countByStatus(2);
-            Long pedidosPendentes = orderDao.countByStatus(1);
+            BigDecimal totalVendas = orderDao.calculateTotalSalesByPeriod(from, to);
+            Long pedidosConcluidos = orderDao.countByStatus(PaymentStatus.PAGO);
+            Long pedidosPendentes = orderDao.countByStatus(PaymentStatus.PENDENTE);
 
             return new EstatisticasVendas(totalVendas, pedidosConcluidos, pedidosPendentes);
         } catch (Exception e) {
             System.err.println("❌ Erro ao calcular estatísticas: " + e.getMessage());
-            return new EstatisticasVendas(0.0, 0L, 0L);
+            return new EstatisticasVendas(BigDecimal.ZERO, 0L, 0L);
         }
     }
 
@@ -317,11 +317,11 @@ public class OrderController {
 
     public static class EstatisticasVendas {
 
-        public final Double totalVendas;
+        public final BigDecimal totalVendas;
         public final Long pedidosConcluidos;
         public final Long pedidosPendentes;
 
-        public EstatisticasVendas(Double totalVendas, Long pedidosConcluidos, Long pedidosPendentes) {
+        public EstatisticasVendas(BigDecimal totalVendas, Long pedidosConcluidos, Long pedidosPendentes) {
             this.totalVendas = totalVendas;
             this.pedidosConcluidos = pedidosConcluidos;
             this.pedidosPendentes = pedidosPendentes;

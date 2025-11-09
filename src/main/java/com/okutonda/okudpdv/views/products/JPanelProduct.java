@@ -484,8 +484,6 @@ public final class JPanelProduct extends javax.swing.JPanel {
         jTabbedPaneProduct.setBackground(new java.awt.Color(255, 255, 255));
         jTabbedPaneProduct.setPreferredSize(new java.awt.Dimension(925, 620));
 
-        jPanelSearchSupplier.setBackground(new java.awt.Color(204, 204, 255));
-
         jTextFieldFilterNameTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextFieldFilterNameTableActionPerformed(evt);
@@ -497,11 +495,9 @@ public final class JPanelProduct extends javax.swing.JPanel {
             }
         });
 
-        jButtonAlterSeleted.setBackground(new java.awt.Color(255, 255, 102));
         jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterSeleted.setText("Editar");
         jButtonAlterSeleted.setBorderPainted(false);
-        jButtonAlterSeleted.setContentAreaFilled(false);
         jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -509,11 +505,9 @@ public final class JPanelProduct extends javax.swing.JPanel {
             }
         });
 
-        jButtonDeleteSelectedTable.setBackground(new java.awt.Color(255, 0, 0));
         jButtonDeleteSelectedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteSelectedTable.setText("Excluir");
         jButtonDeleteSelectedTable.setBorderPainted(false);
-        jButtonDeleteSelectedTable.setContentAreaFilled(false);
         jButtonDeleteSelectedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteSelectedTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -521,11 +515,9 @@ public final class JPanelProduct extends javax.swing.JPanel {
             }
         });
 
-        jButtonOpenFormProduct.setBackground(new java.awt.Color(153, 153, 255));
         jButtonOpenFormProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonOpenFormProduct.setText("Novo Produto");
         jButtonOpenFormProduct.setBorderPainted(false);
-        jButtonOpenFormProduct.setContentAreaFilled(false);
         jButtonOpenFormProduct.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonOpenFormProduct.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -563,12 +555,10 @@ public final class JPanelProduct extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableProducts);
 
-        jButtonViewSeleted.setBackground(new java.awt.Color(102, 255, 102));
         jButtonViewSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewSeleted.setText("Ver");
         jButtonViewSeleted.setToolTipText("Visualizar produto");
         jButtonViewSeleted.setBorderPainted(false);
-        jButtonViewSeleted.setContentAreaFilled(false);
         jButtonViewSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -578,11 +568,9 @@ public final class JPanelProduct extends javax.swing.JPanel {
 
         jLabel2.setText("Procurar Produto");
 
-        jButtonGroups.setBackground(new java.awt.Color(153, 153, 255));
         jButtonGroups.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Puzzle.png"))); // NOI18N
         jButtonGroups.setText("Categoria");
         jButtonGroups.setBorderPainted(false);
-        jButtonGroups.setContentAreaFilled(false);
         jButtonGroups.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonGroups.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -629,8 +617,8 @@ public final class JPanelProduct extends javax.swing.JPanel {
                     .addComponent(jButtonViewSeleted, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonGroups))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
-                .addGap(12, 12, 12))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 490, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jPanelSearchSupplierLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jButtonGroups, jTextFieldFilterNameTable});

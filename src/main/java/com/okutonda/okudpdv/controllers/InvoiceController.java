@@ -3,6 +3,8 @@ package com.okutonda.okudpdv.controllers;
 import com.okutonda.okudpdv.services.InvoiceService;
 import com.okutonda.okudpdv.data.entities.Invoices;
 import com.okutonda.okudpdv.data.entities.Clients;
+import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 
@@ -26,8 +28,52 @@ public class InvoiceController {
     // ==========================================================
     // 🔹 OPERAÇÕES CRUD
     // ==========================================================
-    public Invoices criarFatura(Invoices fatura) {
-        return invoiceService.criarFatura(fatura);
+    /**
+     * Cria uma fatura com produtos e pagamentos
+     */
+    public Invoices criarFaturaComProdutosEPagamentos(Invoices fatura, List<ProductSales> produtos, List<Payment> pagamentos) {
+        return invoiceService.criarFaturaComProdutosEPagamentos(fatura, produtos, pagamentos);
+    }
+
+    /**
+     * Cria uma fatura completa com produtos e pagamento automático
+     */
+    public Invoices criarFaturaCompleta(Clients cliente, String prefixo, List<ProductSales> produtos,
+            String observacoes, BigDecimal desconto, List<Payment> pagamentos) {
+        try {
+            // 1. Criar a fatura
+            Invoices fatura = new Invoices();
+            fatura.setClient(cliente);
+            fatura.setPrefix(prefixo);
+            fatura.setNote(observacoes);
+            fatura.setDiscount(desconto != null ? desconto : BigDecimal.ZERO);
+            fatura.setIssueDate(LocalDate.now().toString());
+            fatura.setDueDate(LocalDate.now().plusDays(30).toString());
+
+            // Vendedor
+            User usuarioLogado = userSession.getUser();
+            if (usuarioLogado != null) {
+                fatura.setSeller(usuarioLogado);
+            }
+
+            // 2. Calcular totais
+            calcularTotaisFatura(fatura, produtos);
+
+            // 3. Criar fatura com pagamentos
+            return invoiceService.criarFaturaComProdutosEPagamentos(fatura, produtos, pagamentos);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao criar fatura completa: " + e.getMessage());
+            throw new RuntimeException("Erro ao criar fatura: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Método de compatibilidade (mantém o antigo sem pagamentos)
+     */
+    public Invoices criarFaturaComProdutos(Invoices fatura, List<ProductSales> produtos) {
+        // Chama o novo método sem pagamentos (será criado automaticamente)
+        return criarFaturaComProdutosEPagamentos(fatura, produtos, null);
     }
 
     public Invoices atualizarFatura(Invoices fatura) {
@@ -49,9 +95,9 @@ public class InvoiceController {
     // ==========================================================
     // 🔹 GESTÃO DE STATUS
     // ==========================================================
-    public Invoices emitirFatura(Integer id) {
-        return invoiceService.emitirFatura(id);
-    }
+//    public Invoices emitirFatura(Integer id) {
+//        return invoiceService.emitirFatura(id);
+//    }
 
     public Invoices marcarComoPaga(Integer id) {
         return invoiceService.marcarComoPaga(id);
@@ -77,7 +123,6 @@ public class InvoiceController {
     }
 
     public List<Invoices> listarPorVendedor(Integer vendedorId) {
-        // Controle de acesso: vendedores só veem suas próprias faturas
         if (!isAdminOrManager() && !vendedorId.equals(getUsuarioLogadoId())) {
             System.err.println("❌ Acesso não autorizado para ver faturas de outros vendedores");
             return List.of();
@@ -143,28 +188,6 @@ public class InvoiceController {
     }
 
     /**
-     * Cria uma nova fatura com dados básicos
-     */
-    public Invoices criarFaturaBasica(Clients cliente, String prefixo, BigDecimal total) {
-        Invoices fatura = new Invoices();
-        fatura.setClient(cliente);
-        fatura.setPrefix(prefixo);
-        fatura.setTotal(total);
-        fatura.setSubTotal(total);
-        fatura.setPayTotal(BigDecimal.ZERO);
-        fatura.setIssueDate(LocalDate.now().toString());
-        fatura.setDueDate(LocalDate.now().plusDays(30).toString());
-
-        // Vendedor padrão é o usuário logado
-        User usuarioLogado = userSession.getUser();
-        if (usuarioLogado != null) {
-            fatura.setSeller(usuarioLogado);
-        }
-
-        return criarFatura(fatura);
-    }
-
-    /**
      * Verifica se o usuário tem permissão para modificar a fatura
      */
     public boolean podeModificarFatura(Invoices fatura) {
@@ -177,12 +200,10 @@ public class InvoiceController {
             return false;
         }
 
-        // Admin/manager pode modificar qualquer fatura
         if (isAdminOrManager()) {
             return true;
         }
 
-        // Vendedor só pode modificar suas próprias faturas pendentes
         return fatura.getSeller() != null
                 && fatura.getSeller().getId().equals(usuarioLogado.getId())
                 && fatura.isPendente();
@@ -198,5 +219,93 @@ public class InvoiceController {
         }
 
         return invoiceService.listarPorVendedor(usuarioLogado.getId());
+    }
+
+    /**
+     * Cria uma fatura completa com produtos (BASEADO NO ORDER CONTROLLER)
+     */
+//    public Invoices criarFaturaCompleta(Clients cliente, String prefixo, List<ProductSales> produtos,
+//            String observacoes, BigDecimal desconto) {
+//        try {
+//            // 1. Criar a fatura
+//            Invoices fatura = new Invoices();
+//            fatura.setClient(cliente);
+//            fatura.setPrefix(prefixo);
+//            fatura.setNote(observacoes);
+//            fatura.setDiscount(desconto != null ? desconto : BigDecimal.ZERO);
+//            fatura.setIssueDate(LocalDate.now().toString());
+//            fatura.setDueDate(LocalDate.now().plusDays(30).toString());
+//
+//            // Vendedor
+//            User usuarioLogado = userSession.getUser();
+//            if (usuarioLogado != null) {
+//                fatura.setSeller(usuarioLogado);
+//            }
+//
+//            // 2. Calcular totais
+//            calcularTotaisFatura(fatura, produtos);
+//
+//            // 3. Usar método baseado no OrderController
+//            return invoiceService.criarFaturaComProdutos(fatura, produtos);
+//
+//        } catch (Exception e) {
+//            System.err.println("❌ Erro ao criar fatura completa: " + e.getMessage());
+//            throw new RuntimeException("Erro ao criar fatura: " + e.getMessage(), e);
+//        }
+//    }
+
+    /**
+     * Método simplificado para criar faturas básicas
+     */
+//    public Invoices criarFaturaBasica(Clients cliente, String prefixo, BigDecimal total) {
+//        Invoices fatura = new Invoices();
+//        fatura.setClient(cliente);
+//        fatura.setPrefix(prefixo);
+//        fatura.setTotal(total);
+//        fatura.setSubTotal(total);
+//        fatura.setPayTotal(BigDecimal.ZERO);
+//        fatura.setIssueDate(LocalDate.now().toString());
+//        fatura.setDueDate(LocalDate.now().plusDays(30).toString());
+//
+//        User usuarioLogado = userSession.getUser();
+//        if (usuarioLogado != null) {
+//            fatura.setSeller(usuarioLogado);
+//        }
+//
+//        return invoiceService.criarFaturaComProdutos(fatura, null);
+//    }
+
+    /**
+     * Calcula totais da fatura baseado nos produtos
+     */
+    private void calcularTotaisFatura(Invoices fatura, List<ProductSales> produtos) {
+        if (produtos == null || produtos.isEmpty()) {
+            fatura.setSubTotal(BigDecimal.ZERO);
+            fatura.setTotalTaxe(BigDecimal.ZERO);
+            fatura.setTotal(BigDecimal.ZERO);
+            return;
+        }
+
+        BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal totalImpostos = BigDecimal.ZERO;
+
+        for (ProductSales ps : produtos) {
+            BigDecimal totalItem = ps.getPrice().multiply(BigDecimal.valueOf(ps.getQty()));
+            subTotal = subTotal.add(totalItem);
+
+            if (ps.getTaxePercentage() != null && ps.getTaxePercentage().compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal impostoItem = totalItem.multiply(ps.getTaxePercentage())
+                        .divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+                totalImpostos = totalImpostos.add(impostoItem);
+            }
+        }
+
+        BigDecimal desconto = fatura.getDiscount() != null ? fatura.getDiscount() : BigDecimal.ZERO;
+        BigDecimal total = subTotal.add(totalImpostos).subtract(desconto);
+
+        fatura.setSubTotal(subTotal);
+        fatura.setTotalTaxe(totalImpostos);
+        fatura.setTotal(total);
+        fatura.setPayTotal(BigDecimal.ZERO);
     }
 }

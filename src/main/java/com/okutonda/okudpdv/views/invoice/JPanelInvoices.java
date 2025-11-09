@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.invoice;
 
 import com.okutonda.okudpdv.controllers.InvoiceController;
 import com.okutonda.okudpdv.data.entities.Invoices;
-import com.okutonda.okudpdv.helpers.PrintHelper;
+import com.okutonda.okudpdv.helpers.InvoicePrintHelper;
 import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -121,7 +121,7 @@ public class JPanelInvoices extends javax.swing.JPanel {
      * Adiciona uma linha na tabela
      */
     private void adicionarLinhaTabela(Invoices invoice) {
-        String status = getStatusDescricao(invoice.getStatus());
+        String status = invoice.getStatus().getDescricao();
         String tipo = invoice.getPrefix();
         String vendedor = invoice.getSeller() != null ? invoice.getSeller().getName() : "N/A";
         String cliente = invoice.getClient() != null ? invoice.getClient().getName() : "N/A";
@@ -261,28 +261,27 @@ public class JPanelInvoices extends javax.swing.JPanel {
     /**
      * Imprime a fatura selecionada
      */
-    private void imprimirFatura() {
-        Invoices fatura = getFaturaSelecionada();
-        if (fatura == null) {
-            return;
-        }
-
-        try {
-            boolean sucesso = PrintHelper.printInvoiceWithDialog(fatura);
-            if (sucesso) {
-                JOptionPane.showMessageDialog(this,
-                        "Fatura impressa com sucesso!",
-                        "Sucesso",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Erro ao imprimir fatura: " + e.getMessage(),
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
+//    private void imprimirFatura() {
+//        Invoices fatura = getFaturaSelecionada();
+//        if (fatura == null) {
+//            return;
+//        }
+//
+//        try {
+//            boolean sucesso = PrintHelper.printInvoiceWithDialog(fatura);
+//            if (sucesso) {
+//                JOptionPane.showMessageDialog(this,
+//                        "Fatura impressa com sucesso!",
+//                        "Sucesso",
+//                        JOptionPane.INFORMATION_MESSAGE);
+//            }
+//        } catch (Exception e) {
+//            JOptionPane.showMessageDialog(this,
+//                    "Erro ao imprimir fatura: " + e.getMessage(),
+//                    "Erro",
+//                    JOptionPane.ERROR_MESSAGE);
+//        }
+//    }
     /**
      * Gera nota de crédito para a fatura selecionada
      */
@@ -299,24 +298,42 @@ public class JPanelInvoices extends javax.swing.JPanel {
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Visualiza detalhes da fatura selecionada
-     */
-    private void visualizarFatura() {
+    // No seu JPanel ou Controller:
+    private void visualizarFaturaAGT() {
         Invoices fatura = getFaturaSelecionada();
         if (fatura == null) {
             return;
         }
 
-        // TODO: Implementar visualização de detalhes
-        JOptionPane.showMessageDialog(this,
-                "Visualizando fatura: " + fatura.getPrefix() + "/" + fatura.getNumber()
-                + "\nCliente: " + (fatura.getClient() != null ? fatura.getClient().getName() : "N/A")
-                + "\nTotal: " + fatura.getTotal()
-                + "\nStatus: " + getStatusDescricao(fatura.getStatus()),
-                "Detalhes da Fatura",
-                JOptionPane.INFORMATION_MESSAGE);
+        InvoicePrintHelper.showInvoiceDetails(fatura, this);
     }
+
+    private void imprimirFaturaAGT() {
+        Invoices fatura = getFaturaSelecionada();
+        if (fatura == null) {
+            return;
+        }
+
+        // Imprimir modelo completo AGT
+        InvoicePrintHelper.printAGTInvoice(fatura, this);
+
+        // Ou versão térmica simplificada
+        // InvoicePrintHelper.printAGTThermal(fatura, this);
+    }
+//
+//    private void exportarFatura() {
+//        Invoices fatura = getFaturaSelecionada();
+//        if (fatura == null) {
+//            return;
+//        }
+//
+//        File pdf = InvoicePrintHelper.generatePdf(fatura);
+//        if (pdf != null) {
+//            JOptionPane.showMessageDialog(this,
+//                    "PDF gerado: " + pdf.getAbsolutePath(),
+//                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+//        }
+//    }
 
     /**
      * Atualiza o status de carregamento
@@ -383,8 +400,7 @@ public class JPanelInvoices extends javax.swing.JPanel {
         jButtonViewOrder2 = new javax.swing.JButton();
         jButtonNewInvoice = new javax.swing.JButton();
         jTextFieldFiltText = new javax.swing.JTextField();
-
-        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel1 = new javax.swing.JLabel();
 
         jTableInvoices.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -404,24 +420,19 @@ public class JPanelInvoices extends javax.swing.JPanel {
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
-        jFormattedTextFieldDateStartFT.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
         try {
             jFormattedTextFieldDateFinishFT.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
-        jFormattedTextFieldDateFinishFT.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel3.setText("Data Inicio:");
 
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel4.setText("Data Fim:");
 
         jButtonFilterOrderFT.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonFilterOrderFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
-        jButtonFilterOrderFT.setText("Filtrar");
         jButtonFilterOrderFT.setBorderPainted(false);
         jButtonFilterOrderFT.setContentAreaFilled(false);
         jButtonFilterOrderFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -433,7 +444,6 @@ public class JPanelInvoices extends javax.swing.JPanel {
 
         jButtonPrintFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/printer_8139457.png"))); // NOI18N
         jButtonPrintFT.setText("Imprimir");
-        jButtonPrintFT.setContentAreaFilled(false);
         jButtonPrintFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonPrintFT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -441,10 +451,8 @@ public class JPanelInvoices extends javax.swing.JPanel {
             }
         });
 
-        jButtonGenerateNoteCreditFT.setBackground(new java.awt.Color(153, 255, 255));
         jButtonGenerateNoteCreditFT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Document.png"))); // NOI18N
         jButtonGenerateNoteCreditFT.setText("Gerar Nota de Credito");
-        jButtonGenerateNoteCreditFT.setContentAreaFilled(false);
         jButtonGenerateNoteCreditFT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonGenerateNoteCreditFT.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -452,10 +460,8 @@ public class JPanelInvoices extends javax.swing.JPanel {
             }
         });
 
-        jButtonViewOrder2.setBackground(new java.awt.Color(255, 255, 102));
         jButtonViewOrder2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewOrder2.setText("Ver");
-        jButtonViewOrder2.setContentAreaFilled(false);
         jButtonViewOrder2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewOrder2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -463,6 +469,7 @@ public class JPanelInvoices extends javax.swing.JPanel {
             }
         });
 
+        jButtonNewInvoice.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonNewInvoice.setText("Novo");
         jButtonNewInvoice.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -470,7 +477,9 @@ public class JPanelInvoices extends javax.swing.JPanel {
             }
         });
 
-        jTextFieldFiltText.setText("jTextField1");
+        jTextFieldFiltText.setToolTipText("Pesquisar...");
+
+        jLabel1.setText("Pesquisar");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -479,67 +488,76 @@ public class JPanelInvoices extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jFormattedTextFieldDateStartFT, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jFormattedTextFieldDateStartFT, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3))
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel4)
+                                .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)
-                                .addComponent(jTextFieldFiltText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 128, Short.MAX_VALUE)
-                                .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextFieldFiltText, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
                                 .addGap(18, 18, 18)
                                 .addComponent(jButtonNewInvoice)
-                                .addGap(59, 59, 59)
+                                .addGap(18, 18, 18)
                                 .addComponent(jButtonViewOrder2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButtonGenerateNoteCreditFT)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButtonPrintFT))))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addGap(18, 18, 18)
+                                .addComponent(jButtonPrintFT)))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addContainerGap(15, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel4))
+                        .addGap(9, 9, 9))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jFormattedTextFieldDateStartFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jFormattedTextFieldDateFinishFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonFilterOrderFT, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPrintFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonGenerateNoteCreditFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonViewOrder2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldFiltText, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonNewInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextFieldFiltText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(103, 103, 103))
+                    .addComponent(jButtonViewOrder2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonGenerateNoteCreditFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonPrintFT, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(11, 11, 11)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1110, Short.MAX_VALUE)
+            .addGap(0, 962, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 535, Short.MAX_VALUE)
+            .addGap(0, 493, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 535, Short.MAX_VALUE))
+                .addGroup(layout.createSequentialGroup()
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -550,7 +568,8 @@ public class JPanelInvoices extends javax.swing.JPanel {
 
     private void jButtonPrintFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrintFTActionPerformed
         // TODO add your handling code here:
-        imprimirFatura();
+//        imprimirFatura();
+        imprimirFaturaAGT();
     }//GEN-LAST:event_jButtonPrintFTActionPerformed
 
     private void jButtonGenerateNoteCreditFTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateNoteCreditFTActionPerformed
@@ -560,7 +579,8 @@ public class JPanelInvoices extends javax.swing.JPanel {
 
     private void jButtonViewOrder2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewOrder2ActionPerformed
         // TODO add your handling code here:
-        visualizarFatura();
+//        visualizarFatura();
+        visualizarFaturaAGT();
     }//GEN-LAST:event_jButtonViewOrder2ActionPerformed
 
     private void jButtonNewInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonNewInvoiceActionPerformed
@@ -584,6 +604,7 @@ public class JPanelInvoices extends javax.swing.JPanel {
     private javax.swing.JButton jButtonViewOrder2;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateFinishFT;
     private javax.swing.JFormattedTextField jFormattedTextFieldDateStartFT;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel2;

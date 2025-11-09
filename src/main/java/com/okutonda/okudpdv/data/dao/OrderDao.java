@@ -2,12 +2,14 @@ package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Order;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.math.BigDecimal;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -257,32 +259,32 @@ public class OrderDao {
     /**
      * Calcula o total de vendas em um período
      */
-    public Double calculateTotalSalesByPeriod(LocalDate from, LocalDate to) {
+    public BigDecimal calculateTotalSalesByPeriod(LocalDate from, LocalDate to) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<Double> cq = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> cq = cb.createQuery(BigDecimal.class);
             Root<Order> root = cq.from(Order.class);
 
             cq.select(cb.sum(root.get("total")))
                     .where(cb.and(
                             cb.between(root.get("datecreate"), from.toString(), to.toString()),
-                            cb.equal(root.get("status"), 2) // Status de pedido concluído
+                            cb.equal(root.get("status"), PaymentStatus.PAGO) // Usar enum diretamente
                     ));
 
-            Double total = session.createQuery(cq).getSingleResult();
-            return total != null ? total : 0.0;
+            BigDecimal total = session.createQuery(cq).getSingleResult();
+            return total != null ? total : BigDecimal.ZERO;
 
         } catch (Exception e) {
             System.err.println("Erro ao calcular total de vendas: " + e.getMessage());
-            return 0.0;
+            return BigDecimal.ZERO;
         }
     }
 
     /**
      * Conta pedidos por status
      */
-    public Long countByStatus(Integer status) {
+    public Long countByStatus(PaymentStatus status) { // Mudar para PaymentStatus
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -290,7 +292,7 @@ public class OrderDao {
             Root<Order> root = cq.from(Order.class);
 
             cq.select(cb.count(root))
-                    .where(cb.equal(root.get("status"), status));
+                    .where(cb.equal(root.get("status"), status)); // Usar enum
 
             return session.createQuery(cq).getSingleResult();
 

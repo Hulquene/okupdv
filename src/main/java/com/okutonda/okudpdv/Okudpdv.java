@@ -24,6 +24,7 @@ import com.okutonda.okudpdv.data.entities.ReasonTaxes;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.data.entities.User;
+import com.okutonda.okudpdv.ui.TemaLookAndFeel;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -31,11 +32,16 @@ public class Okudpdv {
 
     public static void main(String[] args) {
         System.out.println("Hello World!");
-
-        // 1) Look & Feel
         try {
+            // 1. Tema base FlatLaf
             FlatLightLaf.setup();
-            com.okutonda.okudpdv.ui.TemaLookAndFeel.aplicarUIManagerBasico();
+
+            // 2. NOSSAS customizações globais (MAIS IMPORTANTE)
+            TemaLookAndFeel.aplicarUIManagerBasico();
+
+            // 3. Forçar atualização imediata
+            TemaLookAndFeel.atualizarUINasJanelasAbertas();
+
         } catch (Exception ex) {
             System.err.println("Erro no Look & Feel: " + ex.getMessage());
         }
@@ -422,90 +428,3 @@ public class Okudpdv {
         }
     }
 }
-
-///**
-// *
-// * @author kenny
-// */
-//public class Okudpdv {
-//
-//    public static void main(String[] args) {
-//        System.out.println("Hello World!");
-//        Countries.loadCache();
-//        // 1) Look & Feel (FlatLaf)
-//        try {
-//            FlatLightLaf.setup();
-//        } catch (Exception ex) {
-//            System.err.println("Falhou inicializar o Look & Feel FlatLaf: " + ex.getMessage());
-//        }
-//
-//        // 2) Aplicar tema global
-//        try {
-//            com.okutonda.okudpdv.ui.TemaLookAndFeel.aplicarUIManagerBasico();
-//        } catch (Exception ex) {
-//            System.err.println("Falhou aplicar TemaLookAndFeel: " + ex.getMessage());
-//        }
-//
-//        // Garante que a UI Swing inicia na thread de interface
-//        SwingUtilities.invokeLater(() -> {
-//            try {
-//                // 🔍 Diagnóstico inicial do banco (SEU CÓDIGO ATUAL)
-//                DatabaseBootProbe.AppState state = DatabaseBootProbe.detect();
-//                System.out.println("DEBUG → Estado do BD: " + state);
-//
-//                switch (state) {
-//                    case DB_UNREACHABLE -> {
-//                        JOptionPane.showMessageDialog(null, "❌ Não foi possível comunicar com o servidor de base de dados.", "Base de dados inativa", JOptionPane.ERROR_MESSAGE);
-//                        new ScreenLogin().setVisible(true);
-//                    }
-//
-//                    case DB_NOT_FOUND, SCHEMA_MISSING, INSTALL_INCOMPLETE -> {
-//                        JOptionPane.showMessageDialog(null, "⚙️ O sistema precisa ser instalado ou atualizado.", "Instalação necessária", JOptionPane.INFORMATION_MESSAGE);
-//                        new ScreenInstall().setVisible(true);
-//                    }
-//
-//                    case READY -> {
-//                        // 🔥 NOVA VERIFICAÇÃO: Testar Hibernate também
-//                        boolean hibernateOk = testHibernateConnection();
-//
-//                        if (hibernateOk) {
-//                            System.out.println("✅ [Hibernate] Conexão validada com sucesso!");
-//                            new ScreenLogin().setVisible(true);
-//                        } else {
-//                            JOptionPane.showMessageDialog(null,
-//                                    "Hibernate não conseguiu conectar. Usando fallback para JDBC.",
-//                                    "Aviso", JOptionPane.WARNING_MESSAGE);
-//                            // Fallback para seu sistema atual
-//                            try (var conn = DatabaseProvider.getConnection()) {
-//                                new ScreenLogin().setVisible(true);
-//                            } catch (Exception e) {
-//                                JOptionPane.showMessageDialog(null, "Erro ao conectar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-//                                System.exit(1);
-//                            }
-//                        }
-//                    }
-//                }
-//
-//            } catch (Exception e) {
-//                JOptionPane.showMessageDialog(null, "Erro inesperado: " + e.getMessage(), "Erro Fatal", JOptionPane.ERROR_MESSAGE);
-//                e.printStackTrace();
-//                System.exit(1);
-//            }
-//        });
-//
-//        // Shutdown hook para fechar Hibernate adequadamente
-//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            System.out.println("🔄 Encerrando aplicação...");
-//            HibernateConfig.shutdown();
-//        }));
-//    }
-//
-//    private static boolean testHibernateConnection() {
-//        try {
-//            return HibernateConfig.testConnection();
-//        } catch (Exception e) {
-//            System.err.println("❌ Hibernate connection test failed: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//}

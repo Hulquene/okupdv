@@ -2,11 +2,14 @@ package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.entities.Invoices;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import jakarta.persistence.criteria.*;
+import java.math.BigDecimal;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +55,9 @@ public class InvoiceDao {
             System.out.println("✅ Invoice salva: " + invoice.getPrefix() + "/" + invoice.getNumber());
             return invoice;
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             System.err.println("❌ Erro ao salvar Invoice: " + e.getMessage());
             throw new RuntimeException("Erro ao salvar Invoice", e);
         }
@@ -68,7 +73,9 @@ public class InvoiceDao {
             System.out.println("✅ Invoice atualizada: " + invoice.getPrefix() + "/" + invoice.getNumber());
             return merged;
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             System.err.println("❌ Erro ao atualizar Invoice: " + e.getMessage());
             throw new RuntimeException("Erro ao atualizar Invoice", e);
         }
@@ -86,7 +93,9 @@ public class InvoiceDao {
             tx.commit();
             System.out.println("✅ Invoice removida ID: " + id);
         } catch (Exception e) {
-            if (tx != null && tx.isActive()) tx.rollback();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             System.err.println("❌ Erro ao remover Invoice: " + e.getMessage());
             throw new RuntimeException("Erro ao remover Invoice", e);
         }
@@ -136,13 +145,17 @@ public class InvoiceDao {
             CriteriaQuery<Invoices> cq = cb.createQuery(Invoices.class);
             Root<Invoices> root = cq.from(Invoices.class);
 
+            // Usar createdAt convertendo LocalDate para LocalDateTime
+            LocalDateTime inicioDateTime = from.atStartOfDay();
+            LocalDateTime fimDateTime = to.atTime(23, 59, 59);
+
             cq.select(root)
-                    .where(cb.between(root.get("issueDate"), from.toString(), to.toString()))
-                    .orderBy(cb.asc(root.get("issueDate")));
+                    .where(cb.between(root.get("createdAt"), inicioDateTime, fimDateTime))
+                    .orderBy(cb.asc(root.get("createdAt")));
 
             return session.createQuery(cq).getResultList();
         } catch (Exception e) {
-            System.err.println("❌ Erro ao filtrar Invoices por data: " + e.getMessage());
+            System.err.println("❌ Erro ao filtrar Invoices por createdAt: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -262,28 +275,31 @@ public class InvoiceDao {
         }
     }
 
-    public Double calculateTotalSalesByPeriod(LocalDate from, LocalDate to) {
+    public BigDecimal calculateTotalSalesByPeriod(LocalDate from, LocalDate to) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<Double> cq = cb.createQuery(Double.class);
+            CriteriaQuery<BigDecimal> cq = cb.createQuery(BigDecimal.class);
             Root<Invoices> root = cq.from(Invoices.class);
 
             cq.select(cb.sum(root.get("total")))
                     .where(cb.and(
                             cb.between(root.get("issueDate"), from.toString(), to.toString()),
-                            cb.equal(root.get("status"), 3) // Status de invoice paga
+                            cb.equal(root.get("status"), PaymentStatus.PAGO) // Usar enum
                     ));
 
-            Double total = session.createQuery(cq).getSingleResult();
-            return total != null ? total : 0.0;
+            BigDecimal total = session.createQuery(cq).getSingleResult();
+            return total != null ? total : BigDecimal.ZERO;
         } catch (Exception e) {
             System.err.println("❌ Erro ao calcular total de vendas: " + e.getMessage());
-            return 0.0;
+            return BigDecimal.ZERO;
         }
     }
 
-    public Long countByStatus(Integer status) {
+    /**
+     * Conta todas as faturas emitidas (status = 2)
+     */
+    public Long countFaturasEmitidas() {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -291,7 +307,24 @@ public class InvoiceDao {
             Root<Invoices> root = cq.from(Invoices.class);
 
             cq.select(cb.count(root))
-                    .where(cb.equal(root.get("status"), status));
+                    .where(cb.equal(root.get("status"), 2)); // Status 2 = Emitida
+
+            return session.createQuery(cq).getSingleResult();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao contar faturas emitidas: " + e.getMessage());
+            return 0L;
+        }
+    }
+
+    public Long countByStatus(PaymentStatus status) { // Mudar para PaymentStatus
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Invoices> root = cq.from(Invoices.class);
+
+            cq.select(cb.count(root))
+                    .where(cb.equal(root.get("status"), status)); // Usar enum
 
             return session.createQuery(cq).getSingleResult();
         } catch (Exception e) {

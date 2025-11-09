@@ -1,8 +1,14 @@
 package com.okutonda.okudpdv.services;
 
+import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.dao.InvoiceDao;
+import com.okutonda.okudpdv.data.entities.DocumentType;
 import com.okutonda.okudpdv.data.entities.Invoices;
-import com.okutonda.okudpdv.data.entities.Clients;
+import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
+import com.okutonda.okudpdv.data.entities.PaymentStatus;
+import com.okutonda.okudpdv.data.entities.ProductSales;
+import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 import com.okutonda.okudpdv.helpers.UtilDate;
@@ -12,8 +18,9 @@ import com.okutonda.okudpdv.helpers.UtilSaft;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import javax.swing.JOptionPane;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 /**
  * Service layer para gestão de Faturas (Invoices)
@@ -32,50 +39,190 @@ public class InvoiceService {
     // 🔹 OPERAÇÕES PRINCIPAIS
     // ==========================================================
     /**
-     * Cria uma nova fatura
+     * Cria uma nova fatura com produtos e pagamentos (BASEADO NO ORDER
+     * CONTROLLER)
      */
-    public Invoices criarFatura(Invoices fatura) {
+    public Invoices criarFaturaComProdutosEPagamentos(Invoices fatura, List<ProductSales> produtos, List<Payment> pagamentos) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+
         try {
+            tx = session.beginTransaction();
+
+            System.out.println("🔹 INICIANDO CRIAÇÃO DE FATURA COM PAGAMENTOS");
+
+            // 1. Validar dados básicos
             validarFatura(fatura);
             prepararDadosFatura(fatura);
 
-            Invoices faturaSalva = invoiceDao.save(fatura);
+            // 2. Se não veio com pagamentos, criar um pagamento automático
+            if (pagamentos == null || pagamentos.isEmpty()) {
+                System.out.println("💰 Nenhum pagamento fornecido, criando pagamento automático...");
+                pagamentos = criarPagamentoAutomatico(fatura);
+            }
+
+            // 3. Validar pagamentos
+            validarPagamentos(pagamentos, fatura.getTotal());
+
+            // 4. Salvar fatura PRIMEIRO (para obter ID)
+            System.out.println("💾 Salvando fatura...");
+            session.persist(fatura);
+            session.flush(); // 🔥 CRÍTICO: Força INSERT para obter ID
+
+            Integer faturaId = fatura.getId();
+            System.out.println("✅ Fatura salva - ID: " + faturaId + ", Número: " + fatura.getNumber());
+
+            // 5. Salvar produtos SEPARADAMENTE
+            if (produtos != null && !produtos.isEmpty()) {
+                System.out.println("📦 Salvando " + produtos.size() + " produtos...");
+
+                for (ProductSales ps : produtos) {
+                    ps.setDocumentId(faturaId);
+                    ps.setInvoice(fatura);
+
+                    System.out.println("🔍 ProductSales - DocumentId: " + ps.getDocumentId()
+                            + ", ProductId: " + ps.getProduct().getId()
+                            + ", Qty: " + ps.getQty());
+
+                    if (!ps.isValid()) {
+                        throw new RuntimeException("Item de venda inválido: " + ps.getDescription());
+                    }
+
+                    session.persist(ps);
+                    System.out.println("✅ ProductSales salvo - DocumentId: " + ps.getDocumentId());
+
+                    // Registra movimento de stock (saída) - igual ao OrderController
+                    StockMovement mov = new StockMovement();
+                    mov.setProduct(ps.getProduct());
+                    mov.setQuantity(-ps.getQty());
+                    mov.setOrigin("VENDA");
+                    mov.setType("SAIDA");
+                    mov.setReason("VENDA " + fatura.getPrefix() + "/" + fatura.getNumber());
+                    mov.setUser(fatura.getSeller());
+                    session.persist(mov);
+                    System.out.println("✅ Movimento de stock registrado");
+                }
+            } else {
+                System.out.println("ℹ️ Nenhum produto para salvar");
+            }
+
+            // 6. Salvar os pagamentos (igual ao OrderController)
+            System.out.println("💳 Salvando " + pagamentos.size() + " pagamentos...");
+            for (Payment p : pagamentos) {
+                configurarPagamento(p, fatura);
+                session.persist(p);
+                System.out.println("✅ Pagamento salvo - " + p.getPaymentMode() + ": " + p.getTotal());
+            }
+
+            tx.commit();
+
+            System.out.println("🎉 Fatura criada com sucesso! ID: " + faturaId);
             showSuccessMessage("Fatura criada com sucesso!\nNúmero: "
-                    + faturaSalva.getPrefix() + "/" + faturaSalva.getNumber());
-            return faturaSalva;
+                    + fatura.getPrefix() + "/" + fatura.getNumber());
+
+            return fatura;
 
         } catch (Exception e) {
-            handleError("Erro ao criar fatura", e);
-            throw new RuntimeException("Erro ao criar fatura", e);
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao criar fatura com pagamentos: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao criar fatura: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Emite uma fatura (muda status para emitida)
+     * Cria pagamento automático quando não são fornecidos pagamentos
      */
-    public Invoices emitirFatura(Integer id) {
-        try {
-            Invoices fatura = buscarPorId(id);
-            if (fatura == null) {
-                throw new IllegalArgumentException("Fatura não encontrada");
+    private List<Payment> criarPagamentoAutomatico(Invoices fatura) {
+        Payment pagamento = new Payment();
+
+        // Configurar pagamento automático (dinheiro como padrão)
+        pagamento.setDescription("Pagamento automático - Fatura " + fatura.getPrefix() + "/" + fatura.getNumber());
+        pagamento.setTotal(fatura.getTotal());
+        pagamento.setReference(gerarReferenciaPagamento(fatura));
+        pagamento.setPaymentMode(PaymentMode.NU); // Numerário como padrão
+        pagamento.setDate(UtilDate.getFormatDataNow());
+        pagamento.setCurrency("AOA");
+        pagamento.setStatus(PaymentStatus.PAGO);
+
+        return List.of(pagamento);
+    }
+
+    /**
+     * Configura os dados do pagamento para a fatura
+     */
+    private void configurarPagamento(Payment p, Invoices fatura) {
+        p.setInvoiceId(fatura.getId());
+        p.setInvoiceType(DocumentType.FT); // FT para faturas
+        p.setPrefix(fatura.getPrefix());
+        p.setNumber(fatura.getNumber());
+        p.setClient(fatura.getClient());
+        p.setUser(fatura.getSeller());
+
+        // Valores padrão se não definidos
+        if (p.getDate() == null) {
+            p.setDate(UtilDate.getFormatDataNow());
+        }
+        if (p.getCurrency() == null) {
+            p.setCurrency("AOA");
+        }
+        if (p.getStatus() == null) {
+            p.setStatus(PaymentStatus.PAGO);
+        }
+        if (p.getReference() == null) {
+            p.setReference(gerarReferenciaPagamento(fatura));
+        }
+    }
+
+    /**
+     * Gera referência única para pagamento
+     */
+    private String gerarReferenciaPagamento(Invoices fatura) {
+        return "PAY-FT-" + fatura.getPrefix() + "-" + fatura.getNumber() + "-" + System.currentTimeMillis();
+    }
+
+    /**
+     * Valida os pagamentos
+     */
+    private void validarPagamentos(List<Payment> pagamentos, BigDecimal totalFatura) {
+        if (pagamentos == null || pagamentos.isEmpty()) {
+            throw new IllegalArgumentException("Lista de pagamentos não pode ser vazia");
+        }
+
+        BigDecimal totalPagamentos = BigDecimal.ZERO;
+        for (Payment p : pagamentos) {
+            if (p.getTotal() == null || p.getTotal().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Total do pagamento deve ser maior que zero");
             }
-
-            if (fatura.isEmitida()) {
-                throw new IllegalStateException("Fatura já está emitida");
+            if (p.getPaymentMode() == null) {
+                throw new IllegalArgumentException("Modo de pagamento é obrigatório");
             }
+            totalPagamentos = totalPagamentos.add(p.getTotal());
+        }
 
-            if (fatura.isAnulada()) {
-                throw new IllegalStateException("Fatura anulada não pode ser emitida");
-            }
+        // Verificar se o total dos pagamentos cobre a fatura
+        if (totalPagamentos.compareTo(totalFatura) < 0) {
+            throw new IllegalArgumentException("Total dos pagamentos (" + totalPagamentos + ") é menor que o total da fatura (" + totalFatura + ")");
+        }
+    }
 
-            fatura.setStatus(2); // Emitida
-            fatura.setHash(gerarHashFatura(fatura));
-
-            return invoiceDao.update(fatura);
-
-        } catch (Exception e) {
-            handleError("Erro ao emitir fatura", e);
-            throw new RuntimeException("Erro ao emitir fatura", e);
+    /**
+     * Valida um ProductSales individual
+     */
+    private void validarProductSales(ProductSales ps) {
+        if (ps == null) {
+            throw new IllegalArgumentException("Produto não pode ser nulo");
+        }
+        if (ps.getProduct() == null) {
+            throw new IllegalArgumentException("ID do produto é obrigatório");
+        }
+        if (ps.getQty() == null || ps.getQty() <= 0) {
+            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        }
+        if (ps.getPrice() == null || ps.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Preço deve ser maior ou igual a zero");
         }
     }
 
@@ -89,11 +236,11 @@ public class InvoiceService {
                 throw new IllegalArgumentException("Fatura não encontrada");
             }
 
-            if (!fatura.isEmitida()) {
-                throw new IllegalStateException("Apenas faturas emitidas podem ser marcadas como pagas");
+            if (!fatura.isPendente()) {
+                throw new IllegalStateException("Apenas faturas pedentes podem ser marcadas como pagas");
             }
 
-            fatura.setStatus(3); // Paga
+            fatura.setStatus(PaymentStatus.PAGO); // Paga
             return invoiceDao.update(fatura);
 
         } catch (Exception e) {
@@ -116,7 +263,7 @@ public class InvoiceService {
                 throw new IllegalStateException("Fatura paga não pode ser anulada");
             }
 
-            fatura.setStatus(4); // Anulada
+            fatura.setStatus(PaymentStatus.CANCELADO); // Anulada
             return invoiceDao.update(fatura);
 
         } catch (Exception e) {
@@ -149,8 +296,8 @@ public class InvoiceService {
                 throw new IllegalArgumentException("Fatura não encontrada");
             }
 
-            if (fatura.isEmitida() || fatura.isPaga()) {
-                throw new IllegalStateException("Não é possível excluir faturas emitidas ou pagas");
+            if (fatura.isPendente() || fatura.isPaga()) {
+                throw new IllegalStateException("Não é possível excluir faturas pedente ou pagas");
             }
 
             invoiceDao.delete(id);
@@ -241,8 +388,7 @@ public class InvoiceService {
 
     public BigDecimal calcularTotalPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
         validarPeriodo(dataInicio, dataFim);
-        Double total = invoiceDao.calculateTotalSalesByPeriod(dataInicio, dataFim);
-        return BigDecimal.valueOf(total != null ? total : 0.0);
+        return invoiceDao.calculateTotalSalesByPeriod(dataInicio, dataFim);
     }
 
     public Integer obterProximoNumero(String prefixo) {
@@ -251,13 +397,13 @@ public class InvoiceService {
 
     public EstatisticasFaturas calcularEstatisticas(LocalDate from, LocalDate to) {
         try {
-            Double totalVendas = invoiceDao.calculateTotalSalesByPeriod(from, to);
-            Long faturasEmitidas = invoiceDao.countByStatus(2);
-            Long faturasPagas = invoiceDao.countByStatus(3);
-            Long faturasPendentes = invoiceDao.countByStatus(1);
+            BigDecimal totalVendas = invoiceDao.calculateTotalSalesByPeriod(from, to);
+            Long faturasEmitidas = invoiceDao.countFaturasEmitidas();
+            Long faturasPagas = invoiceDao.countByStatus(PaymentStatus.PAGO);
+            Long faturasPendentes = invoiceDao.countByStatus(PaymentStatus.PENDENTE);
 
             return new EstatisticasFaturas(
-                    BigDecimal.valueOf(totalVendas != null ? totalVendas : 0.0),
+                    totalVendas,
                     faturasEmitidas, faturasPagas, faturasPendentes
             );
         } catch (Exception e) {
@@ -333,11 +479,11 @@ public class InvoiceService {
 
         // Status padrão
         if (fatura.getStatus() == null) {
-            fatura.setStatus(1); // Pendente
+            fatura.setStatus(PaymentStatus.PENDENTE); // Pendente
         }
 
         // Hash se for emitida
-        if (fatura.isEmitida() && fatura.getHash() == null) {
+        if (fatura != null && fatura.getHash() == null) {
             fatura.setHash(gerarHashFatura(fatura));
         }
     }

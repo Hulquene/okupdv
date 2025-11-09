@@ -226,7 +226,6 @@ public class ProductDao {
                     + "WHERE p.status = :activeStatus "
                     + "ORDER BY p.description";
 
-            
             return session.createQuery(hql, Product.class)
                     .setParameter("activeStatus", ProductStatus.ACTIVE)
                     .getResultList();
@@ -532,6 +531,56 @@ public class ProductDao {
         } catch (Exception e) {
             System.err.println("Erro ao contar Products por status: " + e.getMessage());
             return 0;
+        }
+    }
+    // ==========================================================
+// 🔹 MÉTODOS FALTANTES PARA CONSULTA POR CÓDIGO
+// ==========================================================
+
+    /**
+     * Busca produto por código interno
+     */
+    public Optional<Product> findByCode(String code) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            cq.select(root).where(cb.equal(root.get("code"), code));
+
+            return session.createQuery(cq).uniqueResultOptional();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Product por código: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Busca produto por código ou descrição (para busca flexível)
+     */
+    public List<Product> findByCodeOrDescription(String searchText) {
+        Session session = HibernateUtil.getCurrentSession();
+        try {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Product> cq = cb.createQuery(Product.class);
+            Root<Product> root = cq.from(Product.class);
+
+            String likePattern = "%" + searchText + "%";
+
+            Predicate codePredicate = cb.like(root.get("code"), likePattern);
+            Predicate descriptionPredicate = cb.like(root.get("description"), likePattern);
+            Predicate barcodePredicate = cb.like(root.get("barcode"), likePattern);
+
+            cq.select(root).where(cb.or(codePredicate, descriptionPredicate, barcodePredicate));
+            cq.orderBy(cb.asc(root.get("description")));
+
+            return session.createQuery(cq).getResultList();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar Product por código/descrição: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

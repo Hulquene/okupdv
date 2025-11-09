@@ -14,8 +14,9 @@ public class Invoices {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "status", nullable = false)
-    private Integer status = 1; // 1=Pendente, 2=Emitida, 3=Paga, 4=Anulada
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private PaymentStatus status = PaymentStatus.PENDENTE;
 
     @Column(name = "issue_date", length = 20, nullable = false)
     private String issueDate;
@@ -28,7 +29,7 @@ public class Invoices {
 
     @Column(name = "prefix", length = 10, nullable = false)
     private String prefix;
-    
+
     @Column(name = "series", length = 10)
     private String series;
 
@@ -71,10 +72,9 @@ public class Invoices {
     @JoinColumn(name = "user_id", nullable = false)
     private User seller;
 
-        // ✅ NOVO: Relacionamento com ProductSales (itens da fatura)
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY) // SEM CASCADE!
     private List<ProductSales> products = new ArrayList<>();
-    
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -103,12 +103,12 @@ public class Invoices {
         this.id = id;
     }
 
-    public Integer getStatus() {
+    public PaymentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status != null ? status : 1;
+    public void setStatus(PaymentStatus status) {
+        this.status = status != null ? status : PaymentStatus.PENDENTE;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -247,8 +247,7 @@ public class Invoices {
     public void setSeller(User seller) {
         this.seller = seller;
     }
-    
-    
+
     // ✅ NOVO: Getter e Setter para products
     public List<ProductSales> getProducts() {
         return products;
@@ -275,20 +274,19 @@ public class Invoices {
     }
 
     // Métodos de negócio
-    public boolean isPendente() {
-        return status == 1;
+    public Boolean isPendente() {
+        return status == PaymentStatus.PENDENTE;
     }
 
-    public boolean isEmitida() {
-        return status == 2;
+//    public PaymentStatus isEmitida() {
+//        return status == PaymentStatus.;
+//    }
+    public Boolean isPaga() {
+        return status == PaymentStatus.PAGO;
     }
 
-    public boolean isPaga() {
-        return status == 3;
-    }
-
-    public boolean isAnulada() {
-        return status == 4;
+    public Boolean isAnulada() {
+        return status == PaymentStatus.CANCELADO;
     }
 
     public BigDecimal getSaldoPendente() {

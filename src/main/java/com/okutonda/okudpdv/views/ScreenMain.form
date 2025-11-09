@@ -66,9 +66,6 @@
   <SubComponents>
     <Container class="javax.swing.JPanel" name="jPanelSidebar">
       <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="cc" red="cc" type="rgb"/>
-        </Property>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[170, 600]"/>
         </Property>
@@ -210,7 +207,7 @@
               <Color blue="66" green="0" red="0" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icons/Male User_2.png"/>
+              <Image iconType="3" name="/icons/Folder.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Entidades"/>
             <Property name="borderPainted" type="boolean" value="false"/>
@@ -268,7 +265,7 @@
               <Color blue="66" green="0" red="0" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icons/shop_6895262.png"/>
+              <Image iconType="3" name="/icons/invo.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Vendas"/>
             <Property name="borderPainted" type="boolean" value="false"/>
@@ -297,7 +294,7 @@
               <Color blue="66" green="0" red="0" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icons/report_1321938.png"/>
+              <Image iconType="3" name="/icons/Puzzle.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Financeiro"/>
             <Property name="borderPainted" type="boolean" value="false"/>
@@ -425,7 +422,7 @@
               <Color blue="66" green="0" red="0" type="rgb"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/icons/shop_6895262.png"/>
+              <Image iconType="3" name="/icons/Restart.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Compras"/>
             <Property name="borderPainted" type="boolean" value="false"/>
@@ -494,11 +491,11 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jComboBoxOptionsDash" min="-2" pref="156" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="jLabelNamePanelOpen" min="-2" pref="197" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="jLabelDateTime" min="-2" pref="198" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
-                  <Component id="jLabelNamePanelOpen" min="-2" pref="197" max="-2" attributes="0"/>
+                  <Component id="jComboBoxOptionsDash" min="-2" pref="156" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -520,36 +517,18 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="jLabelDateTime">
           <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Segoe UI" size="14" style="1"/>
-            </Property>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="66" green="0" red="0" type="rgb"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
             <Property name="text" type="java.lang.String" value="Data e hora"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabelNamePanelOpen">
           <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Segoe UI" size="14" style="1"/>
-            </Property>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="66" green="0" red="0" type="rgb"/>
-            </Property>
             <Property name="horizontalAlignment" type="int" value="0"/>
             <Property name="text" type="java.lang.String" value="DASHBOARD"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JComboBox" name="jComboBoxOptionsDash">
           <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Segoe UI" size="14" style="1"/>
-            </Property>
-            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="66" green="0" red="0" type="rgb"/>
-            </Property>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
               <StringArray count="3">
                 <StringItem index="0" value="Perfil"/>

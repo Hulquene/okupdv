@@ -50,11 +50,11 @@ public class JPanelInventory extends javax.swing.JPanel {
 //        TemaUI.aplicarCampoTexto(jTextFieldEmail);
 //        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
         // Botões
-        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
-        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
-        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
-        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
-        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
+//        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
+//        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
+//        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
 //        TemaUI.aplicarBotaoPrimario(jButtonLogin);
 //        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
 //        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
@@ -89,6 +89,7 @@ public class JPanelInventory extends javax.swing.JPanel {
 
         jToolBar1.setRollover(true);
 
+        jButtonProdAndService.setBackground(new java.awt.Color(0, 102, 255));
         jButtonProdAndService.setText("Produtos&Serviços");
         jButtonProdAndService.setFocusable(false);
         jButtonProdAndService.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -100,6 +101,7 @@ public class JPanelInventory extends javax.swing.JPanel {
         });
         jToolBar1.add(jButtonProdAndService);
 
+        jButtonInvStoque.setBackground(new java.awt.Color(0, 102, 255));
         jButtonInvStoque.setText("Stock");
         jButtonInvStoque.setFocusable(false);
         jButtonInvStoque.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -111,6 +113,7 @@ public class JPanelInventory extends javax.swing.JPanel {
         });
         jToolBar1.add(jButtonInvStoque);
 
+        jButtonInventoryPurchases.setBackground(new java.awt.Color(0, 102, 255));
         jButtonInventoryPurchases.setText("Compras");
         jButtonInventoryPurchases.setFocusable(false);
         jButtonInventoryPurchases.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -122,6 +125,7 @@ public class JPanelInventory extends javax.swing.JPanel {
         });
         jToolBar1.add(jButtonInventoryPurchases);
 
+        jButtonInventoryFisic.setBackground(new java.awt.Color(0, 102, 255));
         jButtonInventoryFisic.setText("Inventário Físico");
         jButtonInventoryFisic.setFocusable(false);
         jButtonInventoryFisic.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -133,6 +137,7 @@ public class JPanelInventory extends javax.swing.JPanel {
         });
         jToolBar1.add(jButtonInventoryFisic);
 
+        jButtonInventoryReport.setBackground(new java.awt.Color(0, 102, 255));
         jButtonInventoryReport.setText("Relatórios");
         jButtonInventoryReport.setFocusable(false);
         jButtonInventoryReport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

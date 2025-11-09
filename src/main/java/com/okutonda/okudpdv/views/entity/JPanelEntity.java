@@ -9,8 +9,6 @@ import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Supplier;
-import com.okutonda.okudpdv.ui.TemaCleaner;
-import com.okutonda.okudpdv.ui.TemaCores;
 import com.okutonda.okudpdv.helpers.UserSession;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -32,17 +30,17 @@ public final class JPanelEntity extends javax.swing.JPanel {
      */
     public JPanelEntity() {
         initComponents();
-        applyTheme();
+//        applyTheme();
         session = UserSession.getInstance();
         listClients();
         listSuppliers();
     }
 
-    private void applyTheme() {
-        TemaCleaner.clearBuilderOverrides(jPanelClient);
-        // Painel de fundo da janela
-        jPanelClient.setBackground(TemaCores.BG_LIGHT);
-    }
+//    private void applyTheme() {
+//        TemaCleaner.clearBuilderOverrides(jPanelClient);
+//        // Painel de fundo da janela
+//        jPanelClient.setBackground(TemaCores.BG_LIGHT);
+//    }
 
     public void listClients() {
         ClientDao cDao = new ClientDao();
@@ -202,12 +200,10 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
         jTabbedPaneClient.setBackground(new java.awt.Color(255, 255, 255));
 
-        jPanelClient.setBackground(new java.awt.Color(204, 204, 255));
         jPanelClient.setPreferredSize(new java.awt.Dimension(900, 600));
 
         jButtonFilterClientNameTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
         jButtonFilterClientNameTable.setText("Pesquisar");
-        jButtonFilterClientNameTable.setContentAreaFilled(false);
         jButtonFilterClientNameTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonFilterClientNameTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -221,11 +217,8 @@ public final class JPanelEntity extends javax.swing.JPanel {
             }
         });
 
-        jButtonAlterClientSeletedTable.setBackground(new java.awt.Color(255, 255, 102));
-        jButtonAlterClientSeletedTable.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonAlterClientSeletedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterClientSeletedTable.setText("Editar");
-        jButtonAlterClientSeletedTable.setContentAreaFilled(false);
         jButtonAlterClientSeletedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterClientSeletedTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -233,12 +226,9 @@ public final class JPanelEntity extends javax.swing.JPanel {
             }
         });
 
-        jButtonDeleteClientSelectedTable.setBackground(new java.awt.Color(255, 51, 51));
-        jButtonDeleteClientSelectedTable.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonDeleteClientSelectedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteClientSelectedTable.setText("Excluir");
         jButtonDeleteClientSelectedTable.setToolTipText("Apagar Cliente");
-        jButtonDeleteClientSelectedTable.setContentAreaFilled(false);
         jButtonDeleteClientSelectedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteClientSelectedTable.setSelected(true);
         jButtonDeleteClientSelectedTable.addActionListener(new java.awt.event.ActionListener() {
@@ -247,12 +237,9 @@ public final class JPanelEntity extends javax.swing.JPanel {
             }
         });
 
-        jButtonCreateNewClient.setBackground(new java.awt.Color(153, 153, 255));
-        jButtonCreateNewClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonCreateNewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonCreateNewClient.setText("Adicionar");
         jButtonCreateNewClient.setToolTipText("Cadastrar Cliente");
-        jButtonCreateNewClient.setContentAreaFilled(false);
         jButtonCreateNewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonCreateNewClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -290,11 +277,8 @@ public final class JPanelEntity extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableClients);
 
-        jButtonCreateViewClient.setBackground(new java.awt.Color(102, 255, 102));
-        jButtonCreateViewClient.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonCreateViewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonCreateViewClient.setText("Ver");
-        jButtonCreateViewClient.setContentAreaFilled(false);
         jButtonCreateViewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonCreateViewClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -316,7 +300,7 @@ public final class JPanelEntity extends javax.swing.JPanel {
                         .addComponent(jTextFieldFilterClientNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonFilterClientNameTable)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
                         .addComponent(jButtonCreateNewClient)
                         .addGap(18, 18, 18)
                         .addComponent(jButtonCreateViewClient)
@@ -344,18 +328,14 @@ public final class JPanelEntity extends javax.swing.JPanel {
 
         jTabbedPaneClient.addTab("Clientes", jPanelClient);
 
-        jPanelSearchSupplier.setBackground(new java.awt.Color(204, 204, 255));
-
         jTextFieldFilterNameTable.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 jTextFieldFilterNameTableKeyReleased(evt);
             }
         });
 
-        jButtonAlterSeleted.setBackground(new java.awt.Color(255, 255, 153));
         jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterSeleted.setText("Alterar");
-        jButtonAlterSeleted.setContentAreaFilled(false);
         jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -363,10 +343,8 @@ public final class JPanelEntity extends javax.swing.JPanel {
             }
         });
 
-        jButtonDeleteSelected.setBackground(new java.awt.Color(255, 51, 51));
         jButtonDeleteSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteSelected.setText("Excluir");
-        jButtonDeleteSelected.setContentAreaFilled(false);
         jButtonDeleteSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -374,10 +352,8 @@ public final class JPanelEntity extends javax.swing.JPanel {
             }
         });
 
-        jButtonOpenFormSupplier.setBackground(new java.awt.Color(153, 153, 255));
         jButtonOpenFormSupplier.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonOpenFormSupplier.setText("Adicionar");
-        jButtonOpenFormSupplier.setContentAreaFilled(false);
         jButtonOpenFormSupplier.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonOpenFormSupplier.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -415,10 +391,8 @@ public final class JPanelEntity extends javax.swing.JPanel {
         });
         jScrollPane2.setViewportView(jTableSuppliers);
 
-        jButtonViewSupplierSelected.setBackground(new java.awt.Color(153, 255, 153));
         jButtonViewSupplierSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewSupplierSelected.setText("Ver");
-        jButtonViewSupplierSelected.setContentAreaFilled(false);
         jButtonViewSupplierSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewSupplierSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

@@ -307,5 +307,39 @@ public class ProductService {
             return 0L;
         }
     }
+// ==========================================================
+// 🔹 MÉTODOS FALTANTES PARA CONSULTA POR CÓDIGO
+// ==========================================================
 
+    /**
+     * Busca produto por código interno
+     */
+    public Product buscarPorCodigo(String code) {
+        try {
+            return productDao.findByCode(code).orElse(null);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produto por código: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar produto por código", e);
+        }
+    }
+
+    /**
+     * Busca produto por código ou código de barras
+     */
+    public Product buscarPorCodigoOuCodigoBarras(String code) {
+        try {
+            // Primeiro tenta buscar por código
+            Product porCodigo = productDao.findByCode(code).orElse(null);
+            if (porCodigo != null) {
+                return porCodigo;
+            }
+
+            // Se não encontrar, tenta por código de barras
+            return productDao.findByBarcode(code).orElse(null);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao buscar produto por código/barcode: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar produto por código/barcode", e);
+        }
+    }
 }

@@ -8,10 +8,9 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.okutonda.okudpdv.controllers.OptionController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.ui.TemaCleaner;
-import com.okutonda.okudpdv.ui.TemaCores;
-import com.okutonda.okudpdv.ui.TemaUI;
 import com.okutonda.okudpdv.helpers.CompanySession;
+import com.okutonda.okudpdv.ui.TemaCleaner;
+import com.okutonda.okudpdv.ui.TemaLookAndFeel;
 import com.okutonda.okudpdv.views.suport.JDialogSuport;
 import com.okutonda.okudpdv.views.ScreenMain;
 import com.okutonda.okudpdv.views.install.JDialogInstallInsertUser;
@@ -38,8 +37,9 @@ public class ScreenLogin extends javax.swing.JFrame {
      */
     public ScreenLogin() {
         initComponents();
+//        applyTheme();
 //         1) aplica tema (depois do init)
-        applyTheme();
+//        applyTheme();
 
 //        this.conn = ConnectionDatabase.getConnect();
 //        if (this.conn != null) {
@@ -48,12 +48,12 @@ public class ScreenLogin extends javax.swing.JFrame {
 //        } else {
 //            jLabelStatusBdConect.setText("Desconectado");
 //        }
-        jLabelNameCompany.setText(companySession.getName());
-        List<User> response = userController.getAll();
-        if (response == null || response.isEmpty()) {
-            JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
-            jdInstallUser.setVisible(true);
-        }
+        jLabelNameCompany.setText(optionController.getOptionValue("companyName"));
+//        List<User> response = userController.getAll();
+//        if (response == null || response.isEmpty()) {
+//            JDialogInstallInsertUser jdInstallUser = new JDialogInstallInsertUser(this, true);
+//            jdInstallUser.setVisible(true);
+//        }
 
 //        AdminRoot root = new AdminRoot();
 //        if (!Boolean.parseBoolean(root.getStatusSoftware())) {
@@ -70,46 +70,22 @@ public class ScreenLogin extends javax.swing.JFrame {
     /**
      * Aplica o tema centralizado nesta tela. Chamar após initComponents().
      */
-    private void applyTheme() {
-
-        TemaCleaner.clearBuilderOverrides(getContentPane());
-        // Painel de fundo da janela
-//        jPanel3.setBackground(TemaCores.BG_LIGHT);
-
-        // Card do login
-//        TemaUI.aplicarPainelDefault(jPanel1);
-        // Título
-        TemaUI.aplicarTitulo(jLabelNameCompany);
-        jLabelNameCompany.setForeground(TemaCores.PRIMARY);
-
-        // Labels
-//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
-//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
-        // Campos
-//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
-//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
-        // Botões
-//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
-//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonInstall.setForeground(TemaCores.PRIMARY);
-//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
-        // Status de BD (cor dinâmica) — chama depois de testar a conexão
-//        updateDbStatusLabel(this.conn != null);
-
-        // Borda superior/rodapé (opcional)
-        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
-        // Se o GUI Builder deixou cores hardcoded em initComponents,
-        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
-    }
-
+//    private void applyTheme() {
+//        // APENAS ISSO - essencial para limpar cores manuais do GUI Builder
+//        TemaCleaner.clearBuilderOverrides(getContentPane());
+//
+//        TemaLookAndFeel.aplicarConfiguracao("espacoso"); // Para telas de login
+//        // Configurações funcionais (não relacionadas a cores)
+////        iniciarRelogio();
+//        // O UIManager já aplica todas as cores automaticamente!
+//        // NÃO aplique cores manualmente aqui
+//    }
     /**
      * Atualiza a cor do label de status da BD conforme conectado/desconectado.
      */
-    private void updateDbStatusLabel(boolean connected) {
-        jLabelStatusBdConect.setForeground(connected ? TemaCores.SUCCESS : TemaCores.ERROR);
-    }
-
+//    private void updateDbStatusLabel(boolean connected) {
+//        jLabelStatusBdConect.setForeground(connected ? TemaCores.SUCCESS : TemaCores.ERROR);
+//    }
     public void loadDataCompany() {
 //        System.out.println("key:"+optionController.getValueOptions("companyKeyLicence"));
         companySession.setName(optionController.getOptionValue("companyName"));
@@ -198,7 +174,7 @@ public class ScreenLogin extends javax.swing.JFrame {
                 jButtonAboutActionPerformed(evt);
             }
         });
-        jPanel3.add(jButtonAbout, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 570, 70, -1));
+        jPanel3.add(jButtonAbout, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 570, 70, -1));
 
         jButtonInstall.setText("instalar");
         jButtonInstall.setContentAreaFilled(false);
@@ -208,18 +184,14 @@ public class ScreenLogin extends javax.swing.JFrame {
                 jButtonInstallActionPerformed(evt);
             }
         });
-        jPanel3.add(jButtonInstall, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 570, 70, -1));
+        jPanel3.add(jButtonInstall, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 570, 70, -1));
 
         jLabelStatusBdConect.setFont(new java.awt.Font("Segoe UI", 3, 12)); // NOI18N
         jLabelStatusBdConect.setText("Desconectado");
         jPanel3.add(jLabelStatusBdConect, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 570, 80, 20));
 
-        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
         jPanel1.setToolTipText("Entrada");
 
-        jButtonLogin.setBackground(new java.awt.Color(0, 0, 102));
-        jButtonLogin.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButtonLogin.setForeground(new java.awt.Color(255, 255, 255));
         jButtonLogin.setText("Entrar");
         jButtonLogin.setToolTipText("Login");
         jButtonLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -229,7 +201,6 @@ public class ScreenLogin extends javax.swing.JFrame {
             }
         });
 
-        jPasswordFieldPassword.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jPasswordFieldPassword.setForeground(new java.awt.Color(0, 0, 102));
         jPasswordFieldPassword.setText("admin123");
         jPasswordFieldPassword.setToolTipText("Senha");
@@ -240,11 +211,9 @@ public class ScreenLogin extends javax.swing.JFrame {
             }
         });
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(0, 0, 102));
         jLabel2.setText("Senha:");
 
-        jTextFieldEmail.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jTextFieldEmail.setForeground(new java.awt.Color(0, 0, 102));
         jTextFieldEmail.setText("admin@empresa.com");
         jTextFieldEmail.setToolTipText("Email");
@@ -256,12 +225,10 @@ public class ScreenLogin extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(0, 0, 102));
         jLabel1.setText("Email:");
 
-        jLabelNameCompany.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jLabelNameCompany.setForeground(new java.awt.Color(0, 0, 102));
+        jLabelNameCompany.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelNameCompany.setText("ENTRAR");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -288,9 +255,9 @@ public class ScreenLogin extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(12, 12, 12)
-                .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(28, 28, 28)
+                .addComponent(jLabelNameCompany, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jTextFieldEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)

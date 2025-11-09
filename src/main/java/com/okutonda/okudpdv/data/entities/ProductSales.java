@@ -235,7 +235,8 @@ public class ProductSales {
         this.order = order;
         if (order != null) {
             this.documentId = order.getId();
-            this.documentType = DocumentType.fromString(order.getPrefix());
+//            this.documentType = DocumentType.fromString(order.getPrefix());
+            this.documentType = DocumentType.FR;
             this.date = order.getDatecreate();
         }
     }

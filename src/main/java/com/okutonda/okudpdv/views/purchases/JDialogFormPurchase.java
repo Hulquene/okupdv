@@ -14,7 +14,7 @@ import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
 import com.okutonda.okudpdv.data.entities.StockStatus;
 import com.okutonda.okudpdv.data.entities.Supplier;
-import com.okutonda.okudpdv.ui.TemaCores;
+//import com.okutonda.okudpdv.ui.TemaCores;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -47,7 +47,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     public JDialogFormPurchase(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        applyTheme();
+//        applyTheme();
 
         loadComboBoxSuppliers();
         loadComboBoxProdutosCompra();
@@ -79,42 +79,42 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         return response;
     }
 
-    private void applyTheme() {
-//        TemaCleaner.clearBuilderOverrides(getContentPane());
-        // Painel de fundo da janela
-//        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
-
-//        TemaUI.aplicarTitulo(jLabelJpanelSelected);
-//        jPanelSidebar.setBackground(TemaCores.PRIMARY);
-        // Card do login
-//        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
-        // Título
-//        TemaUI.aplicarTitulo(jLabelNameCompany);
-        jLabelTitle.setForeground(TemaCores.PRIMARY);
-        // Labels
-//        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
-//        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
-        // Campos
-//        TemaUI.aplicarCampoTexto(jTextFieldEmail);
-//        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
-        // Botões
-//        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
-//        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
-//        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
-//        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
-//        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
-//        TemaUI.aplicarBotaoPrimario(jButtonLogin);
-//        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
-//        jButtonInstall.setForeground(TemaCores.PRIMARY);
-//        jButtonCloseScreen.setForeground(TemaCores.ERROR);
-        // Status de BD (cor dinâmica) — chama depois de testar a conexão
-//        updateDbStatusLabel(this.conn != null);
-        // Borda superior/rodapé (opcional)
-        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
-        // Se o GUI Builder deixou cores hardcoded em initComponents,
-        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
-    }
+//    private void applyTheme() {
+////        TemaCleaner.clearBuilderOverrides(getContentPane());
+//        // Painel de fundo da janela
+////        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
+//
+////        TemaUI.aplicarTitulo(jLabelJpanelSelected);
+////        jPanelSidebar.setBackground(TemaCores.PRIMARY);
+//        // Card do login
+////        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
+//        // Título
+////        TemaUI.aplicarTitulo(jLabelNameCompany);
+//        jLabelTitle.setForeground(TemaCores.PRIMARY);
+//        // Labels
+////        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
+////        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
+//        // Campos
+////        TemaUI.aplicarCampoTexto(jTextFieldEmail);
+////        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
+//        // Botões
+////        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
+////        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
+////        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
+////        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
+////        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
+////        TemaUI.aplicarBotaoPrimario(jButtonLogin);
+////        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
+////        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
+////        jButtonInstall.setForeground(TemaCores.PRIMARY);
+////        jButtonCloseScreen.setForeground(TemaCores.ERROR);
+//        // Status de BD (cor dinâmica) — chama depois de testar a conexão
+////        updateDbStatusLabel(this.conn != null);
+//        // Borda superior/rodapé (opcional)
+//        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
+//        // Se o GUI Builder deixou cores hardcoded em initComponents,
+//        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
+//    }
 
     private void loadComboBoxSuppliers() {
 
