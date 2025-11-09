@@ -737,9 +737,6 @@ public class JPanelDashboard extends javax.swing.JPanel {
             // 🔹 Fallback: cálculo manual
             List<Invoices> faturas = invoiceController.listarPorPeriodo(inicio, fim);
             BigDecimal total = BigDecimal.ZERO;
-            System.out.println("datas inicio: " + inicio);
-            System.out.println("datas fim: " + fim);
-            System.out.println("fatu" + faturas);
             if (faturas != null) {
                 for (Invoices fatura : faturas) {
                     // Incluir apenas faturas pagas (Status 3)

@@ -101,7 +101,7 @@ public class HibernateConfig {
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Warehouse.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Payment.class);
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.StockMovement.class);
-            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.ExportSaftFat.class);
+            configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.SaftFat.class);
 
             // 🔹 ADICIONE OUTRAS ENTIDADES QUE VOCÊ POSSUI
             configuration.addAnnotatedClass(com.okutonda.okudpdv.data.entities.Shift.class);

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "saft_exports")
-public class ExportSaftFat {
+public class SaftFat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +35,11 @@ public class ExportSaftFat {
     private LocalDateTime createdAt;
 
     // Construtores
-    public ExportSaftFat() {
+    public SaftFat() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public ExportSaftFat(LocalDate periodStart, LocalDate periodEnd, String filePath, String status) {
+    public SaftFat(LocalDate periodStart, LocalDate periodEnd, String filePath, String status) {
         this();
         this.periodStart = periodStart;
         this.periodEnd = periodEnd;

@@ -1,7 +1,7 @@
 package com.okutonda.okudpdv.data.dao;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
-import com.okutonda.okudpdv.data.entities.ExportSaftFat;
+import com.okutonda.okudpdv.data.entities.SaftFat;
 import com.okutonda.okudpdv.data.entities.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -17,24 +17,24 @@ import java.util.Optional;
 
 public class SaftFatDao {
 
-    private final Class<ExportSaftFat> entityClass = ExportSaftFat.class;
+    private final Class<SaftFat> entityClass = SaftFat.class;
 
     // ==========================================================
-    // 🔹 INSERT
+    // 🔹 INSERT E UPDATE
     // ==========================================================
-    public ExportSaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes) {
+    public SaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes) {
         return insertExport(start, end, path, status, notes, null);
     }
 
-    public ExportSaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes, User exportedBy) {
-        ExportSaftFat export = new ExportSaftFat(start, end, path, status);
+    public SaftFat insertExport(LocalDate start, LocalDate end, String path, String status, String notes, User exportedBy) {
+        SaftFat export = new SaftFat(start, end, path, status);
         export.setNotes(notes);
         export.setUser(exportedBy);
 
         return save(export);
     }
 
-    public ExportSaftFat save(ExportSaftFat export) {
+    public SaftFat save(SaftFat export) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
@@ -54,12 +54,12 @@ public class SaftFatDao {
         }
     }
 
-    public ExportSaftFat update(ExportSaftFat export) {
+    public SaftFat update(SaftFat export) {
         Session session = HibernateUtil.getCurrentSession();
         Transaction tx = null;
         try {
             tx = session.beginTransaction();
-            ExportSaftFat merged = session.merge(export);
+            SaftFat merged = session.merge(export);
             tx.commit();
 
             System.out.println("✅ Export SAF-T atualizado: " + export.getId());
@@ -77,12 +77,12 @@ public class SaftFatDao {
     // ==========================================================
     // 🔹 SELECTS
     // ==========================================================
-    public List<ExportSaftFat> getAll() {
+    public List<SaftFat> getAll() {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
             cq.select(root).orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
             return session.createQuery(cq).getResultList();
@@ -92,10 +92,10 @@ public class SaftFatDao {
         }
     }
 
-    public Optional<ExportSaftFat> findById(Long id) {
+    public Optional<SaftFat> findById(Long id) {
         Session session = HibernateUtil.getCurrentSession();
         try {
-            ExportSaftFat entity = session.find(ExportSaftFat.class, id);
+            SaftFat entity = session.find(SaftFat.class, id);
             return Optional.ofNullable(entity);
         } catch (Exception e) {
             System.err.println("Erro ao buscar ExportSaftFat por ID: " + e.getMessage());
@@ -103,12 +103,12 @@ public class SaftFatDao {
         }
     }
 
-    public List<ExportSaftFat> filter(String text) {
+    public List<SaftFat> filter(String text) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             String likePattern = "%" + (text != null ? text.trim() : "") + "%";
 
@@ -129,12 +129,12 @@ public class SaftFatDao {
         }
     }
 
-    public List<ExportSaftFat> filterByCreatedAt(LocalDate from, LocalDate to) {
+    public List<SaftFat> filterByCreatedAt(LocalDate from, LocalDate to) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             cq.select(root)
                     .where(cb.between(root.get("createdAt").as(LocalDate.class), from, to))
@@ -148,20 +148,20 @@ public class SaftFatDao {
         }
     }
 
-    public List<ExportSaftFat> filterByPeriod(LocalDate from, LocalDate to) {
+    public List<SaftFat> filterByPeriod(LocalDate from, LocalDate to) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
-            // WHERE period_start <= ? AND period_end >= ?
-            Predicate startPredicate = cb.lessThanOrEqualTo(root.get("periodStart"), to);
-            Predicate endPredicate = cb.greaterThanOrEqualTo(root.get("periodEnd"), from);
+            // WHERE period_start = ? AND period_end = ?
+            Predicate startPredicate = cb.equal(root.get("periodStart"), from);
+            Predicate endPredicate = cb.equal(root.get("periodEnd"), to);
 
             cq.select(root)
                     .where(cb.and(startPredicate, endPredicate))
-                    .orderBy(cb.desc(root.get("periodStart")), cb.desc(root.get("id")));
+                    .orderBy(cb.desc(root.get("createdAt")), cb.desc(root.get("id")));
 
             return session.createQuery(cq).getResultList();
 
@@ -171,12 +171,12 @@ public class SaftFatDao {
         }
     }
 
-    public List<ExportSaftFat> findByUserId(Long userId) {
+    public List<SaftFat> findByUserId(Long userId) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             cq.select(root)
                     .where(cb.equal(root.get("user").get("id"), userId))
@@ -190,12 +190,12 @@ public class SaftFatDao {
         }
     }
 
-    public List<ExportSaftFat> findByStatus(String status) {
+    public List<SaftFat> findByStatus(String status) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             cq.select(root)
                     .where(cb.equal(root.get("status"), status))
@@ -218,7 +218,7 @@ public class SaftFatDao {
         try {
             tx = session.beginTransaction();
 
-            ExportSaftFat export = session.find(ExportSaftFat.class, id);
+            SaftFat export = session.find(SaftFat.class, id);
             if (export != null) {
                 session.remove(export);
             }
@@ -246,7 +246,7 @@ public class SaftFatDao {
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             Predicate startPredicate = cb.equal(root.get("periodStart"), start);
             Predicate endPredicate = cb.equal(root.get("periodEnd"), end);
@@ -266,12 +266,12 @@ public class SaftFatDao {
     /**
      * Busca o último export realizado
      */
-    public Optional<ExportSaftFat> findLastExport() {
+    public Optional<SaftFat> findLastExport() {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             cq.select(root).orderBy(cb.desc(root.get("createdAt")));
 
@@ -291,7 +291,7 @@ public class SaftFatDao {
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             cq.select(cb.count(root))
                     .where(cb.equal(root.get("status"), status));
@@ -307,12 +307,12 @@ public class SaftFatDao {
     /**
      * Busca exports com período sobreposto
      */
-    public List<ExportSaftFat> findOverlappingExports(LocalDate start, LocalDate end) {
+    public List<SaftFat> findOverlappingExports(LocalDate start, LocalDate end) {
         Session session = HibernateUtil.getCurrentSession();
         try {
             CriteriaBuilder cb = session.getCriteriaBuilder();
-            CriteriaQuery<ExportSaftFat> cq = cb.createQuery(ExportSaftFat.class);
-            Root<ExportSaftFat> root = cq.from(ExportSaftFat.class);
+            CriteriaQuery<SaftFat> cq = cb.createQuery(SaftFat.class);
+            Root<SaftFat> root = cq.from(SaftFat.class);
 
             // WHERE (period_start <= end) AND (period_end >= start)
             Predicate startOverlap = cb.lessThanOrEqualTo(root.get("periodStart"), end);

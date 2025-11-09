@@ -138,11 +138,8 @@ public final class JPanelUser extends javax.swing.JPanel {
         jTabbedPaneUsers.setBackground(new java.awt.Color(255, 255, 255));
         jTabbedPaneUsers.setEnabled(false);
 
-        jPanelSearchUser.setBackground(new java.awt.Color(204, 204, 255));
-
         jButtonFilterNameTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
         jButtonFilterNameTable.setText("Pesquisar");
-        jButtonFilterNameTable.setContentAreaFilled(false);
         jButtonFilterNameTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonFilterNameTable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -156,11 +153,9 @@ public final class JPanelUser extends javax.swing.JPanel {
             }
         });
 
-        jButtonAlterSeleted.setBackground(new java.awt.Color(255, 255, 153));
         jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
         jButtonAlterSeleted.setText("Alterar");
         jButtonAlterSeleted.setToolTipText("Editar Usuario");
-        jButtonAlterSeleted.setContentAreaFilled(false);
         jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -168,11 +163,9 @@ public final class JPanelUser extends javax.swing.JPanel {
             }
         });
 
-        jButtonDeleteSelected.setBackground(new java.awt.Color(255, 51, 51));
         jButtonDeleteSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
         jButtonDeleteSelected.setText("Excluir");
         jButtonDeleteSelected.setToolTipText("Apagar usuario");
-        jButtonDeleteSelected.setContentAreaFilled(false);
         jButtonDeleteSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDeleteSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -180,10 +173,8 @@ public final class JPanelUser extends javax.swing.JPanel {
             }
         });
 
-        jButtonOpenFormUser.setBackground(new java.awt.Color(153, 153, 255));
         jButtonOpenFormUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonOpenFormUser.setText("Adicionar");
-        jButtonOpenFormUser.setContentAreaFilled(false);
         jButtonOpenFormUser.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonOpenFormUser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -224,11 +215,9 @@ public final class JPanelUser extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(jTableUsers);
 
-        jButtonViewSelected.setBackground(new java.awt.Color(153, 255, 153));
         jButtonViewSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
         jButtonViewSelected.setText("Ver");
         jButtonViewSelected.setToolTipText("Ver os dados");
-        jButtonViewSelected.setContentAreaFilled(false);
         jButtonViewSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonViewSelected.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -242,7 +231,7 @@ public final class JPanelUser extends javax.swing.JPanel {
             jPanelSearchUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSearchUserLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanelSearchUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanelSearchUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1)
                     .addGroup(jPanelSearchUserLayout.createSequentialGroup()
                         .addComponent(jTextFieldFilterNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -255,9 +244,8 @@ public final class JPanelUser extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonAlterSeleted)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonDeleteSelected)
-                        .addGap(0, 126, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addComponent(jButtonDeleteSelected)))
+                .addContainerGap(132, Short.MAX_VALUE))
         );
         jPanelSearchUserLayout.setVerticalGroup(
             jPanelSearchUserLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

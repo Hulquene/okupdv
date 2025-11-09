@@ -4,11 +4,16 @@
  */
 package com.okutonda.okudpdv.views.export;
 
-import com.okutonda.okudpdv.controllers.SaftFatController;
-import com.okutonda.okudpdv.data.entities.ExportSaftFat;
+import com.okutonda.okudpdv.controllers.SaftController;
+import com.okutonda.okudpdv.data.entities.SaftFat;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -16,7 +21,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class JDialogExportSaftFat extends javax.swing.JDialog {
 
-    SaftFatController exportSaftFat = new SaftFatController();
+    SaftController exportSaftFat = new SaftController();
+    private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> rowSorter;
 
     /**
      * Creates new form JDialogExportSaftFat
@@ -24,49 +31,188 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
     public JDialogExportSaftFat(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        initializeDates();
+        initializeTable();
+        initializeFilter();
         listExpotSaftFat();
     }
 
+    /**
+     * Inicializa as datas com valores padrão
+     */
+    private void initializeDates() {
+        try {
+            // Data inicial: primeiro dia do mês atual
+            LocalDate firstDayOfMonth = LocalDate.now().withDayOfMonth(1);
+            // Data final: último dia do mês atual
+            LocalDate lastDayOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+
+            DateTimeFormatter displayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            jFormattedTextFieldDateStart.setText(firstDayOfMonth.format(displayFormat));
+            jFormattedTextFieldDateEnd.setText(lastDayOfMonth.format(displayFormat));
+
+        } catch (Exception e) {
+            System.err.println("Erro ao inicializar datas: " + e.getMessage());
+            // Valores fallback
+            jFormattedTextFieldDateStart.setText("01/" + String.format("%02d", LocalDate.now().getMonthValue()) + "/" + LocalDate.now().getYear());
+            jFormattedTextFieldDateEnd.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
+    }
+
+    /**
+     * Inicializa a tabela com configurações
+     */
+    private void initializeTable() {
+        // Define o modelo da tabela
+        tableModel = new DefaultTableModel(
+                new Object[]{"ID", "Período", "Ficheiro", "Exportado por", "Criado em", "Estado", "Notas"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Torna todas as células não editáveis
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                switch (columnIndex) {
+                    case 0:
+                        return Long.class;    // ID
+                    case 1:
+                        return String.class;  // Período
+                    case 2:
+                        return String.class;  // Ficheiro
+                    case 3:
+                        return String.class;  // Exportado por
+                    case 4:
+                        return String.class;  // Criado em
+                    case 5:
+                        return String.class;  // Estado
+                    case 6:
+                        return String.class;  // Notas
+                    default:
+                        return Object.class;
+                }
+            }
+        };
+
+        jTableExporSaftFat.setModel(tableModel);
+
+        // Configura o row sorter para filtro
+        rowSorter = new TableRowSorter<>(tableModel);
+        jTableExporSaftFat.setRowSorter(rowSorter);
+
+        // Ajusta a largura das colunas
+        jTableExporSaftFat.getColumnModel().getColumn(0).setPreferredWidth(50);  // ID
+        jTableExporSaftFat.getColumnModel().getColumn(1).setPreferredWidth(120); // Período
+        jTableExporSaftFat.getColumnModel().getColumn(2).setPreferredWidth(150); // Ficheiro
+        jTableExporSaftFat.getColumnModel().getColumn(3).setPreferredWidth(100); // Exportado por
+        jTableExporSaftFat.getColumnModel().getColumn(4).setPreferredWidth(120); // Criado em
+        jTableExporSaftFat.getColumnModel().getColumn(5).setPreferredWidth(80);  // Estado
+        jTableExporSaftFat.getColumnModel().getColumn(6).setPreferredWidth(200); // Notas
+    }
+
+    /**
+     * Inicializa o sistema de filtro
+     */
+    private void initializeFilter() {
+        jTextField1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                applyFilter(jTextField1.getText().trim());
+            }
+        });
+    }
+
+    /**
+     * Aplica filtro na tabela
+     */
+    private void applyFilter(String filterText) {
+        if (filterText == null || filterText.trim().isEmpty()) {
+            rowSorter.setRowFilter(null);
+        } else {
+            try {
+                // Filtra em múltiplas colunas
+                rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + filterText, 1, 2, 3, 5, 6));
+            } catch (Exception e) {
+                // Em caso de regex inválido, usa filtro simples
+                rowSorter.setRowFilter(null);
+            }
+        }
+    }
+
     public void listExpotSaftFat() {
-        List<ExportSaftFat> list = exportSaftFat.get();
+        List<SaftFat> list = exportSaftFat.get();
         loadListExpotSaftFat(list);
     }
 
     public void filterListExpotSaftFat(String txt) {
-        List<ExportSaftFat> list = exportSaftFat.filter(txt);
+        List<SaftFat> list = exportSaftFat.filter(txt);
         loadListExpotSaftFat(list);
     }
 
-    public void loadListExpotSaftFat(List<ExportSaftFat> list) {
-//        DefaultTableModel data = (DefaultTableModel) jTableExporSaftFat.getModel();
-// prepara o modelo com as novas colunas (ou garante que a tua JTable tem estas colunas)
-        DefaultTableModel data = new DefaultTableModel(
-                new String[]{"ID", "Período", "Ficheiro", "Exportado por", "Criado em", "Estado", "Notas"}, 0);
-        jTableExporSaftFat.setModel(data);
-// limpa linhas antigas
-        data.setRowCount(0);
+    public void loadListExpotSaftFat(List<SaftFat> list) {
+        // Limpa a tabela
+        tableModel.setRowCount(0);
 
-// formato para createdAt
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        for (ExportSaftFat c : list) {
-            String period = c.getPeriodStart() + " a " + c.getPeriodEnd(); // "YYYY-MM-DD a YYYY-MM-DD"
-            String file = c.getNotes();    // só o nome, sem path
-            String user = c.getUser() != null ? c.getUser().getName() : "";
-            String created = c.getCreatedAt() != null ? c.getCreatedAt().format(dtf) : "";
-            String status = c.getStatus() != null ? c.getStatus() : "";
-            String notes = c.getNotes() != null ? c.getNotes() : "";
+        // Formato para datas
+        DateTimeFormatter displayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter datetimeFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-            data.addRow(new Object[]{
-                c.getId(),
+        for (SaftFat export : list) {
+            String period = export.getPeriodStart().format(displayFormat) + " a "
+                    + export.getPeriodEnd().format(displayFormat);
+
+            // Extrai apenas o nome do arquivo do caminho completo
+            String fileName = extractFileName(export.getFilePath());
+
+            String user = export.getUser() != null ? export.getUser().getName() : "Sistema";
+            String created = export.getCreatedAt() != null
+                    ? export.getCreatedAt().format(datetimeFormat) : "";
+            String status = export.getStatus() != null ? export.getStatus() : "";
+            String notes = export.getNotes() != null ? export.getNotes() : "";
+
+            tableModel.addRow(new Object[]{
+                export.getId(),
                 period,
-                file,
+                fileName,
                 user,
                 created,
                 status,
                 notes
             });
-
         }
+
+        // Aplica o filtro atual se houver texto no campo de pesquisa
+        if (jTextField1.getText() != null && !jTextField1.getText().trim().isEmpty()) {
+            applyFilter(jTextField1.getText().trim());
+        }
+
+        // Atualiza o status com a contagem
+        updateStatusLabel(list.size());
+    }
+
+    /**
+     * Extrai apenas o nome do arquivo do caminho completo
+     */
+    private String extractFileName(String filePath) {
+        if (filePath == null || filePath.trim().isEmpty()) {
+            return "N/A";
+        }
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get(filePath);
+            return path.getFileName().toString();
+        } catch (Exception e) {
+            // Fallback: pega a última parte após a última barra
+            int lastSeparator = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+            return lastSeparator >= 0 ? filePath.substring(lastSeparator + 1) : filePath;
+        }
+    }
+
+    /**
+     * Atualiza o label de status com a contagem de registros
+     */
+    private void updateStatusLabel(int count) {
+        jLabel1.setText("Total de registros: " + count + " | Formato data: dd/MM/yyyy");
     }
 
     /**
@@ -275,9 +421,17 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
     private void jButtonGerarFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGerarFileActionPerformed
         // TODO add your handling code here:
         try {
+            // Valida as datas
+            if (jFormattedTextFieldDateStart.getText() == null || jFormattedTextFieldDateStart.getText().trim().isEmpty()
+                    || jFormattedTextFieldDateEnd.getText() == null || jFormattedTextFieldDateEnd.getText().trim().isEmpty()) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Por favor, preencha ambas as datas.");
+                return;
+            }
+
             var fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
             var start = java.time.LocalDate.parse(jFormattedTextFieldDateStart.getText().trim(), fmt);
             var end = java.time.LocalDate.parse(jFormattedTextFieldDateEnd.getText().trim(), fmt);
+
             if (end.isBefore(start)) {
                 javax.swing.JOptionPane.showMessageDialog(this, "Data final não pode ser anterior à inicial.");
                 return;
@@ -289,6 +443,8 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
 
             javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
             fc.setSelectedFile(new java.io.File(defaultName));
+            fc.setDialogTitle("Salvar arquivo SAF-T");
+
             int result = fc.showSaveDialog(this);
             if (result != javax.swing.JFileChooser.APPROVE_OPTION) {
                 return;
@@ -296,12 +452,20 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
 
             java.nio.file.Path output = fc.getSelectedFile().toPath();
 
+            // Adiciona extensão .xml se não tiver
+            if (!output.toString().toLowerCase().endsWith(".xml")) {
+                output = java.nio.file.Paths.get(output.toString() + ".xml");
+            }
+
             // chama o controller
-            long exportId = new SaftFatController().export(start, end, output);
+            long exportId = new SaftController().export(start, end, output);
 
             javax.swing.JOptionPane.showMessageDialog(this,
-                    "SAF-T gerado com sucesso!\nID export: " + exportId + "\nFicheiro: " + output);
+                    "SAF-T gerado com sucesso!\nID export: " + exportId + "\nFicheiro: " + output.getFileName());
             listExpotSaftFat();
+        } catch (java.time.format.DateTimeParseException ex) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Formato de data inválido. Use o formato dd/MM/yyyy.\nExemplo: 01/01/2024");
         } catch (Exception ex) {
             ex.printStackTrace();
             javax.swing.JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage());
@@ -314,6 +478,31 @@ public class JDialogExportSaftFat extends javax.swing.JDialog {
 
     private void jButtonApagarFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonApagarFileActionPerformed
         // TODO add your handling code here:
+        // Implementação do botão apagar
+        int selectedRow = jTableExporSaftFat.getSelectedRow();
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, selecione um registro para apagar.");
+            return;
+        }
+
+        // Converte para modelo real (considerando o filtro)
+        int modelRow = jTableExporSaftFat.convertRowIndexToModel(selectedRow);
+        Long exportId = (Long) tableModel.getValueAt(modelRow, 0);
+
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Tem certeza que deseja apagar este registro?\nID: " + exportId,
+                "Confirmar exclusão",
+                javax.swing.JOptionPane.YES_NO_OPTION);
+
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            try {
+                exportSaftFat.delete(exportId);
+                javax.swing.JOptionPane.showMessageDialog(this, "Registro apagado com sucesso!");
+                listExpotSaftFat();
+            } catch (Exception ex) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Erro ao apagar registro: " + ex.getMessage());
+            }
+        }
     }//GEN-LAST:event_jButtonApagarFileActionPerformed
 
     /**
