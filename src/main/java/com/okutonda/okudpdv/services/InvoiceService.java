@@ -2,6 +2,7 @@ package com.okutonda.okudpdv.services;
 
 import com.okutonda.okudpdv.data.config.HibernateUtil;
 import com.okutonda.okudpdv.data.dao.InvoiceDao;
+import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.entities.DocumentType;
 import com.okutonda.okudpdv.data.entities.Invoices;
 import com.okutonda.okudpdv.data.entities.Payment;
@@ -28,19 +29,21 @@ import org.hibernate.Transaction;
 public class InvoiceService {
 
     private final InvoiceDao invoiceDao;
+    private final PaymentDao paymentDao;
+
     private final UserSession userSession;
 
     public InvoiceService() {
         this.invoiceDao = new InvoiceDao();
+        this.paymentDao = new PaymentDao();
         this.userSession = UserSession.getInstance();
     }
 
     // ==========================================================
-    // 🔹 OPERAÇÕES PRINCIPAIS
+    // 🔹 OPERAÇÕES PRINCIPAIS - ATUALIZADAS COM REGRAS DE NEGÓCIO
     // ==========================================================
     /**
-     * Cria uma nova fatura com produtos e pagamentos (BASEADO NO ORDER
-     * CONTROLLER)
+     * Cria uma nova fatura com produtos e pagamentos e aplica regras de status
      */
     public Invoices criarFaturaComProdutosEPagamentos(Invoices fatura, List<ProductSales> produtos, List<Payment> pagamentos) {
         Session session = HibernateUtil.getCurrentSession();
@@ -64,15 +67,18 @@ public class InvoiceService {
             // 3. Validar pagamentos
             validarPagamentos(pagamentos, fatura.getTotal());
 
-            // 4. Salvar fatura PRIMEIRO (para obter ID)
+            // 4. 🔹 APLICAR REGRAS DE STATUS BASEADO NOS PAGAMENTOS
+            aplicarRegrasStatusFatura(fatura, pagamentos);
+
+            // 5. Salvar fatura PRIMEIRO (para obter ID)
             System.out.println("💾 Salvando fatura...");
             session.persist(fatura);
             session.flush(); // 🔥 CRÍTICO: Força INSERT para obter ID
 
             Integer faturaId = fatura.getId();
-            System.out.println("✅ Fatura salva - ID: " + faturaId + ", Número: " + fatura.getNumber());
+            System.out.println("✅ Fatura salva - ID: " + faturaId + ", Número: " + fatura.getNumber() + ", Status: " + fatura.getStatus());
 
-            // 5. Salvar produtos SEPARADAMENTE
+            // 6. Salvar produtos SEPARADAMENTE
             if (produtos != null && !produtos.isEmpty()) {
                 System.out.println("📦 Salvando " + produtos.size() + " produtos...");
 
@@ -106,19 +112,22 @@ public class InvoiceService {
                 System.out.println("ℹ️ Nenhum produto para salvar");
             }
 
-            // 6. Salvar os pagamentos (igual ao OrderController)
+            // 7. Salvar os pagamentos
             System.out.println("💳 Salvando " + pagamentos.size() + " pagamentos...");
             for (Payment p : pagamentos) {
                 configurarPagamento(p, fatura);
                 session.persist(p);
-                System.out.println("✅ Pagamento salvo - " + p.getPaymentMode() + ": " + p.getTotal());
+                System.out.println("✅ Pagamento salvo - " + p.getPaymentMode() + ": " + p.getTotal() + ", Status: " + p.getStatus());
             }
+
+            // 8. 🔹 ATUALIZAR TOTAL PAGO NA FATURA
+            atualizarTotalPagoFatura(fatura, pagamentos);
 
             tx.commit();
 
-            System.out.println("🎉 Fatura criada com sucesso! ID: " + faturaId);
+            System.out.println("🎉 Fatura criada com sucesso! ID: " + faturaId + ", Status Final: " + fatura.getStatus());
             showSuccessMessage("Fatura criada com sucesso!\nNúmero: "
-                    + fatura.getPrefix() + "/" + fatura.getNumber());
+                    + fatura.getPrefix() + "/" + fatura.getNumber() + "\nStatus: " + fatura.getStatus().getDescricao());
 
             return fatura;
 
@@ -132,6 +141,183 @@ public class InvoiceService {
         }
     }
 
+    /**
+     * 🔹 REGRAS DE NEGÓCIO: Aplica status da fatura baseado nos pagamentos
+     */
+    private void aplicarRegrasStatusFatura(Invoices fatura, List<Payment> pagamentos) {
+        BigDecimal totalFatura = fatura.getTotal();
+        BigDecimal totalPagamentos = calcularTotalPagamentosEfetivos(pagamentos);
+
+        System.out.println("💰 REGRAS DE STATUS - Total Fatura: " + totalFatura + ", Total Pagamentos: " + totalPagamentos);
+
+        // 🔹 REGRA 1: Se total pago >= total fatura → FATURA PAGA
+        if (totalPagamentos.compareTo(totalFatura) >= 0) {
+            fatura.setStatus(PaymentStatus.PAGO);
+            System.out.println("✅ Status: PAGA (Total pago >= Total fatura)");
+        } // 🔹 REGRA 2: Se total pago > 0 mas < total fatura → FATURA PARCIAL
+        else if (totalPagamentos.compareTo(BigDecimal.ZERO) > 0 && totalPagamentos.compareTo(totalFatura) < 0) {
+            fatura.setStatus(PaymentStatus.PARCIAL);
+            System.out.println("🟡 Status: PARCIAL (Total pago: " + totalPagamentos + " < Total fatura: " + totalFatura + ")");
+        } // 🔹 REGRA 3: Se total pago = 0 → FATURA PENDENTE
+        else {
+            fatura.setStatus(PaymentStatus.PENDENTE);
+            System.out.println("🟠 Status: PENDENTE (Nenhum pagamento efetivo)");
+        }
+
+        // 🔹 REGRA 4: Verificar se há pagamentos em atraso
+        if (existemPagamentosAtrasados(pagamentos, fatura.getDueDate())) {
+            System.out.println("⚠️  Aviso: Existem pagamentos em atraso");
+            // Se a fatura não está paga e tem pagamentos atrasados, marcar como atrasada
+            if (!fatura.isPaga() && !fatura.isParcial()) {
+                fatura.setStatus(PaymentStatus.ATRASADO);
+                System.out.println("🔴 Status atualizado para: ATRASADO");
+            }
+        }
+    }
+
+    /**
+     * 🔹 Calcula total dos pagamentos EFETIVOS (apenas pagos)
+     */
+    private BigDecimal calcularTotalPagamentosEfetivos(List<Payment> pagamentos) {
+        return pagamentos.stream()
+                .filter(p -> p.getStatus() == PaymentStatus.PAGO || p.getStatus() == PaymentStatus.PARCIAL)
+                .map(Payment::getTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * 🔹 Verifica se existem pagamentos em atraso
+     */
+    private boolean existemPagamentosAtrasados(List<Payment> pagamentos, String dataVencimento) {
+        if (dataVencimento == null) {
+            return false;
+        }
+
+        try {
+            LocalDate vencimento = LocalDate.parse(dataVencimento.substring(0, 10));
+            LocalDate hoje = LocalDate.now();
+
+            // Se a data de vencimento já passou
+            if (vencimento.isBefore(hoje)) {
+                return true;
+            }
+
+            // Verificar se há pagamentos com data posterior ao vencimento
+            for (Payment p : pagamentos) {
+                if (p.getDate() != null && p.getDate().length() >= 10) {
+                    LocalDate dataPagamento = LocalDate.parse(p.getDate().substring(0, 10));
+                    if (dataPagamento.isAfter(vencimento)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao verificar pagamentos atrasados: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 🔹 Atualiza o total pago na fatura
+     */
+    private void atualizarTotalPagoFatura(Invoices fatura, List<Payment> pagamentos) {
+        BigDecimal totalPago = calcularTotalPagamentosEfetivos(pagamentos);
+        fatura.setPayTotal(totalPago);
+        System.out.println("💰 Total pago atualizado: " + totalPago);
+    }
+
+    // ==========================================================
+    // 🔹 MÉTODOS PARA ATUALIZAÇÃO DE STATUS EM TEMPO REAL
+    // ==========================================================
+    /**
+     * Atualiza o status da fatura baseado nos pagamentos atuais
+     */
+    public Invoices atualizarStatusFatura(Integer faturaId) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            Invoices fatura = buscarPorId(faturaId);
+            if (fatura == null) {
+                throw new IllegalArgumentException("Fatura não encontrada: " + faturaId);
+            }
+
+            // Buscar pagamentos atuais da fatura
+            List<Payment> pagamentos = paymentDao.findByInvoiceId(faturaId);
+
+            // Aplicar regras de status
+            aplicarRegrasStatusFatura(fatura, pagamentos);
+
+            // Atualizar total pago
+            atualizarTotalPagoFatura(fatura, pagamentos);
+
+            // Salvar alterações
+            session.update(fatura);
+            tx.commit();
+
+            System.out.println("🔄 Status da fatura " + faturaId + " atualizado para: " + fatura.getStatus());
+            return fatura;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao atualizar status da fatura: " + e.getMessage());
+            throw new RuntimeException("Erro ao atualizar status da fatura", e);
+        }
+    }
+
+    /**
+     * Adiciona um pagamento a uma fatura existente e atualiza status
+     */
+    public Payment adicionarPagamentoAFatura(Integer faturaId, Payment pagamento) {
+        Session session = HibernateUtil.getCurrentSession();
+        Transaction tx = null;
+
+        try {
+            tx = session.beginTransaction();
+
+            Invoices fatura = buscarPorId(faturaId);
+            if (fatura == null) {
+                throw new IllegalArgumentException("Fatura não encontrada: " + faturaId);
+            }
+
+            // Configurar pagamento
+            configurarPagamento(pagamento, fatura);
+
+            // Salvar pagamento
+            session.persist(pagamento);
+
+            // Buscar todos os pagamentos da fatura (incluindo o novo)
+            List<Payment> todosPagamentos = paymentDao.findByInvoiceId(faturaId);
+            todosPagamentos.add(pagamento);
+
+            // Atualizar status da fatura
+            aplicarRegrasStatusFatura(fatura, todosPagamentos);
+            atualizarTotalPagoFatura(fatura, todosPagamentos);
+
+            session.update(fatura);
+            tx.commit();
+
+            System.out.println("✅ Pagamento adicionado à fatura " + faturaId + ". Novo status: " + fatura.getStatus());
+            return pagamento;
+
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            System.err.println("❌ Erro ao adicionar pagamento à fatura: " + e.getMessage());
+            throw new RuntimeException("Erro ao adicionar pagamento à fatura", e);
+        }
+    }
+
+    // ==========================================================
+    // 🔹 MÉTODOS EXISTENTES (com pequenas melhorias)
+    // ==========================================================
     /**
      * Cria pagamento automático quando não são fornecidos pagamentos
      */
@@ -202,30 +388,16 @@ public class InvoiceService {
             totalPagamentos = totalPagamentos.add(p.getTotal());
         }
 
-        // Verificar se o total dos pagamentos cobre a fatura
+        // 🔹 ATUALIZAÇÃO: Permitir pagamento parcial
+        // Não lançar exceção se total for menor, apenas avisar
         if (totalPagamentos.compareTo(totalFatura) < 0) {
-            throw new IllegalArgumentException("Total dos pagamentos (" + totalPagamentos + ") é menor que o total da fatura (" + totalFatura + ")");
+            System.out.println("⚠️  Aviso: Total dos pagamentos (" + totalPagamentos + ") é menor que o total da fatura (" + totalFatura + ") - Fatura ficará como PARCIAL");
         }
     }
 
-    /**
-     * Valida um ProductSales individual
-     */
-    private void validarProductSales(ProductSales ps) {
-        if (ps == null) {
-            throw new IllegalArgumentException("Produto não pode ser nulo");
-        }
-        if (ps.getProduct() == null) {
-            throw new IllegalArgumentException("ID do produto é obrigatório");
-        }
-        if (ps.getQty() == null || ps.getQty() <= 0) {
-            throw new IllegalArgumentException("Quantidade deve ser maior que zero");
-        }
-        if (ps.getPrice() == null || ps.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Preço deve ser maior ou igual a zero");
-        }
-    }
-
+    // ==========================================================
+    // 🔹 OPERAÇÕES PRINCIPAIS
+    // ==========================================================
     /**
      * Marca fatura como paga
      */

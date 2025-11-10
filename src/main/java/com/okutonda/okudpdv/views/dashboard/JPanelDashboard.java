@@ -454,49 +454,32 @@ public class JPanelDashboard extends javax.swing.JPanel {
     }
 
     /**
-     * Gráfico 6: Vendas Mensais Consolidado
+     * Gráfico 6: Vendas Mensais - Últimos 6 meses em ordem cronológica
      */
     private void adicionarGraficoVendasMensais() {
         try {
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-//            OrderController orderController = new OrderController();
-//            InvoiceController invoiceController = new InvoiceController();
-            // Obter data atual e calcular últimos 6 meses
             LocalDate hoje = LocalDate.now();
-            String[] meses = {"Jan", "Fev", "Mar", "Abr", "Mai", "Jun"};
+            String[] mesesAbreviados = {"Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+                "Jul", "Ago", "Set", "Out", "Nov", "Dez"};
 
+            // Ordem cronológica: do mais antigo (índice 5) para o mais recente (índice 0)
             for (int i = 5; i >= 0; i--) {
                 LocalDate mesAtual = hoje.minusMonths(i);
+                int mes = mesAtual.getMonthValue();
+                int ano = mesAtual.getYear();
+
                 LocalDate inicioMes = mesAtual.withDayOfMonth(1);
                 LocalDate fimMes = mesAtual.withDayOfMonth(mesAtual.lengthOfMonth());
 
-                // Calcular vendas do mês (Orders + Invoices)
-                BigDecimal totalVendasMes = BigDecimal.ZERO;
+                BigDecimal totalVendasMes = calcularVendasMes(inicioMes, fimMes);
 
-                // Vendas de Orders
-                List<Order> ordersMes = orderController.filterByDate(inicioMes, fimMes);
-                for (Order order : ordersMes) {
-                    if (order.getTotal() != null) {
-                        totalVendasMes = totalVendasMes.add(order.getTotal());
-                    }
-                }
-
-                // Vendas de Invoices
-                List<Invoices> invoicesMes = invoiceController.listarPorPeriodo(inicioMes, fimMes);
-                for (Invoices invoice : invoicesMes) {
-                    if (invoice.getTotal() != null && "EMITIDA".equals(invoice.getStatus())) {
-                        totalVendasMes = totalVendasMes.add(invoice.getTotal());
-                    }
-                }
-
-                dataset.addValue(
-                        totalVendasMes.doubleValue(),
-                        "Vendas",
-                        meses[5 - i] // Ajustar índice para os últimos 6 meses
-                );
+                String labelMes = mesesAbreviados[mes - 1] + "/" + String.valueOf(ano).substring(2);
+                dataset.addValue(totalVendasMes.doubleValue(), "Vendas", labelMes);
             }
 
+            // Resto do código igual...
             JFreeChart chart = ChartFactory.createLineChart(
                     "Evolução de Vendas Mensais - Últimos 6 Meses",
                     "Mês",
@@ -504,14 +487,12 @@ public class JPanelDashboard extends javax.swing.JPanel {
                     dataset
             );
 
-            // Personalizar a linha do gráfico
+            // Personalizações...
             CategoryPlot plot = chart.getCategoryPlot();
             LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
-            renderer.setSeriesPaint(0, new Color(0, 100, 0)); // Verde escuro
+            renderer.setSeriesPaint(0, new Color(0, 100, 0));
             renderer.setSeriesStroke(0, new BasicStroke(2.5f));
             renderer.setSeriesShapesVisible(0, true);
-
-            chart.setBackgroundPaint(java.awt.Color.WHITE);
 
             ChartPanel chartPanel = new ChartPanel(chart);
             chartPanel.setPreferredSize(new Dimension(400, 300));
@@ -521,6 +502,31 @@ public class JPanelDashboard extends javax.swing.JPanel {
             System.err.println("❌ Erro ao criar gráfico de vendas mensais: " + e.getMessage());
             panelGraficos.add(criarPainelErro("Erro em Vendas Mensais"));
         }
+    }
+
+    /**
+     * Método auxiliar para calcular vendas do mês
+     */
+    private BigDecimal calcularVendasMes(LocalDate inicio, LocalDate fim) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        // Vendas de Orders
+        List<Order> ordersMes = orderController.filterByDate(inicio, fim);
+        for (Order order : ordersMes) {
+            if (order.getTotal() != null) {
+                total = total.add(order.getTotal());
+            }
+        }
+
+        // Vendas de Invoices
+        List<Invoices> invoicesMes = invoiceController.listarPorPeriodo(inicio, fim);
+        for (Invoices invoice : invoicesMes) {
+            if (invoice.getTotal() != null && "EMITIDA".equals(invoice.getStatus())) {
+                total = total.add(invoice.getTotal());
+            }
+        }
+
+        return total;
     }
 
     /**

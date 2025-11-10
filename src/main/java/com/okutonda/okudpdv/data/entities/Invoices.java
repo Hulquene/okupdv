@@ -28,7 +28,7 @@ public class Invoices {
     private Integer number;
 
     @Column(name = "prefix", length = 10, nullable = false)
-    private String prefix;
+    private String prefix = "FT"; // ✅ EXCLUSIVO: FT
 
     @Column(name = "series", length = 10)
     private String series;
@@ -72,7 +72,7 @@ public class Invoices {
     @JoinColumn(name = "user_id", nullable = false)
     private User seller;
 
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY) // SEM CASCADE!
+    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY)
     private List<ProductSales> products = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -85,13 +85,14 @@ public class Invoices {
     public Invoices() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.prefix = "FT"; // ✅ SEMPRE FT
     }
 
-    public Invoices(Clients client, User seller, String prefix) {
+    public Invoices(Clients client, User seller) {
         this();
         this.client = client;
         this.seller = seller;
-        this.prefix = prefix != null ? prefix : "FT";
+        // ✅ Prefix é sempre "FT", não precisa de parâmetro
     }
 
     // Getters e Setters
@@ -137,11 +138,13 @@ public class Invoices {
     }
 
     public String getPrefix() {
-        return prefix;
+        return "FT"; // ✅ SEMPRE RETORNA FT
     }
 
     public void setPrefix(String prefix) {
-        this.prefix = prefix != null ? prefix : "FT";
+        // ✅ IGNORA qualquer tentativa de mudar o prefix - sempre será FT
+        this.prefix = "FT";
+        this.updatedAt = LocalDateTime.now();
     }
 
     public String getSeries() {
@@ -248,7 +251,6 @@ public class Invoices {
         this.seller = seller;
     }
 
-    // ✅ NOVO: Getter e Setter para products
     public List<ProductSales> getProducts() {
         return products;
     }
@@ -273,19 +275,39 @@ public class Invoices {
         this.updatedAt = updatedAt;
     }
 
-    // Métodos de negócio
+    // ✅ MÉTODOS ESPECÍFICOS PARA FATURAS (FT)
+    public String getNumeroFormatado() {
+        if (number == null || year == null) {
+            return "N/A";
+        }
+        return String.format("FT %d/%d", year, number);
+    }
+
+    public String getDescricaoCompleta() {
+        return String.format("%s - Fatura - %s", 
+            getNumeroFormatado(),
+            client != null ? client.getName() : "Cliente não definido"
+        );
+    }
+
+    // Métodos de negócio específicos para faturas
     public Boolean isPendente() {
         return status == PaymentStatus.PENDENTE;
     }
 
-//    public PaymentStatus isEmitida() {
-//        return status == PaymentStatus.;
-//    }
+    public Boolean isParcial() {
+        return status == PaymentStatus.PARCIAL;
+    }
+
     public Boolean isPaga() {
         return status == PaymentStatus.PAGO;
     }
 
-    public Boolean isAnulada() {
+    public Boolean isAtrasada() {
+        return status == PaymentStatus.ATRASADO;
+    }
+
+    public Boolean isCancelada() {
         return status == PaymentStatus.CANCELADO;
     }
 
@@ -297,39 +319,97 @@ public class Invoices {
         return getSaldoPendente().compareTo(BigDecimal.ZERO) <= 0;
     }
 
-    // ✅ NOVO: Métodos para verificar tipo pelo prefixo
+    public boolean temSaldoPendente() {
+        return getSaldoPendente().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    // ✅ MÉTODOS EXCLUSIVOS PARA FATURAS
     public boolean isFatura() {
-        return "FT".equals(prefix) || "FR".equals(prefix);
+        return true; // ✅ SEMPRE verdadeiro - esta entidade é exclusiva para faturas
     }
 
-    public boolean isNotaCredito() {
-        return "NC".equals(prefix);
+    public boolean isDocumentoFiscal() {
+        return true; // ✅ FT é sempre documento fiscal
     }
 
-    public boolean isNotaDebito() {
-        return "ND".equals(prefix);
+    public boolean isDocumentoValidoParaSAFT() {
+        return true; // ✅ FT é sempre válido para SAF-T
     }
 
-    public boolean isRecibo() {
-        return "RC".equals(prefix);
+    // ✅ NOVO: Método para obter descrição do tipo de documento
+    public String getDocumentTypeDescricao() {
+        return "Fatura";
     }
 
-    public boolean isProforma() {
-        return "PP".equals(prefix);
+    // ✅ NOVO: Método para verificar se pode ser editada
+    public boolean podeSerEditada() {
+        return isPendente() || isParcial();
     }
 
-    public boolean isOrcamento() {
-        return "OR".equals(prefix);
+    // ✅ NOVO: Método para verificar se pode ser cancelada
+    public boolean podeSerCancelada() {
+        return !isCancelada() && !isPaga();
     }
 
-    // Método para validar dados básicos
+    // ✅ NOVO: Método para verificar se está vencida
+    public boolean isVencida() {
+        if (dueDate == null) return false;
+        
+        try {
+            LocalDateTime vencimento = LocalDateTime.parse(dueDate + "T00:00:00");
+            return LocalDateTime.now().isAfter(vencimento);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ✅ NOVO: Método para calcular dias em atraso
+    public Integer getDiasAtraso() {
+        if (dueDate == null || !isVencida()) return 0;
+        
+        try {
+            LocalDateTime vencimento = LocalDateTime.parse(dueDate + "T00:00:00");
+            return (int) java.time.Duration.between(vencimento, LocalDateTime.now()).toDays();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    // Método para validar dados básicos de fatura
     public boolean isValid() {
-        return prefix != null && !prefix.trim().isEmpty()
+        return "FT".equals(prefix) // ✅ SEMPRE deve ser FT
                 && issueDate != null && !issueDate.trim().isEmpty()
                 && number != null && number > 0
                 && total != null && total.compareTo(BigDecimal.ZERO) >= 0
                 && client != null
                 && seller != null;
+    }
+
+    // ✅ NOVO: Método para validar para emissão
+    public boolean isValidParaEmissao() {
+        return isValid() 
+                && isPendente() 
+                && total.compareTo(BigDecimal.ZERO) > 0
+                && products != null && !products.isEmpty();
+    }
+
+    // ✅ NOVO: Método específico para faturas - cálculo de IVA
+    public BigDecimal calcularIVA() {
+        // Supondo que o IVA é 14% em Angola
+        BigDecimal taxaIVA = new BigDecimal("0.14");
+        return subTotal.multiply(taxaIVA).setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    // ✅ NOVO: Método para verificar se fatura está dentro do prazo
+    public boolean isDentroDoPrazo() {
+        if (dueDate == null) return true;
+        
+        try {
+            LocalDateTime vencimento = LocalDateTime.parse(dueDate + "T23:59:59");
+            return LocalDateTime.now().isBefore(vencimento);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     @PreUpdate
@@ -339,23 +419,13 @@ public class Invoices {
 
     @Override
     public String toString() {
-        return "Invoice{"
-                + "id=" + id
-                + ", prefix=" + prefix
-                + ", number=" + number
-                + ", total=" + total
-                + ", status=" + status
-                + '}';
+        return getNumeroFormatado(); // ✅ Retorna "FT 2024/123"
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Invoices)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (!(o instanceof Invoices)) return false;
         Invoices invoice = (Invoices) o;
         return id != null && id.equals(invoice.id);
     }

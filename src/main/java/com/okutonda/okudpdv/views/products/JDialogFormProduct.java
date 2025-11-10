@@ -35,6 +35,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     GroupsProductController groupsProductController = new GroupsProductController();
 //    WarehouseController warehouseController = new WarehouseController();
     Boolean status = false;
+    private boolean carregandoDados = false;
 
     /**
      * Creates new form JDialogFormProduct
@@ -48,7 +49,6 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
     public Boolean getResponse() {
         return status;
     }
-    private boolean carregandoDados = false;
 
     public void loadCombobox() {
         // Combos com consulta ao banco
@@ -99,10 +99,15 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jComboBoxType.addItem("Serviço");
 
         carregandoDados = false; // Finaliza o carregamento
+
+        // ✅ Aplicar regras iniciais
+        aplicarRegrasTipoProduto();
     }
 
     public void setFormProduct(Product prod) {
         if (prod != null) {
+            carregandoDados = true; // Inicia carregamento de dados
+
             // TextFields
             jTextFieldId.setText(String.valueOf(prod.getId()));
             jTextFieldCode.setText(prod.getCode());
@@ -132,11 +137,16 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
                 selecionarItemComboBox(jComboBoxGroup, prod.getGroup());
             }
 
-            // Aplicar regras do tipo após carregar os dados
+            carregandoDados = false; // Finaliza carregamento de dados
+
+            // ✅ Aplicar regras do tipo após carregar os dados
             aplicarRegrasTipoProduto();
         }
     }
 
+    /**
+     * ✅ Aplica regras específicas baseadas no tipo de produto
+     */
     private void aplicarRegrasTipoProduto() {
         if (carregandoDados) {
             return;
@@ -145,17 +155,46 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         Object selectedItem = jComboBoxType.getSelectedItem();
         if (selectedItem != null) {
             String type = selectedItem.toString();
-            if ("Produto".equals(type)) {
-                jTextFieldStockMinimo.setEnabled(true);
-                jTextFieldBarCode.setEnabled(true);
-            } else {
+
+            if ("Serviço".equals(type)) {
+                // ✅ SERVIÇO: Desabilita campos e limpa valores
                 jTextFieldStockMinimo.setEnabled(false);
                 jTextFieldBarCode.setEnabled(false);
+                jTextFieldPurchasePrice.setEnabled(false);
+
+                // ✅ Limpa valores para serviços
+                jTextFieldStockMinimo.setText("0");
+                jTextFieldBarCode.setText("");
+                jTextFieldPurchasePrice.setText("0.00");
+
+                // ✅ Muda cor de fundo para indicar desabilitado
+                jTextFieldStockMinimo.setBackground(new java.awt.Color(240, 240, 240));
+                jTextFieldBarCode.setBackground(new java.awt.Color(240, 240, 240));
+                jTextFieldPurchasePrice.setBackground(new java.awt.Color(240, 240, 240));
+
+            } else {
+                // ✅ PRODUTO: Habilita todos os campos
+                jTextFieldStockMinimo.setEnabled(true);
+                jTextFieldBarCode.setEnabled(true);
+                jTextFieldPurchasePrice.setEnabled(true);
+
+                // ✅ Restaura cor de fundo normal
+                jTextFieldStockMinimo.setBackground(java.awt.Color.WHITE);
+                jTextFieldBarCode.setBackground(java.awt.Color.WHITE);
+                jTextFieldPurchasePrice.setBackground(java.awt.Color.WHITE);
+
+                // ✅ Garante valores padrão para produtos
+                if (jTextFieldStockMinimo.getText().trim().isEmpty() || "0".equals(jTextFieldStockMinimo.getText().trim())) {
+                    jTextFieldStockMinimo.setText("1");
+                }
+                if (jTextFieldPurchasePrice.getText().trim().isEmpty() || "0.00".equals(jTextFieldPurchasePrice.getText().trim())) {
+                    jTextFieldPurchasePrice.setText("0.00");
+                }
             }
         }
     }
-// Método auxiliar para selecionar item por string nos combos estáticos
-// Este método deve aceitar String como segundo parâmetro
+
+    // Método auxiliar para selecionar item por string nos combos estáticos
     private void selecionarItemPorString(JComboBox<String> comboBox, String valor) {
         if (valor != null) {
             for (int i = 0; i < comboBox.getItemCount(); i++) {
@@ -167,7 +206,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         }
     }
 
-// Método auxiliar para selecionar item por objeto nos combos dinâmicos
+    // Método auxiliar para selecionar item por objeto nos combos dinâmicos
     private void selecionarItemComboBox(JComboBox comboBox, Object objetoParaSelecionar) {
         for (int i = 0; i < comboBox.getItemCount(); i++) {
             Object item = comboBox.getItemAt(i);
@@ -186,7 +225,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         }
     }
 
-// Verifica se dois objetos têm o mesmo ID
+    // Verifica se dois objetos têm o mesmo ID
     private boolean temMesmoId(Object obj1, Object obj2) {
         try {
             Method getId1 = obj1.getClass().getMethod("getId");
@@ -206,9 +245,9 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         setFormProduct(prod);
     }
 
-// Na sua View - validação completa de campos obrigatórios
+    // ✅ VALIDAÇÃO ATUALIZADA: Campos obrigatórios dependem do tipo
     private boolean validarCamposUI() {
-        // 1️⃣ Validação do Código
+        // 1️⃣ Validação do Código (obrigatório para todos)
         if (jTextFieldCode.getText().trim().isEmpty()) {
             showError("Código é obrigatório!");
             jTextFieldCode.requestFocus();
@@ -220,7 +259,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             return false;
         }
 
-        // 2️⃣ Validação da Descrição
+        // 2️⃣ Validação da Descrição (obrigatório para todos)
         if (jTextFieldDescription.getText().trim().isEmpty()) {
             showError("Descrição é obrigatória!");
             jTextFieldDescription.requestFocus();
@@ -232,19 +271,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             return false;
         }
 
-        // 3️⃣ Validação do Código de Barras
-        if (jTextFieldBarCode.getText().trim().isEmpty()) {
-            showError("Código de Barras é obrigatório!");
-            jTextFieldBarCode.requestFocus();
-            return false;
-        }
-        if (jTextFieldBarCode.getText().trim().length() < 9) {
-            showError("Código de Barras deve ter pelo menos 9 caracteres");
-            jTextFieldBarCode.requestFocus();
-            return false;
-        }
-
-        // 4️⃣ Validação do Preço de Venda
+        // 3️⃣ Validação do Preço de Venda (obrigatório para todos)
         if (jTextFieldPrice.getText().trim().isEmpty()) {
             showError("Preço de Venda é obrigatório!");
             jTextFieldPrice.requestFocus();
@@ -268,76 +295,95 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             return false;
         }
 
-        // 5️⃣ Validação do Preço de Compra
-        if (jTextFieldPurchasePrice.getText().trim().isEmpty()) {
-            showError("Preço de Compra é obrigatório!");
-            jTextFieldPurchasePrice.requestFocus();
-            return false;
-        }
-        if (!Util.isValidDouble(jTextFieldPurchasePrice.getText())) {
-            showError("Preço de Compra deve ser um número válido\nEx: 100.00 ou 100,00");
-            jTextFieldPurchasePrice.requestFocus();
-            return false;
-        }
-        try {
-            BigDecimal precoCompra = new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", "."));
-            if (precoCompra.compareTo(BigDecimal.ZERO) < 0) {
-                showError("Preço de Compra não pode ser negativo");
+        // ✅ VALIDAÇÕES CONDICIONAIS BASEADAS NO TIPO
+        String tipoSelecionado = jComboBoxType.getSelectedItem().toString();
+
+        if ("Produto".equals(tipoSelecionado)) {
+            // ✅ VALIDAÇÕES APENAS PARA PRODUTOS
+
+            // 4️⃣ Validação do Código de Barras (obrigatório apenas para produtos)
+            if (jTextFieldBarCode.getText().trim().isEmpty()) {
+                showError("Código de Barras é obrigatório para produtos!");
+                jTextFieldBarCode.requestFocus();
+                return false;
+            }
+            if (jTextFieldBarCode.getText().trim().length() < 9) {
+                showError("Código de Barras deve ter pelo menos 9 caracteres");
+                jTextFieldBarCode.requestFocus();
+                return false;
+            }
+
+            // 5️⃣ Validação do Preço de Compra (obrigatório apenas para produtos)
+            if (jTextFieldPurchasePrice.getText().trim().isEmpty()) {
+                showError("Preço de Compra é obrigatório para produtos!");
                 jTextFieldPurchasePrice.requestFocus();
                 return false;
             }
-        } catch (NumberFormatException e) {
-            showError("Formato de Preço de Compra inválido");
-            jTextFieldPurchasePrice.requestFocus();
-            return false;
-        }
+            if (!Util.isValidDouble(jTextFieldPurchasePrice.getText())) {
+                showError("Preço de Compra deve ser um número válido\nEx: 100.00 ou 100,00");
+                jTextFieldPurchasePrice.requestFocus();
+                return false;
+            }
+            try {
+                BigDecimal precoCompra = new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", "."));
+                if (precoCompra.compareTo(BigDecimal.ZERO) < 0) {
+                    showError("Preço de Compra não pode ser negativo");
+                    jTextFieldPurchasePrice.requestFocus();
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showError("Formato de Preço de Compra inválido");
+                jTextFieldPurchasePrice.requestFocus();
+                return false;
+            }
 
-        // 6️⃣ Validação do Stock Mínimo
-        if (jTextFieldStockMinimo.getText().trim().isEmpty()) {
-            showError("Stock Mínimo é obrigatório!");
-            jTextFieldStockMinimo.requestFocus();
-            return false;
-        }
-        if (!Util.isInteger(jTextFieldStockMinimo.getText())) {
-            showError("Stock Mínimo deve ser um número inteiro\nEx: 10, 50, 100");
-            jTextFieldStockMinimo.requestFocus();
-            return false;
-        }
-        try {
-            int stockMinimo = Integer.parseInt(jTextFieldStockMinimo.getText().trim());
-            if (stockMinimo < 0) {
-                showError("Stock Mínimo não pode ser negativo");
+            // 6️⃣ Validação do Stock Mínimo (obrigatório apenas para produtos)
+            if (jTextFieldStockMinimo.getText().trim().isEmpty()) {
+                showError("Stock Mínimo é obrigatório para produtos!");
                 jTextFieldStockMinimo.requestFocus();
                 return false;
             }
-        } catch (NumberFormatException e) {
-            showError("Formato de Stock Mínimo inválido");
-            jTextFieldStockMinimo.requestFocus();
-            return false;
+            if (!Util.isInteger(jTextFieldStockMinimo.getText())) {
+                showError("Stock Mínimo deve ser um número inteiro\nEx: 10, 50, 100");
+                jTextFieldStockMinimo.requestFocus();
+                return false;
+            }
+            try {
+                int stockMinimo = Integer.parseInt(jTextFieldStockMinimo.getText().trim());
+                if (stockMinimo < 0) {
+                    showError("Stock Mínimo não pode ser negativo");
+                    jTextFieldStockMinimo.requestFocus();
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showError("Formato de Stock Mínimo inválido");
+                jTextFieldStockMinimo.requestFocus();
+                return false;
+            }
         }
 
-        // 7️⃣ Validação do Tipo
+        // 7️⃣ Validação do Tipo (obrigatório para todos)
         if (jComboBoxType.getSelectedItem() == null) {
             showError("Tipo do produto é obrigatório!");
             jComboBoxType.requestFocus();
             return false;
         }
 
-        // 8️⃣ Validação da Taxa
+        // 8️⃣ Validação da Taxa (obrigatório para todos)
         if (jComboBoxTaxeId.getSelectedItem() == null) {
             showError("Taxa é obrigatória!");
             jComboBoxTaxeId.requestFocus();
             return false;
         }
 
-        // 9️⃣ Validação da Reason Tax
+        // 9️⃣ Validação da Reason Tax (obrigatório para todos)
         if (jComboBoxReasonTaxeId.getSelectedItem() == null) {
             showError("Reason Tax é obrigatória!");
             jComboBoxReasonTaxeId.requestFocus();
             return false;
         }
 
-        // 🔟 Validação do Status
+        // 🔟 Validação do Status (obrigatório para todos)
         if (jComboBoxStatus.getSelectedItem() == null) {
             showError("Status é obrigatório!");
             jComboBoxStatus.requestFocus();
@@ -348,17 +394,17 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         return true;
     }
 
-// Método auxiliar para mostrar erros
+    // Método auxiliar para mostrar erros
     private void showError(String message) {
         JOptionPane.showMessageDialog(this, message, "Erro de Validação", JOptionPane.ERROR_MESSAGE);
     }
 
-// Método auxiliar para mostrar sucesso
+    // Método auxiliar para mostrar sucesso
     private void showSuccess(String message) {
         JOptionPane.showMessageDialog(this, message, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
     }
-    // Função simplificada para criar/salvar produto
 
+    // ✅ MÉTODO ATUALIZADO: Criar produto considerando tipo
     private void salvarProduto() {
         // 1️⃣ PRIMEIRO: Validação completa da UI
         if (!validarCamposUI()) {
@@ -392,20 +438,32 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         }
     }
 
+    // ✅ MÉTODO ATUALIZADO: Criar produto com valores condicionais
     private Product criarProdutoFromCampos() {
         Product produto = new Product();
 
         // Campos obrigatórios (já validados)
         produto.setCode(jTextFieldCode.getText().trim());
         produto.setDescription(jTextFieldDescription.getText().trim());
-        produto.setBarcode(jTextFieldBarCode.getText().trim());
         produto.setPrice(new BigDecimal(jTextFieldPrice.getText().replace(",", ".")));
-        produto.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
-        produto.setMinStock(Integer.parseInt(jTextFieldStockMinimo.getText().trim()));
 
         // Tipo - CORREÇÃO: converter string para enum
         String tipoSelecionado = jComboBoxType.getSelectedItem().toString();
-        produto.setType(ProductType.fromDescription(tipoSelecionado));
+        ProductType tipo = ProductType.fromDescription(tipoSelecionado);
+        produto.setType(tipo);
+
+        // ✅ CAMPOS CONDICIONAIS BASEADOS NO TIPO
+        if (tipo == ProductType.PRODUCT) {
+            // ✅ PRODUTO: Todos os campos são obrigatórios
+            produto.setBarcode(jTextFieldBarCode.getText().trim());
+            produto.setPurchasePrice(new BigDecimal(jTextFieldPurchasePrice.getText().replace(",", ".")));
+            produto.setMinStock(Integer.parseInt(jTextFieldStockMinimo.getText().trim()));
+        } else {
+            // ✅ SERVIÇO: Campos específicos são nulos ou zero
+            produto.setBarcode(null); // ✅ Código de barras nulo
+            produto.setPurchasePrice(BigDecimal.ZERO); // ✅ Preço de compra zero
+            produto.setMinStock(0); // ✅ Stock mínimo zero
+        }
 
         // Combos dinâmicos
         produto.setTaxe((Taxes) jComboBoxTaxeId.getSelectedItem());
@@ -513,7 +571,6 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jLabel18.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel18.setText("Razão:");
 
-        jComboBoxType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "product", "service" }));
         jComboBoxType.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBoxTypeItemStateChanged(evt);
@@ -538,7 +595,6 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel20.setText("Grupo");
 
-        jComboBoxTaxeId.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "selecione" }));
         jComboBoxTaxeId.addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 jComboBoxTaxeIdAncestorAdded(evt);
@@ -689,7 +745,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
                         .addComponent(jButtonClearForm)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonCancelFormAdd)))
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addContainerGap(51, Short.MAX_VALUE))
         );
         jPanelFormProductLayout.setVerticalGroup(
             jPanelFormProductLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -759,9 +815,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanelFormProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jPanelFormProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

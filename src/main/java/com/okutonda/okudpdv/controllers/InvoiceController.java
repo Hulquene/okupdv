@@ -26,15 +26,152 @@ public class InvoiceController {
     }
 
     // ==========================================================
-    // 🔹 OPERAÇÕES CRUD
+    // 🔹 OPERAÇÕES CRUD ATUALIZADAS
     // ==========================================================
     /**
-     * Cria uma fatura com produtos e pagamentos
+     * Cria uma fatura com produtos e pagamentos (aplica regras de status
+     * automaticamente)
      */
     public Invoices criarFaturaComProdutosEPagamentos(Invoices fatura, List<ProductSales> produtos, List<Payment> pagamentos) {
         return invoiceService.criarFaturaComProdutosEPagamentos(fatura, produtos, pagamentos);
     }
 
+    /**
+     * Atualiza o status de uma fatura baseado nos pagamentos atuais
+     */
+    public Invoices atualizarStatusFatura(Integer faturaId) {
+        return invoiceService.atualizarStatusFatura(faturaId);
+    }
+
+    /**
+     * Adiciona um pagamento a uma fatura existente e atualiza status
+     * automaticamente
+     */
+    public Payment adicionarPagamentoAFatura(Integer faturaId, Payment pagamento) {
+        return invoiceService.adicionarPagamentoAFatura(faturaId, pagamento);
+    }
+
+    /**
+     * Obtém o status atual de uma fatura baseado nos pagamentos
+     */
+    public String obterStatusDetalhadoFatura(Integer faturaId) {
+        Invoices fatura = invoiceService.buscarPorId(faturaId);
+        if (fatura == null) {
+            return "Fatura não encontrada";
+        }
+
+        BigDecimal totalFatura = fatura.getTotal();
+        BigDecimal totalPago = fatura.getPayTotal() != null ? fatura.getPayTotal() : BigDecimal.ZERO;
+        BigDecimal saldoDevedor = totalFatura.subtract(totalPago);
+
+        return String.format(
+                "Status: %s | Total: %.2f AOA | Pago: %.2f AOA | Pendente: %.2f AOA",
+                fatura.getStatus().getDescricao(),
+                totalFatura.doubleValue(),
+                totalPago.doubleValue(),
+                saldoDevedor.doubleValue()
+        );
+    }
+
+    // ==========================================================
+    // 🔹 NOVOS MÉTODOS PARA RELATÓRIOS
+    // ==========================================================
+    /**
+     * Lista faturas por status
+     */
+//    public List<Invoices> listarPorStatus(String status) {
+//        switch (status.toUpperCase()) {
+//            case "PAGA":
+//                return invoiceService.listarPagas();
+//            case "PARCIAL":
+//                return invoiceService.listar();
+//            case "PENDENTE":
+//                return invoiceService.listarPendentes();
+//            case "ATRASADA":
+//                return invoiceService.listarAtrasadas();
+//            case "CANCELADA":
+//                return invoiceService.listarAnuladas();
+//            default:
+//                return invoiceService.listarTodas();
+//        }
+//    }
+
+    /**
+     * Calcula estatísticas detalhadas de faturas
+     */
+    public EstatisticasDetalhadas calcularEstatisticasDetalhadas(LocalDate from, LocalDate to) {
+        List<Invoices> faturas = invoiceService.listarPorPeriodo(from, to);
+
+        BigDecimal totalFaturado = BigDecimal.ZERO;
+        BigDecimal totalRecebido = BigDecimal.ZERO;
+        BigDecimal totalPendente = BigDecimal.ZERO;
+        int countPagas = 0;
+        int countParciais = 0;
+        int countPendentes = 0;
+        int countAtrasadas = 0;
+
+        for (Invoices fatura : faturas) {
+            totalFaturado = totalFaturado.add(fatura.getTotal());
+            totalRecebido = totalRecebido.add(fatura.getPayTotal() != null ? fatura.getPayTotal() : BigDecimal.ZERO);
+
+            switch (fatura.getStatus()) {
+                case PAGO:
+                    countPagas++;
+                    break;
+                case PARCIAL:
+                    countParciais++;
+                    totalPendente = totalPendente.add(fatura.getTotal().subtract(fatura.getPayTotal()));
+                    break;
+                case PENDENTE:
+                    countPendentes++;
+                    totalPendente = totalPendente.add(fatura.getTotal());
+                    break;
+                case ATRASADO:
+                    countAtrasadas++;
+                    totalPendente = totalPendente.add(fatura.getTotal().subtract(fatura.getPayTotal() != null ? fatura.getPayTotal() : BigDecimal.ZERO));
+                    break;
+            }
+        }
+
+        return new EstatisticasDetalhadas(
+                totalFaturado, totalRecebido, totalPendente,
+                countPagas, countParciais, countPendentes, countAtrasadas
+        );
+    }
+
+    // ==========================================================
+    // 🔹 CLASSE PARA ESTATÍSTICAS DETALHADAS
+    // ==========================================================
+    public static class EstatisticasDetalhadas {
+
+        public final BigDecimal totalFaturado;
+        public final BigDecimal totalRecebido;
+        public final BigDecimal totalPendente;
+        public final int faturasPagas;
+        public final int faturasParciais;
+        public final int faturasPendentes;
+        public final int faturasAtrasadas;
+
+        public EstatisticasDetalhadas(BigDecimal totalFaturado, BigDecimal totalRecebido,
+                BigDecimal totalPendente, int faturasPagas,
+                int faturasParciais, int faturasPendentes,
+                int faturasAtrasadas) {
+            this.totalFaturado = totalFaturado;
+            this.totalRecebido = totalRecebido;
+            this.totalPendente = totalPendente;
+            this.faturasPagas = faturasPagas;
+            this.faturasParciais = faturasParciais;
+            this.faturasPendentes = faturasPendentes;
+            this.faturasAtrasadas = faturasAtrasadas;
+        }
+    }
+
+    // ==========================================================
+    // 🔹 OPERAÇÕES CRUD
+    // ==========================================================
+    /**
+     * Cria uma fatura com produtos e pagamentos
+     */
     /**
      * Cria uma fatura completa com produtos e pagamento automático
      */
@@ -98,7 +235,6 @@ public class InvoiceController {
 //    public Invoices emitirFatura(Integer id) {
 //        return invoiceService.emitirFatura(id);
 //    }
-
     public Invoices marcarComoPaga(Integer id) {
         return invoiceService.marcarComoPaga(id);
     }
@@ -253,7 +389,6 @@ public class InvoiceController {
 //            throw new RuntimeException("Erro ao criar fatura: " + e.getMessage(), e);
 //        }
 //    }
-
     /**
      * Método simplificado para criar faturas básicas
      */
@@ -274,7 +409,6 @@ public class InvoiceController {
 //
 //        return invoiceService.criarFaturaComProdutos(fatura, null);
 //    }
-
     /**
      * Calcula totais da fatura baseado nos produtos
      */

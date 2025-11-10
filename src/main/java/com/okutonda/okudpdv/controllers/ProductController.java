@@ -4,6 +4,7 @@ import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.dtos.ProductStockReport;
 import com.okutonda.okudpdv.services.ProductService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -295,6 +296,38 @@ public class ProductController {
         } catch (Exception e) {
             System.err.println("❌ Erro ao buscar produto por código/barcode: " + e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * ✅ Filtra produtos por código ou descrição
+     */
+    public List<Product> filtrarProdutos(String filtro) {
+        try {
+            if (filtro == null || filtro.trim().isEmpty()) {
+                return listAll();
+            }
+
+            String filtroLower = filtro.trim().toLowerCase();
+            List<Product> todosProdutos = listAll();
+            List<Product> produtosFiltrados = new ArrayList<>();
+
+            for (Product produto : todosProdutos) {
+                if (produto.getStatus().isActive()) {
+                    boolean matches = (produto.getCode() != null && produto.getCode().toLowerCase().contains(filtroLower))
+                            || (produto.getDescription() != null && produto.getDescription().toLowerCase().contains(filtroLower));
+
+                    if (matches) {
+                        produtosFiltrados.add(produto);
+                    }
+                }
+            }
+
+            return produtosFiltrados;
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao filtrar produtos: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

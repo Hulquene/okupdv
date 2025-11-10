@@ -1580,11 +1580,6 @@ public class JPanelPDV extends javax.swing.JFrame {
                 backDashboard();
             }
         } else {
-//            listProduts(null);
-//            listClients();
-//            iniciarRelogio(); // inicia o relógio
-//            String date = UtilDate.getDateNow();
-//            jLabelDateTime.setText(date);
             jLabelNameUserSeller.setText(shiftSession.getSeller().getName());
 
             int itemCount = jComboBoxOptions.getItemCount();
@@ -1600,84 +1595,7 @@ public class JPanelPDV extends javax.swing.JFrame {
 
     private void jButtonFinishInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishInvoiceActionPerformed
         // TODO add your handling code here:
-        finalizarVenda();
-        // Evita finalizar sem itens
-//        if (listProductOrder == null || listProductOrder.isEmpty()) {
-//            JOptionPane.showMessageDialog(this, "Adicione produto para fazer a venda", "Atenção", JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
-//        // Evita duplo clique
-//        jButtonFinishInvoice.setEnabled(false);
-//
-//        try {
-//            // 1) Cliente padrão (se não selecionado)
-//            if (clientSelected == null) {
-//                ClientDao clientDao = new ClientDao();
-//                clientSelected = clientDao.getClientDefault();
-//                if (clientSelected == null) {
-//                    JOptionPane.showMessageDialog(this, "Cliente padrão não configurado.", "Atenção", JOptionPane.WARNING_MESSAGE);
-//                    return;
-//                }
-//            }
-//
-//            // 2) Sessão/Operador
-//            if (shiftSession == null || shiftSession.getSeller() == null) {
-//                JOptionPane.showMessageDialog(this, "Abra um turno (operador não encontrado).", "Atenção", JOptionPane.WARNING_MESSAGE);
-//                return;
-//            }
-//
-//            // 3) Monta o Order “mínimo” (sem numeração/hash/valores pagos)
-//            Order order = new Order();
-//            order.setClient(clientSelected);
-//            order.setSeller(shiftSession.getSeller());
-//            order.setProducts(listProductOrder);
-//            // NÃO setar prefix/number/hash aqui; isso é do controller/service.
-//            // NÃO usar total/subTotal aqui; isso é recalculado no servidor.
-//
-//            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO NO DIÁLOGO (UI)
-//// (o controller recalcula novamente ao salvar)
-//            // 3.1) CALCULAR TOTAIS PARA EXIBIÇÃO (preço COM IVA embutido)
-//            Totais t = calcularTotaisLocalComIVA(listProductOrder);
-//            order.setSubTotal(t.subtotal.doubleValue()); // líquido
-//            order.setTotalTaxe(t.tax.doubleValue());     // IVA
-//            order.setTotal(t.total.doubleValue());       // bruto
-//
-////            System.out.println(order);
-//            // 4) Abre diálogo de pagamento (o diálogo calcula payTotal, troco, métodos, observações, etc.)
-//            JDialogOrder jdOrder = new JDialogOrder(this, true);
-//            jdOrder.setOrder(order);          // passa itens/cliente/seller para o preview no diálogo
-//            jdOrder.setVisible(true);
-//
-//            // 5) Verifica se o utilizador confirmou o pagamento
-//            Boolean confirmado = jdOrder.getResponse();
-//            if (Boolean.TRUE.equals(confirmado)) {
-//                // O diálogo deve ter preenchido:
-//                //   order.setPayTotal(...);
-//                //   order.setAmountReturned(...);
-//                //   order.setNote(...);           // se aplicares
-//                //   // não mexer no prefix/number/hash – isso será feito no controller
-//
-//                // 6) Finaliza no controller (ele calcula totais, reserva número, gera hash e persiste tudo)
-////                Order result = orderController.criarEFinalizar(order);
-////                if (result != null && result.getId() > 0) {
-////                    JOptionPane.showMessageDialog(this, "Venda efetuada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-//                clearOrder();   // limpa carrinho/campos
-////                    listProduts();  // recarrega grelha de produtos/stock
-////                    // opcional: imprimir/mostrar resumo result
-////                } else {
-////                    JOptionPane.showMessageDialog(this, "Falha ao gravar a venda.", "Erro", JOptionPane.ERROR_MESSAGE);
-////                }
-//            } else {
-//                // utilizador cancelou; nada a fazer
-//                // JOptionPane.showMessageDialog(this, "Pagamento cancelado.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//            }
-//
-//        } catch (Exception ex) {
-//            Logger.getLogger(ScreenPdv.class.getName()).log(Level.SEVERE, null, ex);
-//            JOptionPane.showMessageDialog(this, "Ocorreu um erro ao finalizar a venda:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-//        } finally {
-//            jButtonFinishInvoice.setEnabled(true);
-//        }
+        finalizarVenda();        
     }//GEN-LAST:event_jButtonFinishInvoiceActionPerformed
 
     private void jButtonRemoveProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveProdActionPerformed
