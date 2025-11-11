@@ -1344,12 +1344,12 @@ public final class JDialogSetting extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(null, "Campo Codigo invalido!!");
         } else if (jTextFieldTaxeName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Campo Descrição invalido!!");
-        } else if (jTextFieldTaxePerc.getText().isEmpty() || Util.isValidDouble(jTextFieldTaxePerc.getText()) == false) {
+        } else if (jTextFieldTaxePerc.getText().isEmpty() || Util.isDouble(jTextFieldTaxePerc.getText()) == false) {
             JOptionPane.showMessageDialog(null, "Campo Percetage invalido!!");
         } else {
             cModel.setName(jTextFieldTaxeName.getText());
             cModel.setCode(jTextFieldTaxeCode.getText());
-            cModel.setPercetage(Util.convertToBigDecimal(jTextFieldTaxePerc.getText()));
+            cModel.setPercetage(Util.toBigDecimal(jTextFieldTaxePerc.getText()));
             cModel.setIsDefault(jComboBoxTaxeIsDefault.getSelectedIndex());
         }
         if (cModel != null) {

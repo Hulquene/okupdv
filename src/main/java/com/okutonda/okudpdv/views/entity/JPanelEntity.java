@@ -6,13 +6,12 @@ package com.okutonda.okudpdv.views.entity;
 
 import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.SupplierController;
-import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.Supplier;
+import com.okutonda.okudpdv.helpers.JpanelLoader;
 import com.okutonda.okudpdv.helpers.UserSession;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -20,10 +19,11 @@ import javax.swing.table.DefaultTableModel;
  */
 public final class JPanelEntity extends javax.swing.JPanel {
 
-//    CountryController countryController = new CountryController();
-    ClientController clientController = new ClientController();
-    SupplierController supplierController = new SupplierController();
-    UserSession session;
+//    JpanelLoader jpload = new JpanelLoader();
+    private final JpanelLoader jpload = new JpanelLoader();
+    private final ClientController clientController = new ClientController();
+    private final SupplierController supplierController = new SupplierController();
+    private final UserSession session;
 
     /**
      * Creates new form JPanelClient
@@ -32,8 +32,11 @@ public final class JPanelEntity extends javax.swing.JPanel {
         initComponents();
 //        applyTheme();
         session = UserSession.getInstance();
-        listClients();
-        listSuppliers();
+        inicializarComponentes();
+//         applyTheme();
+        JPanelClients pClients = new JPanelClients();
+        jpload.jPanelLoader(jPanelEntityContent, pClients);
+        jLabelJpanelSelected.setText("CLIENTES");
     }
 
 //    private void applyTheme() {
@@ -41,130 +44,70 @@ public final class JPanelEntity extends javax.swing.JPanel {
 //        // Painel de fundo da janela
 //        jPanelClient.setBackground(TemaCores.BG_LIGHT);
 //    }
+    private void inicializarComponentes() {
+        // Carregar estatísticas iniciais
+        carregarEstatisticas();
 
-    public void listClients() {
-        ClientDao cDao = new ClientDao();
-        List<Clients> list = cDao.findAll();
-//        jTableClients.setModel(new DefaultTableModel);
-        DefaultTableModel data = (DefaultTableModel) jTableClients.getModel();
-//        data.setM
-        data.setNumRows(0);
-        for (Clients c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getNif(),
-                c.getName(),
-                c.getEmail(),
-                c.getPhone(),
-                //                c.getCountry(),
-                //                c.getCity(),
-                //                c.getState(),
-                c.getAddress(),
-                c.getZipCode(),
-                c.getStatus(),
-                c.getIsDefault()
+        // Carregar painel de clientes por padrão
+        JPanelClients pClients = new JPanelClients();
+        jpload.jPanelLoader(jPanelEntityContent, pClients);
+        jLabelJpanelSelected.setText("CLIENTES");
+    }
+
+    private void carregarEstatisticas() {
+        try {
+            // Carregar estatísticas em uma thread separada para não travar a UI
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    // Estatísticas de Clientes
+                    List<Clients> todosClientes = clientController.getAll();
+                    List<Clients> clientesAtivos = clientController.getActiveClients();
+
+                    int totalClientes = todosClientes.size();
+                    int clientesAtivosCount = clientesAtivos.size();
+                    int clientesInativosCount = totalClientes - clientesAtivosCount;
+
+                    jLabelTotalClients.setText(String.valueOf(totalClientes));
+                    jLabel9clientAtive.setText(String.valueOf(clientesAtivosCount));
+                    jLabelClientInative.setText(String.valueOf(clientesInativosCount));
+
+                    // Estatísticas de Fornecedores
+                    List<Supplier> todosFornecedores = supplierController.listarTodos();
+                    List<Supplier> fornecedoresAtivos = supplierController.listarAtivos();
+
+                    int totalFornecedores = todosFornecedores.size();
+                    int fornecedoresAtivosCount = fornecedoresAtivos.size();
+                    int fornecedoresInativosCount = totalFornecedores - fornecedoresAtivosCount;
+
+                    jLabel8SupplierTotal.setText(String.valueOf(totalFornecedores));
+                    jLabelSuplierAtive.setText(String.valueOf(fornecedoresAtivosCount));
+                    jLabelSupplierInative.setText(String.valueOf(fornecedoresInativosCount));
+
+                } catch (Exception e) {
+                    System.err.println("❌ Erro ao carregar estatísticas: " + e.getMessage());
+                    // Definir valores padrão em caso de erro
+                    definirValoresPadrao();
+                }
             });
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao iniciar carregamento de estatísticas: " + e.getMessage());
+            definirValoresPadrao();
         }
     }
 
-    public void filterListClients(String txt) {
-        ClientDao cDao = new ClientDao();
-        List<Clients> list = cDao.filter(txt);
-        DefaultTableModel data = (DefaultTableModel) jTableClients.getModel();
-        data.setNumRows(0);
-        for (Clients c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getNif(),
-                c.getName(),
-                c.getEmail(),
-                c.getPhone(),
-                //                c.getCountry(),
-                //                c.getCity(),
-                //                c.getState(),
-                c.getAddress(),
-                c.getZipCode(),
-                c.getStatus(),
-                c.getIsDefault()
-            });
-        }
+    private void definirValoresPadrao() {
+        jLabelTotalClients.setText("0");
+        jLabel9clientAtive.setText("0");
+        jLabelClientInative.setText("0");
+        jLabel8SupplierTotal.setText("0");
+        jLabelSuplierAtive.setText("0");
+        jLabelSupplierInative.setText("0");
     }
+    // Método público para atualizar estatísticas de outros componentes
 
-    public void listSuppliers() {
-//        SupplierDao cDao = new SupplierDao();
-        List<Supplier> list = supplierController.listarTodos();
-        DefaultTableModel data = (DefaultTableModel) jTableSuppliers.getModel();
-        data.setNumRows(0);
-        for (Supplier c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getNif(),
-                c.getName(),
-                c.getEmail(),
-                c.getPhone(),
-                //                c.getCountry(),
-                //                c.getCity(),
-                //                c.getState(),
-                c.getAddress(),
-                c.getZipCode(),
-                c.getStatus(),});
-        }
-    }
-
-    public void filterSupplierList(String txt) {
-//        SupplierDao cDao = new SupplierDao();
-        List<Supplier> list = supplierController.filtrar(txt);
-        DefaultTableModel data = (DefaultTableModel) jTableSuppliers.getModel();
-        data.setNumRows(0);
-        for (Supplier c : list) {
-            data.addRow(new Object[]{
-                c.getId(),
-                c.getNif(),
-                c.getName(),
-                c.getEmail(),
-                c.getPhone(),
-                c.getGroupId(),
-                //                c.getCountry(),
-                //                c.getCity(),
-                //                c.getState(),
-                c.getAddress(),
-                c.getZipCode(),
-                c.getStatus(),
-                c.getIsDefault()
-            });
-        }
-    }
-
-//    public Clients validateClient() {
-//
-//        Clients cModel = new Clients();
-//        if (jTextFieldNifClient.getText().isEmpty() || jTextFieldNifClient.getText().length() < 9) {
-//            JOptionPane.showMessageDialog(null, "Campo NIF invalido!! no minimo 9 caracteres");
-//        } else if (jTextFieldNameClient.getText().isEmpty() || jTextFieldNameClient.getText().length() < 3) {
-//            JOptionPane.showMessageDialog(null, "Campo Nome invalido!! no minimo 3 caracteres");
-//        } else if (jTextFieldAddressClient.getText().isEmpty() || jTextFieldAddressClient.getText().length() < 3) {
-//            JOptionPane.showMessageDialog(null, "Campo Endereço invalido!! no minimo 3 caracteres");
-//        } else {
-//            System.out.println("nome:" + jTextFieldNameClient.getText());
-//            cModel.setNif(jTextFieldNifClient.getText());
-//            cModel.setName(jTextFieldNameClient.getText());
-//            cModel.setEmail(jTextFieldEmailClient.getText());
-//            cModel.setAddress(jTextFieldAddressClient.getText());
-//            cModel.setPhone(jTextFieldPhoneClient.getText());
-//            cModel.setCountry((Countries) jComboBoxCountryClient.getSelectedItem());
-//            cModel.setCity(jTextFieldCityClient.getText());
-//            cModel.setState(jTextFieldStateClient.getText());
-//            cModel.setZipCode(jTextFieldZipCodeClient.getText());
-//            cModel.setStatus(jComboBoxDefaultClient.getSelectedIndex());
-//            cModel.setIsDefault(jComboBoxDefaultClient.getSelectedIndex());
-//            return cModel;
-//        }
-//
-//        return null;
-//    }
-    public void screanListClient() {
-        jTabbedPaneClient.setSelectedIndex(0);
-        listClients();
+    public void atualizarEstatisticas() {
+        carregarEstatisticas();
     }
 
     /**
@@ -176,525 +119,226 @@ public final class JPanelEntity extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTabbedPaneClient = new javax.swing.JTabbedPane();
-        jPanelClient = new javax.swing.JPanel();
-        jButtonFilterClientNameTable = new javax.swing.JButton();
-        jTextFieldFilterClientNameTable = new javax.swing.JTextField();
-        jButtonAlterClientSeletedTable = new javax.swing.JButton();
-        jButtonDeleteClientSelectedTable = new javax.swing.JButton();
-        jButtonCreateNewClient = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTableClients = new javax.swing.JTable();
-        jButtonCreateViewClient = new javax.swing.JButton();
-        jPanelSearchSupplier = new javax.swing.JPanel();
-        jTextFieldFilterNameTable = new javax.swing.JTextField();
-        jButtonAlterSeleted = new javax.swing.JButton();
-        jButtonDeleteSelected = new javax.swing.JButton();
-        jButtonOpenFormSupplier = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTableSuppliers = new javax.swing.JTable();
-        jButtonViewSupplierSelected = new javax.swing.JButton();
+        jPanel10 = new javax.swing.JPanel();
+        jToolBar1 = new javax.swing.JToolBar();
+        jButtonClients = new javax.swing.JButton();
+        jButtonSuppliers = new javax.swing.JButton();
+        jLabelJpanelSelected = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabelTotalClients = new javax.swing.JLabel();
+        jLabel8SupplierTotal = new javax.swing.JLabel();
+        jLabel9clientAtive = new javax.swing.JLabel();
+        jLabelClientInative = new javax.swing.JLabel();
+        jLabelSuplierAtive = new javax.swing.JLabel();
+        jLabelSupplierInative = new javax.swing.JLabel();
+        jPanelEntityContent = new javax.swing.JPanel();
 
         setMinimumSize(new java.awt.Dimension(900, 600));
         setPreferredSize(new java.awt.Dimension(900, 600));
 
-        jTabbedPaneClient.setBackground(new java.awt.Color(255, 255, 255));
+        jToolBar1.setRollover(true);
 
-        jPanelClient.setPreferredSize(new java.awt.Dimension(900, 600));
-
-        jButtonFilterClientNameTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Search.png"))); // NOI18N
-        jButtonFilterClientNameTable.setText("Pesquisar");
-        jButtonFilterClientNameTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonFilterClientNameTable.addActionListener(new java.awt.event.ActionListener() {
+        jButtonClients.setBackground(new java.awt.Color(0, 102, 255));
+        jButtonClients.setText("Clientes");
+        jButtonClients.setFocusable(false);
+        jButtonClients.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonClients.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonClients.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonFilterClientNameTableActionPerformed(evt);
+                jButtonClientsActionPerformed(evt);
             }
         });
+        jToolBar1.add(jButtonClients);
 
-        jTextFieldFilterClientNameTable.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                jTextFieldFilterClientNameTableKeyReleased(evt);
-            }
-        });
-
-        jButtonAlterClientSeletedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
-        jButtonAlterClientSeletedTable.setText("Editar");
-        jButtonAlterClientSeletedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonAlterClientSeletedTable.addActionListener(new java.awt.event.ActionListener() {
+        jButtonSuppliers.setBackground(new java.awt.Color(0, 102, 255));
+        jButtonSuppliers.setText("Fornecedores");
+        jButtonSuppliers.setFocusable(false);
+        jButtonSuppliers.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jButtonSuppliers.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        jButtonSuppliers.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAlterClientSeletedTableActionPerformed(evt);
+                jButtonSuppliersActionPerformed(evt);
             }
         });
+        jToolBar1.add(jButtonSuppliers);
 
-        jButtonDeleteClientSelectedTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
-        jButtonDeleteClientSelectedTable.setText("Excluir");
-        jButtonDeleteClientSelectedTable.setToolTipText("Apagar Cliente");
-        jButtonDeleteClientSelectedTable.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonDeleteClientSelectedTable.setSelected(true);
-        jButtonDeleteClientSelectedTable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDeleteClientSelectedTableActionPerformed(evt);
-            }
-        });
+        jLabelJpanelSelected.setText("Tela Selecionada");
 
-        jButtonCreateNewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
-        jButtonCreateNewClient.setText("Adicionar");
-        jButtonCreateNewClient.setToolTipText("Cadastrar Cliente");
-        jButtonCreateNewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonCreateNewClient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCreateNewClientActionPerformed(evt);
-            }
-        });
-
-        jTableClients.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "ID", "NIF", "Nome", "Email", "Telefone", "Endereço", "Zip", "Status", "Padrão"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jTableClients.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTableClientsMouseClicked(evt);
-            }
-        });
-        jScrollPane1.setViewportView(jTableClients);
-
-        jButtonCreateViewClient.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
-        jButtonCreateViewClient.setText("Ver");
-        jButtonCreateViewClient.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonCreateViewClient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCreateViewClientActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanelClientLayout = new javax.swing.GroupLayout(jPanelClient);
-        jPanelClient.setLayout(jPanelClientLayout);
-        jPanelClientLayout.setHorizontalGroup(
-            jPanelClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelClientLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanelClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelClientLayout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addContainerGap())
-                    .addGroup(jPanelClientLayout.createSequentialGroup()
-                        .addComponent(jTextFieldFilterClientNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonFilterClientNameTable)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
-                        .addComponent(jButtonCreateNewClient)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButtonCreateViewClient)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonAlterClientSeletedTable)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonDeleteClientSelectedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(8, 8, 8))))
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabelJpanelSelected)
+                .addGap(86, 86, 86))
         );
-        jPanelClientLayout.setVerticalGroup(
-            jPanelClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelClientLayout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addGroup(jPanelClientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldFilterClientNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonFilterClientNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonCreateNewClient, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonAlterClientSeletedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonDeleteClientSelectedTable, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonCreateViewClient, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE)
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabelJpanelSelected)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jTabbedPaneClient.addTab("Clientes", jPanelClient);
+        jLabel1.setText("Clinete Ativos");
 
-        jTextFieldFilterNameTable.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                jTextFieldFilterNameTableKeyReleased(evt);
-            }
-        });
+        jLabel2.setText("Total de cliente");
 
-        jButtonAlterSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Edit Pencil.png"))); // NOI18N
-        jButtonAlterSeleted.setText("Alterar");
-        jButtonAlterSeleted.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonAlterSeleted.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonAlterSeletedActionPerformed(evt);
-            }
-        });
+        jLabel3.setText("Total Fornecedores");
 
-        jButtonDeleteSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
-        jButtonDeleteSelected.setText("Excluir");
-        jButtonDeleteSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonDeleteSelected.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonDeleteSelectedActionPerformed(evt);
-            }
-        });
+        jLabel4.setText("Fornecedores Ativo");
 
-        jButtonOpenFormSupplier.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
-        jButtonOpenFormSupplier.setText("Adicionar");
-        jButtonOpenFormSupplier.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonOpenFormSupplier.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonOpenFormSupplierActionPerformed(evt);
-            }
-        });
+        jLabel5.setText("Clinete  Inativos");
 
-        jTableSuppliers.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+        jLabel6.setText("Fornecedores inativos");
 
-            },
-            new String [] {
-                "ID", "NIF", "Nome", "Email", "Telefone", "Endereço", "Zip", "Status"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false, false
-            };
+        jLabelTotalClients.setText("Total de cliente");
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
+        jLabel8SupplierTotal.setText("Total Fornecedores");
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jTableSuppliers.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTableSuppliersMouseClicked(evt);
-            }
-        });
-        jScrollPane2.setViewportView(jTableSuppliers);
+        jLabel9clientAtive.setText("Clinete Ativos");
 
-        jButtonViewSupplierSelected.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Binoculars.png"))); // NOI18N
-        jButtonViewSupplierSelected.setText("Ver");
-        jButtonViewSupplierSelected.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        jButtonViewSupplierSelected.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonViewSupplierSelectedActionPerformed(evt);
-            }
-        });
+        jLabelClientInative.setText("Clinete  Inativos");
 
-        javax.swing.GroupLayout jPanelSearchSupplierLayout = new javax.swing.GroupLayout(jPanelSearchSupplier);
-        jPanelSearchSupplier.setLayout(jPanelSearchSupplierLayout);
-        jPanelSearchSupplierLayout.setHorizontalGroup(
-            jPanelSearchSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelSearchSupplierLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanelSearchSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(jPanelSearchSupplierLayout.createSequentialGroup()
-                        .addComponent(jTextFieldFilterNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 299, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 171, Short.MAX_VALUE)
-                        .addComponent(jButtonOpenFormSupplier)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonViewSupplierSelected)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonAlterSeleted)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonDeleteSelected)))
-                .addContainerGap())
+        jLabelSuplierAtive.setText("Fornecedores Ativo");
+
+        jLabelSupplierInative.setText("Fornecedores inativos");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabelTotalClients))
+                .addGap(49, 49, 49)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel8SupplierTotal))
+                .addGap(75, 75, 75)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel9clientAtive))
+                .addGap(75, 75, 75)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabelClientInative))
+                .addGap(64, 64, 64)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(26, 26, 26)
+                        .addComponent(jLabel6))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabelSuplierAtive)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabelSupplierInative)))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
-        jPanelSearchSupplierLayout.setVerticalGroup(
-            jPanelSearchSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelSearchSupplierLayout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(jPanelSearchSupplierLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextFieldFilterNameTable, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonOpenFormSupplier, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonAlterSeleted, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonDeleteSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonViewSupplierSelected, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
-                .addGap(8, 8, 8))
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelTotalClients)
+                    .addComponent(jLabel8SupplierTotal)
+                    .addComponent(jLabel9clientAtive)
+                    .addComponent(jLabelClientInative)
+                    .addComponent(jLabelSuplierAtive)
+                    .addComponent(jLabelSupplierInative))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
-        jTabbedPaneClient.addTab("Fornecedores", jPanelSearchSupplier);
+        javax.swing.GroupLayout jPanelEntityContentLayout = new javax.swing.GroupLayout(jPanelEntityContent);
+        jPanelEntityContent.setLayout(jPanelEntityContentLayout);
+        jPanelEntityContentLayout.setHorizontalGroup(
+            jPanelEntityContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        jPanelEntityContentLayout.setVerticalGroup(
+            jPanelEntityContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 457, Short.MAX_VALUE)
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jTabbedPaneClient)
-                .addContainerGap())
+            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanelEntityContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPaneClient, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanelEntityContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonViewSupplierSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewSupplierSelectedActionPerformed
+    private void jButtonClientsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClientsActionPerformed
         // TODO add your handling code here:
-        int id = Integer.parseInt(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        Supplier supplier = supplierController.getById(id);
-        JOptionPane.showMessageDialog(null, "supplier :" + supplier.getName() + "\n NIF:" + supplier.getNif() + "\n Email:" + supplier.getEmail() + "\n Endereço:" + supplier.getAddress());
-    }//GEN-LAST:event_jButtonViewSupplierSelectedActionPerformed
+        JPanelClients pClient = new JPanelClients();
+        jpload.jPanelLoader(jPanelEntityContent, pClient);
+        jLabelJpanelSelected.setText("CLIENTES");
 
-    private void jTableSuppliersMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableSuppliersMouseClicked
+        // Atualizar estatísticas quando mudar para fornecedores
+        carregarEstatisticas();
+    }//GEN-LAST:event_jButtonClientsActionPerformed
+
+    private void jButtonSuppliersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSuppliersActionPerformed
         // TODO add your handling code here:
-        //        jTabbedPaneSupplier.setSelectedIndex(1);
-        //        jTextFieldId.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        //        jTextFieldNif.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 1).toString());
-        //        jTextFieldName.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 2).toString());
-        //        jTextFieldEmail.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 3).toString());
-        //        jTextFieldPhone.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 4).toString());
-        //        jComboBoxCountry.setSelectedItem(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 5));
-        //        jTextFieldCity.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 6).toString());
-        //        jTextFieldState.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 7).toString());
-        //        jTextFieldAddress.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 8).toString());
-        //        jTextFieldZipCode.setText(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 9).toString());
-        //        jComboBoxStatus.setSelectedIndex((int) jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 10));
-    }//GEN-LAST:event_jTableSuppliersMouseClicked
-
-    private void jButtonOpenFormSupplierActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenFormSupplierActionPerformed
-        // TODO add your handling code here:
-        //        jTabbedPaneSupplier.setSelectedIndex(1);
-        //        Utilities helpUtil = new Utilities();
-        //        helpUtil.clearScreen(jPanelFormSupplier);
-        JDialogFormSupplier formSupplier = new JDialogFormSupplier(null, true);
-        formSupplier.setVisible(true);
-        Boolean resp = formSupplier.getResponse();
-        if (resp == true) {
-            JOptionPane.showMessageDialog(null, "Usuario salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            listSuppliers();
-        }
-    }//GEN-LAST:event_jButtonOpenFormSupplierActionPerformed
-
-    private void jButtonDeleteSelectedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteSelectedActionPerformed
-        // TODO add your handling code here:
-        int id = 0;
-        try {
-            id = (int) jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Fornecedor na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (id > 0) {
-                Supplier client = supplierController.getById(id);
-                int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-                if (sair == JOptionPane.YES_OPTION) {
-                    if (supplierController.delete(id)) {
-                        JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
-                        listSuppliers();
-                    }
-                }
-            }
-        }
-
-        //        int id = Integer.parseInt(jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0).toString());
-        //        Supplier client = supplierController.getId(id);
-        //        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
-        //        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-        //        if (sair == JOptionPane.YES_OPTION) {
-        //            if (supplierController.deleteId(id)) {
-        //                JOptionPane.showMessageDialog(null, "suppliers excluido com Sucesso!!");
-        //                listSuppliers();
-        //            }
-        //        }
-    }//GEN-LAST:event_jButtonDeleteSelectedActionPerformed
-
-    private void jButtonAlterSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterSeletedActionPerformed
-        // TODO add your handling code here:
-        int value = 0;
-        try {
-            value = (int) jTableSuppliers.getValueAt(jTableSuppliers.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um Fornecedor na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (value > 0) {
-                JDialogFormSupplier formUser = new JDialogFormSupplier(null, true);
-                formUser.setSupplier(value);
-                formUser.setVisible(true);
-                Boolean resp = formUser.getResponse();
-                if (resp == true) {
-                    JOptionPane.showMessageDialog(null, "Usuario salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    listSuppliers();
-                }
-            }
-        }
-    }//GEN-LAST:event_jButtonAlterSeletedActionPerformed
-
-    private void jTextFieldFilterNameTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldFilterNameTableKeyReleased
-        // TODO add your handling code here:
-        String txt = jTextFieldFilterNameTable.getText();
-        if (!txt.isEmpty()) {
-            filterSupplierList(txt);
-        } else {
-            listSuppliers();
-        }
-    }//GEN-LAST:event_jTextFieldFilterNameTableKeyReleased
-
-    private void jButtonCreateViewClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateViewClientActionPerformed
-        // TODO add your handling code here:
-        int id = 0;
-        try {
-            id = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (id > 0) {
-                JDialogViewClient viewClient = new JDialogViewClient(null, true);
-                viewClient.setClient(id);
-                viewClient.setVisible(true);
-                //                Boolean resp = viewClient.getResponse();
-                //                Clients client = clientController.getId(id);
-                //                JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
-            }
-        }
-        //        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-        //        Clients client = clientController.getId(id);
-        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName() + "\n NIF:" + client.getNif() + "\n Email:" + client.getEmail() + "\n Endereço:" + client.getAddress());
-    }//GEN-LAST:event_jButtonCreateViewClientActionPerformed
-
-    private void jTableClientsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableClientsMouseClicked
-        // TODO add your handling code here:
-        //        jTabbedPaneClient.setSelectedIndex(1);
-        //        jTextFieldIdClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-        //        jTextFieldNifClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 1).toString());
-        //        jTextFieldNameClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 2).toString());
-        //        jTextFieldEmailClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 3).toString());
-        //        jTextFieldPhoneClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 4).toString());
-        //        jComboBoxCountryClient.setSelectedItem(jTableClients.getValueAt(jTableClients.getSelectedRow(), 5));
-        //        jTextFieldCityClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 6).toString());
-        //        jTextFieldStateClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 7).toString());
-        //        jTextFieldAddressClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 8).toString());
-        //        jTextFieldZipCodeClient.setText(jTableClients.getValueAt(jTableClients.getSelectedRow(), 9).toString());
-        //        jComboBoxStatusClient.setSelectedIndex((int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 10));
-    }//GEN-LAST:event_jTableClientsMouseClicked
-
-    private void jButtonCreateNewClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCreateNewClientActionPerformed
-        // TODO add your handling code here:
-        //        jTabbedPaneClient.setSelectedIndex(1);
-
-        JDialogFormClient formClient = new JDialogFormClient(null, true);
-        formClient.setVisible(true);
-        Boolean resp = formClient.getResponse();
-        if (resp == true) {
-            JOptionPane.showMessageDialog(null, "Usuario salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            listClients();
-        }
-    }//GEN-LAST:event_jButtonCreateNewClientActionPerformed
-
-    private void jButtonDeleteClientSelectedTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteClientSelectedTableActionPerformed
-        // TODO add your handling code here:
-        System.out.println("teste");
-        int id = 0;
-        try {
-            id = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (id > 0) {
-                Clients client = clientController.getById(id);
-                int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-                if (sair == JOptionPane.YES_OPTION) {
-                    if (clientController.deleteById(id)) {
-                        JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
-                        listClients();
-                    }
-                }
-            }
-        }
-
-        //        int id = Integer.parseInt(jTableClients.getValueAt(jTableClients.getSelectedRow(), 0).toString());
-        //        Clients client = clientController.getId(id);
-        //        //        JOptionPane.showMessageDialog(null, "Cliente :" + client.getName());
-        //        int sair = JOptionPane.showConfirmDialog(null, "Tem certeza que deseja Deletar," + client.getName() + "?", "Atenção", JOptionPane.YES_NO_OPTION);
-        //        if (sair == JOptionPane.YES_OPTION) {
-        //            if (clientController.deleteId(id)) {
-        //                JOptionPane.showMessageDialog(null, "Client excluido com Sucesso!!");
-        //                listClients();
-        //            }
-        //        }
-    }//GEN-LAST:event_jButtonDeleteClientSelectedTableActionPerformed
-
-    private void jButtonAlterClientSeletedTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAlterClientSeletedTableActionPerformed
-        // TODO add your handling code here:
-        int value = 0;
-        try {
-            value = (int) jTableClients.getValueAt(jTableClients.getSelectedRow(), 0);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Selecione um cliente na tabela!!", "Atencao", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            if (value > 0) {
-                JDialogFormClient formClient = new JDialogFormClient(null, true);
-                formClient.setClient(value);
-                formClient.setVisible(true);
-                Boolean resp = formClient.getResponse();
-                if (resp == true) {
-                    JOptionPane.showMessageDialog(null, "Cliente salvo com sucesso!!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    listClients();
-                }
-            }
-        }
-    }//GEN-LAST:event_jButtonAlterClientSeletedTableActionPerformed
-
-    private void jTextFieldFilterClientNameTableKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldFilterClientNameTableKeyReleased
-        // TODO add your handling code here:
-        String txt = jTextFieldFilterClientNameTable.getText();
-        if (!txt.isEmpty()) {
-            filterListClients(txt);
-        } else {
-            listClients();
-        }
-    }//GEN-LAST:event_jTextFieldFilterClientNameTableKeyReleased
-
-    private void jButtonFilterClientNameTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFilterClientNameTableActionPerformed
-        // TODO add your handling code here:
-        String txt = jTextFieldFilterClientNameTable.getText();
-        if (!txt.isEmpty()) {
-            filterListClients(txt);
-        } else {
-            listClients();
-        }
-    }//GEN-LAST:event_jButtonFilterClientNameTableActionPerformed
+        JPanelSuppliers pSupp = new JPanelSuppliers();
+        jpload.jPanelLoader(jPanelEntityContent, pSupp);
+        jLabelJpanelSelected.setText("FORNECEDORES");
+    }//GEN-LAST:event_jButtonSuppliersActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton jButtonAlterClientSeletedTable;
-    public javax.swing.JButton jButtonAlterSeleted;
-    private javax.swing.JButton jButtonCreateNewClient;
-    private javax.swing.JButton jButtonCreateViewClient;
-    public javax.swing.JButton jButtonDeleteClientSelectedTable;
-    public javax.swing.JButton jButtonDeleteSelected;
-    private javax.swing.JButton jButtonFilterClientNameTable;
-    private javax.swing.JButton jButtonOpenFormSupplier;
-    private javax.swing.JButton jButtonViewSupplierSelected;
-    private javax.swing.JPanel jPanelClient;
-    private javax.swing.JPanel jPanelSearchSupplier;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTabbedPane jTabbedPaneClient;
-    private javax.swing.JTable jTableClients;
-    private javax.swing.JTable jTableSuppliers;
-    private javax.swing.JTextField jTextFieldFilterClientNameTable;
-    private javax.swing.JTextField jTextFieldFilterNameTable;
+    private javax.swing.JButton jButtonClients;
+    private javax.swing.JButton jButtonSuppliers;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel8SupplierTotal;
+    private javax.swing.JLabel jLabel9clientAtive;
+    private javax.swing.JLabel jLabelClientInative;
+    private javax.swing.JLabel jLabelJpanelSelected;
+    private javax.swing.JLabel jLabelSuplierAtive;
+    private javax.swing.JLabel jLabelSupplierInative;
+    private javax.swing.JLabel jLabelTotalClients;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanelEntityContent;
+    private javax.swing.JToolBar jToolBar1;
     // End of variables declaration//GEN-END:variables
 }

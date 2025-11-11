@@ -80,7 +80,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
 
     public void loadListPurchase(List<Purchase> list) {
         DefaultTableModel model = (DefaultTableModel) jTableListProduct.getModel();
-        model.setRowCount(0); // limpa tabela
+        model.setRowCount(0);
 
         if (list == null || list.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Nenhuma compra encontrada para entrada de estoque.");
@@ -91,26 +91,24 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
             if (p.getItems() != null) {
                 for (PurchaseItem item : p.getItems()) {
 
-                    System.out.println(item);
-
                     int quantidade = item.getQuantidade() != null ? item.getQuantidade() : 0;
                     int entrada = item.getQuantidadeEntrada() != null ? item.getQuantidadeEntrada() : 0;
                     int faltante = Math.max(quantidade - entrada, 0);
-                    String status = item.getEntradaStatus() != null ? item.getEntradaStatus() : "nao_iniciado";
 
-                    // ✅ Só lista se ainda houver quantidade pendente
+                    // ✅ CORREÇÃO SIMPLES: Usar toString() ou name()
+                    String status = item.getEntradaStatus() != null
+                            ? item.getEntradaStatus().toString() : "PENDENTE";
+
                     if (faltante > 0) {
                         model.addRow(new Object[]{
-                            item.getProduct().getId(), // ID Produto
-                            item.getProduct().getDescription(), // Descrição
-                            //                            p.getInvoiceNumber(), // Nº Fatura
-                            quantidade, // Qtd total da compra
-                            entrada, // Qtd já lançada
-                            faltante, // Qtd restante
-                            status.toUpperCase(), // Estado (NAO_INICIADO / PARCIAL)
-                            item.getPrecoCusto(), // Preço de custo
-                            p.getId(), // ID da compra
-                        });
+                            item.getProduct().getId(),
+                            item.getProduct().getDescription(),
+                            quantidade,
+                            entrada,
+                            faltante,
+                            status,
+                            item.getPrecoCusto(),
+                            p.getId(),});
                     }
                 }
             }
@@ -744,7 +742,7 @@ public class JDialogStockMovementPurchase extends javax.swing.JDialog {
         }
 
         // 🔹 2️⃣ Verifica se é número válido
-        if (!Util.checkIsNumber(texto)) {
+        if (!Util.isNumber(texto)) {
             // opcional: alerta visual sem forçar "1"
 //            jTextFieldQtdProdSelected.setBackground(Color.decode("#f8d7da")); // vermelho leve
             jTextFieldQtdProdSelected.setText(String.valueOf("1"));

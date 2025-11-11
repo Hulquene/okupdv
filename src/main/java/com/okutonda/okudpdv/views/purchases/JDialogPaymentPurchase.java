@@ -2,17 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package com.okutonda.okudpdv.views.invoice;
+package com.okutonda.okudpdv.views.purchases;
 
-import com.okutonda.okudpdv.controllers.InvoiceController;
-import com.okutonda.okudpdv.controllers.PaymentController;
-import com.okutonda.okudpdv.data.entities.DocumentType;
-import com.okutonda.okudpdv.data.entities.Invoices;
-import com.okutonda.okudpdv.data.entities.Payment;
+import com.okutonda.okudpdv.controllers.PurchaseController;
+import com.okutonda.okudpdv.controllers.PurchasePaymentController;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
+import com.okutonda.okudpdv.data.entities.Purchase;
+import com.okutonda.okudpdv.data.entities.PurchasePayment;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
+import com.okutonda.okudpdv.helpers.Util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -26,87 +26,83 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author hr
  */
-public class JDialogPaymentInvoice extends javax.swing.JDialog {
+public class JDialogPaymentPurchase extends javax.swing.JDialog {
 
-    private Invoices invoice;
-    private Invoices response = null;
+    private Purchase purchase;
+    private Purchase response = null;
     private final DecimalFormat df = new DecimalFormat("#,##0.00");
-    private final PaymentController paymentController = new PaymentController();
-    private final InvoiceController invoiceController = new InvoiceController();
+    private final PurchasePaymentController paymentController = new PurchasePaymentController();
+    private final PurchaseController purchaseController = new PurchaseController();
     private final UserSession userSession = UserSession.getInstance();
 
-    private List<Payment> pagamentos = new ArrayList<>();
-    private BigDecimal totalFatura = BigDecimal.ZERO;
+    private List<PurchasePayment> pagamentos = new ArrayList<>();
+    private BigDecimal totalCompra = BigDecimal.ZERO;
     private BigDecimal totalRegistado = BigDecimal.ZERO;
     private BigDecimal totalPendente = BigDecimal.ZERO;
 
     /**
-     * Creates new form JDialogPaymentInvoice
+     * Creates new form JDialogPayPurchase
      */
-    public JDialogPaymentInvoice(java.awt.Frame parent, boolean modal) {
+    public JDialogPaymentPurchase(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+
         inicializarComponentes();
     }
 
-    public Invoices getResponse() {
+    public Purchase getResponse() {
         return response;
     }
 
-    public void setInvoice(Invoices inv) {
-        this.invoice = inv;
-        carregarDadosFatura();
+    public void setPurchase(Purchase purchase) {
+        this.purchase = purchase;
+        carregarDadosCompra();
         atualizarTotais();
     }
 
     private void inicializarComponentes() {
         // Configurar combobox de modos de pagamento
-        jComboBoxMoePayment.removeAllItems();
+        jComboBoxPaymentMode.removeAllItems();
         for (PaymentMode mode : PaymentMode.getActiveModes()) {
-            jComboBoxMoePayment.addItem(mode.getDescricao() + " (" + mode.getCodigo() + ")");
+            jComboBoxPaymentMode.addItem(mode.getDescricao() + " (" + mode.getCodigo() + ")");
         }
 
         // Configurar combobox de status
-        jComboBoxStatusPayment.removeAllItems();
+        jComboBoxPaymentStatus.removeAllItems();
         for (PaymentStatus status : PaymentStatus.values()) {
-            jComboBoxStatusPayment.addItem(status.getDescricao());
+            jComboBoxPaymentStatus.addItem(status.getDescricao());
         }
 
         // Configurar data atual
-        jFormattedTextField1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+        jFormattedTextFieldPaymentDate.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
 
         // Configurar tabela
         configurarTabela();
     }
 
-    private void carregarDadosFatura() {
-        if (invoice != null) {
-            totalFatura = invoice.getTotal() != null ? invoice.getTotal() : BigDecimal.ZERO;
+    private void carregarDadosCompra() {
+        if (purchase != null) {
+            totalCompra = purchase.getTotal() != null ? purchase.getTotal() : BigDecimal.ZERO;
 
-            jTextFieldTotalInvoice.setText(df.format(totalFatura));
-            jLabel1.setText("Pagamento da Fatura " + invoice.getPrefix() + "/" + invoice.getNumber());
+            jTextFieldTotalPurchase.setText(df.format(totalCompra));
+            jLabelTitle.setText("Pagamento da Compra " + purchase.getInvoiceNumber());
 
-            if (invoice.getClient() != null) {
-                jLabelClientName.setText(invoice.getClient().getName());
-                jLabelClientNif.setText(invoice.getClient().getNif() != null ? invoice.getClient().getNif() : "N/A");
+            if (purchase.getSupplier() != null) {
+                jLabelSupplierName.setText(purchase.getSupplier().getName());
+                jLabelSupplierNif.setText(purchase.getSupplier().getNif() != null ? purchase.getSupplier().getNif() : "N/A");
             }
 
-            if (invoice.getSeller() != null) {
-                jLabelSeller.setText(invoice.getSeller().getName());
-            }
-
-            if (invoice.getNote() != null) {
-                jTextPaneNote.setText(invoice.getNote());
-            }
-
+//            if (purchase.getNote() != null) {
+//                jTextAreaNote.setText(purchase.getNote());
+//            }
             // Carregar pagamentos existentes
             carregarPagamentosExistentes();
         }
     }
 
     private void carregarPagamentosExistentes() {
-        if (invoice != null && invoice.getId() != null) {
-            List<Payment> pagamentosExistentes = paymentController.getByInvoiceId(invoice.getId());
+        if (purchase != null && purchase.getId() != null) {
+            List<PurchasePayment> pagamentosExistentes = paymentController.listarPorCompra(purchase.getId());
             pagamentos.clear();
             pagamentos.addAll(pagamentosExistentes);
             atualizarTabelaPagamentos();
@@ -138,13 +134,13 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
         DefaultTableModel model = (DefaultTableModel) jTablePayments.getModel();
         model.setRowCount(0);
 
-        for (Payment pagamento : pagamentos) {
+        for (PurchasePayment pagamento : pagamentos) {
             model.addRow(new Object[]{
-                pagamento.getPaymentMode().getDescricao(),
+                pagamento.getMetodo().getDescricao(),
                 pagamento.getStatus().getDescricao(),
-                df.format(pagamento.getTotal()),
-                pagamento.getDate(),
-                pagamento.getReference()
+                df.format(pagamento.getValorPago()),
+                pagamento.getDataPagamento(),
+                pagamento.getReferencia()
             });
         }
     }
@@ -157,37 +153,46 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
             }
 
             // Obter modo de pagamento selecionado
-            String modoSelecionado = (String) jComboBoxMoePayment.getSelectedItem();
+            String modoSelecionado = (String) jComboBoxPaymentMode.getSelectedItem();
             PaymentMode paymentMode = obterPaymentModeFromString(modoSelecionado);
 
             // Obter status selecionado
-            String statusSelecionado = (String) jComboBoxStatusPayment.getSelectedItem();
+            String statusSelecionado = (String) jComboBoxPaymentStatus.getSelectedItem();
             PaymentStatus paymentStatus = obterPaymentStatusFromString(statusSelecionado);
 
             // Obter valor
-            BigDecimal valor = parseBigDecimal(jTextFieldValuePayment.getText());
+            BigDecimal valor = parseBigDecimal(jTextFieldPaymentValue.getText());
 
             // Obter data
-            String data = jFormattedTextField1.getText();
+            String data = jFormattedTextFieldPaymentDate.getText();
+
+            // 🔹 CORREÇÃO: Calcular total atualizado incluindo o novo pagamento
+            BigDecimal totalPagamentosComNovo = totalRegistado.add(valor);
+
+            // 🔹 CORREÇÃO: Validar se o NOVO TOTAL excede o valor da compra
+            if (totalPagamentosComNovo.compareTo(totalCompra) > 0) {
+                BigDecimal saldoPermitido = totalCompra.subtract(totalRegistado);
+                JOptionPane.showMessageDialog(this,
+                        "Valor excede o saldo pendente!\n"
+                        + "Saldo permitido: " + df.format(saldoPermitido) + " AOA\n"
+                        + "Valor tentado: " + df.format(valor) + " AOA",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             // Criar pagamento
-            Payment pagamento = new Payment();
-            pagamento.setDescription("Pagamento fatura " + invoice.getPrefix() + "/" + invoice.getNumber());
-            pagamento.setTotal(valor);
-            pagamento.setPaymentMode(paymentMode);
+            PurchasePayment pagamento = new PurchasePayment();
+            pagamento.setDescricao("Pagamento compra " + purchase.getInvoiceNumber());
+            pagamento.setValorPago(valor);
+            pagamento.setMetodo(paymentMode);
             pagamento.setStatus(paymentStatus);
-            pagamento.setDate(data);
-            pagamento.setReference(gerarReferenciaPagamento());
-            pagamento.setInvoiceId(invoice.getId());
-            pagamento.setInvoiceType(DocumentType.FT);
+            pagamento.setDataPagamento(Util.parseData(data));
+            pagamento.setReferencia(gerarReferenciaPagamento());
+            pagamento.setPurchaseId(purchase.getId());
 
             User usuarioLogado = userSession.getUser();
             if (usuarioLogado != null) {
                 pagamento.setUser(usuarioLogado);
-            }
-
-            if (invoice.getClient() != null) {
-                pagamento.setClient(invoice.getClient());
             }
 
             // Adicionar à lista
@@ -198,13 +203,16 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
             atualizarTotais();
             limparCamposPagamento();
 
-            JOptionPane.showMessageDialog(this, "Pagamento adicionado com sucesso!",
+            JOptionPane.showMessageDialog(this,
+                    "Pagamento adicionado com sucesso!\n"
+                    + "Saldo restante: " + df.format(totalPendente) + " AOA",
                     "Sucesso", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Erro ao adicionar pagamento: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
@@ -232,28 +240,29 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
     private void atualizarTotais() {
         totalRegistado = BigDecimal.ZERO;
 
-        for (Payment pagamento : pagamentos) {
-            if (pagamento.getTotal() != null) {
-                totalRegistado = totalRegistado.add(pagamento.getTotal());
+        for (PurchasePayment pagamento : pagamentos) {
+            if (pagamento.getValorPago() != null) {
+                totalRegistado = totalRegistado.add(pagamento.getValorPago());
             }
         }
 
-        totalPendente = totalFatura.subtract(totalRegistado);
+        totalPendente = totalCompra.subtract(totalRegistado);
 
-        jTextField1.setText(df.format(totalRegistado));
-        jTextFieldTotalPedente.setText(df.format(totalPendente));
+        jTextFieldTotalPaid.setText(df.format(totalRegistado));
+        jTextFieldTotalPending.setText(df.format(totalPendente));
 
         // Atualizar cores baseadas no status
         if (totalPendente.compareTo(BigDecimal.ZERO) == 0) {
-            jTextFieldTotalPedente.setBackground(new java.awt.Color(200, 255, 200)); // Verde claro
+            jTextFieldTotalPending.setBackground(new java.awt.Color(200, 255, 200)); // Verde claro
         } else if (totalPendente.compareTo(BigDecimal.ZERO) > 0) {
-            jTextFieldTotalPedente.setBackground(new java.awt.Color(255, 255, 200)); // Amarelo
+            jTextFieldTotalPending.setBackground(new java.awt.Color(255, 255, 200)); // Amarelo
         } else {
-            jTextFieldTotalPedente.setBackground(new java.awt.Color(255, 200, 200)); // Vermelho claro
+            jTextFieldTotalPending.setBackground(new java.awt.Color(255, 200, 200)); // Vermelho claro
         }
     }
 
-    private void finalizarFatura() {
+    // NO MÉTODO finalizarPagamentos(), ATUALIZE:
+    private void finalizarPagamentos() {
         try {
             if (pagamentos.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
@@ -262,38 +271,50 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                 return;
             }
 
-            // 🔹 REGRAS DE NEGÓCIO: Verificar status antes de salvar
-            BigDecimal totalPagamentosEfetivos = calcularTotalPagamentosEfetivos();
+            // 🔹 VERIFICAR SE A COMPRA JÁ TEM ID (já foi salva)
+            if (purchase.getId() == null) {
+                System.out.println("⚠️  Compra ainda não foi salva no banco...");
 
-            if (totalPagamentosEfetivos.compareTo(totalFatura) >= 0) {
-                // Fatura será marcada como PAGA automaticamente
-                System.out.println("✅ Fatura será marcada como PAGA");
-            } else if (totalPagamentosEfetivos.compareTo(BigDecimal.ZERO) > 0) {
-                // Fatura será marcada como PARCIAL automaticamente
-                System.out.println("🟡 Fatura será marcada como PARCIAL");
-            } else {
-                // Fatura será marcada como PENDENTE automaticamente
-                System.out.println("🟠 Fatura será marcada como PENDENTE");
+                // Se a compra não tem ID, precisamos salvá-la primeiro
+                // Garantir que tem invoiceNumber
+                if (purchase.getInvoiceNumber() == null) {
+                    Integer nextNumber = purchaseController.obterProximoNumeroFatura();
+                    purchase.setInvoiceNumber("COMP/" + java.time.LocalDate.now().getYear() + "/" + String.format("%04d", nextNumber));
+                }
             }
 
-            // Salvar fatura com pagamentos (status será aplicado automaticamente)
-            response = invoiceController.criarFaturaComProdutosEPagamentos(
-                    invoice,
-                    invoice.getProducts(),
-                    pagamentos
-            );
+            // 🔹 CALCULAR STATUS BASEADO NOS PAGAMENTOS
+            BigDecimal totalPagamentosEfetivos = calcularTotalPagamentosEfetivos();
+            PaymentStatus statusFinal;
+
+            if (totalPagamentosEfetivos.compareTo(totalCompra) >= 0) {
+                statusFinal = PaymentStatus.PAGO;
+                System.out.println("✅ Compra será marcada como PAGA");
+            } else if (totalPagamentosEfetivos.compareTo(BigDecimal.ZERO) > 0) {
+                statusFinal = PaymentStatus.PARCIAL;
+                System.out.println("🟡 Compra será marcada como PARCIAL");
+            } else {
+                statusFinal = PaymentStatus.PENDENTE;
+                System.out.println("🟠 Compra será marcada como PENDENTE");
+            }
+
+            // Atualizar status da compra
+            purchase.setPaymentStatus(statusFinal);
+
+            // 🔹 SALVAR/ATUALIZAR COMPRA COM PAGAMENTOS
+            response = purchaseController.atualizarCompraComPagamentos(purchase, pagamentos);
 
             if (response != null) {
                 String statusMsg = String.format(
-                        "Fatura finalizada com sucesso!\n"
+                        "Compra finalizada com sucesso!\n"
+                        + "Número: %s\n"
                         + "Total: %s AOA\n"
                         + "Pago: %s AOA\n"
-                        + "Pendente: %s AOA\n"
                         + "Status: %s",
-                        df.format(totalFatura),
+                        response.getInvoiceNumber(),
+                        df.format(totalCompra),
                         df.format(totalRegistado),
-                        df.format(totalPendente),
-                        response.getStatus().getDescricao()
+                        response.getPaymentStatus().getDescricao()
                 );
 
                 JOptionPane.showMessageDialog(this, statusMsg, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -302,15 +323,17 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
-                    "Erro ao finalizar fatura: " + e.getMessage(),
+                    "Erro ao finalizar compra: " + e.getMessage(),
                     "Erro", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
+// ADICIONE ESTE MÉTODO SE NÃO EXISTIR:
     private BigDecimal calcularTotalPagamentosEfetivos() {
         return pagamentos.stream()
                 .filter(p -> p.getStatus() == PaymentStatus.PAGO || p.getStatus() == PaymentStatus.PARCIAL)
-                .map(Payment::getTotal)
+                .map(PurchasePayment::getValorPago)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -321,7 +344,7 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
         // Validar valor
         BigDecimal valor;
         try {
-            valor = parseBigDecimal(jTextFieldValuePayment.getText());
+            valor = parseBigDecimal(jTextFieldPaymentValue.getText());
             if (valor.compareTo(BigDecimal.ZERO) <= 0) {
                 JOptionPane.showMessageDialog(this,
                         "O valor do pagamento deve ser maior que zero",
@@ -336,7 +359,7 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
         }
 
         // Validar data
-        String data = jFormattedTextField1.getText();
+        String data = jFormattedTextFieldPaymentDate.getText();
         if (data == null || data.trim().isEmpty() || data.length() != 10) {
             JOptionPane.showMessageDialog(this,
                     "Data do pagamento inválida",
@@ -385,15 +408,102 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
     }
 
     private String gerarReferenciaPagamento() {
-        return "PAY-" + invoice.getPrefix() + "-" + invoice.getNumber() + "-" + System.currentTimeMillis();
+        return "PAY-PUR-" + purchase.getInvoiceNumber() + "-" + System.currentTimeMillis();
     }
 
     private void limparCamposPagamento() {
-        jTextFieldValuePayment.setText("0.00");
-        jFormattedTextField1.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-        jComboBoxMoePayment.setSelectedIndex(0);
-        jComboBoxStatusPayment.setSelectedItem(PaymentStatus.PAGO.getDescricao());
+        jTextFieldPaymentValue.setText("0.00");
+        jFormattedTextFieldPaymentDate.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+        jComboBoxPaymentMode.setSelectedIndex(0);
+        jComboBoxPaymentStatus.setSelectedItem(PaymentStatus.PAGO.getDescricao());
     }
+//
+//    /**
+//     * Define a compra a ser paga
+//     */
+//    public void setCompra(Purchase compra) {
+//        this.compra = compra;
+//        carregarDadosCompra();
+//    }
+//
+//    /**
+//     * Retorna se o pagamento foi processado
+//     */
+//    public boolean isPagamentoProcessado() {
+//        return pagamentoProcessado;
+//    }
+//
+//    /**
+//     * Carrega os dados da compra na interface
+//     */
+//    private void carregarDadosCompra() {
+//        if (compra != null) {
+//            // Preenche os campos com os dados da compra
+//            jTextFieldCompraId.setText(String.valueOf(compra.getId()));
+//            jTextFieldNumeroFatura.setText(compra.getInvoiceNumber());
+//            jTextFieldFornecedor.setText(compra.getSupplier().getName());
+//            jTextFieldTotal.setText(String.valueOf(compra.getTotalAmount()));
+//            jTextFieldData.setText(compra.getPurchaseDate().toString());
+//
+//            // Aqui você pode adicionar mais campos conforme necessário
+//        }
+//    }
+//
+//    /**
+//     * Processa o pagamento da compra
+//     */
+//    private void processarPagamento() {
+//        try {
+//            // Aqui você implementa a lógica de pagamento
+//            // Exemplo: integração com gateway de pagamento, registro no banco, etc.
+//
+//            // Simulação de processamento bem-sucedido
+//            boolean pagamentoSucesso = true; // Substitua pela lógica real
+//
+//            if (pagamentoSucesso) {
+//                // Atualiza o status da compra para PAGA
+//                PurchaseController purchaseController = new PurchaseController();
+//                boolean atualizado = purchaseController.atualizarStatusCompra(compra.getId(), "PAGA");
+//
+//                if (atualizado) {
+//                    pagamentoProcessado = true;
+//                    JOptionPane.showMessageDialog(this,
+//                            "Pagamento processado com sucesso!",
+//                            "Sucesso",
+//                            JOptionPane.INFORMATION_MESSAGE);
+//                    this.dispose();
+//                } else {
+//                    JOptionPane.showMessageDialog(this,
+//                            "Erro ao atualizar status da compra!",
+//                            "Erro",
+//                            JOptionPane.ERROR_MESSAGE);
+//                }
+//            } else {
+//                JOptionPane.showMessageDialog(this,
+//                        "Falha no processamento do pagamento!",
+//                        "Erro",
+//                        JOptionPane.ERROR_MESSAGE);
+//            }
+//
+//        } catch (Exception e) {
+//            System.err.println("❌ Erro ao processar pagamento: " + e.getMessage());
+//            JOptionPane.showMessageDialog(this,
+//                    "Erro ao processar pagamento: " + e.getMessage(),
+//                    "Erro",
+//                    JOptionPane.ERROR_MESSAGE);
+//        }
+//    }
+//
+//    // Método chamado pelo botão de confirmar pagamento
+//    private void jButtonConfirmarPagamentoActionPerformed(java.awt.event.ActionEvent evt) {
+//        processarPagamento();
+//    }
+//
+//    // Método chamado pelo botão de cancelar
+//    private void jButtonCancelarActionPerformed(java.awt.event.ActionEvent evt) {
+//        pagamentoProcessado = false;
+//        this.dispose();
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -407,29 +517,29 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTablePayments = new javax.swing.JTable();
-        jComboBoxMoePayment = new javax.swing.JComboBox<>();
-        jTextFieldValuePayment = new javax.swing.JTextField();
+        jComboBoxPaymentMode = new javax.swing.JComboBox<>();
+        jTextFieldPaymentValue = new javax.swing.JTextField();
         jButtonAddPaymentToTable = new javax.swing.JButton();
         jButtonFinishInvoice = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jComboBoxStatusPayment = new javax.swing.JComboBox<>();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        jLabelTitle = new javax.swing.JLabel();
+        jComboBoxPaymentStatus = new javax.swing.JComboBox<>();
+        jFormattedTextFieldPaymentDate = new javax.swing.JFormattedTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jTextFieldTotalInvoice = new javax.swing.JTextField();
+        jTextFieldTotalPurchase = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jTextFieldTotalPedente = new javax.swing.JTextField();
+        jTextFieldTotalPending = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        jTextFieldTotalPaid = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jLabelClientNif = new javax.swing.JLabel();
+        jLabelSupplierNif = new javax.swing.JLabel();
         jLabelSeller = new javax.swing.JLabel();
-        jLabelClientName = new javax.swing.JLabel();
+        jLabelSupplierName = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextPaneNote = new javax.swing.JTextPane();
+        jTextAreaNote = new javax.swing.JTextPane();
         jLabel9 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -447,9 +557,9 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
         ));
         jScrollPane1.setViewportView(jTablePayments);
 
-        jComboBoxMoePayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBoxPaymentMode.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jTextFieldValuePayment.setText("0.00");
+        jTextFieldPaymentValue.setText("0.00");
 
         jButtonAddPaymentToTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Done.png"))); // NOI18N
         jButtonAddPaymentToTable.addActionListener(new java.awt.event.ActionListener() {
@@ -466,12 +576,12 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setText("Pagamento da Fatura FT");
+        jLabelTitle.setText("Pagamento da Fatura FT");
 
-        jComboBoxStatusPayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBoxPaymentStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         try {
-            jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
+            jFormattedTextFieldPaymentDate.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -484,18 +594,18 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
 
         jLabel5.setText("Valor");
 
-        jTextFieldTotalInvoice.setEditable(false);
-        jTextFieldTotalInvoice.setText("0.00");
+        jTextFieldTotalPurchase.setEditable(false);
+        jTextFieldTotalPurchase.setText("0.00");
 
         jLabel6.setText("Valor Total Fatura");
 
-        jTextFieldTotalPedente.setEditable(false);
-        jTextFieldTotalPedente.setText("0.00");
+        jTextFieldTotalPending.setEditable(false);
+        jTextFieldTotalPending.setText("0.00");
 
         jLabel7.setText("Valor Pedente");
 
-        jTextField1.setEditable(false);
-        jTextField1.setText("0.00");
+        jTextFieldTotalPaid.setEditable(false);
+        jTextFieldTotalPaid.setText("0.00");
 
         jLabel8.setText("Total Registado");
 
@@ -506,13 +616,13 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
             }
         });
 
-        jLabelClientNif.setText("ClientNif");
+        jLabelSupplierNif.setText("ClientNif");
 
         jLabelSeller.setText("Seller");
 
-        jLabelClientName.setText("ClientName");
+        jLabelSupplierName.setText("ClientName");
 
-        jScrollPane2.setViewportView(jTextPaneNote);
+        jScrollPane2.setViewportView(jTextAreaNote);
 
         jLabel9.setText("Observacao");
 
@@ -527,55 +637,55 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                         .addComponent(jScrollPane1)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jComboBoxStatusPayment, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBoxPaymentStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel2))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel3)
                                 .addGroup(jPanel1Layout.createSequentialGroup()
-                                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jFormattedTextFieldPaymentDate, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jButton1))))
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel6)
-                                .addComponent(jTextFieldTotalInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jTextFieldTotalPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(jPanel1Layout.createSequentialGroup()
                                     .addComponent(jLabel8)
                                     .addGap(0, 75, Short.MAX_VALUE))
-                                .addComponent(jTextField1))
+                                .addComponent(jTextFieldTotalPaid))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jTextFieldTotalPedente, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextFieldTotalPending, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel7))
                             .addGap(115, 115, 115)))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jButtonAddPaymentToTable, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(jPanel1Layout.createSequentialGroup()
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jComboBoxMoePayment, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jComboBoxPaymentMode, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel4))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jLabel5)
-                                .addComponent(jTextFieldValuePayment, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(jTextFieldPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2)
-                    .addComponent(jButtonFinishInvoice, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 177, Short.MAX_VALUE)
+                    .addComponent(jButtonFinishInvoice, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 194, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel9)
                             .addComponent(jLabelSeller)
-                            .addComponent(jLabelClientNif)
-                            .addComponent(jLabelClientName))
+                            .addComponent(jLabelSupplierNif)
+                            .addComponent(jLabelSupplierName))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGap(289, 289, 289)
-                .addComponent(jLabel1)
+                .addComponent(jLabelTitle)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -584,22 +694,22 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jLabel1)
+                        .addComponent(jLabelTitle)
                         .addGap(23, 23, 23)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jComboBoxMoePayment, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextFieldValuePayment, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jComboBoxPaymentMode, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jTextFieldPaymentValue, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(24, 24, 24)
                         .addComponent(jLabelSeller)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabelClientName)
+                        .addComponent(jLabelSupplierName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabelClientNif)))
+                        .addComponent(jLabelSupplierNif)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -609,8 +719,8 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonAddPaymentToTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jFormattedTextField1)
-                        .addComponent(jComboBoxStatusPayment))
+                        .addComponent(jFormattedTextFieldPaymentDate)
+                        .addComponent(jComboBoxPaymentStatus))
                     .addComponent(jLabel9))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -623,11 +733,11 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                     .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextFieldTotalPedente, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextFieldTotalPending, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldTotalInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextFieldTotalPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jButtonFinishInvoice, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jTextFieldTotalPaid, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(20, 20, 20))
         );
 
@@ -642,19 +752,19 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        setSize(new java.awt.Dimension(840, 484));
+        setSize(new java.awt.Dimension(857, 453));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButtonFinishInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishInvoiceActionPerformed
-        // TODO add your handling code here:
-        finalizarFatura();
-    }//GEN-LAST:event_jButtonFinishInvoiceActionPerformed
 
     private void jButtonAddPaymentToTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddPaymentToTableActionPerformed
         // TODO add your handling code here:
         adicionarPagamento();
     }//GEN-LAST:event_jButtonAddPaymentToTableActionPerformed
+
+    private void jButtonFinishInvoiceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishInvoiceActionPerformed
+        // TODO add your handling code here:
+        finalizarPagamentos();
+    }//GEN-LAST:event_jButtonFinishInvoiceActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
@@ -678,20 +788,21 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JDialogPaymentInvoice.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogPaymentPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JDialogPaymentInvoice.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogPaymentPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JDialogPaymentInvoice.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogPaymentPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JDialogPaymentInvoice.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(JDialogPaymentPurchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                JDialogPaymentInvoice dialog = new JDialogPaymentInvoice(new javax.swing.JFrame(), true);
+                JDialogPaymentPurchase dialog = new JDialogPaymentPurchase(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -707,10 +818,9 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonAddPaymentToTable;
     private javax.swing.JButton jButtonFinishInvoice;
-    private javax.swing.JComboBox<String> jComboBoxMoePayment;
-    private javax.swing.JComboBox<String> jComboBoxStatusPayment;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JComboBox<String> jComboBoxPaymentMode;
+    private javax.swing.JComboBox<String> jComboBoxPaymentStatus;
+    private javax.swing.JFormattedTextField jFormattedTextFieldPaymentDate;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -719,17 +829,18 @@ public class JDialogPaymentInvoice extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JLabel jLabelClientName;
-    private javax.swing.JLabel jLabelClientNif;
     private javax.swing.JLabel jLabelSeller;
+    private javax.swing.JLabel jLabelSupplierName;
+    private javax.swing.JLabel jLabelSupplierNif;
+    private javax.swing.JLabel jLabelTitle;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTablePayments;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextFieldTotalInvoice;
-    private javax.swing.JTextField jTextFieldTotalPedente;
-    private javax.swing.JTextField jTextFieldValuePayment;
-    private javax.swing.JTextPane jTextPaneNote;
+    private javax.swing.JTextPane jTextAreaNote;
+    private javax.swing.JTextField jTextFieldPaymentValue;
+    private javax.swing.JTextField jTextFieldTotalPaid;
+    private javax.swing.JTextField jTextFieldTotalPending;
+    private javax.swing.JTextField jTextFieldTotalPurchase;
     // End of variables declaration//GEN-END:variables
 }

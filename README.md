@@ -206,3 +206,61 @@ Assim, stock atual = soma de todos os movimentos.
 
 
 
+Fase 1: Análise e Planeamento (Semana 1)
+1.1 Requisitos Funcionais
+Gestão de Produtos
+
+Cadastro/Edição/Exclusão de produtos
+
+Controlo de stock
+
+Categorias e tipos (produto/serviço)
+
+Impostos e taxas
+
+Gestão de Clientes
+
+Cadastro de clientes
+
+Histórico de compras
+
+Dados fiscais (NIF, etc.)
+
+Módulo de Vendas (PDV)
+
+Interface de venda rápida
+
+Carrinho de compras
+
+Cálculo automático de impostos
+
+Múltiplas formas de pagamento
+
+Faturação
+
+Emissão de faturas
+
+Série de numeração
+
+Templates personalizáveis
+
+Envio por email
+
+Relatórios
+
+Vendas por período
+
+Produtos mais vendidos
+
+Fluxo de caixa
+
+Stock mínimo
+
+1.2 Requisitos Não Funcionais
+Performance: Suporte a múltiplos terminais
+
+Segurança: Controle de acesso por usuário
+
+Backup: Sistema automático de backup
+
+Offline: Funcionamento sem internet

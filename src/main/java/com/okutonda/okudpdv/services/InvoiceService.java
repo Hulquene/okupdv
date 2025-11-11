@@ -12,8 +12,8 @@ import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.data.entities.StockMovement;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
-import com.okutonda.okudpdv.helpers.UtilDate;
 import com.okutonda.okudpdv.helpers.PrintHelper;
+import com.okutonda.okudpdv.helpers.Util;
 import com.okutonda.okudpdv.helpers.UtilSaft;
 
 import java.math.BigDecimal;
@@ -329,7 +329,7 @@ public class InvoiceService {
         pagamento.setTotal(fatura.getTotal());
         pagamento.setReference(gerarReferenciaPagamento(fatura));
         pagamento.setPaymentMode(PaymentMode.NU); // Numerário como padrão
-        pagamento.setDate(UtilDate.getFormatDataNow());
+        pagamento.setDate(Util.currentDateFormatted());
         pagamento.setCurrency("AOA");
         pagamento.setStatus(PaymentStatus.PAGO);
 
@@ -349,7 +349,7 @@ public class InvoiceService {
 
         // Valores padrão se não definidos
         if (p.getDate() == null) {
-            p.setDate(UtilDate.getFormatDataNow());
+            p.setDate(Util.currentDateFormatted());
         }
         if (p.getCurrency() == null) {
             p.setCurrency("AOA");
@@ -641,12 +641,12 @@ public class InvoiceService {
 
         // Data de emissão padrão
         if (fatura.getIssueDate() == null) {
-            fatura.setIssueDate(UtilDate.getFormatDataNow());
+            fatura.setIssueDate(Util.currentDateFormatted());
         }
 
         // Ano atual
         if (fatura.getYear() == null) {
-            fatura.setYear(UtilDate.getYear());
+            fatura.setYear(Util.getYear());
         }
 
         // Status padrão

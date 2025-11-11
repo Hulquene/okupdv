@@ -277,7 +277,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
             jTextFieldPrice.requestFocus();
             return false;
         }
-        if (!Util.isValidDouble(jTextFieldPrice.getText())) {
+        if (!Util.isNumber(jTextFieldPrice.getText())) {
             showError("Preço de Venda deve ser um número válido\nEx: 150.00 ou 150,00");
             jTextFieldPrice.requestFocus();
             return false;
@@ -319,7 +319,7 @@ public final class JDialogFormProduct extends javax.swing.JDialog {
                 jTextFieldPurchasePrice.requestFocus();
                 return false;
             }
-            if (!Util.isValidDouble(jTextFieldPurchasePrice.getText())) {
+            if (!Util.isNumber(jTextFieldPurchasePrice.getText())) {
                 showError("Preço de Compra deve ser um número válido\nEx: 100.00 ou 100,00");
                 jTextFieldPurchasePrice.requestFocus();
                 return false;

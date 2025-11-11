@@ -8,10 +8,13 @@ import com.okutonda.okudpdv.controllers.ProductController;
 import com.okutonda.okudpdv.controllers.PurchaseController;
 import com.okutonda.okudpdv.controllers.SupplierController;
 import com.okutonda.okudpdv.controllers.WarehouseController;
+import com.okutonda.okudpdv.data.entities.DocumentType;
+import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.Purchase;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
+import com.okutonda.okudpdv.data.entities.PurchasePayment;
 import com.okutonda.okudpdv.data.entities.StockStatus;
 import com.okutonda.okudpdv.data.entities.Supplier;
 //import com.okutonda.okudpdv.ui.TemaCores;
@@ -24,7 +27,9 @@ import java.util.Date;
 import java.util.List;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
+import javax.swing.RowFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.DateFormatter;
 import javax.swing.text.DefaultFormatterFactory;
 
@@ -35,6 +40,9 @@ import javax.swing.text.DefaultFormatterFactory;
 public class JDialogFormPurchase extends javax.swing.JDialog {
 
     private List<PurchaseItem> itensCompra = new ArrayList<>();
+    private DefaultTableModel tableModelItensCompra;
+    private DefaultTableModel tableModelListaProdutos;
+    private TableRowSorter<DefaultTableModel> rowSorter;
 
     ProductController productController = new ProductController();
     SupplierController supplierController = new SupplierController();
@@ -47,252 +55,593 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     public JDialogFormPurchase(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-//        applyTheme();
-
-        loadComboBoxSuppliers();
-        loadComboBoxProdutosCompra();
-//        loadComboBoxWarehouse();
-
-        // mesmo formatter/behavior nos dois campos
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        jFormattedTextFieldDataCompra.setFormatterFactory(
-                new DefaultFormatterFactory(new DateFormatter(sdf)));
-        jFormattedTextFieldDataCompra.setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
-
-        jFormattedTextFieldDataVencimento.setFormatterFactory(
-                new DefaultFormatterFactory(new DateFormatter(sdf)));
-        jFormattedTextFieldDataVencimento.setFocusLostBehavior(JFormattedTextField.COMMIT_OR_REVERT);
-
-// 1) data de compra = hoje
-        Date hoje = new Date();
-        jFormattedTextFieldDataCompra.setValue(hoje);
-
-// 2) vencimento = compra + 1 mês (usando java.time)
-        ZoneId zone = ZoneId.systemDefault();
-        LocalDate base = hoje.toInstant().atZone(zone).toLocalDate();
-        Date venc = Date.from(base.plusMonths(1).atStartOfDay(zone).toInstant());
-        jFormattedTextFieldDataVencimento.setValue(venc);
-
+//        applyTheme();       
+        inicializarComponentes();
+        carregarDadosIniciais();
     }
 
     public Boolean getResponse() {
         return response;
     }
 
-//    private void applyTheme() {
-////        TemaCleaner.clearBuilderOverrides(getContentPane());
-//        // Painel de fundo da janela
-////        jPanelSidebar.setBackground(TemaCores.BG_LIGHT);
-//
-////        TemaUI.aplicarTitulo(jLabelJpanelSelected);
-////        jPanelSidebar.setBackground(TemaCores.PRIMARY);
-//        // Card do login
-////        TemaUI.aplicarPainelHeader(jPanelSidebar, TemaCores.PRIMARY);
-//        // Título
-////        TemaUI.aplicarTitulo(jLabelNameCompany);
-//        jLabelTitle.setForeground(TemaCores.PRIMARY);
-//        // Labels
-////        jLabel1.setForeground(TemaCores.TEXT_DARK);   // "Email:"
-////        jLabel2.setForeground(TemaCores.TEXT_DARK);   // "Senha:"
-//        // Campos
-////        TemaUI.aplicarCampoTexto(jTextFieldEmail);
-////        TemaUI.aplicarCampoTexto(jPasswordFieldPassword);
-//        // Botões
-////        TemaUI.aplicarBotaoPrimario(jButtonProdAndService);
-////        TemaUI.aplicarBotaoPrimario(jButtonInvStoque);
-////        TemaUI.aplicarBotaoPrimario(jButtonInventoryPurchases);
-////        TemaUI.aplicarBotaoPrimario(jButtonInventoryFisic);
-////        TemaUI.aplicarBotaoPrimario(jButtonInventoryReport);
-////        TemaUI.aplicarBotaoPrimario(jButtonLogin);
-////        jButtonSuport.setForeground(TemaCores.TEXT_GRAY);
-////        jButtonAbout.setForeground(TemaCores.TEXT_GRAY);
-////        jButtonInstall.setForeground(TemaCores.PRIMARY);
-////        jButtonCloseScreen.setForeground(TemaCores.ERROR);
-//        // Status de BD (cor dinâmica) — chama depois de testar a conexão
-////        updateDbStatusLabel(this.conn != null);
-//        // Borda superior/rodapé (opcional)
-//        // getRootPane().setBorder(new javax.swing.border.MatteBorder(0, 0, 2, 0, TemaCores.PRIMARY));
-//        // Se o GUI Builder deixou cores hardcoded em initComponents,
-//        // isso aqui sobrescreve. Se puder, remova as cores fixas no builder.
-//    }
+    /**
+     * Inicializa componentes da interface
+     */
+    private void inicializarComponentes() {
+        // Inicializar tabelas
+        inicializarTabelaItensCompra();
+        inicializarTabelaListaProdutos();
 
-    private void loadComboBoxSuppliers() {
+        // Configurar datas
+        configurarDatasPadrao();
 
-        List<Supplier> fornecedores = supplierController.listarTodos();
+        // Carregar combobox
+        carregarCombobox();
 
-        for (Supplier s : fornecedores) {
-            jComboBoxListFornecedor.addItem(s);
+        // Configurar filtro de produtos
+        configurarFiltroProdutos();
+    }
+
+    /**
+     * Inicializa a tabela de itens da compra
+     */
+    private void inicializarTabelaItensCompra() {
+        String[] colunas = {"ID", "Produto", "Qtd", "Preço", "Subtotal"};
+        tableModelItensCompra = new DefaultTableModel(colunas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                switch (columnIndex) {
+                    case 0:
+                        return Integer.class;
+                    case 1:
+                        return String.class;
+                    case 2:
+                        return Integer.class;
+                    case 3:
+                        return BigDecimal.class;
+                    case 4:
+                        return BigDecimal.class;
+                    default:
+                        return Object.class;
+                }
+            }
+        };
+
+        jTablePurchaseItems.setModel(tableModelItensCompra);
+    }
+
+    /**
+     * Inicializa a tabela de lista de produtos
+     */
+    private void inicializarTabelaListaProdutos() {
+        String[] colunas = {"Código", "Descrição", "Preço"};
+        tableModelListaProdutos = new DefaultTableModel(colunas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        jTableListProd.setModel(tableModelListaProdutos);
+    }
+
+    /**
+     * Configura filtro para a tabela de produtos
+     */
+    private void configurarFiltroProdutos() {
+        rowSorter = new TableRowSorter<>(tableModelListaProdutos);
+        jTableListProd.setRowSorter(rowSorter);
+    }
+
+    /**
+     * Filtra produtos na tabela
+     */
+    private void filtrarProdutos() {
+        String textoFiltro = jTextFieldFilterListProdu.getText().trim();
+
+        if (textoFiltro.length() == 0) {
+            rowSorter.setRowFilter(null);
+        } else {
+            try {
+                RowFilter<DefaultTableModel, Object> rf = RowFilter.regexFilter("(?i)" + textoFiltro, 0, 1);
+                rowSorter.setRowFilter(rf);
+            } catch (Exception e) {
+                System.err.println("Erro ao filtrar produtos: " + e.getMessage());
+            }
         }
     }
 
-//    private void loadComboBoxWarehouse() {
-//        List<Warehouse> warehouse = warehouseController.get("");
-//        for (Warehouse s : warehouse) {
-//            jComboBoxWarehouse.addItem(s);
-//        }
-//    }
-    private void loadComboBoxProdutosCompra() {
-        jComboBoxListProduto.removeAllItems(); // limpa primeiro
+    /**
+     * Configura datas padrão - CORRIGIDO
+     */
+    private void configurarDatasPadrao() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-        List<Product> produtos = productController.listProducts();
-        for (Product p : produtos) {
-            jComboBoxListProduto.addItem(p);
+            // Data de compra = hoje
+            Date hoje = new Date();
+            jFormattedTextFieldDataCompra.setText(sdf.format(hoje));
+
+            // Vencimento = hoje + 30 dias
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(hoje);
+            cal.add(java.util.Calendar.DAY_OF_MONTH, 30);
+            Date vencimento = cal.getTime();
+            jFormattedTextFieldDataVencimento.setText(sdf.format(vencimento));
+
+        } catch (Exception e) {
+            System.err.println("Erro ao configurar datas: " + e.getMessage());
         }
     }
 
-    private void loadItemsTable() {
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[][]{},
-                new String[]{"Produto", "Qtd", "Preço", "IVA", "Subtotal"}
-        );
-        for (PurchaseItem it : itensCompra) {
-            model.addRow(new Object[]{
-                it.getProduct().getDescription(),
-                it.getQuantidade(),
-                it.getPrecoCusto(),
-                it.getIva(),
-                it.getSubtotal()
+    /**
+     * Carrega combobox com dados
+     */
+    private void carregarCombobox() {
+        try {
+            // Carregar fornecedores
+            carregarFornecedores();
+
+            // Carregar produtos na tabela
+            carregarProdutosNaTabela();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar dados: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Carrega dados iniciais
+     */
+    private void carregarDadosIniciais() {
+        // Nada específico por enquanto
+    }
+
+    /**
+     * Carrega lista de fornecedores
+     */
+    private void carregarFornecedores() {
+        try {
+            jComboBoxListFornecedor.removeAllItems();
+            List<Supplier> fornecedores = supplierController.listarTodos();
+
+            for (Supplier fornecedor : fornecedores) {
+                jComboBoxListFornecedor.addItem(fornecedor);
+            }
+
+            if (jComboBoxListFornecedor.getItemCount() > 0) {
+                jComboBoxListFornecedor.setSelectedIndex(0);
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar fornecedores: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Carrega produtos na tabela de lista
+     */
+    private void carregarProdutosNaTabela() {
+        try {
+            tableModelListaProdutos.setRowCount(0);
+            List<Product> produtos = productController.listProducts();
+
+            for (Product produto : produtos) {
+                tableModelListaProdutos.addRow(new Object[]{
+                    produto.getCode(),
+                    produto.getDescription(),
+                    produto.getPrice()
+                });
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar produtos: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar produtos: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Preenche campos do produto quando selecionado na tabela
+     */
+    private void preencherCamposProdutoSelecionado() {
+        int selectedRow = jTableListProd.getSelectedRow();
+        if (selectedRow == -1) {
+            return;
+        }
+
+        try {
+            int modelRow = jTableListProd.convertRowIndexToModel(selectedRow);
+
+            String codigo = (String) tableModelListaProdutos.getValueAt(modelRow, 0);
+            String descricao = (String) tableModelListaProdutos.getValueAt(modelRow, 1);
+            BigDecimal preco = (BigDecimal) tableModelListaProdutos.getValueAt(modelRow, 2);
+
+            jTextFieldCodeProd.setText(codigo);
+            jTextFieldNameProdSeletec.setText(descricao);
+
+            // Focar no campo de quantidade
+            jTextFieldQtdProduct.requestFocus();
+            jTextFieldQtdProduct.selectAll();
+
+        } catch (Exception e) {
+            System.err.println("Erro ao preencher campos do produto: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Seleciona produto da tabela
+     */
+    private void selecionarProduto() {
+        int selectedRow = jTableListProd.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um produto da lista primeiro",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        preencherCamposProdutoSelecionado();
+    }
+
+    /**
+     * Adiciona produto selecionado à compra
+     */
+    private void adicionarProduto() {
+        try {
+            // Verificar se há produto selecionado
+            if (jTextFieldCodeProd.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Selecione um produto da lista primeiro",
+                        "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Obter código do produto selecionado
+            String codigoProduto = jTextFieldCodeProd.getText().trim();
+            Product produto = productController.getByCode(codigoProduto);
+
+            if (produto == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Produto não encontrado: " + codigoProduto,
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Obter quantidade
+            int quantidade = 1;
+            try {
+                String qtdTexto = jTextFieldQtdProduct.getText().trim();
+                if (!qtdTexto.isEmpty()) {
+                    quantidade = Integer.parseInt(qtdTexto);
+                    if (quantidade <= 0) {
+                        JOptionPane.showMessageDialog(this,
+                                "Quantidade deve ser maior que zero",
+                                "Aviso", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this,
+                        "Quantidade inválida. Use um número inteiro.",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Verificar se já existe na compra
+            PurchaseItem itemExistente = encontrarItemNaCompra(produto.getId());
+
+            if (itemExistente != null) {
+                // Produto já existe - incrementar quantidade
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Produto '" + produto.getDescription() + "' já está na compra.\n"
+                        + "Deseja incrementar a quantidade em " + quantidade + " unidades?",
+                        "Produto Duplicado",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    int novaQuantidade = itemExistente.getQuantidade() + quantidade;
+                    itemExistente.setQuantidade(novaQuantidade);
+                    itemExistente.setSubtotal(itemExistente.getPrecoCusto().multiply(BigDecimal.valueOf(novaQuantidade)));
+
+                    atualizarTabelaItensCompra();
+                    atualizarTotais();
+                    limparCamposProduto();
+
+                    JOptionPane.showMessageDialog(this,
+                            "Quantidade atualizada com sucesso! Nova quantidade: " + novaQuantidade,
+                            "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                } else {
+                    return;
+                }
+            }
+
+            // Produto novo - adicionar à compra
+            PurchaseItem item = new PurchaseItem();
+            item.setProduct(produto);
+            item.setQuantidade(quantidade);
+            item.setPrecoCusto(produto.getPrice());
+
+            // Calcular subtotal
+            BigDecimal subtotal = produto.getPrice().multiply(BigDecimal.valueOf(quantidade));
+            item.setSubtotal(subtotal);
+
+            // Adicionar à lista
+            itensCompra.add(item);
+
+            // Atualizar interface
+            atualizarTabelaItensCompra();
+            atualizarTotais();
+            limparCamposProduto();
+
+            JOptionPane.showMessageDialog(this,
+                    "Produto adicionado com sucesso! Quantidade: " + quantidade,
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao adicionar produto: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Remove produto selecionado da compra
+     */
+    private void removerProduto() {
+        int selectedRow = jTablePurchaseItems.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um item para remover",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            int modelRow = jTablePurchaseItems.convertRowIndexToModel(selectedRow);
+            Integer productId = (Integer) tableModelItensCompra.getValueAt(modelRow, 0);
+
+            // Remover da lista
+            itensCompra.removeIf(item -> item.getProduct().getId().equals(productId));
+
+            // Atualizar tabela e totais
+            atualizarTabelaItensCompra();
+            atualizarTotais();
+
+            JOptionPane.showMessageDialog(this,
+                    "Item removido com sucesso!",
+                    "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao remover item: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Atualiza a tabela de itens da compra
+     */
+    private void atualizarTabelaItensCompra() {
+        tableModelItensCompra.setRowCount(0);
+
+        for (PurchaseItem item : itensCompra) {
+            tableModelItensCompra.addRow(new Object[]{
+                item.getProduct().getId(),
+                item.getProduct().getDescription(),
+                item.getQuantidade(),
+                item.getPrecoCusto(),
+                item.getSubtotal()
             });
         }
-        jTablePurchaseItems.setModel(model);
     }
 
+    /**
+     * Calcula totais da compra
+     */
     private void atualizarTotais() {
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal ivaTotal = BigDecimal.ZERO;
 
-        for (PurchaseItem it : itensCompra) {
-            total = total.add(it.getSubtotal());
-            ivaTotal = ivaTotal.add(it.getIva() != null ? it.getIva() : BigDecimal.ZERO);
+        for (PurchaseItem item : itensCompra) {
+            if (item.getSubtotal() != null) {
+                subtotal = subtotal.add(item.getSubtotal());
+            }
+            if (item.getIva() != null) {
+                ivaTotal = ivaTotal.add(item.getIva());
+            }
         }
 
+        BigDecimal total = subtotal.add(ivaTotal);
+
+        // Atualizar campos
         jTextFieldTotal.setText(total.toString());
         jTextFieldIvaTotal.setText(ivaTotal.toString());
     }
 
-    private void criacaoItem() {
-        // Validar produto e quantidade
-        if (jComboBoxListProduto.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto!");
+    /**
+     * Finaliza a compra com opção de pagamento - CORRIGIDO
+     */
+    /**
+ * Finaliza a compra com opção de pagamento - CORRIGIDO
+ */
+private void finalizarCompra(boolean abrirPagamento) {
+    try {
+        // Validar dados básicos
+        if (!validarDadosCompra()) {
             return;
         }
 
-        int qtd;
-        try {
-            qtd = Integer.parseInt(jTextFieldQtdProduct.getText());
-            if (qtd <= 0) {
-                throw new NumberFormatException();
+        // 🔹 VALIDAR INVOICE NUMBER (se preenchido)
+        String invoiceNumber = jTextFieldInvoiceNumber.getText().trim();
+        if (!invoiceNumber.isEmpty()) {
+            // Verificar se já existe (opcional - pode remover se quiser validar apenas no service)
+            PurchaseController purchaseController = new PurchaseController();
+            // Pode adicionar validação aqui se quiser
+        }
+
+        // Configurar compra
+        Purchase purchase = configurarCompra();
+
+        if (abrirPagamento) {
+            // Abre diálogo de pagamento
+            JDialogPaymentPurchase jdPayment = new JDialogPaymentPurchase(null, true);
+            jdPayment.setPurchase(purchase);
+            jdPayment.setVisible(true);
+
+            // Obtém a resposta
+            Purchase compraSalva = jdPayment.getResponse();
+
+            if (compraSalva != null) {
+                response = true;
+                JOptionPane.showMessageDialog(this,
+                        "Compra registrada com sucesso!\nNúmero: " + compraSalva.getInvoiceNumber(),
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose();
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Quantidade inválida!");
-            return;
-        }
+        } else {
+            // Salvar compra sem pagamento
+            PurchaseController purchaseController = new PurchaseController();
+            Purchase compraSalva = purchaseController.criarCompra(purchase);
 
-        // Produto selecionado
-        Product prod = (Product) jComboBoxListProduto.getSelectedItem();
-
-        // Criar item
-        PurchaseItem item = new PurchaseItem();
-        item.setProduct(prod);
-        item.setQuantidade(qtd);
-        item.setPrecoCusto(prod.getPrice());
-
-        // 🔹 CALCULAR SUBTOTAL CORRETAMENTE
-        BigDecimal subtotal = prod.getPrice().multiply(BigDecimal.valueOf(qtd));
-        item.setSubtotal(subtotal);
-
-        // 🔹 VERIFICAR SE JÁ EXISTE
-        boolean jaExiste = false;
-        for (PurchaseItem it : itensCompra) {
-            if (it.getProduct().getId().equals(prod.getId())) {
-                // Já existe → soma quantidade e recalcula subtotal
-                int novaQuantidade = it.getQuantidade() + qtd;
-                it.setQuantidade(novaQuantidade);
-                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(novaQuantidade)));
-                jaExiste = true;
-                break;
+            if (compraSalva != null && compraSalva.getId() != null) {
+                response = true;
+                JOptionPane.showMessageDialog(this,
+                        "Compra registrada com sucesso!\nNúmero: " + compraSalva.getInvoiceNumber(),
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Erro ao salvar compra",
+                        "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
 
-        // 🔹 SE NÃO EXISTIR, ADICIONA
-        if (!jaExiste) {
-            itensCompra.add(item);
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+                "Erro ao finalizar compra: " + e.getMessage(),
+                "Erro", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+}
+
+    /**
+     * Valida dados da compra - CORRIGIDO
+     */
+    private boolean validarDadosCompra() {
+        // Verificar fornecedor
+        if (jComboBoxListFornecedor.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um fornecedor",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return false;
         }
 
-        // Atualizar tabela e totais
-        loadItemsTable();
-        atualizarTotais();
+        // Verificar produtos
+        if (itensCompra.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Adicione pelo menos um produto",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
 
-        // 🔹 LIMPAR CAMPOS APÓS ADICIONAR
-        jTextFieldQtdProduct.setText("1");
+        // Verificar datas
+        if (jFormattedTextFieldDataCompra.getText().trim().isEmpty()
+                || jFormattedTextFieldDataVencimento.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Preencha as datas",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
 
+        return true;
     }
 
-    private void finalizarCompra() {
-        // Validações
-        if (jComboBoxListFornecedor.getSelectedItem() == null) {
-            JOptionPane.showMessageDialog(this, "Selecione um fornecedor!");
-            return;
-        }
-        if (itensCompra.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Adicione ao menos 1 item!");
-            return;
-        }
+    /**
+     * Configura os dados da compra - CORRIGIDO
+     */
+   /**
+ * Configura os dados da compra - CORRIGIDO com invoiceNumber
+ */
+private Purchase configurarCompra() {
+    Purchase purchase = new Purchase();
 
+    try {
+        // 🔹 INVOICE NUMBER DA INTERFACE
+        String invoiceNumber = jTextFieldInvoiceNumber.getText().trim();
+        if (!invoiceNumber.isEmpty()) {
+            purchase.setInvoiceNumber(invoiceNumber);
+        }
+        // Se estiver vazio, o service vai gerar automaticamente
+        
+        purchase.setInvoiceType(DocumentType.FT);
+        
+        // Fornecedor
+        Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
+        purchase.setSupplier(fornecedor);
+
+        // Datas - CORREÇÃO: Converter String para java.sql.Date
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+        Date dataCompraUtil = sdf.parse(jFormattedTextFieldDataCompra.getText());
+        java.sql.Date dataCompra = new java.sql.Date(dataCompraUtil.getTime());
+        purchase.setDataCompra(dataCompra);
+
+        Date dataVencUtil = sdf.parse(jFormattedTextFieldDataVencimento.getText());
+        java.sql.Date dataVenc = new java.sql.Date(dataVencUtil.getTime());
+        purchase.setDataVencimento(dataVenc);
+
+        // Itens
+        for (PurchaseItem item : itensCompra) {
+            item.setPurchase(purchase);
+        }
+        purchase.setItems(new ArrayList<>(itensCompra));
+
+        // Totais
         try {
-            Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
-
-            Purchase purchase = new Purchase();
-            purchase.setSupplier(fornecedor);
-            purchase.setDescricao(jTextAreaNote.getText());
-
-            // 🔹 CORREÇÃO CRÍTICA: Associar a Purchase aos itens ANTES de definir a lista
-            for (PurchaseItem item : itensCompra) {
-                item.setPurchase(purchase); // 🔹 IMPORTANTE: definir a relação bidirecional
-            }
-
-            purchase.setItems(new ArrayList<>(itensCompra));
-
-            // 🔹 CALCULAR TOTAIS
-            BigDecimal total = new BigDecimal(jTextFieldTotal.getText());
-            BigDecimal ivaTotal = new BigDecimal(jTextFieldIvaTotal.getText());
-            purchase.setTotal(total);
-            purchase.setIvaTotal(ivaTotal);
-
-            // Datas
-            java.sql.Date dataCompra = java.sql.Date.valueOf(jFormattedTextFieldDataCompra.getText());
-            java.sql.Date dataVenc = java.sql.Date.valueOf(jFormattedTextFieldDataVencimento.getText());
-            purchase.setDataCompra(dataCompra);
-            purchase.setDataVencimento(dataVenc);
-
-            // Status inicial
-            purchase.setStockStatus(StockStatus.PENDENTE);
-            purchase.setPaymentStatus(PaymentStatus.PENDENTE);
-
-            // 🔹 DEBUG: Verificar se os itens estão associados
-            System.out.println("=== DEBUG FINALIZAR COMPRA ===");
-            System.out.println("Fornecedor: " + purchase.getSupplier().getName());
-            System.out.println("Total Itens: " + purchase.getItems().size());
-            for (PurchaseItem item : purchase.getItems()) {
-                System.out.println("Item: " + item.getProduct().getDescription()
-                        + " - Purchase: " + (item.getPurchase() != null ? "ASSOCIADO" : "NULO"));
-            }
-
-            // 🔹 SALVAR USANDO O NOVO SERVICE
-//            System.out.println(purchase);
-            response = new PurchaseController().add(purchase);
-
-            if (response) {
-                JOptionPane.showMessageDialog(this, "✅ Compra registrada com sucesso!");
-                dispose(); // Fecha o dialog
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao salvar compra!");
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
-            e.printStackTrace();
+            purchase.setTotal(new BigDecimal(jTextFieldTotal.getText()));
+            purchase.setIvaTotal(new BigDecimal(jTextFieldIvaTotal.getText()));
+        } catch (NumberFormatException e) {
+            purchase.setTotal(BigDecimal.ZERO);
+            purchase.setIvaTotal(BigDecimal.ZERO);
         }
+
+        // Observações
+        purchase.setDescricao(jTextAreaNote.getText());
+
+        // Status inicial
+        purchase.setStockStatus(StockStatus.PENDENTE);
+        purchase.setPaymentStatus(PaymentStatus.PENDENTE);
+
+    } catch (Exception e) {
+        System.err.println("Erro ao configurar compra: " + e.getMessage());
+        throw new RuntimeException("Erro ao configurar compra: " + e.getMessage(), e);
+    }
+
+    return purchase;
+}
+
+    // ==========================================================
+    // 🔹 MÉTODOS AUXILIARES
+    // ==========================================================
+    private void limparCamposProduto() {
+        jTextFieldCodeProd.setText("");
+        jTextFieldNameProdSeletec.setText("");
+        jTextFieldQtdProduct.setText("1");
+    }
+
+    private PurchaseItem encontrarItemNaCompra(Integer productId) {
+        for (PurchaseItem item : itensCompra) {
+            if (item.getProduct().getId().equals(productId)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     /**
@@ -325,19 +674,29 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         jLabel8 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jTextFieldQtdProduct = new javax.swing.JTextField();
-        jComboBoxListProduto = new javax.swing.JComboBox();
         jButtonAddProduct = new javax.swing.JButton();
         jFormattedTextFieldDataFabrico = new javax.swing.JFormattedTextField();
         jFormattedTextFieldDataExpiracao = new javax.swing.JFormattedTextField();
         jLabel10 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTableListProd = new javax.swing.JTable();
+        jTextFieldFilterListProdu = new javax.swing.JTextField();
+        jButtonAddProdSeleted = new javax.swing.JButton();
+        jButtonRemoveProdPurchaseItem = new javax.swing.JButton();
+        jTextFieldNameProdSeletec = new javax.swing.JTextField();
+        jTextFieldCodeProd = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        jButtonFinishAndPay = new javax.swing.JButton();
+        jTextFieldInvoiceNumber = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabelTitle.setText("Formulario de Compra");
 
         try {
-            jFormattedTextFieldDataVencimento.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+            jFormattedTextFieldDataVencimento.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -347,7 +706,7 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         jLabel7.setText("Data compra");
 
         try {
-            jFormattedTextFieldDataCompra.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+            jFormattedTextFieldDataCompra.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -400,8 +759,6 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
         jTextFieldQtdProduct.setText("1");
 
-        jComboBoxListProduto.setToolTipText("");
-
         jButtonAddProduct.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
         jButtonAddProduct.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -410,13 +767,13 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         });
 
         try {
-            jFormattedTextFieldDataFabrico.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+            jFormattedTextFieldDataFabrico.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
 
         try {
-            jFormattedTextFieldDataExpiracao.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("20##-##-##")));
+            jFormattedTextFieldDataExpiracao.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/20##")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -424,6 +781,60 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         jLabel10.setText("Data de Expiracao");
 
         jLabel4.setText("Data de Fabrico");
+
+        jTableListProd.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jTableListProd.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableListProdMouseClicked(evt);
+            }
+        });
+        jScrollPane3.setViewportView(jTableListProd);
+
+        jTextFieldFilterListProdu.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextFieldFilterListProduKeyReleased(evt);
+            }
+        });
+
+        jButtonAddProdSeleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Plus.png"))); // NOI18N
+        jButtonAddProdSeleted.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddProdSeletedActionPerformed(evt);
+            }
+        });
+
+        jButtonRemoveProdPurchaseItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Trash Can.png"))); // NOI18N
+        jButtonRemoveProdPurchaseItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonRemoveProdPurchaseItemActionPerformed(evt);
+            }
+        });
+
+        jTextFieldNameProdSeletec.setEditable(false);
+
+        jTextFieldCodeProd.setEditable(false);
+
+        jLabel11.setText("Procurar produto");
+
+        jButtonFinishAndPay.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/Done.png"))); // NOI18N
+        jButtonFinishAndPay.setText("Finalizar e Pagar");
+        jButtonFinishAndPay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonFinishAndPayActionPerformed(evt);
+            }
+        });
+
+        jLabel12.setText("Invoice Number");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -434,82 +845,106 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBoxListProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jTextFieldQtdProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jFormattedTextFieldDataFabrico, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel10)
-                            .addComponent(jFormattedTextFieldDataExpiracao, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 622, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(50, 50, 50))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                        .addComponent(jLabel7)
-                                        .addGap(50, 50, 50))
                                     .addGroup(jPanel2Layout.createSequentialGroup()
-                                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(jLabel1)
-                                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                                .addComponent(jComboBoxListFornecedor, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(jFormattedTextFieldDataCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addGap(12, 12, 12)))
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel6)
-                                    .addComponent(jFormattedTextFieldDataVencimento, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addGap(15, 15, 15)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jComboBoxListFornecedor, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jFormattedTextFieldDataCompra, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel1)
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addGap(9, 9, 9)
+                                        .addComponent(jLabelTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(40, 40, 40)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6)
+                            .addComponent(jFormattedTextFieldDataVencimento, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 42, Short.MAX_VALUE)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jTextFieldTotal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextFieldIvaTotal, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jButtonFinishPurchase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addGap(23, 23, 23))
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jTextFieldIvaTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jTextFieldInvoiceNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel12))
+                                .addContainerGap())))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(jLabelTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 411, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(jPanel2Layout.createSequentialGroup()
+                                    .addComponent(jTextFieldFilterListProdu, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(jButtonAddProdSeleted, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(jPanel2Layout.createSequentialGroup()
+                                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(jPanel2Layout.createSequentialGroup()
+                                            .addComponent(jLabel2)
+                                            .addGap(211, 211, 211))
+                                        .addGroup(jPanel2Layout.createSequentialGroup()
+                                            .addComponent(jTextFieldCodeProd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                            .addComponent(jTextFieldNameProdSeletec)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel8)
+                                        .addComponent(jTextFieldQtdProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jLabel11)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jButtonRemoveProdPurchaseItem))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel2Layout.createSequentialGroup()
+                                        .addComponent(jLabel4)
+                                        .addGap(0, 31, Short.MAX_VALUE))
+                                    .addComponent(jFormattedTextFieldDataFabrico, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel10)
+                                    .addComponent(jFormattedTextFieldDataExpiracao, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(23, 23, 23)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(193, 193, 193))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jButtonFinishAndPay, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jTextFieldTotal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButtonFinishPurchase, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))))))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabelTitle)
-                .addGap(29, 29, 29)
-                .addComponent(jLabel1)
-                .addGap(2, 2, 2)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelTitle)
+                    .addComponent(jLabel12))
+                .addGap(0, 0, 0)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jTextFieldInvoiceNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jLabel7)
                     .addComponent(jLabel9))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -520,13 +955,8 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel2)
-                                .addGap(46, 46, 46))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jComboBoxListProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextFieldQtdProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jTextFieldCodeProd, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel4)
@@ -535,24 +965,46 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jFormattedTextFieldDataFabrico, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jFormattedTextFieldDataExpiracao, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(46, 46, 46))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
-                        .addGap(28, 28, 28)))
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jTextFieldIvaTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel3)
+                            .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTextFieldNameProdSeletec)
+                                    .addComponent(jTextFieldQtdProduct, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonFinishPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(10, 10, 10)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButtonAddProdSeleted, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jTextFieldFilterListProdu)))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel5)
+                        .addComponent(jButtonRemoveProdPurchaseItem)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jTextFieldIvaTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonFinishPurchase)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButtonFinishAndPay, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(9, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -566,10 +1018,12 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(916, 521));
+        setSize(new java.awt.Dimension(916, 477));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
@@ -579,99 +1033,40 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
 
     private void jButtonAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductActionPerformed
         // TODO add your handling code here:
-        criacaoItem();
-//        // validar produto e quantidade
-//        if (jComboBoxListProduto.getSelectedItem() == null) {
-//            JOptionPane.showMessageDialog(this, "Selecione um produto!");
-//            return;
-//        }
-//        int qtd;
-//        try {
-//            qtd = Integer.parseInt(jTextFieldQtdProduct.getText());
-//            if (qtd <= 0) {
-//                throw new NumberFormatException();
-//            }
-//        } catch (NumberFormatException e) {
-//            JOptionPane.showMessageDialog(this, "Quantidade inválida!");
-//            return;
-//        }
-//
-//        // produto selecionado
-//        Product prod = (Product) jComboBoxListProduto.getSelectedItem();
-//
-//        // criar item
-//        PurchaseItem item = new PurchaseItem();
-//        item.setProduct(prod);
-//        item.setQuantidade(qtd);
-//        item.setPrecoCusto(prod.getPrice());
-//        item.setSubtotal(prod.getPrice().multiply(BigDecimal.valueOf(qtd)));
-//
-//// 🔹 Verificar se já existe esse produto na lista
-//        boolean jaExiste = false;
-//        for (PurchaseItem it : itensCompra) {
-//            if (it.getProduct().getId() == prod.getId()) {
-//                // já existe → soma quantidade e recalcula subtotal
-//                it.setQuantidade(it.getQuantidade() + qtd);
-//                it.setSubtotal(it.getPrecoCusto().multiply(BigDecimal.valueOf(it.getQuantidade())));
-//                jaExiste = true;
-//                break;
-//            }
-//        }
-//
-//// 🔹 Se não existir, adiciona normalmente
-//        if (!jaExiste) {
-//            itensCompra.add(item);
-//        }
-//
-//// atualizar tabela
-//        loadItemsTable();
-//        atualizarTotais();
+        adicionarProduto(); // Agora chama o método consolidado
     }//GEN-LAST:event_jButtonAddProductActionPerformed
 
     private void jButtonFinishPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishPurchaseActionPerformed
         // TODO add your handling code here:
-        finalizarCompra();
-//        // validações
-//        if (jComboBoxListFornecedor.getSelectedItem() == null) {
-//            JOptionPane.showMessageDialog(this, "Selecione um fornecedor!");
-//            return;
-//        }
-//        if (itensCompra.isEmpty()) {
-//            JOptionPane.showMessageDialog(this, "Adicione ao menos 1 item!");
-//            return;
-//        }
-//
-//        Supplier fornecedor = (Supplier) jComboBoxListFornecedor.getSelectedItem();
-//
-//        Purchase purchase = new Purchase();
-//        purchase.setSupplier(fornecedor);
-//        purchase.setDescricao(jTextAreaNote.getText());
-//        purchase.setTotal(new BigDecimal(jTextFieldTotal.getText()));
-//        purchase.setIvaTotal(new BigDecimal(jTextFieldIvaTotal.getText()));
-//        purchase.setItems(itensCompra);
-//
-//        try {
-//            java.sql.Date dataCompra = java.sql.Date.valueOf(jFormattedTextFieldDataCompra.getText());
-//            java.sql.Date dataVenc = java.sql.Date.valueOf(jFormattedTextFieldDataVencimento.getText());
-//            purchase.setDataCompra(dataCompra);
-//            purchase.setDataVencimento(dataVenc);
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this, "Datas inválidas!");
-//            return;
-//        }
-//
-//        // status inicial
-//        purchase.setStatus("aberto");
-//
-//        // salvar na BD via controller
-//        response = new PurchaseController().add(purchase);
-//        if (response) {
-////            JOptionPane.showMessageDialog(this, "Compra salva com sucesso!");
-//            dispose(); // fecha o dialog
-//        } else {
-//            JOptionPane.showMessageDialog(this, "Erro ao salvar compra!");
-//        }
+        finalizarCompra(false);
     }//GEN-LAST:event_jButtonFinishPurchaseActionPerformed
+
+    private void jTextFieldFilterListProduKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldFilterListProduKeyReleased
+        // TODO add your handling code here:
+        filtrarProdutos();
+    }//GEN-LAST:event_jTextFieldFilterListProduKeyReleased
+
+    private void jTableListProdMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableListProdMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount() == 2) {
+            preencherCamposProdutoSelecionado();
+        }
+    }//GEN-LAST:event_jTableListProdMouseClicked
+
+    private void jButtonAddProdSeletedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProdSeletedActionPerformed
+        // TODO add your handling code here:
+        selecionarProduto();
+    }//GEN-LAST:event_jButtonAddProdSeletedActionPerformed
+
+    private void jButtonRemoveProdPurchaseItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRemoveProdPurchaseItemActionPerformed
+        // TODO add your handling code here:
+        removerProduto();
+    }//GEN-LAST:event_jButtonRemoveProdPurchaseItemActionPerformed
+
+    private void jButtonFinishAndPayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFinishAndPayActionPerformed
+        // TODO add your handling code here:
+        finalizarCompra(true);
+    }//GEN-LAST:event_jButtonFinishAndPayActionPerformed
 
     /**
      * @param args the command line arguments
@@ -716,16 +1111,20 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonAddProdSeleted;
     private javax.swing.JButton jButtonAddProduct;
+    private javax.swing.JButton jButtonFinishAndPay;
     private javax.swing.JButton jButtonFinishPurchase;
+    private javax.swing.JButton jButtonRemoveProdPurchaseItem;
     private javax.swing.JComboBox jComboBoxListFornecedor;
-    private javax.swing.JComboBox jComboBoxListProduto;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataCompra;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataExpiracao;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataFabrico;
     private javax.swing.JFormattedTextField jFormattedTextFieldDataVencimento;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -738,9 +1137,15 @@ public class JDialogFormPurchase extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable jTableListProd;
     private javax.swing.JTable jTablePurchaseItems;
     private javax.swing.JTextArea jTextAreaNote;
+    private javax.swing.JTextField jTextFieldCodeProd;
+    private javax.swing.JTextField jTextFieldFilterListProdu;
+    private javax.swing.JTextField jTextFieldInvoiceNumber;
     private javax.swing.JTextField jTextFieldIvaTotal;
+    private javax.swing.JTextField jTextFieldNameProdSeletec;
     private javax.swing.JTextField jTextFieldQtdProduct;
     private javax.swing.JTextField jTextFieldTotal;
     // End of variables declaration//GEN-END:variables

@@ -14,7 +14,7 @@ import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.ProductSales;
 import com.okutonda.okudpdv.helpers.ShiftSession;
-import com.okutonda.okudpdv.helpers.UtilDate;
+import com.okutonda.okudpdv.helpers.Util;
 import com.okutonda.okudpdv.helpers.PrintHelper;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
@@ -120,7 +120,7 @@ public class JDialogOrder extends javax.swing.JDialog {
             order.setNote(jTextPaneNote.getText()); // se tiver observação
 
             // 6) Completar metadados opcionais dos pagamentos (cliente, operador, datas)
-            String nowIso = UtilDate.getFormatDataNow();
+            String nowIso = Util.currentDateFormatted();
             for (Payment p : listPayment) {
                 p.setClient(order.getClient());
                 p.setUser(order.getSeller());

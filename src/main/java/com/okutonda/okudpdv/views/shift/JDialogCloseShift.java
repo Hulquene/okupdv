@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.data.entities.Shift;
 import com.okutonda.okudpdv.helpers.ShiftSession;
 import com.okutonda.okudpdv.helpers.UserSession;
-import com.okutonda.okudpdv.helpers.UtilDate;
+import com.okutonda.okudpdv.helpers.Util;
 import java.math.BigDecimal;
 import javax.swing.JOptionPane;
 
@@ -37,8 +37,7 @@ public class JDialogCloseShift extends javax.swing.JDialog {
         jLabelCodeShift.setText(shiftSession.getShift().getCode());
 
         jLabelDateOpen.setText(shiftSession.getShift().getDateOpen().toString());
-//        shiftSession.getShift().setDateClose(UtilDate.getDateTimeNow());
-        shiftSession.getShift().setDateClose(UtilDate.getLocalDateTimeNow());
+        shiftSession.getShift().setDateClose(Util.getLocalDateTimeNow());
         jLabelDateClose.setText(shiftSession.getShift().getDateClose().toString());
 
         jLabelValueOpen.setText(shiftSession.getShift().getGrantedAmount().toString());

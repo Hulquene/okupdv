@@ -235,35 +235,6 @@ public class PurchaseDao {
     }
 
     /**
-     * Obtém o próximo número de fatura - VERSÃO CORRIGIDA
-     */
-    public Integer getNextInvoiceNumber() {
-        Session session = HibernateUtil.getCurrentSession();
-        try {
-            // Usando Native Query como fallback seguro
-            String sql = "SELECT COALESCE(MAX(CAST(invoice_number AS UNSIGNED)), 0) + 1 FROM purchases";
-
-            Object result = session.createNativeQuery(sql).uniqueResult();
-
-            if (result instanceof Number) {
-                return ((Number) result).intValue();
-            } else if (result instanceof String) {
-                try {
-                    return Integer.parseInt((String) result);
-                } catch (NumberFormatException e) {
-                    return 1;
-                }
-            }
-
-            return 1;
-
-        } catch (Exception e) {
-            System.err.println("Erro ao obter próximo número de fatura: " + e.getMessage());
-            return 1;
-        }
-    }
-
-    /**
      * Calcula o total de compras por período
      */
     public Double calculateTotalByPeriod(LocalDate from, LocalDate to) {
@@ -306,4 +277,19 @@ public class PurchaseDao {
             throw new RuntimeException("Erro ao buscar compra com itens", e);
         }
     }
+
+    /**
+     * Obtém o próximo número sequencial
+     */
+    public Integer getNextNumber() {
+        try (Session session = HibernateUtil.getCurrentSession()) {
+            String hql = "SELECT MAX(p.number) FROM Purchase p";
+            Integer maxNumber = (Integer) session.createQuery(hql).uniqueResult();
+            return (maxNumber != null ? maxNumber : 0) + 1;
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao obter próximo número: " + e.getMessage());
+            return 1;
+        }
+    }
+
 }

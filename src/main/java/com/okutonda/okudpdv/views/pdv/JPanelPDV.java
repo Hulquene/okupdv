@@ -1722,7 +1722,7 @@ public class JPanelPDV extends javax.swing.JFrame {
         }
 
         // 🔹 2️⃣ Verifica se é número válido
-        if (!Util.checkIsNumber(texto)) {
+        if (!Util.isNumber(texto)) {
             // opcional: alerta visual sem forçar "1"
 //            jTextFieldQtdProductsSelected.setBackground(Color.decode("#f8d7da")); // vermelho leve
             jTextFieldQtdProductsSelected.setText(String.valueOf("1"));

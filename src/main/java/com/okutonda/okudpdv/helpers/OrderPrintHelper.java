@@ -4,7 +4,6 @@ import com.okutonda.okudpdv.data.entities.Order;
 import com.okutonda.okudpdv.data.entities.ProductSales;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

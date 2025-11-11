@@ -2,6 +2,7 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.dao.PurchaseItemDao;
 import com.okutonda.okudpdv.data.entities.PurchaseItem;
+import com.okutonda.okudpdv.data.entities.StockStatus;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -144,11 +145,11 @@ public class PurchaseItemController {
 
         // Atualiza status baseado na quantidade entrada
         if (quantidadeEntrada == 0) {
-            item.setEntradaStatus("NAO_INICIADO");
+            item.setEntradaStatus(StockStatus.PENDENTE);
         } else if (quantidadeEntrada < item.getQuantidade()) {
-            item.setEntradaStatus("PARCIAL");
+            item.setEntradaStatus(StockStatus.PARCIAL);
         } else {
-            item.setEntradaStatus("COMPLETO");
+            item.setEntradaStatus(StockStatus.PROCESSADO);
         }
 
         dao.update(item);

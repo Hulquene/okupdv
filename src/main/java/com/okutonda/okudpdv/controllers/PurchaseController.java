@@ -2,6 +2,7 @@ package com.okutonda.okudpdv.controllers;
 
 import com.okutonda.okudpdv.data.entities.DocumentType;
 import com.okutonda.okudpdv.data.entities.Purchase;
+import com.okutonda.okudpdv.data.entities.PurchasePayment;
 import com.okutonda.okudpdv.services.PurchaseService;
 
 import java.math.BigDecimal;
@@ -48,6 +49,31 @@ public class PurchaseController {
 
     public Purchase atualizarCompra(Purchase compra) {
         return purchaseService.atualizarCompra(compra);
+    }
+
+    /**
+     * 🔹 NOVO MÉTODO: Atualiza compra com pagamentos (para JDialogPaymentPurchase)
+     */
+    public Purchase atualizarCompraComPagamentos(Purchase compra, List<PurchasePayment> pagamentos) {
+        try {
+            System.out.println("=== ATUALIZANDO COMPRA COM PAGAMENTOS ===");
+            System.out.println("Compra ID: " + compra.getId());
+            System.out.println("Total pagamentos: " + pagamentos.size());
+            
+            Purchase compraAtualizada = purchaseService.atualizarCompraComPagamentos(compra, pagamentos);
+            boolean sucesso = compraAtualizada != null;
+
+            System.out.println("Resultado: " + (sucesso ? "SUCESSO" : "FALHA"));
+            return compraAtualizada;
+
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar compra com pagamentos: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "❌ Erro ao atualizar compra com pagamentos: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public void excluirCompra(Integer id) {
