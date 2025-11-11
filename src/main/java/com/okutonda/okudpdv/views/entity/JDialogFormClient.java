@@ -8,7 +8,7 @@ import com.okutonda.okudpdv.controllers.ClientController;
 import com.okutonda.okudpdv.controllers.CountryController;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.entities.Clients;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
@@ -22,12 +22,13 @@ public class JDialogFormClient extends javax.swing.JDialog {
     ClientController clientController = new ClientController();
     Boolean status;
     Clients client;
-
+    ScreenHelpers screenHelpers;
     /**
      * Creates new form JDialogFormClient
      */
     public JDialogFormClient(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        screenHelpers = new ScreenHelpers();
         initComponents();
         status = false;
     }
@@ -462,16 +463,12 @@ public class JDialogFormClient extends javax.swing.JDialog {
                 status = true;
             }
             this.dispose();
-//            screanListUser();
-//            Utilities helpUtil = new Utilities();
-//            helpUtil.clearScreen(jPanelFormUser);
         }
     }//GEN-LAST:event_jButtonAddClientActionPerformed
 
     private void jButtonClearFormClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearFormClientActionPerformed
         // TODO add your handling code here:
-        Utilities helpUtil = new Utilities();
-        helpUtil.clearScreen(jPanelFormClient);
+        screenHelpers.clearScreen(jPanelFormClient);
     }//GEN-LAST:event_jButtonClearFormClientActionPerformed
 
     private void jComboBoxStatusClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxStatusClientActionPerformed

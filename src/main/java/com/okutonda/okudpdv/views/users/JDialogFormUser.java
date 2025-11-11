@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.users;
 
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.entities.User;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 
@@ -572,14 +572,14 @@ public class JDialogFormUser extends javax.swing.JDialog {
             }
             this.dispose();
 //            screanListUser();
-//            Utilities helpUtil = new Utilities();
+//            ScreenHelpers helpUtil = new ScreenHelpers();
 //            helpUtil.clearScreen(jPanelFormUser);
         }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
     private void jButtonClearFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearFormActionPerformed
         // TODO add your handling code here:
-        Utilities helpUtil = new Utilities();
+        ScreenHelpers helpUtil = new ScreenHelpers();
         helpUtil.clearScreen(jPanelFormUser);
     }//GEN-LAST:event_jButtonClearFormActionPerformed
 

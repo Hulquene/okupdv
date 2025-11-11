@@ -1,4 +1,4 @@
-package com.okutonda.okudpdv.helpers;
+package com.okutonda.okudpdv.teste;
 
 import com.okutonda.okudpdv.data.dao.PaymentDao;
 import com.okutonda.okudpdv.data.dao.StockMovementDao;

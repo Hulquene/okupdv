@@ -210,15 +210,17 @@
                           <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                              <Group type="103" alignment="1" groupAlignment="0" attributes="0">
                                   <Component id="jButtonAddProdTable" alignment="1" min="-2" pref="38" max="-2" attributes="0"/>
-                                  <Component id="jButtonRemoveProdTable" alignment="3" min="-2" pref="38" max="-2" attributes="0"/>
+                                  <Component id="jButtonRemoveProdTable" min="-2" pref="38" max="-2" attributes="0"/>
                               </Group>
                               <Component id="jTextFieldQtdProd" alignment="0" max="32767" attributes="0"/>
-                              <Group type="103" alignment="1" groupAlignment="3" attributes="0">
-                                  <Component id="jTextFieldPriceProd" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Group type="103" alignment="1" groupAlignment="0" attributes="0">
                                   <Component id="jTextFieldCodeProd" alignment="1" min="-2" pref="38" max="-2" attributes="0"/>
-                                  <Component id="jTextFieldNameProd" alignment="3" min="-2" pref="38" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="jTextFieldPriceProd" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                                      <Component id="jTextFieldNameProd" alignment="3" min="-2" pref="38" max="-2" attributes="0"/>
+                                  </Group>
                               </Group>
                           </Group>
                       </Group>

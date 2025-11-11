@@ -10,7 +10,7 @@ import com.okutonda.okudpdv.data.dao.SupplierDao;
 import com.okutonda.okudpdv.data.entities.Countries;
 import com.okutonda.okudpdv.data.entities.Supplier;
 import com.okutonda.okudpdv.helpers.UserSession;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -441,7 +441,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
             }
             this.dispose();
 //            screanListUser();
-//            Utilities helpUtil = new Utilities();
+//            ScreenHelpers helpUtil = new ScreenHelpers();
 //            helpUtil.clearScreen(jPanelFormUser);
         }
         
@@ -450,7 +450,7 @@ public class JDialogFormSupplier extends javax.swing.JDialog {
 
     private void jButtonClearFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearFormActionPerformed
         // TODO add your handling code here:
-        Utilities helpUtil = new Utilities();
+        ScreenHelpers helpUtil = new ScreenHelpers();
         helpUtil.clearScreen(jPanelFormSupplier);
     }//GEN-LAST:event_jButtonClearFormActionPerformed
 

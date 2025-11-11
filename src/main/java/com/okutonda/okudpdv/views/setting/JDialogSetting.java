@@ -12,7 +12,7 @@ import com.okutonda.okudpdv.controllers.TaxeController;
 import com.okutonda.okudpdv.data.entities.Options;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.Shift;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import com.okutonda.okudpdv.data.entities.Taxes;
 import com.okutonda.okudpdv.helpers.CompanySession;
 import com.okutonda.okudpdv.helpers.Util;
@@ -225,7 +225,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 
         if (sucesso) {
             // Limpa formulário e atualiza lista
-            new Utilities().clearScreen(jPanelBoxForm);
+            new ScreenHelpers().clearScreen(jPanelBoxForm);
             listBox(); // Ou listShifts() se renomeou o método
         }
     }
@@ -1371,7 +1371,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
                     listTaxes();
                 }
             }
-            new Utilities().clearScreen(jPanelTaxeForm);
+            new ScreenHelpers().clearScreen(jPanelTaxeForm);
         }
 
     }//GEN-LAST:event_jButtonTaxeAddActionPerformed
@@ -1586,7 +1586,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 //                        listTaxes();
 //                    }
 //                }
-//                new Utilities().clearScreen(jPanelPaymentModesForm);
+//                new ScreenHelpers().clearScreen(jPanelPaymentModesForm);
 //            }
 //        }
     }//GEN-LAST:event_jButtonFormPaymentAddActionPerformed
@@ -1619,7 +1619,7 @@ public final class JDialogSetting extends javax.swing.JDialog {
 //                        listBox();
 //                    }
 //                }
-//                new Utilities().clearScreen(jPanelBoxForm);
+//                new ScreenHelpers().clearScreen(jPanelBoxForm);
 //            }
 //        }
 

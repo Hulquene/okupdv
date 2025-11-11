@@ -11,7 +11,7 @@ import com.okutonda.okudpdv.controllers.ShiftController;
 import com.okutonda.okudpdv.controllers.UserController;
 import com.okutonda.okudpdv.data.dao.ClientDao;
 import com.okutonda.okudpdv.data.dao.StockMovementDao;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import com.okutonda.okudpdv.data.entities.Clients;
 import com.okutonda.okudpdv.data.entities.GroupsProduct;
 import com.okutonda.okudpdv.data.entities.Order;
@@ -783,7 +783,7 @@ public class JPanelPDV extends javax.swing.JFrame {
         // 6) Atualizar UI
         listProdutsOrder();
         calculTotal();
-        new Utilities().clearScreen(jPanelSelectedProduct);
+        new ScreenHelpers().clearScreen(jPanelSelectedProduct);
         jTextFieldQtdProductsSelected.setText("1");
         // jTextFieldBarCodeProductSelect.setText(""); // se quiseres limpar o campo
 
@@ -835,7 +835,7 @@ public class JPanelPDV extends javax.swing.JFrame {
 //                listProductOrder.add(prodOrder);
 //                listProdutsOrder();
 //                calculTotal();
-//                new Utilities().clearScreen(jPanelSelectedProduct);
+//                new ScreenHelpers().clearScreen(jPanelSelectedProduct);
 //                jTextFieldQtdProductsSelected.setText("1");
 ////                    jTextFieldBarCodeProductSelect.setText("1X");
 //                return true;

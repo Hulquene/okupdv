@@ -6,7 +6,7 @@ package com.okutonda.okudpdv.views.warehouse;
 
 import com.okutonda.okudpdv.controllers.WarehouseController;
 import com.okutonda.okudpdv.data.entities.Warehouse;
-import com.okutonda.okudpdv.helpers.Utilities;
+import com.okutonda.okudpdv.helpers.ScreenHelpers;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -322,7 +322,7 @@ public class JDialogWarehouse extends javax.swing.JDialog {
                 }
             }
             listWarehouse();
-            Utilities helpUtil = new Utilities();
+            ScreenHelpers helpUtil = new ScreenHelpers();
             helpUtil.clearScreen(jPanelFormWarehouse);
         }
 

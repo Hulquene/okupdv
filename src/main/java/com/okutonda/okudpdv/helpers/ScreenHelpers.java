@@ -12,7 +12,7 @@ import javax.swing.JTextField;
  *
  * @author kenny
  */
-public class Utilities {
+public class ScreenHelpers {
 
     public void clearScreen(JPanel container) {
         Component components[] = container.getComponents();

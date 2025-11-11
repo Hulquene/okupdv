@@ -14,6 +14,7 @@ import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
 import com.okutonda.okudpdv.data.entities.Product;
 import com.okutonda.okudpdv.data.entities.ProductSales;
+import com.okutonda.okudpdv.data.entities.ProductType;
 import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 import java.math.BigDecimal;
@@ -193,7 +194,7 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
                     tableModelListaProdutos.addRow(new Object[]{
                         produto.getCode(),
                         produto.getDescription(),
-                        produto.getType() != null ? produto.getType().getDescription(): "Produto"
+                        produto.getType() != null ? produto.getType().getDescription() : "Produto"
                     });
                 }
             }
@@ -223,6 +224,7 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
 
             String codigo = (String) tableModelListaProdutos.getValueAt(modelRow, 0);
             String descricao = (String) tableModelListaProdutos.getValueAt(modelRow, 1);
+            String tipo = (String) tableModelListaProdutos.getValueAt(modelRow, 2);
 
             jTextFieldCodeProd.setText(codigo);
             jTextFieldNameProd.setText(descricao);
@@ -231,6 +233,12 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
             Product produto = productController.getByCode(codigo);
             if (produto != null && produto.getPrice() != null) {
                 jTextFieldPriceProd.setText(produto.getPrice().toString());
+            }
+            // ✅ VERIFICAÇÃO REFORÇADA PARA SERVIÇOS
+            if (tipo.equals(ProductType.SERVICE.getDescription())) {
+                jTextFieldPriceProd.setEditable(true);
+            } else {
+                jTextFieldPriceProd.setEditable(false);
             }
 
             // Focar no campo de quantidade para facilitar a entrada
@@ -1090,14 +1098,15 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jButtonAddProdTable, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jButtonAddProdTable, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jButtonRemoveProdTable, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jTextFieldQtdProd)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jTextFieldPriceProd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jTextFieldCodeProd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jTextFieldNameProd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jTextFieldCodeProd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jTextFieldPriceProd, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jTextFieldNameProd, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -1189,12 +1198,12 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
 
     private void jTableListProdutosKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTableListProdutosKeyReleased
         // TODO add your handling code here:
-       
+
     }//GEN-LAST:event_jTableListProdutosKeyReleased
 
     private void jTextFieldFilterListProdutosKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextFieldFilterListProdutosKeyReleased
         // TODO add your handling code here:
-         filtrarProdutos();
+        filtrarProdutos();
     }//GEN-LAST:event_jTextFieldFilterListProdutosKeyReleased
 
     private void jTableListProdutosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableListProdutosMouseClicked
@@ -1206,7 +1215,7 @@ public class JDialogFormInvoice extends javax.swing.JDialog {
 
     private void jButtonSelecionarProdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSelecionarProdActionPerformed
         // TODO add your handling code here:
-         selecionarProduto();
+        selecionarProduto();
     }//GEN-LAST:event_jButtonSelecionarProdActionPerformed
 
     /**
