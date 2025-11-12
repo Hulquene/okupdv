@@ -22,7 +22,7 @@ public class Purchase {
     @Column(name = "number", unique = true)
     private Integer number; // 0001, 0002 (apenas número)
 
-    @Column(name = "invoice_number", nullable = false, length = 50, unique = true)
+    @Column(name = "invoice_number", length = 50)
     private String invoiceNumber;
 
     @Enumerated(EnumType.STRING)

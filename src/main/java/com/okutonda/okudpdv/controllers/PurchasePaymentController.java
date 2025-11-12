@@ -7,6 +7,7 @@ import com.okutonda.okudpdv.data.entities.User;
 import com.okutonda.okudpdv.helpers.UserSession;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -161,4 +162,30 @@ public class PurchasePaymentController {
         BigDecimal saldoDevedor = calcularSaldoDevedor(totalCompra, purchaseId);
         return valorPagamento.compareTo(saldoDevedor) > 0;
     }
+    // 🔹 NOVO MÉTODO: Listar todos os pagamentos
+
+    public List<PurchasePayment> listarTodos() {
+        try {
+            return dao.findAll();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao listar todos os pagamentos: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    // 🔹 NOVO MÉTODO: Converter string para PaymentMode
+    public PaymentMode converterParaPaymentMode(String descricao) {
+        if (descricao == null || descricao.trim().isEmpty()) {
+            return null;
+        }
+
+        for (PaymentMode mode : PaymentMode.getActiveModes()) {
+            if (mode.getDescricao().equals(descricao)) {
+                return mode;
+            }
+        }
+
+        return null;
+    }
+
 }

@@ -611,11 +611,11 @@ public class JPanelDashboard extends javax.swing.JPanel {
                 System.out.println("⚠️ Nenhum dado de venda encontrado, usando dados de exemplo");
 
                 // Dados de exemplo educativos
-                dataset.addValue(45, "Vendas", "Caderno Universitário");
-                dataset.addValue(38, "Vendas", "Caneta Esferográfica");
-                dataset.addValue(29, "Vendas", "Borracha Branca");
-                dataset.addValue(21, "Vendas", "Lápis HB");
-                dataset.addValue(18, "Vendas", "Régua 30cm");
+//                dataset.addValue(45, "Vendas", "Caderno Universitário");
+//                dataset.addValue(38, "Vendas", "Caneta Esferográfica");
+//                dataset.addValue(29, "Vendas", "Borracha Branca");
+//                dataset.addValue(21, "Vendas", "Lápis HB");
+//                dataset.addValue(18, "Vendas", "Régua 30cm");
             } else {
                 // Adicionar dados reais ao dataset
                 for (Map.Entry<String, Integer> entry : topProdutos) {
@@ -786,15 +786,100 @@ public class JPanelDashboard extends javax.swing.JPanel {
     /**
      * Método auxiliar para contar documentos por tipo
      */
+    /**
+     * Método auxiliar para contar documentos por tipo - COMPLETADO
+     */
     private long contarDocumentosPorTipo(String tipoDocumento, LocalDate inicio, LocalDate fim) {
         try {
-            // Substitua por sua lógica real de busca no banco
-            return (long) (Math.random() * 50 + 10); // Entre 10 e 60
+            // Inicializar controllers se necessário
+//            if (invoiceController == null) {
+//                invoiceController = new InvoiceController();
+//            }
+//            if (orderController == null) {
+//                orderController = new OrderController();
+//            }
+
+            switch (tipoDocumento.toUpperCase()) {
+                case "FT": // Faturas
+                    List<Invoices> faturas = invoiceController.listarPorPeriodo(inicio, fim);
+                    return faturas != null ? faturas.size() : 0L;
+
+                case "FR": // Faturas Recibos (Orders)
+                    List<Order> orders = orderController.filterByDate(inicio, fim);
+                    return orders != null ? orders.size() : 0L;
+
+                case "FS": // Faturas Simplificadas
+                    // Se tiver um controller específico para FS, adicione aqui
+                    return contarFaturasSimplificadas(inicio, fim);
+
+//                case "NC": // Notas de Crédito
+//                    return contarNotasCredito(inicio, fim);
+//
+//                case "ND": // Notas de Débito  
+//                    return contarNotasDebito(inicio, fim);
+
+                default:
+                    System.err.println("⚠️  Tipo de documento não reconhecido: " + tipoDocumento);
+                    return 0L;
+            }
         } catch (Exception e) {
             System.err.println("❌ Erro ao contar documentos para " + tipoDocumento + ": " + e.getMessage());
             return 0L;
         }
     }
+
+    /**
+     * Método auxiliar para contar faturas simplificadas (se aplicável)
+     */
+    private long contarFaturasSimplificadas(LocalDate inicio, LocalDate fim) {
+        try {
+            // Se seu sistema tem um prefixo específico para FS, pode filtrar por prefixo
+            List<Invoices> todasFaturas = invoiceController.listarPorPeriodo(inicio, fim);
+            return todasFaturas.stream()
+                    .filter(fatura -> "FS".equals(fatura.getPrefix()))
+                    .count();
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao contar faturas simplificadas: " + e.getMessage());
+            return 0L;
+        }
+    }
+
+    /**
+     * Método auxiliar para contar notas de crédito (se aplicável)
+     */
+//    private long contarNotasCredito(LocalDate inicio, LocalDate fim) {
+//        try {
+//            // Implemente conforme a lógica do seu sistema para notas de crédito
+//            // Pode ser através de um tipo específico ou prefixo
+//            List<Invoices> todasFaturas = invoiceController.listarPorPeriodo(inicio, fim);
+//            return todasFaturas.stream()
+//                    .filter(fatura -> "NC".equals(fatura.getPrefix())
+//                    || fatura.getInvoiceType() != null
+//                    && fatura.getInvoiceType().name().contains("CREDITO"))
+//                    .count();
+//        } catch (Exception e) {
+//            System.err.println("❌ Erro ao contar notas de crédito: " + e.getMessage());
+//            return 0L;
+//        }
+//    }
+
+    /**
+     * Método auxiliar para contar notas de débito (se aplicável)
+     */
+//    private long contarNotasDebito(LocalDate inicio, LocalDate fim) {
+//        try {
+//            // Implemente conforme a lógica do seu sistema para notas de débito
+//            List<Invoices> todasFaturas = invoiceController.listarPorPeriodo(inicio, fim);
+//            return todasFaturas.stream()
+//                    .filter(fatura -> "ND".equals(fatura.getPrefix())
+//                    || fatura.getInvoiceType() != null
+//                    && fatura.getInvoiceType().name().contains("DEBITO"))
+//                    .count();
+//        } catch (Exception e) {
+//            System.err.println("❌ Erro ao contar notas de débito: " + e.getMessage());
+//            return 0L;
+//        }
+//    }
 
     /**
      * Cria um painel organizado para cada gráfico

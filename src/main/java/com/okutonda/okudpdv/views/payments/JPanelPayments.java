@@ -5,9 +5,12 @@
 package com.okutonda.okudpdv.views.payments;
 
 import com.okutonda.okudpdv.controllers.PaymentController;
+import com.okutonda.okudpdv.controllers.PurchasePaymentController;
 import com.okutonda.okudpdv.data.entities.Payment;
 import com.okutonda.okudpdv.data.entities.PaymentMode;
 import com.okutonda.okudpdv.data.entities.PaymentStatus;
+import com.okutonda.okudpdv.data.entities.Purchase;
+import com.okutonda.okudpdv.data.entities.PurchasePayment;
 import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +25,7 @@ import javax.swing.table.DefaultTableModel;
 public class JPanelPayments extends javax.swing.JPanel {
 
     private PaymentController paymentController = new PaymentController();
+    private PurchasePaymentController purchasePaymentController = new PurchasePaymentController();
     private DefaultTableModel tableModelSales;
     private DefaultTableModel tableModelPurchase;
 
@@ -34,6 +38,7 @@ public class JPanelPayments extends javax.swing.JPanel {
         setupDateFields();
         loadPaymentModes();
         listPaymentsSales();
+        listPaymentsPurchase();
     }
 
     /**
@@ -150,7 +155,7 @@ public class JPanelPayments extends javax.swing.JPanel {
         for (Payment payment : list) {
             tableModelSales.addRow(new Object[]{
                 payment.getId(),
-//                payment.getReference(),
+                //                payment.getReference(),
                 payment.getInvoiceType(),
                 payment.getDate(),
                 payment.getDescription(),
@@ -350,20 +355,165 @@ public class JPanelPayments extends javax.swing.JPanel {
     // ==========================================================
     // MÉTODOS PARA COMPRAS (estrutura similar)
     // ==========================================================
+    /**
+     * Lista pagamentos de compras na tabela - IMPLEMENTADO
+     */
     public void listPaymentsPurchase() {
-        // TODO: Implementar quando tiver controller de compras
-        JOptionPane.showMessageDialog(this,
-                "Módulo de pagamentos de compras em desenvolvimento",
-                "Informação",
-                JOptionPane.INFORMATION_MESSAGE);
+        try {
+            List<PurchasePayment> list = purchasePaymentController.listarTodos();
+            listTablePurchase(list);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao listar pagamentos de compras: " + e.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar pagamentos de compras: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
+    /**
+     * Preenche a tabela de compras com dados - IMPLEMENTADO
+     */
+    public void listTablePurchase(List<PurchasePayment> list) {
+        tableModelPurchase.setRowCount(0);
+
+        for (PurchasePayment payment : list) {
+            tableModelPurchase.addRow(new Object[]{
+                payment.getId(),
+                payment.getReferencia(),
+                payment.getDataPagamento(),
+                payment.getDescricao(),
+                payment.getValorPago(),
+                payment.getMetodoDescricao(),
+                getStatusText(payment.getStatus()),
+                getFornecedorNome(payment.getPurchase())
+            });
+        }
+
+        adjustTableColumnsPurchase();
+    }
+
+    /**
+     * Ajusta as colunas da tabela de compras - IMPLEMENTADO
+     */
+    private void adjustTableColumnsPurchase() {
+        jTablePaymentsPurchase.getColumnModel().getColumn(0).setPreferredWidth(40);   // ID
+        jTablePaymentsPurchase.getColumnModel().getColumn(1).setPreferredWidth(100);  // Referência
+        jTablePaymentsPurchase.getColumnModel().getColumn(2).setPreferredWidth(80);   // Data
+        jTablePaymentsPurchase.getColumnModel().getColumn(3).setPreferredWidth(150);  // Descrição
+        jTablePaymentsPurchase.getColumnModel().getColumn(4).setPreferredWidth(80);   // Total
+        jTablePaymentsPurchase.getColumnModel().getColumn(5).setPreferredWidth(100);  // Modo Pagamento
+        jTablePaymentsPurchase.getColumnModel().getColumn(6).setPreferredWidth(80);   // Status
+        jTablePaymentsPurchase.getColumnModel().getColumn(7).setPreferredWidth(120);  // Fornecedor
+    }
+
+    /**
+     * Filtra pagamentos de compras - IMPLEMENTADO
+     */
     public void filterPaymentsPurchase() {
-        // TODO: Implementar quando tiver controller de compras
-        JOptionPane.showMessageDialog(this,
-                "Módulo de pagamentos de compras em desenvolvimento",
-                "Informação",
-                JOptionPane.INFORMATION_MESSAGE);
+        if (!validarDatasPurchase()) {
+            return;
+        }
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate dateFrom = LocalDate.parse(jFormattedTextField1.getText(), formatter);
+            LocalDate dateTo = LocalDate.parse(jFormattedTextField2.getText(), formatter);
+
+            // Filtro por modo de pagamento
+            String modoSelecionado = (String) jComboBoxTipoDocument.getSelectedItem();
+            PaymentMode paymentMode = null;
+            if (!"Todos".equals(modoSelecionado)) {
+                paymentMode = purchasePaymentController.converterParaPaymentMode(modoSelecionado);
+            }
+
+            List<PurchasePayment> filteredList;
+            if (paymentMode != null) {
+                filteredList = purchasePaymentController.listarPorModoPagamento(paymentMode);
+                // Filtra adicionalmente por data
+                filteredList = filteredList.stream()
+                        .filter(p -> isDataNoPeriodo(p.getDataPagamento().toString(), dateFrom, dateTo))
+                        .toList();
+            } else {
+                filteredList = purchasePaymentController.listarPorPeriodo(dateFrom, dateTo);
+            }
+
+            listTablePurchase(filteredList);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao filtrar pagamentos de compras: " + e.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Valida as datas do filtro de compras - IMPLEMENTADO
+     */
+    private boolean validarDatasPurchase() {
+        String dataInicio = jFormattedTextField1.getText();
+        String dataFim = jFormattedTextField2.getText();
+
+        if (dataInicio == null || dataInicio.trim().isEmpty()
+                || dataFim == null || dataFim.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Preencha ambas as datas para filtrar",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate dateFrom = LocalDate.parse(dataInicio, formatter);
+            LocalDate dateTo = LocalDate.parse(dataFim, formatter);
+
+            if (dateFrom.isAfter(dateTo)) {
+                JOptionPane.showMessageDialog(this,
+                        "Data de início não pode ser maior que data de fim",
+                        "Aviso",
+                        JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Formato de data inválido. Use DD/MM/AAAA",
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    /**
+     * Obtém o nome do fornecedor - IMPLEMENTADO
+     */
+    private String getFornecedorNome(Purchase purchase) {
+        if (purchase == null || purchase.getSupplier() == null) {
+            return "N/A";
+        }
+        return purchase.getSupplier().getName();
+    }
+
+    /**
+     * Obtém o pagamento selecionado na tabela de compras - IMPLEMENTADO
+     */
+    private PurchasePayment getPaymentSelecionadoPurchase() {
+        int selectedRow = jTablePaymentsPurchase.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um pagamento da tabela de compras",
+                    "Aviso",
+                    JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+
+        int modelRow = jTablePaymentsPurchase.convertRowIndexToModel(selectedRow);
+        Integer paymentId = (Integer) tableModelPurchase.getValueAt(modelRow, 0);
+
+        return purchasePaymentController.buscarPorId(paymentId);
     }
 
     /**
@@ -396,7 +546,7 @@ public class JPanelPayments extends javax.swing.JPanel {
         jComboBoxTipoDocument = new javax.swing.JComboBox<>();
         jButtonViewPaymentPurchase = new javax.swing.JButton();
         jButtonPrintPaymentsPurchase = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        jButtonFilterPurchasePayment = new javax.swing.JButton();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jFormattedTextField2 = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -509,14 +659,15 @@ public class JPanelPayments extends javax.swing.JPanel {
                     .addComponent(jLabel5)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonViewPaymentSales, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPrintPaymentsSales, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonFilterSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jFormattedTextFieldFilterDaDataSales, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jFormattedTextFieldFilterAteDataSales, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxFilterTipoDocumentSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxFilterClienteSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jFormattedTextFieldFilterAteDataSales, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButtonViewPaymentSales, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonPrintPaymentsSales, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonFilterSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jFormattedTextFieldFilterDaDataSales, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxFilterTipoDocumentSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxFilterClienteSales, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -553,10 +704,10 @@ public class JPanelPayments extends javax.swing.JPanel {
             }
         });
 
-        jButton1.setText("Filtrar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        jButtonFilterPurchasePayment.setText("Filtrar");
+        jButtonFilterPurchasePayment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                jButtonFilterPurchasePaymentActionPerformed(evt);
             }
         });
 
@@ -592,7 +743,7 @@ public class JPanelPayments extends javax.swing.JPanel {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jComboBoxTipoDocument, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 179, Short.MAX_VALUE)
-                                .addComponent(jButton1)
+                                .addComponent(jButtonFilterPurchasePayment)
                                 .addGap(162, 162, 162)
                                 .addComponent(jButtonViewPaymentPurchase)
                                 .addGap(37, 37, 37)
@@ -607,13 +758,14 @@ public class JPanelPayments extends javax.swing.JPanel {
                     .addComponent(jLabel1)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonViewPaymentPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonPrintPaymentsPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jFormattedTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxTipoDocument, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jFormattedTextField2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButtonViewPaymentPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonPrintPaymentsPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jButtonFilterPurchasePayment, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jComboBoxTipoDocument, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 379, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -664,28 +816,59 @@ public class JPanelPayments extends javax.swing.JPanel {
 
     private void jButtonViewPaymentPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewPaymentPurchaseActionPerformed
         // TODO add your handling code here:
+        PurchasePayment payment = getPaymentSelecionadoPurchase();
+        if (payment == null) {
+            return;
+        }
+
+        // Visualização detalhada do pagamento de compra
+        String detalhes = String.format(
+                "Detalhes do Pagamento (Compra):\n"
+                + "Referência: %s\n"
+                + "Valor: %.2f AOA\n"
+                + "Data: %s\n"
+                + "Modo: %s\n"
+                + "Status: %s\n"
+                + "Fornecedor: %s\n"
+                + "Descrição: %s",
+                payment.getReferencia(),
+                payment.getValorPago().doubleValue(),
+                payment.getDataPagamento(),
+                payment.getMetodoDescricao(),
+                payment.getStatusDescricao(),
+                getFornecedorNome(payment.getPurchase()),
+                payment.getDescricao() != null ? payment.getDescricao() : "N/A"
+        );
+
         JOptionPane.showMessageDialog(this,
-                "Módulo de pagamentos de compras em desenvolvimento",
-                "Informação",
+                detalhes,
+                "Detalhes do Pagamento - Compra",
                 JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jButtonViewPaymentPurchaseActionPerformed
 
     private void jButtonPrintPaymentsPurchaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPrintPaymentsPurchaseActionPerformed
         // TODO add your handling code here:
+        PurchasePayment payment = getPaymentSelecionadoPurchase();
+        if (payment == null) {
+            return;
+        }
+
+        // TODO: Implementar impressão do pagamento de compra
         JOptionPane.showMessageDialog(this,
-                "Módulo de pagamentos de compras em desenvolvimento",
-                "Informação",
+                "Funcionalidade de impressão será implementada em breve\n"
+                + "Pagamento (Compra): " + payment.getReferencia(),
+                "Impressão - Compra",
                 JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jButtonPrintPaymentsPurchaseActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButtonFilterPurchasePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFilterPurchasePaymentActionPerformed
         // TODO add your handling code here:
         filterPaymentsPurchase();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButtonFilterPurchasePaymentActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonFilterPurchasePayment;
     private javax.swing.JButton jButtonFilterSales;
     private javax.swing.JButton jButtonPrintPaymentsPurchase;
     private javax.swing.JButton jButtonPrintPaymentsSales;

@@ -97,14 +97,16 @@
                           <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jButtonViewPaymentSales" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jButtonPrintPaymentsSales" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jButtonFilterSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
-                          <Component id="jFormattedTextFieldFilterDaDataSales" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jFormattedTextFieldFilterAteDataSales" alignment="1" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jComboBoxFilterTipoDocumentSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
-                          <Component id="jComboBoxFilterClienteSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jButtonViewPaymentSales" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Component id="jButtonPrintPaymentsSales" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Component id="jButtonFilterSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                              <Component id="jFormattedTextFieldFilterDaDataSales" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                              <Component id="jComboBoxFilterTipoDocumentSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                              <Component id="jComboBoxFilterClienteSales" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jScrollPane2" min="-2" pref="379" max="-2" attributes="0"/>
@@ -262,7 +264,7 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="jComboBoxTipoDocument" min="-2" pref="226" max="-2" attributes="0"/>
                                       <EmptySpace pref="179" max="32767" attributes="0"/>
-                                      <Component id="jButton1" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jButtonFilterPurchasePayment" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="162" max="-2" attributes="0"/>
                                       <Component id="jButtonViewPaymentPurchase" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
@@ -284,13 +286,15 @@
                           <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jButtonViewPaymentPurchase" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jButtonPrintPaymentsPurchase" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jButton1" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
-                          <Component id="jFormattedTextField1" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jFormattedTextField2" alignment="1" min="-2" pref="39" max="-2" attributes="0"/>
-                          <Component id="jComboBoxTipoDocument" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jButtonViewPaymentPurchase" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Component id="jButtonPrintPaymentsPurchase" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                              <Component id="jButtonFilterPurchasePayment" alignment="3" min="-2" pref="30" max="-2" attributes="0"/>
+                              <Component id="jFormattedTextField1" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                              <Component id="jComboBoxTipoDocument" alignment="3" min="-2" pref="39" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jScrollPane1" min="-2" pref="379" max="-2" attributes="0"/>
@@ -352,12 +356,12 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonPrintPaymentsPurchaseActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="jButton1">
+            <Component class="javax.swing.JButton" name="jButtonFilterPurchasePayment">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Filtrar"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonFilterPurchasePaymentActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="jFormattedTextField1">
